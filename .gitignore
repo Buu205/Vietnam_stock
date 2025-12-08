@@ -1,0 +1,101 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info
+MANIFEST
+
+# Virtual environments
+.env
+.venv
+env/
+venv.bak/
+ENV/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+._*
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Large database files (>100MB)
+*.db
+*.sqlite
+*.sqlite3
+
+# Large parquet files (except calculated results)
+*.parquet - commented out to allow calculated results
+!calculated_results/**/*.parquet
+
+# Log files
+*.log
+
+# Temporary data directories
+data/
+temp/
+tmp/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Streamlit
+.streamlit/
+
+# API keys and secrets
+.env
+config.ini
+secrets.json
+
+# Backup files
+*_backup_*
+*backup*
+
+# Cache files
+.cache/
+cache/
+
+# Processing logic - NOT pushed to GitHub (run locally only)
+PROCESSORS/
+
+# Raw data - NOT pushed to GitHub (too large, local only)
+DATA/raw/
+DATA/archive/
+
+# Old structure (deprecated, can be removed after verification)
+calculated_results/      # → Moved to DATA/processed/
+data_warehouse/          # → Moved to DATA/raw/ and DATA/metadata/
+
+# Centralized logs directory
+logs/
+
+# Archived/deprecated code
+archive/
+
+# NOTE: DATA/processed/ IS tracked (needed for Streamlit to read parquet results)
+# Only WEBAPP/ and DATA/processed/ are pushed to GitHub for Streamlit deployment

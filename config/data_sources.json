@@ -1,0 +1,343 @@
+{
+  "project_info": {
+    "name": "VN Finance Dashboard",
+    "version": "2.0.0",
+    "last_updated": "2025-01-11",
+    "description": "Configuration for data sources and processing pipelines"
+  },
+  "date_format_standards": {
+    "description": "Standardized date format configuration for all data sources",
+    "target_format": "YYYY-MM-DD",
+    "target_dtype": "object",
+    "rules": {
+      "no_time_component": true,
+      "no_timezone": true,
+      "format_string": "%Y-%m-%d",
+      "pandas_format": "object"
+    },
+    "conversion_settings": {
+      "from_datetime": {
+        "method": "dt.date",
+        "then_convert_to_string": true
+      },
+      "from_string": {
+        "parse_first": true,
+        "then_format": "%Y-%m-%d"
+      },
+      "validation": {
+        "regex_pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+        "min_year": 2010,
+        "max_year": 2030
+      }
+    },
+    "applicable_columns": [
+      "report_date",
+      "date",
+      "trading_date",
+      "announcement_date",
+      "effective_date"
+    ]
+  },
+  "data_sources": {
+    "ohlcv": {
+      "name": "OHLCV Price Data",
+      "description": "Open, High, Low, Close, Volume data for Vietnamese stocks",
+      "raw_path": "data_warehouse/raw/ohlcv",
+      "processed_path": "data_warehouse/processed/ohlcv",
+      "calculated_path": "calculated_results/technical/indicators",
+      "schema_file": "data_warehouse/schemas/ohlcv_schema.json",
+      "calculated_schema_file": "calculated_results/schemas/technical_calculated_schema.json",
+      "file_pattern": "*.parquet",
+      "update_frequency": "daily",
+      "last_updated": "2025-01-11",
+      "status": "active",
+      "dependencies": ["vnstock_data"],
+      "validation_rules": [
+        "price_consistency",
+        "volume_validation",
+        "date_sequence"
+      ]
+    },
+    "fundamental": {
+      "name": "Fundamental Financial Data",
+      "description": "Financial statements and ratios for companies and banks",
+      "raw_path": "data_warehouse/raw/fundamental",
+      "processed_path": "data_warehouse/processed/fundamental",
+      "calculated_path": "calculated_results/fundamental",
+      "schema_file": "data_warehouse/schemas/fundamental_schema.json",
+      "calculated_schema_file": "calculated_results/schemas/fundamental_calculated_schema.json",
+      "file_pattern": "*.parquet",
+      "update_frequency": "quarterly",
+      "last_updated": "2025-01-11",
+      "status": "active",
+      "dependencies": ["vnstock_data"],
+      "sub_types": {
+        "bank": {
+          "path": "fundamental/bank",
+          "description": "Banking sector financial metrics",
+          "metrics": ["roea_ttm", "roaa_ttm", "nim_q", "casa_ratio", "cir", "npl_ratio"]
+        },
+        "company": {
+          "path": "fundamental/company",
+          "description": "Corporate financial metrics",
+          "metrics": ["gross_margin", "ebit_margin", "net_margin", "roe", "roa"]
+        },
+        "insurance": {
+          "path": "fundamental/insurance",
+          "description": "Insurance sector metrics",
+          "metrics": ["combined_ratio", "loss_ratio", "expense_ratio"]
+        },
+        "security": {
+          "path": "fundamental/security",
+          "description": "Securities sector metrics",
+          "metrics": ["trading_volume", "commission_income", "net_interest_income"]
+        }
+      },
+      "validation_rules": [
+        "financial_relationships",
+        "ratio_consistency",
+        "temporal_consistency"
+      ]
+    },
+    "technical": {
+      "name": "Technical Indicators",
+      "description": "Calculated technical indicators and trading signals",
+      "raw_path": "data_warehouse/raw/technical",
+      "processed_path": "data_warehouse/processed/technical",
+      "calculated_path": "calculated_results/technical",
+      "schema_file": "data_warehouse/schemas/technical_schema.json",
+      "calculated_schema_file": "calculated_results/schemas/technical_calculated_schema.json",
+      "file_pattern": "*.parquet",
+      "update_frequency": "daily",
+      "last_updated": "2025-01-11",
+      "status": "active",
+      "dependencies": ["ohlcv"],
+      "sub_types": {
+        "indicators": {
+          "path": "technical/indicators",
+          "description": "Technical indicators (MA, RSI, MACD, etc.)",
+          "indicators": ["sma", "ema", "rsi", "macd", "bollinger_bands", "atr"]
+        },
+        "signals": {
+          "path": "technical/signals",
+          "description": "Trading signals and recommendations",
+          "signals": ["ma_cross", "rsi_signal", "macd_signal", "overall_signal"]
+        },
+        "market_breadth": {
+          "path": "technical/market_breadth",
+          "description": "Market breadth indicators",
+          "indicators": ["advance_decline", "new_highs_lows", "mcclellan_oscillator"]
+        },
+        "sector_rotation": {
+          "path": "technical/sector_rotation",
+          "description": "Sector rotation analysis",
+          "indicators": ["relative_strength", "momentum_score", "rotation_phase"]
+        }
+      },
+      "validation_rules": [
+        "indicator_calculation",
+        "signal_consistency",
+        "temporal_consistency"
+      ]
+    },
+    "valuation": {
+      "name": "Valuation Models",
+      "description": "Valuation calculations and fair value estimates",
+      "raw_path": "data_warehouse/raw/valuation",
+      "processed_path": "data_warehouse/processed/valuation",
+      "calculated_path": "calculated_results/valuation",
+      "schema_file": "data_warehouse/schemas/valuation_schema.json",
+      "calculated_schema_file": "calculated_results/schemas/valuation_calculated_schema.json",
+      "file_pattern": "*.parquet",
+      "update_frequency": "weekly",
+      "last_updated": "2025-01-11",
+      "status": "active",
+      "dependencies": ["fundamental", "ohlcv"],
+      "sub_types": {
+        "pe": {
+          "path": "valuation/pe",
+          "description": "Price-to-Earnings valuation",
+          "metrics": ["pe_ttm", "pe_forward", "pe_fair_value"]
+        },
+        "pb": {
+          "path": "valuation/pb",
+          "description": "Price-to-Book valuation",
+          "metrics": ["pb_current", "pb_fair_value", "pb_percentile"]
+        },
+        "ev": {
+          "path": "valuation/ev",
+          "description": "Enterprise Value valuation",
+          "metrics": ["ev_ebitda", "ev_revenue", "ev_fair_value"]
+        },
+        "dcf": {
+          "path": "valuation/dcf",
+          "description": "Discounted Cash Flow valuation",
+          "metrics": ["dcf_fair_value", "wacc", "terminal_growth"]
+        }
+      },
+      "validation_rules": [
+        "valuation_consistency",
+        "model_validation",
+        "data_quality"
+      ]
+    }
+  },
+  "processing_pipelines": {
+    "daily_update": {
+      "name": "Daily Data Update",
+      "description": "Daily update of OHLCV and technical indicators",
+      "schedule": "0 2 * * *",
+      "enabled": true,
+      "steps": [
+        "fetch_ohlcv_data",
+        "calculate_technical_indicators",
+        "update_market_breadth",
+        "validate_data_quality",
+        "update_cache"
+      ],
+      "dependencies": ["ohlcv", "technical"],
+      "last_run": "2025-01-11T02:00:00Z",
+      "status": "success"
+    },
+    "quarterly_update": {
+      "name": "Quarterly Fundamental Update",
+      "description": "Quarterly update of fundamental data",
+      "schedule": "0 3 1 1,4,7,10 *",
+      "enabled": true,
+      "steps": [
+        "fetch_fundamental_data",
+        "calculate_financial_ratios",
+        "update_valuation_models",
+        "validate_consistency",
+        "update_cache"
+      ],
+      "dependencies": ["fundamental", "valuation"],
+      "last_run": "2025-01-01T03:00:00Z",
+      "status": "success"
+    },
+    "weekly_valuation": {
+      "name": "Weekly Valuation Update",
+      "description": "Weekly update of valuation models",
+      "schedule": "0 4 * * 1",
+      "enabled": true,
+      "steps": [
+        "update_market_data",
+        "recalculate_valuations",
+        "update_relative_rankings",
+        "validate_models",
+        "update_cache"
+      ],
+      "dependencies": ["valuation", "ohlcv"],
+      "last_run": "2025-01-06T04:00:00Z",
+      "status": "success"
+    }
+  },
+  "quality_checks": {
+    "data_validation": {
+      "enabled": true,
+      "frequency": "daily",
+      "rules": [
+        "schema_validation",
+        "data_consistency",
+        "temporal_consistency",
+        "range_validation"
+      ]
+    },
+    "performance_monitoring": {
+      "enabled": true,
+      "metrics": [
+        "data_loading_time",
+        "cache_hit_rate",
+        "memory_usage",
+        "query_performance"
+      ],
+      "thresholds": {
+        "data_loading_time": 5000,
+        "cache_hit_rate": 0.8,
+        "memory_usage": 0.9,
+        "query_performance": 1000
+      }
+    },
+    "consistency_checks": {
+      "enabled": true,
+      "frequency": "weekly",
+      "checks": [
+        "cross_source_consistency",
+        "financial_relationship_validation",
+        "temporal_consistency",
+        "unit_consistency"
+      ]
+    }
+  },
+  "cache_configuration": {
+    "redis": {
+      "enabled": true,
+      "host": "localhost",
+      "port": 6379,
+      "db": 0,
+      "ttl": 3600
+    },
+    "memory": {
+      "enabled": true,
+      "max_size": 1000,
+      "default_ttl": 3600
+    },
+    "strategies": {
+      "ohlcv": {
+        "ttl": 3600,
+        "priority": "high"
+      },
+      "fundamental": {
+        "ttl": 86400,
+        "priority": "medium"
+      },
+      "technical": {
+        "ttl": 1800,
+        "priority": "high"
+      },
+      "valuation": {
+        "ttl": 604800,
+        "priority": "low"
+      }
+    }
+  },
+  "monitoring": {
+    "alerts": {
+      "data_quality": {
+        "enabled": true,
+        "thresholds": {
+          "missing_data_percentage": 0.1,
+          "validation_error_count": 100,
+          "consistency_violation_count": 50
+        }
+      },
+      "performance": {
+        "enabled": true,
+        "thresholds": {
+          "data_loading_time": 10000,
+          "memory_usage": 0.95,
+          "cache_hit_rate": 0.7
+        }
+      },
+      "system": {
+        "enabled": true,
+        "thresholds": {
+          "disk_usage": 0.9,
+          "cpu_usage": 0.8,
+          "memory_usage": 0.9
+        }
+      }
+    },
+    "logging": {
+      "level": "INFO",
+      "retention_days": 30,
+      "files": [
+        "technical_processing.log",
+        "daily_ohlcv_mktcap_updater.log",
+        "data_validation.log",
+        "performance.log"
+      ]
+    }
+  }
+}
+

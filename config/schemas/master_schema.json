@@ -1,0 +1,233 @@
+{
+  "name": "Stock Dashboard Master Schema",
+  "version": "2.0.0",
+  "description": "Master schema with global settings for the entire stock dashboard system",
+  "app_metadata": {
+    "app_name": "Vietnamese Stock Market Dashboard",
+    "version": "2.0.0",
+    "default_language": "vi",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "currency": "VND"
+  },
+  "global_settings": {
+    "display": {
+      "decimal_separator": ".",
+      "thousands_separator": ",",
+      "currency_symbol": "đ",
+      "currency_position": "suffix",
+      "date_format": "YYYY-MM-DD",
+      "datetime_format": "YYYY-MM-DD HH:mm:ss",
+      "quarter_format": "Q{quarter} {year}"
+    },
+    "data_quality": {
+      "min_completeness": 0.95,
+      "max_missing_consecutive_days": 5,
+      "outlier_threshold_std": 3.0,
+      "require_validation": true
+    },
+    "performance": {
+      "cache_ttl_seconds": 3600,
+      "batch_size": 1000,
+      "max_parallel_workers": 4
+    }
+  },
+  "theme": {
+    "name": "stock_dashboard_default",
+    "colors": {
+      "primary": "#1976D2",
+      "secondary": "#424242",
+      "success": "#00C853",
+      "danger": "#D32F2F",
+      "warning": "#FFA726",
+      "info": "#0288D1",
+      "light": "#F5F5F5",
+      "dark": "#212121",
+      "muted": "#757575"
+    },
+    "semantic_colors": {
+      "positive_change": {
+        "color": "#00C853",
+        "description": "Price increases, profit growth"
+      },
+      "negative_change": {
+        "color": "#D32F2F",
+        "description": "Price decreases, losses"
+      },
+      "neutral": {
+        "color": "#757575",
+        "description": "No change, zero values"
+      },
+      "reference_price": {
+        "color": "#FFA726",
+        "description": "Reference/ceiling/floor prices"
+      },
+      "buy_signal": {
+        "color": "#00C853",
+        "description": "Technical buy signals"
+      },
+      "sell_signal": {
+        "color": "#D32F2F",
+        "description": "Technical sell signals"
+      },
+      "hold_signal": {
+        "color": "#FFA726",
+        "description": "Hold recommendations"
+      }
+    }
+  },
+  "formatting_rules": {
+    "price": {
+      "decimal_places": 2,
+      "thousands_separator": true,
+      "show_currency": true,
+      "example": "25,750.50đ"
+    },
+    "volume": {
+      "decimal_places": 0,
+      "thousands_separator": true,
+      "abbreviate_millions": false,
+      "example": "1,250,000"
+    },
+    "percentage": {
+      "decimal_places": 2,
+      "show_sign": true,
+      "suffix": "%",
+      "example": "+2.35%"
+    },
+    "market_cap": {
+      "decimal_places": 1,
+      "abbreviate": true,
+      "unit": "B",
+      "example": "25.7B"
+    },
+    "ratio": {
+      "decimal_places": 2,
+      "example": "12.35"
+    },
+    "large_number": {
+      "decimal_places": 0,
+      "thousands_separator": true,
+      "abbreviate_billions": true,
+      "example": "1.5B"
+    }
+  },
+  "frequency_codes": {
+    "D": {
+      "description": "Daily",
+      "aggregation_period": "1 day",
+      "typical_use": "Technical analysis, short-term trading",
+      "min_data_points": 20
+    },
+    "W": {
+      "description": "Weekly",
+      "aggregation_period": "1 week",
+      "typical_use": "Medium-term trend analysis",
+      "min_data_points": 12
+    },
+    "M": {
+      "description": "Monthly",
+      "aggregation_period": "1 month",
+      "typical_use": "Long-term investment analysis",
+      "min_data_points": 6
+    },
+    "Q": {
+      "description": "Quarterly",
+      "aggregation_period": "3 months",
+      "typical_use": "Fundamental analysis alignment",
+      "min_data_points": 4
+    },
+    "Y": {
+      "description": "Yearly",
+      "aggregation_period": "1 year",
+      "typical_use": "Long-term performance review",
+      "min_data_points": 3
+    }
+  },
+  "validation_thresholds": {
+    "price": {
+      "min": 0,
+      "max": 10000000,
+      "max_daily_change_pct": 200
+    },
+    "volume": {
+      "min": 0,
+      "max": 1000000000
+    },
+    "pe_ratio": {
+      "min": -1000,
+      "max": 1000,
+      "typical_range": [5, 50]
+    },
+    "pb_ratio": {
+      "min": 0,
+      "max": 100,
+      "typical_range": [0.5, 10]
+    },
+    "roe": {
+      "min": -500,
+      "max": 500,
+      "typical_range": [5, 30]
+    }
+  },
+  "entity_types": {
+    "COMPANY": {
+      "description": "Standard corporations",
+      "color": "#1976D2",
+      "icon": "🏢"
+    },
+    "BANK": {
+      "description": "Banking institutions",
+      "color": "#00897B",
+      "icon": "🏦"
+    },
+    "INSURANCE": {
+      "description": "Insurance companies",
+      "color": "#7B1FA2",
+      "icon": "🛡️"
+    },
+    "SECURITY": {
+      "description": "Securities/brokerage firms",
+      "color": "#F57C00",
+      "icon": "📈"
+    }
+  },
+  "chart_defaults": {
+    "height": 400,
+    "font_family": "Arial, sans-serif",
+    "font_size": 12,
+    "grid_color": "#E0E0E0",
+    "background_color": "#FFFFFF",
+    "line_width": 2,
+    "marker_size": 6
+  },
+  "schema_references": {
+    "data_schemas": {
+      "fundamental": "config/schemas/data/fundamental.json",
+      "technical": "config/schemas/data/technical.json",
+      "ohlcv": "config/schemas/data/ohlcv.json",
+      "valuation": "config/schemas/data/valuation.json"
+    },
+    "display_schemas": {
+      "formatting": "config/schemas/display/formatting_rules.json",
+      "colors": "config/schemas/display/color_theme.json",
+      "charts": "config/schemas/display/chart_defaults.json"
+    },
+    "metadata_schemas": {
+      "metrics": "data_warehouse/metadata/metric_registry.json",
+      "sectors": "data_warehouse/metadata/sector_industry_registry.json",
+      "warehouse": "config/schemas/metadata/data_warehouse_structure.json"
+    }
+  },
+  "version_history": [
+    {
+      "version": "2.0.0",
+      "date": "2025-12-07",
+      "changes": "Centralized schema system with global settings"
+    },
+    {
+      "version": "1.0.0",
+      "date": "2025-12-05",
+      "changes": "Initial schema creation (scattered locations)"
+    }
+  ]
+}
