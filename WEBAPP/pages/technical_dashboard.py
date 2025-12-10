@@ -30,6 +30,10 @@ streamlit_app = importlib.import_module("streamlit_app")
 
 from WEBAPP.core.utils import get_data_path, load_custom_css, get_plotly_font_config
 from WEBAPP.layout.navigation import render_top_nav
+from config.schema_registry import SchemaRegistry
+
+# Initialize SchemaRegistry singleton
+schema_registry = SchemaRegistry()
 
 # Load custom CSS (Nunito font)
 load_custom_css()
@@ -1589,17 +1593,20 @@ def render_commodity_chart():
                 perf_df = perf_df[[c for c in column_order if c in perf_df.columns]].copy()
                 
                 # Format columns via Styler to keep numeric values for conditional coloring
+                # Use SchemaRegistry for formatting
                 def format_price(val: float) -> str:
                     if pd.isna(val):
                         return "N/A"
-                    return f"{float(val):,.1f}"
+                    return schema_registry.format_price(float(val), include_currency=False)
 
                 def format_date(val: str) -> str:
                     return val if val else "N/A"
+                    
                 def format_pct(val: float) -> str:
                     if pd.isna(val):
                         return "N/A"
-                    return f"{val:+.2f}%"
+                    formatted, _ = schema_registry.format_percentage(val, show_sign=True, color=False)
+                    return formatted
 
                 def pct_color(val: float) -> str:
                     if pd.isna(val):

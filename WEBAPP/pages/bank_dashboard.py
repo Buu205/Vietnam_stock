@@ -27,6 +27,7 @@ from WEBAPP.core.utils import get_data_path, load_custom_css, get_plotly_font_co
 from WEBAPP.core.formatters import formatter, format_value, format_df_column, format_summary_data
 from WEBAPP.core.display_config import format_df_for_display, format_metrics_for_display
 from WEBAPP.layout.navigation import render_top_nav
+from config.schema_registry import SchemaRegistry
 
 # Load custom CSS (Nunito font)
 load_custom_css()

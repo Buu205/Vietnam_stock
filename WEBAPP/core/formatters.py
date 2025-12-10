@@ -7,10 +7,13 @@ import pandas as pd
 import streamlit as st
 from typing import Any, Dict, List, Optional, Union
 from .config import DisplayConfig, format_currency, format_percentage, format_ratio, format_decimal, format_date
-from config.schema_registry.core.entities import SchemaRegistry
+from config.schema_registry import SchemaRegistry
 
 class DataFormatter:
-    """Centralized data formatting class."""
+    """
+    Centralized data formatting class.
+    Lớp định dạng dữ liệu tập trung.
+    """
     
     def __init__(self):
         self.config = DisplayConfig()
@@ -166,17 +169,59 @@ formatter = DataFormatter()
 
 # Convenience functions for direct use
 def format_value(value: float, value_type: str = 'currency') -> str:
-    """Quick format a single value."""
+    """
+    Format a single value based on type.
+    Định dạng một giá trị đơn lẻ theo loại.
+    
+    Args:
+        value: Giá trị cần định dạng
+        value_type: Loại giá trị ('currency', 'percentage', 'ratio', 'decimal')
+    
+    Returns:
+        Chuỗi đã được định dạng
+    """
     return formatter.format_financial_value(value, value_type)
 
 def format_df_column(df: pd.DataFrame, column: str, value_type: str = 'currency') -> pd.DataFrame:
+    """
+    Format a column in DataFrame.
+    Định dạng một cột trong DataFrame.
+    
+    Args:
+        df: DataFrame cần định dạng
+        column: Tên cột
+        value_type: Loại giá trị
+    
+    Returns:
+        DataFrame đã được định dạng
+    """
     """Quick format a DataFrame column."""
     return formatter.format_dataframe_column(df, column, value_type)
 
 def format_valuation_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Format valuation DataFrame.
+    Định dạng DataFrame định giá.
+    
+    Args:
+        df: DataFrame định giá
+    
+    Returns:
+        DataFrame đã được định dạng
+    """
     """Quick format valuation DataFrame."""
     return formatter.format_valuation_data(df)
 
 def format_summary_data(data: Dict[str, Any]) -> Dict[str, str]:
+    """
+    Format summary data dictionary.
+    Định dạng dictionary dữ liệu tóm tắt.
+    
+    Args:
+        data: Dictionary dữ liệu
+    
+    Returns:
+        Dictionary đã được định dạng
+    """
     """Quick format summary data."""
     return formatter.format_financial_summary(data)

@@ -3,6 +3,7 @@ Centralized Data Paths Configuration
 =====================================
 
 Single source of truth for all data paths in the project.
+Cấu hình tập trung cho tất cả đường dẫn dữ liệu trong project.
 Giúp dễ dàng thay đổi đường dẫn mà không cần sửa nhiều file.
 
 Author: AI Assistant
@@ -42,8 +43,10 @@ else:
 class DataPaths:
     """
     Centralized configuration for all data paths.
+    Cấu hình tập trung cho tất cả đường dẫn dữ liệu.
     
     All paths are relative to project root and resolved using get_data_path().
+    Tất cả đường dẫn đều relative đến project root và được resolve bằng get_data_path().
     """
     
     # ============================================================================

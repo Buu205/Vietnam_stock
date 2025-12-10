@@ -52,8 +52,13 @@ except (ImportError, KeyError):
         def format_currency(value):
             return f"{value:,.0f}" if pd.notna(value) else "N/A"
         
+        # Use SchemaRegistry for formatting (will be initialized later)
         def format_percentage(value):
-            return f"{value:.1f}%" if pd.notna(value) else "N/A"
+            if pd.notna(value):
+                from config.schema_registry import SchemaRegistry
+                registry = SchemaRegistry()
+                return registry.format_percentage(value, show_sign=False)
+            return "N/A"
         
         def format_ratio(value):
             return f"{value:.2f}" if pd.notna(value) else "N/A"

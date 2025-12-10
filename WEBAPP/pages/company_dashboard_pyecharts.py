@@ -64,6 +64,10 @@ def _ensure_columns(df: pd.DataFrame, required_cols: list[str], context: str) ->
 # Import formatting utilities
 from WEBAPP.core.formatters import formatter, format_value, format_valuation_df, format_summary_data
 from WEBAPP.core.display_config import format_df_for_display, format_metrics_for_display, get_chart_tooltip_config
+from config.schema_registry import SchemaRegistry
+
+# Initialize SchemaRegistry singleton
+schema_registry = SchemaRegistry()
 
 # Page config for wide layout
 st.set_page_config(layout="wide", page_title="Company Dashboard (PyEcharts)", page_icon="🏢")

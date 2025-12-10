@@ -9,7 +9,10 @@ import streamlit as st
 from .formatters import format_value, format_valuation_df, format_summary_data
 
 class DisplayConfigManager:
-    """Manages display configuration for all data types."""
+    """
+    Manages display configuration for all data types.
+    Quản lý cấu hình hiển thị cho tất cả các loại dữ liệu.
+    """
     
     def __init__(self):
         self.column_formats = {

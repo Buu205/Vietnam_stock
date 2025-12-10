@@ -23,6 +23,10 @@ if project_root not in sys.path:
 
 from WEBAPP.core.utils import get_data_path, load_custom_css
 from WEBAPP.layout.navigation import render_top_nav
+from config.schema_registry import SchemaRegistry
+
+# Initialize SchemaRegistry singleton
+schema_registry = SchemaRegistry()
 
 # Load custom CSS
 load_custom_css()
