@@ -23,10 +23,10 @@ if project_root not in sys.path:
 # Ensure Streamlit package namespace is registered (for Streamlit Cloud reloads)
 streamlit_app = importlib.import_module("streamlit_app")
 
-from streamlit_app.core.utils import get_data_path, load_custom_css, get_plotly_font_config
-from streamlit_app.core.formatters import formatter, format_value, format_df_column, format_summary_data
-from streamlit_app.core.display_config import format_df_for_display, format_metrics_for_display
-from streamlit_app.layout.navigation import render_top_nav
+from WEBAPP.core.utils import get_data_path, load_custom_css, get_plotly_font_config
+from WEBAPP.core.formatters import formatter, format_value, format_df_column, format_summary_data
+from WEBAPP.core.display_config import format_df_for_display, format_metrics_for_display
+from WEBAPP.layout.navigation import render_top_nav
 
 # Load custom CSS (Nunito font)
 load_custom_css()
@@ -181,11 +181,11 @@ def _safe_plot_pyecharts(df, col_name, xs, title, color, key_prefix):
     except Exception as e:
         st.error(f"Error plotting {col_name}: {e}")
         return False
-from streamlit_app.core.display_config import format_df_for_display, format_metrics_for_display
+from WEBAPP.core.display_config import format_df_for_display, format_metrics_for_display
 
 # New modular imports (optional wiring)
 try:
-    from streamlit_app.domains.banking.data_loading_bank import get_bank_symbols
+    from WEBAPP.domains.banking.data_loading_bank import get_bank_symbols
 except Exception:
     get_bank_symbols = None
 
@@ -284,7 +284,7 @@ def render_bank_dashboard():
 
 def _get_bank_parquet_path() -> Path:
     """Get bank fundamental data path using centralized config"""
-    from streamlit_app.core.data_paths import get_fundamental_path
+    from WEBAPP.core.data_paths import get_fundamental_path
     return get_fundamental_path('bank')
 
 @st.cache_data(ttl=300, max_entries=32)  # Cache for 5 minutes to allow fresh Q3/2025 data
@@ -652,7 +652,7 @@ def build_bank_metrics_table(symbol: str, start_year: int, metrics_spec: list) -
     """
     try:
         # Use DuckDB for efficient filtering
-        from streamlit_app.core.data_paths import get_fundamental_path
+        from WEBAPP.core.data_paths import get_fundamental_path
         conn = duckdb.connect()
         p = get_fundamental_path('bank')
         

@@ -1,0 +1,92 @@
+{
+  "name": "Field Mappings and Relationships",
+  "version": "1.0.0",
+  "description": "Field mappings and relationships between different data schemas",
+  "field_mappings": {
+    "ticker_standardization": {
+      "description": "Standard ticker format mapping",
+      "rules": {
+        "case": "upper",
+        "strip_whitespace": true,
+        "remove_special_chars": false
+      }
+    },
+    "metric_code_mapping": {
+      "description": "Maps Vietnamese metric names to English codes",
+      "source": "metadata_registry/metrics/fundamental_metrics.json",
+      "example": {
+        "Doanh thu thuần": "revenue",
+        "Lợi nhuận ròng": "net_income",
+        "ROE": "roe",
+        "ROA": "roa"
+      }
+    },
+    "sector_mapping": {
+      "description": "Maps ICB codes to sector names",
+      "source": "metadata_registry/sectors/industry.json",
+      "levels": {
+        "ICB_L1": "Industry Group",
+        "ICB_L2": "Industry",
+        "ICB_L3": "Sub-Industry"
+      }
+    }
+  },
+  "data_path_mappings": {
+    "raw_data": {
+      "ohlcv": "DATA/raw/ohlcv/",
+      "fundamental": "DATA/raw/fundamental/csv/",
+      "commodity": "DATA/raw/commodity/",
+      "macro": "DATA/raw/macro/"
+    },
+    "processed_data": {
+      "fundamental": {
+        "company": "DATA/processed/fundamental/company/",
+        "bank": "DATA/processed/fundamental/bank/",
+        "insurance": "DATA/processed/fundamental/insurance/",
+        "security": "DATA/processed/fundamental/security/"
+      },
+      "technical": "DATA/processed/technical/",
+      "valuation": {
+        "pe": "DATA/processed/valuation/pe/",
+        "pb": "DATA/processed/valuation/pb/",
+        "ev_ebitda": "DATA/processed/valuation/ev_ebitda/",
+        "sector_pe": "DATA/processed/valuation/sector_pe/"
+      },
+      "commodity": "DATA/processed/commodity/",
+      "macro": "DATA/processed/macro/",
+      "forecast": "DATA/processed/forecast/bsc/"
+    }
+  },
+  "schema_relationships": {
+    "fundamental_to_valuation": {
+      "description": "How fundamental data feeds into valuation calculations",
+      "mappings": {
+        "ttm_earnings": "fundamental.net_income (TTM)",
+        "book_value": "fundamental.total_equity",
+        "ebitda": "fundamental.ebitda (TTM)"
+      }
+    },
+    "ohlcv_to_technical": {
+      "description": "How OHLCV data feeds into technical indicators",
+      "mappings": {
+        "price_data": "ohlcv.close",
+        "volume_data": "ohlcv.volume",
+        "high_low": "ohlcv.high, ohlcv.low"
+      }
+    },
+    "technical_to_signals": {
+      "description": "How technical indicators generate trading signals",
+      "mappings": {
+        "ma_cross": "technical.ma_20, technical.ma_50",
+        "rsi_oversold": "technical.rsi < 30",
+        "rsi_overbought": "technical.rsi > 70"
+      }
+    }
+  },
+  "entity_calculator_mapping": {
+    "COMPANY": "PROCESSORS/fundamental/calculators/company_calculator.py::CompanyCalculator",
+    "BANK": "PROCESSORS/fundamental/calculators/bank_calculator.py::BankCalculator",
+    "INSURANCE": "PROCESSORS/fundamental/calculators/insurance_calculator.py::InsuranceCalculator",
+    "SECURITY": "PROCESSORS/fundamental/calculators/security_calculator.py::SecurityCalculator"
+  }
+}

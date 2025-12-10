@@ -9,8 +9,8 @@ from typing import Dict, List
 from pathlib import Path
 import duckdb
 import pandas as pd
-from streamlit_app.core.formatters import format_value, format_df_column
-from streamlit_app.core.utils import get_data_path
+from WEBAPP.core.formatters import format_value, format_df_column
+from WEBAPP.core.utils import get_data_path
 
 # Import streamlit for caching (optional, only if available)
 try:
@@ -26,16 +26,16 @@ except ImportError:
 
 # Example paths (có thể hiệu chỉnh sau)
 OHLCV_BASIC = \
-    get_data_path("calculated_results/technical/basic_data/basic_data_full.parquet")
+    get_data_path("DATA/processed/technical/basic_data/basic_data_full.parquet")
 RSI_PATH = \
-    get_data_path("calculated_results/technical/rsi/rsi_full.parquet")
+    get_data_path("DATA/processed/technical/rsi/rsi_full.parquet")
 MA_PATH = \
-    get_data_path("calculated_results/technical/moving_averages/moving_averages_full.parquet")
+    get_data_path("DATA/processed/technical/moving_averages/moving_averages_full.parquet")
 
 # MA Screening hiện đang được script daily ghi ra thư mục technical riêng:
-# calculated_results/technical/ma_screening_latest.parquet
+# DATA/processed/technical/ma_screening_latest.parquet
 # Sử dụng get_data_path() để nhất quán với các path khác
-MA_SCREENING_PATH = get_data_path("calculated_results/technical/ma_screening_latest.parquet")
+MA_SCREENING_PATH = get_data_path("DATA/processed/technical/ma_screening_latest.parquet")
 
 
 def get_connection() -> duckdb.DuckDBPyConnection:

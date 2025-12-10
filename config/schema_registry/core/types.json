@@ -1,0 +1,100 @@
+{
+  "name": "Data Type Definitions",
+  "version": "1.0.0",
+  "description": "Standard data type definitions for the stock dashboard system",
+  "types": {
+    "price": {
+      "type": "float",
+      "min": 0,
+      "max": 10000000,
+      "decimal_places": 2,
+      "unit": "VND",
+      "format": "number",
+      "validation": {
+        "max_daily_change_pct": 200,
+        "outlier_threshold_std": 3.0
+      }
+    },
+    "volume": {
+      "type": "integer",
+      "min": 0,
+      "max": 1000000000,
+      "format": "number",
+      "abbreviate_millions": false
+    },
+    "percentage": {
+      "type": "float",
+      "min": -500,
+      "max": 500,
+      "decimal_places": 2,
+      "unit": "%",
+      "format": "percentage",
+      "show_sign": true
+    },
+    "ratio": {
+      "type": "float",
+      "min": -1000,
+      "max": 1000,
+      "decimal_places": 2,
+      "format": "number",
+      "examples": {
+        "pe_ratio": {"typical_range": [5, 50]},
+        "pb_ratio": {"typical_range": [0.5, 10]},
+        "roe": {"typical_range": [5, 30]}
+      }
+    },
+    "market_cap": {
+      "type": "float",
+      "min": 0,
+      "decimal_places": 1,
+      "unit": "VND",
+      "format": "abbreviated",
+      "abbreviate": true,
+      "abbreviation_unit": "B"
+    },
+    "date": {
+      "type": "date",
+      "format": "YYYY-MM-DD",
+      "timezone": "Asia/Ho_Chi_Minh"
+    },
+    "datetime": {
+      "type": "datetime",
+      "format": "YYYY-MM-DD HH:mm:ss",
+      "timezone": "Asia/Ho_Chi_Minh"
+    },
+    "quarter": {
+      "type": "string",
+      "format": "Q{quarter} {year}",
+      "pattern": "^Q[1-4] \\d{4}$"
+    },
+    "ticker": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]{2,10}$",
+      "case": "upper",
+      "description": "Vietnamese stock ticker symbol"
+    },
+    "currency": {
+      "type": "string",
+      "default": "VND",
+      "symbol": "đ",
+      "position": "suffix"
+    }
+  },
+  "composite_types": {
+    "ohlcv_record": {
+      "description": "OHLCV data record",
+      "fields": ["date", "ticker", "open", "high", "low", "close", "volume"],
+      "required": ["date", "ticker", "close", "volume"]
+    },
+    "fundamental_record": {
+      "description": "Fundamental financial data record",
+      "fields": ["ticker", "period", "metric_code", "value", "currency", "unit"],
+      "required": ["ticker", "period", "metric_code", "value"]
+    },
+    "valuation_record": {
+      "description": "Valuation metric record",
+      "fields": ["date", "ticker", "metric_type", "value", "market_cap", "ttm_earnings"],
+      "required": ["date", "ticker", "metric_type", "value"]
+    }
+  }
+}

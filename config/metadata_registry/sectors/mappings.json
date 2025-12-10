@@ -1,0 +1,16 @@
+{
+  "name": "Sector Mapping Tables",
+  "version": "1.0.0",
+  "description": "Mappings between tickers and sectors",
+  "structure": {
+    "ticker_to_sector": {
+      "description": "Maps ticker to sector code",
+      "columns": ["ticker", "sector_code", "sector_name", "entity_type"]
+    },
+    "sector_to_tickers": {
+      "description": "Maps sector code to list of tickers",
+      "columns": ["sector_code", "tickers", "ticker_count"]
+    }
+  },
+  "note": "Actual mappings should be loaded from PROCESSORS/core/registries/sector_lookup.py or DATA/metadata/sector_industry_registry.json"
+}

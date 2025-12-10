@@ -12,11 +12,11 @@ import logging
 import pandas as pd
 import streamlit as st
 
-from streamlit_app.core.utils import get_data_path
+from WEBAPP.core.utils import get_data_path
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_COMMODITY_REL_PATH = "calculated_results/commodity/commodity_prices.parquet"
+DEFAULT_COMMODITY_REL_PATH = "DATA/processed/commodity/commodity_prices.parquet"
 
 
 def _resolve_data_path(explicit_path: Optional[str] = None) -> Path:

@@ -9,11 +9,11 @@ import os
 from datetime import datetime, timedelta
 from typing import Dict, List
 import pandas as pd
-from streamlit_app.core.data_loading import load_symbol_list, load_valuation_generic
-from streamlit_app.core.data_paths import DataPaths, get_fundamental_path, get_valuation_path
+from WEBAPP.core.data_loading import load_symbol_list, load_valuation_generic
+from WEBAPP.core.data_paths import DataPaths, get_fundamental_path, get_valuation_path
 from pathlib import Path
 import streamlit as st
-from streamlit_app.core.formatters import format_valuation_df, format_value
+from WEBAPP.core.formatters import format_valuation_df, format_value
 
 
 # Use centralized DataPaths configuration
@@ -27,7 +27,7 @@ def get_company_symbols() -> List[str]:
     fund_file = Path(FUND_PATH)
     if not fund_file.exists():
         # Graceful handling on Streamlit Cloud if file missing
-        st.warning("Company fundamentals file is missing. Please ensure it exists at calculated_results/fundamental/company/company_financial_metrics.parquet")
+        st.warning("Company fundamentals file is missing. Please ensure it exists at DATA/processed/fundamental/company/company_financial_metrics.parquet")
         return []
     return load_symbol_list(FUND_PATH)
 

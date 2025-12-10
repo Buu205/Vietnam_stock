@@ -1,0 +1,51 @@
+{
+  "name": "AI Insights Schemas",
+  "version": "1.0.0",
+  "description": "Schemas for AI-generated insights and recommendations",
+  "insight_types": {
+    "sector_analysis": {
+      "description": "Sector-level insights",
+      "components": {
+        "performance_summary": "Overall sector performance",
+        "key_drivers": "Main factors driving performance",
+        "outlook": "Future outlook and trends"
+      }
+    },
+    "stock_analysis": {
+      "description": "Individual stock insights",
+      "components": {
+        "strengths": "Key strengths",
+        "weaknesses": "Key weaknesses",
+        "opportunities": "Investment opportunities",
+        "risks": "Investment risks"
+      }
+    },
+    "market_analysis": {
+      "description": "Market-wide insights",
+      "components": {
+        "market_sentiment": "Overall market sentiment",
+        "sector_rotation": "Sector rotation patterns",
+        "valuation_assessment": "Market valuation assessment"
+      }
+    }
+  },
+  "insight_format": {
+    "structure": {
+      "title": "string",
+      "summary": "string",
+      "details": "array",
+      "confidence": "float",
+      "timestamp": "datetime",
+      "source": "string"
+    },
+    "confidence_levels": {
+      "high": 0.8,
+      "medium": 0.5,
+      "low": 0.3
+    }
+  },
+  "data_structure": {
+    "columns": ["date", "ticker_or_sector", "insight_type", "title", "summary", "confidence", "details"],
+    "required": ["date", "insight_type", "title", "summary", "confidence"]
+  }
+}

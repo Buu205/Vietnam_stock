@@ -21,8 +21,8 @@ project_root = os.path.dirname(os.path.dirname(current_dir))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from streamlit_app.core.utils import get_data_path, load_custom_css
-from streamlit_app.layout.navigation import render_top_nav
+from WEBAPP.core.utils import get_data_path, load_custom_css
+from WEBAPP.layout.navigation import render_top_nav
 
 # Load custom CSS
 load_custom_css()
@@ -60,7 +60,7 @@ def load_sector_pe_data(
     max_years: int = MAX_HISTORY_YEARS,
 ):
     """Load sector PE data with column selection + history window"""
-    data_dir = get_data_path("calculated_results/valuation/sector_pe")
+    data_dir = get_data_path("DATA/processed/valuation/sector_pe")
     
     latest_cols = latest_columns or LATEST_COLUMNS
     hist_cols = historical_columns or HISTORICAL_COLUMNS

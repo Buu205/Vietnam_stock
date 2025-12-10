@@ -18,8 +18,8 @@ project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from streamlit_app.core.utils import get_data_path, load_custom_css, get_plotly_font_config
-from streamlit_app.layout.navigation import render_top_nav
+from WEBAPP.core.utils import get_data_path, load_custom_css, get_plotly_font_config
+from WEBAPP.layout.navigation import render_top_nav
 
 # Load custom CSS (Nunito font)
 load_custom_css()
@@ -52,7 +52,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Import formatting utilities
-from streamlit_app.core.formatters import formatter, format_value, format_df_column, format_summary_data
+from WEBAPP.core.formatters import formatter, format_value, format_df_column, format_summary_data
 
 # PyEcharts helper functions for overview
 def build_line(xs, ys, title, color):
@@ -178,7 +178,7 @@ def get_security_symbols():
     """Get list of security symbols from data - only selected securities"""
     try:
         # Load from security_full.parquet and filter to only allowed securities
-        security_path = get_data_path('DATA/refined/fundamental/current/security_full.parquet')
+        security_path = get_data_path('DATA/processed/fundamental/security_full.parquet')
         df = pd.read_parquet(str(security_path))
         securities = df[df['ENTITY_TYPE'] == 'SECURITY']['SECURITY_CODE'].unique()
         # Filter to only allowed securities
@@ -309,7 +309,7 @@ def render_securities_dashboard():
 
 def _get_security_parquet_path() -> Path:
     """Get path to security fundamental data"""
-    return Path(get_data_path("DATA/refined/fundamental/current/security_full.parquet"))
+    return Path(get_data_path("DATA/processed/fundamental/security_full.parquet"))
 
 
 @st.cache_data(ttl=300, max_entries=32)  # Cache for 5 minutes to allow fresh Q3/2025 data
@@ -362,7 +362,7 @@ def load_securities_valuation_data(symbol, start_year):
         conn = duckdb.connect()
         
         # Load PE data with filtering
-        pe_path = get_data_path('calculated_results/valuation/pe/pe_historical_all_symbols_final.parquet')
+        pe_path = get_data_path('DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet')
         pe_data = conn.execute("""
             SELECT * FROM read_parquet(?)
             WHERE symbol = ? AND TRY_CAST(date AS DATE) >= ?
@@ -373,7 +373,7 @@ def load_securities_valuation_data(symbol, start_year):
             pe_data['date'] = pd.to_datetime(pe_data['date'])
         
         # Load PB data with filtering
-        pb_path = get_data_path('calculated_results/valuation/pb/pb_historical_all_symbols_final.parquet')
+        pb_path = get_data_path('DATA/processed/valuation/pb/pb_historical_all_symbols_final.parquet')
         pb_data = conn.execute("""
             SELECT * FROM read_parquet(?)
             WHERE symbol = ? AND TRY_CAST(date AS DATE) >= ?
@@ -692,8 +692,8 @@ def render_valuation_tab(valuation_data, selected_symbol, start_year):
     
     # Load real PE/PB data for analysis
     try:
-        pe_file = get_data_path("calculated_results/valuation/pe/pe_historical_all_symbols_final.parquet")
-        pb_file = get_data_path("calculated_results/valuation/pb/pb_historical_all_symbols_final.parquet")
+        pe_file = get_data_path("DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet")
+        pb_file = get_data_path("DATA/processed/valuation/pb/pb_historical_all_symbols_final.parquet")
         
         file_path = pe_file if metric_type == "P/E" else pb_file
         if not os.path.exists(file_path):
@@ -1142,7 +1142,7 @@ def render_pe_pb_dotplot(valuation_data, selected_symbol, start_year):
         if metric_type == "P/E":
             # Try to load latest PE data
             pe_files = [
-                get_data_path("calculated_results/valuation/pe/pe_historical_all_symbols_final.parquet")
+                get_data_path("DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet")
             ]
             
             all_data = None
@@ -1158,7 +1158,7 @@ def render_pe_pb_dotplot(valuation_data, selected_symbol, start_year):
                     continue
                     
         else:  # P/B
-            pb_file = get_data_path("calculated_results/valuation/pb/pb_historical_all_symbols_final.parquet")
+            pb_file = get_data_path("DATA/processed/valuation/pb/pb_historical_all_symbols_final.parquet")
             all_data = pd.read_parquet(pb_file)
             # Filter to only allowed securities
             if 'symbol' in all_data.columns:
@@ -1361,7 +1361,7 @@ def render_securities_historical_trend(selected_ticker, metric_type, start_year)
         if metric_type == "P/E":
             # Try to load latest PE data
             pe_files = [
-                get_data_path("calculated_results/valuation/pe/pe_historical_all_symbols_final.parquet")
+                get_data_path("DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet")
             ]
             
             ticker_df = None
@@ -1382,7 +1382,7 @@ def render_securities_historical_trend(selected_ticker, metric_type, start_year)
                     
         else:  # P/B
             # Load latest PB data
-            pb_file = get_data_path("calculated_results/valuation/pb/pb_historical_all_symbols_final.parquet")
+            pb_file = get_data_path("DATA/processed/valuation/pb/pb_historical_all_symbols_final.parquet")
             df = pd.read_parquet(pb_file)
             # Filter to only allowed securities
             if 'symbol' in df.columns:

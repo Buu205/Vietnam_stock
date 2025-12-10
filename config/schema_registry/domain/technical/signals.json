@@ -1,0 +1,64 @@
+{
+  "name": "Trading Signal Schemas",
+  "version": "1.0.0",
+  "description": "Trading signal generation schemas",
+  "signal_types": {
+    "buy": {
+      "color": "#00C853",
+      "description": "Buy signal",
+      "conditions": [
+        "rsi < 30",
+        "price crosses above ma_20",
+        "macd_histogram > 0",
+        "volume > volume_ma * 1.5"
+      ]
+    },
+    "sell": {
+      "color": "#D32F2F",
+      "description": "Sell signal",
+      "conditions": [
+        "rsi > 70",
+        "price crosses below ma_20",
+        "macd_histogram < 0",
+        "volume > volume_ma * 1.5"
+      ]
+    },
+    "hold": {
+      "color": "#FFA726",
+      "description": "Hold signal",
+      "conditions": [
+        "30 <= rsi <= 70",
+        "price between ma_20 and ma_50",
+        "no clear trend"
+      ]
+    }
+  },
+  "signal_generation_rules": {
+    "ma_crossover": {
+      "buy": "ma_20 crosses above ma_50",
+      "sell": "ma_20 crosses below ma_50"
+    },
+    "rsi_divergence": {
+      "buy": "price makes lower low, rsi makes higher low",
+      "sell": "price makes higher high, rsi makes lower high"
+    },
+    "macd_crossover": {
+      "buy": "macd_line crosses above signal_line",
+      "sell": "macd_line crosses below signal_line"
+    },
+    "bollinger_squeeze": {
+      "buy": "price touches lower band and bounces",
+      "sell": "price touches upper band and reverses"
+    }
+  },
+  "signal_strength": {
+    "weak": 1,
+    "moderate": 2,
+    "strong": 3,
+    "very_strong": 4
+  },
+  "data_structure": {
+    "columns": ["date", "ticker", "signal_type", "strength", "indicator", "value"],
+    "required": ["date", "ticker", "signal_type", "strength"]
+  }
+}

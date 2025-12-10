@@ -1,0 +1,83 @@
+{
+  "name": "Financial Report Structures",
+  "version": "1.0.0",
+  "description": "Financial report structure definitions",
+  "report_types": {
+    "income_statement": {
+      "description": "Income statement structure",
+      "sections": {
+        "revenue": {
+          "metrics": ["revenue", "cost_of_goods_sold", "gross_profit"],
+          "order": 1
+        },
+        "operating_expenses": {
+          "metrics": ["operating_expenses", "ebitda", "ebit"],
+          "order": 2
+        },
+        "net_income": {
+          "metrics": ["interest_expense", "tax_expense", "net_income"],
+          "order": 3
+        }
+      }
+    },
+    "balance_sheet": {
+      "description": "Balance sheet structure",
+      "sections": {
+        "assets": {
+          "metrics": ["current_assets", "non_current_assets", "total_assets"],
+          "order": 1
+        },
+        "liabilities": {
+          "metrics": ["current_liabilities", "non_current_liabilities", "total_liabilities"],
+          "order": 2
+        },
+        "equity": {
+          "metrics": ["share_capital", "retained_earnings", "total_equity"],
+          "order": 3
+        }
+      }
+    },
+    "cash_flow": {
+      "description": "Cash flow statement structure",
+      "sections": {
+        "operating": {
+          "metrics": ["operating_cash_flow"],
+          "order": 1
+        },
+        "investing": {
+          "metrics": ["investing_cash_flow"],
+          "order": 2
+        },
+        "financing": {
+          "metrics": ["financing_cash_flow"],
+          "order": 3
+        },
+        "net_change": {
+          "metrics": ["net_cash_change"],
+          "order": 4
+        }
+      }
+    }
+  },
+  "entity_specific_reports": {
+    "BANK": {
+      "income_statement": {
+        "interest_income": "order_1",
+        "interest_expense": "order_2",
+        "net_interest_income": "order_3",
+        "non_interest_income": "order_4",
+        "operating_expenses": "order_5",
+        "net_income": "order_6"
+      }
+    },
+    "INSURANCE": {
+      "income_statement": {
+        "premium_income": "order_1",
+        "claims_expense": "order_2",
+        "underwriting_expense": "order_3",
+        "combined_ratio": "order_4",
+        "net_income": "order_5"
+      }
+    }
+  }
+}

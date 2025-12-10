@@ -6,11 +6,11 @@ Single source of truth for all data paths in the project.
 Giúp dễ dàng thay đổi đường dẫn mà không cần sửa nhiều file.
 
 Author: AI Assistant
-Date: 2025-11-11
-Version: 1.0.0
+Date: 2025-12-09
+Version: 2.0.0 - Updated to v4.0.0 Canonical Architecture
 
 Usage:
-    from streamlit_app.core.data_paths import DataPaths, get_fundamental_path
+    from WEBAPP.core.data_paths import DataPaths, get_fundamental_path
     
     # Method 1: Using static methods
     bank_path = DataPaths.fundamental('bank')
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     current_dir = Path(__file__).resolve().parent
     project_root = current_dir.parent.parent
     sys.path.insert(0, str(project_root))
-    from streamlit_app.core.utils import get_data_path
+    from WEBAPP.core.utils import get_data_path
 else:
     # Module import - use relative import
     from .utils import get_data_path
@@ -72,7 +72,7 @@ class DataPaths:
             
         Example:
             >>> DataPaths.fundamental('bank')
-            Path('.../calculated_results/fundamental/bank/bank_financial_metrics.parquet')
+            Path('.../DATA/processed/fundamental/bank/bank_financial_metrics.parquet')
         
         Note:
             Files contain calculated metrics including:
@@ -83,10 +83,10 @@ class DataPaths:
             - Growth rates (YoY, QoQ)
         """
         entity_map = {
-            'bank': 'bank/bank_financial_metrics.parquet',
-            'company': 'company/company_financial_metrics.parquet',
-            'insurance': 'insurance/insurance_financial_metrics.parquet',
-            'security': 'security/security_financial_metrics.parquet'
+            'bank': 'fundamental/bank/bank_financial_metrics.parquet',
+            'company': 'fundamental/company/company_financial_metrics.parquet',
+            'insurance': 'fundamental/insurance/insurance_financial_metrics.parquet',
+            'security': 'fundamental/security/security_financial_metrics.parquet'
         }
         
         if entity_type not in entity_map:
@@ -95,7 +95,7 @@ class DataPaths:
                 f"Valid options: {list(entity_map.keys())}"
             )
             
-        return get_data_path(f"calculated_results/fundamental/{entity_map[entity_type]}")
+        return get_data_path(f"DATA/processed/{entity_map[entity_type]}")
     
     # Legacy constants for backward compatibility
     @property
@@ -145,14 +145,14 @@ class DataPaths:
             
         Example:
             >>> DataPaths.valuation('pe')
-            Path('.../calculated_results/valuation/pe/pe_historical_all_symbols_final.parquet')
+            Path('.../DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet')
         """
         metric_map = {
-            'pe': 'pe/pe_historical_all_symbols_final.parquet',
-            'pb': 'pb/pb_historical_all_symbols_final.parquet',
-            'ev_ebitda': 'ev_ebitda/ev_ebitda_historical_all_symbols_final.parquet',
-            'vnindex_pe': 'vnindex_pe_historical_final.parquet',
-            'sector_pe': 'sector_pe/sector_pe_historical_final.parquet'
+            'pe': 'valuation/pe/pe_historical_all_symbols_final.parquet',
+            'pb': 'valuation/pb/pb_historical_all_symbols_final.parquet',
+            'ev_ebitda': 'valuation/ev_ebitda/ev_ebitda_historical_all_symbols_final.parquet',
+            'vnindex_pe': 'valuation/vnindex_pe_historical_final.parquet',
+            'sector_pe': 'valuation/sector_pe/sector_pe_historical_final.parquet'
         }
         
         if metric not in metric_map:
@@ -161,7 +161,7 @@ class DataPaths:
                 f"Valid options: {list(metric_map.keys())}"
             )
             
-        return get_data_path(f"calculated_results/valuation/{metric_map[metric]}")
+        return get_data_path(f"DATA/processed/{metric_map[metric]}")
     
     # Legacy constants
     @property
@@ -207,13 +207,13 @@ class DataPaths:
             ValueError: If indicator is not recognized
         """
         indicator_map = {
-            'ma': 'moving_averages/ma_all_symbols.parquet',
-            'ema': 'exponential_moving_averages/ema_all_symbols.parquet',
-            'rsi': 'rsi/rsi_all_symbols.parquet',
-            'macd': 'macd/macd_all_symbols.parquet',
-            'bollinger': 'bollinger_bands/bb_all_symbols.parquet',
-            'signals': 'signals/trading_signals.parquet',
-            'market_breadth': 'market_breadth/market_breadth_daily.parquet'
+            'ma': 'technical/moving_averages/ma_all_symbols.parquet',
+            'ema': 'technical/exponential_moving_averages/ema_all_symbols.parquet',
+            'rsi': 'technical/rsi/rsi_all_symbols.parquet',
+            'macd': 'technical/macd/macd_all_symbols.parquet',
+            'bollinger': 'technical/bollinger_bands/bb_all_symbols.parquet',
+            'signals': 'technical/signals/trading_signals.parquet',
+            'market_breadth': 'technical/market_breadth/market_breadth_daily.parquet'
         }
         
         if indicator not in indicator_map:
@@ -222,7 +222,7 @@ class DataPaths:
                 f"Valid options: {list(indicator_map.keys())}"
             )
             
-        return get_data_path(f"calculated_results/technical/{indicator_map[indicator]}")
+        return get_data_path(f"DATA/processed/{indicator_map[indicator]}")
     
     # ============================================================================
     # RAW DATA (Data Warehouse)
@@ -243,7 +243,7 @@ class DataPaths:
             
         Example:
             >>> DataPaths.raw_fundamental('company')
-            Path('.../DATA/refined/fundamental/current/company_full.parquet')
+            Path('.../DATA/processed/fundamental/company_full.parquet')
         """
         valid_types = ['bank', 'company', 'insurance', 'security']
         if entity_type not in valid_types:
@@ -253,7 +253,7 @@ class DataPaths:
             )
 
         return get_data_path(
-            f"DATA/refined/fundamental/current/{entity_type}_full.parquet"
+            f"DATA/processed/fundamental/{entity_type}_full.parquet"
         )
     
     @staticmethod
@@ -264,7 +264,7 @@ class DataPaths:
         Returns:
             Path to OHLCV parquet file
         """
-        return get_data_path("data_warehouse/raw/ohlcv/OHLCV_mktcap.parquet")
+        return get_data_path("DATA/raw/ohlcv/OHLCV_mktcap.parquet")
     
     # ============================================================================
     # MACRO DATA
@@ -292,13 +292,13 @@ class DataPaths:
             
         Example:
             >>> DataPaths.macro('deposit_interest')
-            Path('.../calculated_results/macro/deposit_interest_rates.parquet')
+            Path('.../DATA/processed/macro/deposit_interest_rates.parquet')
         """
         indicator_map = {
-            'deposit_interest': 'deposit_interest_rates.parquet',
-            'exchange_rates': 'exchange_rates.parquet',
-            'gov_bond_yields': 'gov_bond_yields.parquet',
-            'interest_rates': 'interest_rates.parquet'
+            'deposit_interest': 'macro/deposit_interest_rates.parquet',
+            'exchange_rates': 'macro/exchange_rates.parquet',
+            'gov_bond_yields': 'macro/gov_bond_yields.parquet',
+            'interest_rates': 'macro/interest_rates.parquet'
         }
         
         if indicator not in indicator_map:
@@ -307,7 +307,7 @@ class DataPaths:
                 f"Valid options: {list(indicator_map.keys())}"
             )
             
-        return get_data_path(f"calculated_results/macro/{indicator_map[indicator]}")
+        return get_data_path(f"DATA/processed/{indicator_map[indicator]}")
     
     # ============================================================================
     # FORECAST DATA
@@ -328,7 +328,7 @@ class DataPaths:
             ValueError: If source is not recognized
         """
         if source == 'bsc':
-            return get_data_path("calculated_results/forecast/bsc/bsc_forecast_latest.json")
+            return get_data_path("DATA/processed/forecast/bsc/bsc_forecast_latest.json")
         else:
             raise ValueError(f"Unknown forecast source: '{source}'")
 
@@ -350,7 +350,7 @@ def get_fundamental_path(entity_type: str) -> Path:
         
     Example:
         >>> get_fundamental_path('company')
-        Path('.../calculated_results/fundamental/company/company_financial_metrics.parquet')
+        Path('.../DATA/processed/fundamental/company/company_financial_metrics.parquet')
     """
     return DataPaths.fundamental(entity_type)
 

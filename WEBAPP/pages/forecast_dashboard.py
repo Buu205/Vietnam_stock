@@ -22,13 +22,13 @@ if streamlit_app_dir not in sys.path:
 
 # Try different import paths for compatibility
 try:
-    from streamlit_app.domains.forecast.data_loading_forecast_csv import (
+    from WEBAPP.domains.forecast.data_loading_forecast_csv import (
         load_comprehensive_forecast_data_csv, 
         check_csv_data_freshness
     )
-    from streamlit_app.core.formatters import format_currency, format_percentage, format_ratio
-    from streamlit_app.layout.navigation import render_top_nav
-    from streamlit_app.core.utils import load_custom_css
+    from WEBAPP.core.formatters import format_currency, format_percentage, format_ratio
+    from WEBAPP.layout.navigation import render_top_nav
+    from WEBAPP.core.utils import load_custom_css
 except (ImportError, KeyError):
     # Fallback for Streamlit Cloud
     try:
@@ -968,8 +968,8 @@ def load_npat_3q_2025(forecast_symbols: list) -> pd.DataFrame:
         DataFrame với các cột: symbol, npat_3q_2025, q4_2024_npat
     """
     try:
-        from streamlit_app.core.data_paths import DataPaths
-        from streamlit_app.core.utils import get_data_path
+        from WEBAPP.core.data_paths import DataPaths
+        from WEBAPP.core.utils import get_data_path
         
         # Normalize symbols to uppercase
         forecast_symbols_upper = [s.upper() for s in forecast_symbols]

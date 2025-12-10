@@ -15,8 +15,8 @@ import logging
 from pathlib import Path
 from datetime import datetime
 import streamlit as st
-from streamlit_app.core.utils import get_data_path
-from streamlit_app.core.data_paths import DataPaths, get_valuation_path, get_fundamental_path
+from WEBAPP.core.utils import get_data_path
+from WEBAPP.core.data_paths import DataPaths, get_valuation_path, get_fundamental_path
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class ForecastDataLoader:
         """Initialize with Excel file path"""
         if excel_path is None:
             # Default path to forecast Excel file - Updated path
-            self.excel_path = Path(get_data_path('data_processor/Bsc_forecast/Database Forecast BSC.xlsx'))
+            self.excel_path = Path(get_data_path('PROCESSORS/Bsc_forecast/Database Forecast BSC.xlsx'))
         else:
             self.excel_path = Path(excel_path)
         
@@ -120,7 +120,7 @@ class ForecastDataLoader:
             logger.info(f"Loading YTD data for {len(forecast_symbols)} forecast symbols")
             
             # Load full database - use get_data_path for consistency
-            full_db_path = get_data_path('data_warehouse/raw/fundamental/full_database.parquet')
+            full_db_path = get_data_path('DATA/raw/fundamental/full_database.parquet')
             df = pd.read_parquet(full_db_path)
             
             # Filter early to reduce memory usage - only load forecast symbols and current year

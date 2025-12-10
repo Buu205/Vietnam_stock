@@ -1,0 +1,6 @@
+{
+  "name": "Valuation Metric Definitions",
+  "version": "1.0.0",
+  "description": "Valuation metric definitions",
+  "note": "Valuation metric definitions are in schema_registry/domain/valuation/metrics.json"
+}

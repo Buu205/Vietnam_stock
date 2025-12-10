@@ -4,8 +4,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from streamlit_app.layout.navigation import render_top_nav
-from streamlit_app.services.news_loader import (
+from WEBAPP.layout.navigation import render_top_nav
+from WEBAPP.services.news_loader import (
     compute_sentiment_overview,
     format_sentiment_label,
     load_news_data,

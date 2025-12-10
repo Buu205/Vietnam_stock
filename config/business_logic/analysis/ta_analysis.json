@@ -1,0 +1,41 @@
+{
+  "name": "Technical Analysis Settings",
+  "version": "1.0.0",
+  "description": "Technical analysis configuration and settings",
+  "indicators": {
+    "trend": {
+      "indicators": ["ma_20", "ma_50", "ma_200"],
+      "weights": {
+        "ma_20": 0.3,
+        "ma_50": 0.4,
+        "ma_200": 0.3
+      }
+    },
+    "momentum": {
+      "indicators": ["rsi", "macd"],
+      "weights": {
+        "rsi": 0.6,
+        "macd": 0.4
+      }
+    },
+    "volatility": {
+      "indicators": ["bollinger_bands", "atr"],
+      "weights": {
+        "bollinger_bands": 0.7,
+        "atr": 0.3
+      }
+    }
+  },
+  "signal_generation": {
+    "buy_signals": [
+      "rsi < 30",
+      "ma_20 crosses above ma_50",
+      "macd_histogram > 0"
+    ],
+    "sell_signals": [
+      "rsi > 70",
+      "ma_20 crosses below ma_50",
+      "macd_histogram < 0"
+    ]
+  }
+}

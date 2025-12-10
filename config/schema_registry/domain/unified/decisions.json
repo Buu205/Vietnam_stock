@@ -1,0 +1,55 @@
+{
+  "name": "Decision-Making Schemas",
+  "version": "1.0.0",
+  "description": "Schemas for investment decision-making combining multiple factors",
+  "decision_framework": {
+    "factors": {
+      "fundamental": {
+        "weight": 0.4,
+        "metrics": ["roe", "roa", "growth", "margin"],
+        "description": "Fundamental analysis factors"
+      },
+      "technical": {
+        "weight": 0.3,
+        "metrics": ["rsi", "ma_trend", "volume", "momentum"],
+        "description": "Technical analysis factors"
+      },
+      "valuation": {
+        "weight": 0.3,
+        "metrics": ["pe", "pb", "relative_valuation"],
+        "description": "Valuation factors"
+      }
+    },
+    "scoring": {
+      "method": "weighted_average",
+      "scale": [0, 100],
+      "thresholds": {
+        "buy": 70,
+        "hold": 40,
+        "sell": 0
+      }
+    }
+  },
+  "decision_rules": {
+    "buy_conditions": [
+      "fundamental_score > 60",
+      "technical_score > 50",
+      "valuation_score < 30 (undervalued)",
+      "overall_score > 70"
+    ],
+    "sell_conditions": [
+      "fundamental_score < 40",
+      "technical_score < 30",
+      "valuation_score > 70 (overvalued)",
+      "overall_score < 30"
+    ],
+    "hold_conditions": [
+      "40 <= overall_score <= 70",
+      "mixed signals across factors"
+    ]
+  },
+  "data_structure": {
+    "columns": ["date", "ticker", "fundamental_score", "technical_score", "valuation_score", "overall_score", "recommendation"],
+    "required": ["date", "ticker", "overall_score", "recommendation"]
+  }
+}

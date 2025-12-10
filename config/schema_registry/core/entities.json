@@ -1,0 +1,57 @@
+{
+  "name": "Core Entity Definitions",
+  "version": "1.0.0",
+  "description": "Base entity definitions for the stock dashboard system",
+  "entities": {
+    "COMPANY": {
+      "type": "COMPANY",
+      "description": "Standard corporations",
+      "color": "#1976D2",
+      "icon": "🏢",
+      "calculator_class": "CompanyCalculator",
+      "schema_path": "fundamental/company",
+      "default_metrics": ["revenue", "net_income", "roe", "roa", "gross_margin"]
+    },
+    "BANK": {
+      "type": "BANK",
+      "description": "Banking institutions",
+      "color": "#00897B",
+      "icon": "🏦",
+      "calculator_class": "BankCalculator",
+      "schema_path": "fundamental/bank",
+      "default_metrics": ["nim", "roe", "roa", "car", "loan_to_deposit"]
+    },
+    "INSURANCE": {
+      "type": "INSURANCE",
+      "description": "Insurance companies",
+      "color": "#7B1FA2",
+      "icon": "🛡️",
+      "calculator_class": "InsuranceCalculator",
+      "schema_path": "fundamental/insurance",
+      "default_metrics": ["combined_ratio", "roe", "roa", "premium_growth"]
+    },
+    "SECURITY": {
+      "type": "SECURITY",
+      "description": "Securities/brokerage firms",
+      "color": "#F57C00",
+      "icon": "📈",
+      "calculator_class": "SecurityCalculator",
+      "schema_path": "fundamental/security",
+      "default_metrics": ["revenue", "net_income", "roe", "roa", "margin_ratio"]
+    }
+  },
+  "relationships": {
+    "ticker_to_entity": {
+      "description": "Maps ticker symbols to entity types",
+      "source": "metadata_registry/tickers/all_tickers.json"
+    },
+    "entity_to_sector": {
+      "description": "Maps entities to sectors/industries",
+      "source": "metadata_registry/sectors/mappings.json"
+    },
+    "entity_to_metrics": {
+      "description": "Maps entity types to available metrics",
+      "source": "metadata_registry/metrics/fundamental_metrics.json"
+    }
+  }
+}

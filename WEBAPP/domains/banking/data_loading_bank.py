@@ -7,8 +7,8 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Dict, List
 import pandas as pd
-from streamlit_app.core.formatters import format_valuation_df, format_value
-from streamlit_app.core.data_paths import get_fundamental_path
+from WEBAPP.core.formatters import format_valuation_df, format_value
+from WEBAPP.core.data_paths import get_fundamental_path
 
 # Use centralized DataPaths configuration
 BANK_FUND_PATH = str(get_fundamental_path('bank'))

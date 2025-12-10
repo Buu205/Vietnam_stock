@@ -1,0 +1,78 @@
+{
+  "name": "Fundamental Calculation Formulas",
+  "version": "1.0.0",
+  "description": "Calculation formulas for fundamental metrics",
+  "formulas": {
+    "roe": {
+      "formula": "net_income / total_equity * 100",
+      "inputs": ["net_income", "total_equity"],
+      "output_type": "percentage",
+      "description": "Return on Equity"
+    },
+    "roa": {
+      "formula": "net_income / total_assets * 100",
+      "inputs": ["net_income", "total_assets"],
+      "output_type": "percentage",
+      "description": "Return on Assets"
+    },
+    "gross_margin": {
+      "formula": "(revenue - cost_of_goods_sold) / revenue * 100",
+      "inputs": ["revenue", "cost_of_goods_sold"],
+      "output_type": "percentage",
+      "description": "Gross Profit Margin"
+    },
+    "net_margin": {
+      "formula": "net_income / revenue * 100",
+      "inputs": ["net_income", "revenue"],
+      "output_type": "percentage",
+      "description": "Net Profit Margin"
+    },
+    "yoy_growth": {
+      "formula": "(current_value - previous_value) / previous_value * 100",
+      "inputs": ["current_value", "previous_value"],
+      "output_type": "percentage",
+      "description": "Year-over-Year Growth"
+    },
+    "nim": {
+      "formula": "(interest_income - interest_expense) / average_assets * 100",
+      "inputs": ["interest_income", "interest_expense", "average_assets"],
+      "output_type": "percentage",
+      "description": "Net Interest Margin (Banking)",
+      "entity_type": "BANK"
+    },
+    "car": {
+      "formula": "(tier_1_capital + tier_2_capital) / risk_weighted_assets * 100",
+      "inputs": ["tier_1_capital", "tier_2_capital", "risk_weighted_assets"],
+      "output_type": "percentage",
+      "description": "Capital Adequacy Ratio (Banking)",
+      "entity_type": "BANK"
+    },
+    "combined_ratio": {
+      "formula": "(claims_expense + underwriting_expense) / premium_income * 100",
+      "inputs": ["claims_expense", "underwriting_expense", "premium_income"],
+      "output_type": "percentage",
+      "description": "Combined Ratio (Insurance)",
+      "entity_type": "INSURANCE"
+    }
+  },
+  "calculation_rules": {
+    "ttm_calculation": {
+      "description": "Trailing Twelve Months calculation",
+      "method": "sum_last_4_quarters",
+      "applies_to": ["revenue", "net_income", "ebitda"]
+    },
+    "quarterly_to_annual": {
+      "description": "Convert quarterly to annual",
+      "method": "multiply_by_4",
+      "applies_to": ["quarterly_metrics"]
+    },
+    "validation": {
+      "denominator_not_zero": true,
+      "negative_values_allowed": ["net_income", "growth_rates"],
+      "outlier_detection": {
+        "method": "z_score",
+        "threshold": 3.0
+      }
+    }
+  }
+}

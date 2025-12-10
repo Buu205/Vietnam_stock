@@ -1,0 +1,7 @@
+{
+  "name": "Vietnam-Specific Industry Classifications",
+  "version": "1.0.0",
+  "description": "Vietnam-specific industry classifications and mappings",
+  "source": "Vietnamese stock market classifications",
+  "note": "This file should reference or consolidate data from existing sector registries"
+}

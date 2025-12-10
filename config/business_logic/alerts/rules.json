@@ -1,0 +1,37 @@
+{
+  "name": "Alert Triggering Rules",
+  "version": "1.0.0",
+  "description": "Rules for triggering alerts",
+  "alert_types": {
+    "price_alert": {
+      "description": "Price movement alerts",
+      "triggers": [
+        "price_change_pct > 5",
+        "price_breaks_support",
+        "price_breaks_resistance"
+      ]
+    },
+    "fundamental_alert": {
+      "description": "Fundamental metric alerts",
+      "triggers": [
+        "roe_change_pct > 20",
+        "revenue_growth < -10"
+      ]
+    },
+    "technical_alert": {
+      "description": "Technical indicator alerts",
+      "triggers": [
+        "rsi < 30 (oversold)",
+        "rsi > 70 (overbought)",
+        "ma_crossover"
+      ]
+    },
+    "valuation_alert": {
+      "description": "Valuation alerts",
+      "triggers": [
+        "pe_ratio < 5 (very_undervalued)",
+        "pe_ratio > 50 (very_overvalued)"
+      ]
+    }
+  }
+}

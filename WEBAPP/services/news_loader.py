@@ -8,11 +8,11 @@ import pandas as pd
 import streamlit as st
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-NEWS_DIR = PROJECT_ROOT / "calculated_results" / "news"
+NEWS_DIR = PROJECT_ROOT / "DATA" / "processed" / "news"
 NEWS_DATA_PATH = NEWS_DIR / "news_latest.parquet"
 NEWS_SUMMARY_PATH = NEWS_DIR / "news_summary.json"
 BSC_FORECAST_PATH = (
-    PROJECT_ROOT / "calculated_results" / "forecast" / "bsc" / "bsc_forecast_latest.csv"
+    PROJECT_ROOT / "DATA" / "processed" / "forecast" / "bsc" / "bsc_forecast_latest.csv"
 )
 
 

@@ -1,0 +1,75 @@
+{
+  "name": "Valuation Metric Definitions",
+  "version": "1.0.0",
+  "description": "Valuation metric definitions",
+  "valuation_metrics": {
+    "pe_ratio": {
+      "name": "Price-to-Earnings Ratio",
+      "code": "pe",
+      "formula": "market_cap / ttm_earnings",
+      "type": "ratio",
+      "typical_range": [5, 50],
+      "description": "Measures how much investors pay per unit of earnings",
+      "interpretation": {
+        "low": "< 10: Potentially undervalued",
+        "medium": "10-20: Fairly valued",
+        "high": "> 20: Potentially overvalued"
+      }
+    },
+    "pb_ratio": {
+      "name": "Price-to-Book Ratio",
+      "code": "pb",
+      "formula": "market_cap / book_value",
+      "type": "ratio",
+      "typical_range": [0.5, 10],
+      "description": "Measures market value relative to book value",
+      "interpretation": {
+        "low": "< 1: Trading below book value",
+        "medium": "1-3: Fairly valued",
+        "high": "> 3: Trading above book value"
+      }
+    },
+    "ev_ebitda": {
+      "name": "Enterprise Value to EBITDA",
+      "code": "ev_ebitda",
+      "formula": "enterprise_value / ebitda",
+      "type": "ratio",
+      "typical_range": [5, 20],
+      "description": "Measures company value relative to operating earnings",
+      "interpretation": {
+        "low": "< 8: Potentially undervalued",
+        "medium": "8-15: Fairly valued",
+        "high": "> 15: Potentially overvalued"
+      }
+    },
+    "ps_ratio": {
+      "name": "Price-to-Sales Ratio",
+      "code": "ps",
+      "formula": "market_cap / ttm_revenue",
+      "type": "ratio",
+      "typical_range": [0.5, 10],
+      "description": "Measures market value relative to revenue"
+    }
+  },
+  "aggregate_metrics": {
+    "vnindex_pe": {
+      "name": "VN-Index PE Ratio",
+      "code": "vnindex_pe",
+      "formula": "sum(market_cap) / sum(ttm_earnings)",
+      "type": "aggregate",
+      "description": "Market-wide PE ratio for VN-Index constituents",
+      "exclusions": ["VIC", "VHM", "VPB"]
+    },
+    "sector_pe": {
+      "name": "Sector PE Ratio",
+      "code": "sector_pe",
+      "formula": "sum(sector_market_cap) / sum(sector_ttm_earnings)",
+      "type": "aggregate",
+      "description": "PE ratio aggregated by sector"
+    }
+  },
+  "data_structure": {
+    "columns": ["date", "ticker", "metric_type", "value", "market_cap", "ttm_earnings", "book_value"],
+    "required": ["date", "ticker", "metric_type", "value"]
+  }
+}

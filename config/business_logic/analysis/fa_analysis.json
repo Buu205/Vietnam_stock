@@ -1,0 +1,30 @@
+{
+  "name": "Fundamental Analysis Settings",
+  "version": "1.0.0",
+  "description": "Fundamental analysis configuration and settings",
+  "analysis_framework": {
+    "key_metrics": {
+      "profitability": ["roe", "roa", "gross_margin", "net_margin"],
+      "growth": ["revenue_growth", "earnings_growth"],
+      "liquidity": ["current_ratio", "quick_ratio"],
+      "leverage": ["debt_to_equity"]
+    },
+    "scoring": {
+      "method": "weighted_average",
+      "weights": {
+        "profitability": 0.4,
+        "growth": 0.3,
+        "liquidity": 0.2,
+        "leverage": 0.1
+      }
+    }
+  },
+  "entity_specific": {
+    "BANK": {
+      "key_metrics": ["nim", "roe", "roa", "car", "loan_to_deposit"]
+    },
+    "INSURANCE": {
+      "key_metrics": ["combined_ratio", "roe", "roa", "premium_growth"]
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Data Quality Standards",
+  "version": "1.0.0",
+  "description": "Data quality standards and validation rules",
+  "quality_standards": {
+    "completeness": {
+      "min_threshold": 0.95,
+      "description": "Minimum data completeness percentage"
+    },
+    "accuracy": {
+      "outlier_threshold_std": 3.0,
+      "description": "Outlier detection threshold"
+    },
+    "consistency": {
+      "max_missing_consecutive_days": 5,
+      "description": "Maximum consecutive missing days"
+    }
+  },
+  "validation_rules": {
+    "price_consistency": {
+      "description": "Price data consistency checks",
+      "rules": [
+        "high >= low",
+        "high >= close",
+        "low <= close",
+        "max_daily_change_pct <= 200"
+      ]
+    },
+    "volume_validation": {
+      "description": "Volume data validation",
+      "rules": [
+        "volume >= 0",
+        "volume <= max_reasonable_volume"
+      ]
+    }
+  }
+}

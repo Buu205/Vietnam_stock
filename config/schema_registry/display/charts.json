@@ -1,0 +1,63 @@
+{
+  "name": "Chart Visualization Schemas",
+  "version": "1.0.0",
+  "description": "Chart visualization configuration schemas",
+  "chart_types": {
+    "candlestick": {
+      "description": "OHLCV candlestick chart",
+      "defaults": {
+        "height": 400,
+        "show_volume": true,
+        "show_ma": true,
+        "ma_periods": [20, 50]
+      }
+    },
+    "line": {
+      "description": "Line chart for time series",
+      "defaults": {
+        "height": 400,
+        "show_grid": true,
+        "hover_mode": "x unified"
+      }
+    },
+    "bar": {
+      "description": "Bar chart for comparisons",
+      "defaults": {
+        "height": 400,
+        "orientation": "vertical"
+      }
+    },
+    "scatter": {
+      "description": "Scatter plot for correlations",
+      "defaults": {
+        "height": 400,
+        "show_trendline": true
+      }
+    }
+  },
+  "chart_configuration": {
+    "layout": {
+      "height": 400,
+      "font_family": "Arial, sans-serif",
+      "font_size": 12,
+      "grid_color": "#E0E0E0",
+      "background_color": "#FFFFFF"
+    },
+    "axes": {
+      "x_axis": {
+        "type": "datetime",
+        "title": "Date"
+      },
+      "y_axis": {
+        "type": "linear",
+        "title": "Value"
+      }
+    },
+    "colors": {
+      "positive": "#00C853",
+      "negative": "#D32F2F",
+      "neutral": "#757575",
+      "primary": "#1976D2"
+    }
+  }
+}

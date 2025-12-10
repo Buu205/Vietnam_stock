@@ -1,0 +1,39 @@
+{
+  "name": "Dashboard Layout Schemas",
+  "version": "1.0.0",
+  "description": "Dashboard layout and structure schemas",
+  "dashboard_types": {
+    "company_dashboard": {
+      "description": "Company-specific dashboard",
+      "sections": [
+        "price_chart",
+        "fundamental_metrics",
+        "valuation_metrics",
+        "technical_indicators"
+      ]
+    },
+    "sector_dashboard": {
+      "description": "Sector analysis dashboard",
+      "sections": [
+        "sector_overview",
+        "sector_comparison",
+        "top_performers",
+        "sector_valuation"
+      ]
+    },
+    "market_dashboard": {
+      "description": "Market-wide dashboard",
+      "sections": [
+        "market_indices",
+        "sector_performance",
+        "market_breadth",
+        "valuation_overview"
+      ]
+    }
+  },
+  "layout_configuration": {
+    "default_columns": 2,
+    "responsive": true,
+    "spacing": "medium"
+  }
+}

@@ -28,8 +28,8 @@ if project_root not in sys.path:
 import importlib
 streamlit_app = importlib.import_module("streamlit_app")
 
-from streamlit_app.core.utils import get_data_path, load_custom_css, get_plotly_font_config
-from streamlit_app.layout.navigation import render_top_nav
+from WEBAPP.core.utils import get_data_path, load_custom_css, get_plotly_font_config
+from WEBAPP.layout.navigation import render_top_nav
 
 # Load custom CSS (Nunito font)
 load_custom_css()
@@ -44,16 +44,16 @@ PLOTLY_CONFIG = {
 }
 
 # Import formatting utilities
-from streamlit_app.core.formatters import formatter, format_value, format_df_column, format_summary_data
-from streamlit_app.core.display_config import format_df_for_display, format_metrics_for_display
+from WEBAPP.core.formatters import formatter, format_value, format_df_column, format_summary_data
+from WEBAPP.core.display_config import format_df_for_display, format_metrics_for_display
 
-from streamlit_app.domains.technical.data_loading_technical import (
+from WEBAPP.domains.technical.data_loading_technical import (
     get_technical_symbols,
     load_rsi,
     load_ma_screening,
     get_ma_screening_metadata,
 )
-from streamlit_app.services.commodity_loader import CommodityLoader, COMMODITY_DESCRIPTIONS
+from WEBAPP.services.commodity_loader import CommodityLoader, COMMODITY_DESCRIPTIONS
 
 
 @st.cache_data(ttl=3600)
@@ -83,7 +83,7 @@ def render_ma_screening_table():
     
     # Debug info
     if ma_df.empty:
-        from streamlit_app.domains.technical.data_loading_technical import MA_SCREENING_PATH
+        from WEBAPP.domains.technical.data_loading_technical import MA_SCREENING_PATH
         st.error(f"⚠️ MA screening data is empty!")
         st.info(f"📁 Path: `{MA_SCREENING_PATH}`")
         st.info(f"📁 Exists: {MA_SCREENING_PATH.exists()}")

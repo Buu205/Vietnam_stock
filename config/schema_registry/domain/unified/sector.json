@@ -1,0 +1,50 @@
+{
+  "name": "Unified Sector Schema",
+  "version": "1.0.0",
+  "description": "Unified schema for sector-level analysis combining FA and TA",
+  "sector_structure": {
+    "sector_code": {
+      "type": "string",
+      "description": "ICB sector code (e.g., ICB_L2)"
+    },
+    "sector_name": {
+      "type": "string",
+      "description": "Sector name in Vietnamese and English"
+    },
+    "tickers": {
+      "type": "array",
+      "description": "List of tickers in this sector"
+    }
+  },
+  "aggregated_metrics": {
+    "fundamental": {
+      "description": "Aggregated fundamental metrics by sector",
+      "metrics": {
+        "avg_roe": "Average ROE across sector",
+        "avg_roa": "Average ROA across sector",
+        "avg_growth": "Average revenue growth",
+        "sector_market_cap": "Total market cap of sector"
+      }
+    },
+    "technical": {
+      "description": "Aggregated technical indicators by sector",
+      "metrics": {
+        "sector_rsi": "Average RSI across sector",
+        "sector_trend": "Overall sector trend",
+        "advance_decline": "Advancing vs declining stocks"
+      }
+    },
+    "valuation": {
+      "description": "Sector-level valuation metrics",
+      "metrics": {
+        "sector_pe": "Sector PE ratio",
+        "sector_pb": "Sector PB ratio",
+        "relative_valuation": "Valuation relative to market"
+      }
+    }
+  },
+  "data_structure": {
+    "columns": ["date", "sector_code", "metric_category", "metric_code", "value", "ticker_count"],
+    "required": ["date", "sector_code", "metric_category", "metric_code", "value"]
+  }
+}

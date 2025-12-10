@@ -1,0 +1,11 @@
+{
+  "name": "Alert Subscriptions",
+  "version": "1.0.0",
+  "description": "Alert subscription configurations",
+  "subscriptions": {
+    "default": {
+      "alert_types": ["price_alert", "fundamental_alert"],
+      "channels": ["dashboard"]
+    }
+  }
+}

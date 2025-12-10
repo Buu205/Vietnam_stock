@@ -1,0 +1,59 @@
+{
+  "name": "Valuation Model Schemas",
+  "version": "1.0.0",
+  "description": "Valuation model and methodology schemas",
+  "valuation_models": {
+    "dcf": {
+      "name": "Discounted Cash Flow",
+      "description": "DCF valuation model",
+      "inputs": {
+        "free_cash_flow": "required",
+        "growth_rate": "required",
+        "discount_rate": "required",
+        "terminal_value": "required"
+      },
+      "outputs": {
+        "intrinsic_value": "calculated",
+        "fair_value": "calculated"
+      }
+    },
+    "comparable_companies": {
+      "name": "Comparable Companies Analysis",
+      "description": "Valuation based on peer multiples",
+      "inputs": {
+        "peer_tickers": "required",
+        "valuation_multiple": "required",
+        "target_metric": "required"
+      },
+      "outputs": {
+        "implied_value": "calculated"
+      }
+    },
+    "sector_relative": {
+      "name": "Sector Relative Valuation",
+      "description": "Valuation relative to sector averages",
+      "inputs": {
+        "sector": "required",
+        "sector_pe": "required",
+        "company_pe": "required"
+      },
+      "outputs": {
+        "relative_valuation": "calculated"
+      }
+    }
+  },
+  "valuation_methodology": {
+    "historical_pe": {
+      "description": "Compare current PE to historical average",
+      "time_periods": ["1_year", "3_year", "5_year"]
+    },
+    "sector_comparison": {
+      "description": "Compare to sector median/average",
+      "metrics": ["pe", "pb", "ev_ebitda"]
+    },
+    "peer_comparison": {
+      "description": "Compare to peer companies",
+      "peer_selection": "same_sector_similar_size"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "name": "Trend Analysis Schemas",
+  "version": "1.0.0",
+  "description": "Trend analysis and pattern recognition schemas",
+  "trend_types": {
+    "uptrend": {
+      "description": "Upward price trend",
+      "conditions": [
+        "price > ma_20 > ma_50",
+        "higher highs and higher lows",
+        "rsi > 50"
+      ],
+      "color": "#00C853"
+    },
+    "downtrend": {
+      "description": "Downward price trend",
+      "conditions": [
+        "price < ma_20 < ma_50",
+        "lower highs and lower lows",
+        "rsi < 50"
+      ],
+      "color": "#D32F2F"
+    },
+    "sideways": {
+      "description": "Sideways/consolidation trend",
+      "conditions": [
+        "price oscillates around ma_20",
+        "no clear direction",
+        "40 < rsi < 60"
+      ],
+      "color": "#FFA726"
+    }
+  },
+  "pattern_recognition": {
+    "support_resistance": {
+      "description": "Support and resistance levels",
+      "support": "Price level where buying pressure increases",
+      "resistance": "Price level where selling pressure increases"
+    },
+    "chart_patterns": {
+      "head_and_shoulders": {
+        "type": "reversal",
+        "direction": "bearish"
+      },
+      "double_top": {
+        "type": "reversal",
+        "direction": "bearish"
+      },
+      "double_bottom": {
+        "type": "reversal",
+        "direction": "bullish"
+      },
+      "triangle": {
+        "type": "continuation",
+        "variants": ["ascending", "descending", "symmetrical"]
+      }
+    }
+  },
+  "market_breadth": {
+    "description": "Market-wide trend indicators",
+    "indicators": {
+      "advance_decline": {
+        "code": "advance_decline",
+        "formula": "advancing_stocks - declining_stocks"
+      },
+      "new_highs_lows": {
+        "code": "new_highs_lows",
+        "formula": "new_52w_highs - new_52w_lows"
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Scoring Weight Configurations",
+  "version": "1.0.0",
+  "description": "Weight configurations for scoring systems",
+  "unified_scoring": {
+    "fundamental": 0.4,
+    "technical": 0.3,
+    "valuation": 0.3
+  },
+  "fundamental_scoring": {
+    "profitability": 0.4,
+    "growth": 0.3,
+    "liquidity": 0.2,
+    "leverage": 0.1
+  },
+  "technical_scoring": {
+    "trend": 0.4,
+    "momentum": 0.4,
+    "volatility": 0.2
+  },
+  "valuation_scoring": {
+    "pe": 0.4,
+    "pb": 0.3,
+    "ev_ebitda": 0.3
+  }
+}

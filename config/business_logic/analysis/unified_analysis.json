@@ -1,0 +1,24 @@
+{
+  "name": "Unified Analysis Settings",
+  "version": "1.0.0",
+  "description": "Unified FA+TA analysis configuration",
+  "analysis_weights": {
+    "fundamental": 0.4,
+    "technical": 0.3,
+    "valuation": 0.3
+  },
+  "scoring": {
+    "method": "weighted_average",
+    "scale": [0, 100],
+    "thresholds": {
+      "buy": 70,
+      "hold": 40,
+      "sell": 0
+    }
+  },
+  "sector_analysis": {
+    "enabled": true,
+    "aggregation_method": "weighted_average",
+    "weight_by": "market_cap"
+  }
+}

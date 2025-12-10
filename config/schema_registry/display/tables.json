@@ -1,0 +1,52 @@
+{
+  "name": "Table Display Schemas",
+  "version": "1.0.0",
+  "description": "Table display configuration schemas",
+  "table_types": {
+    "financial_table": {
+      "description": "Financial data table",
+      "defaults": {
+        "sortable": true,
+        "filterable": true,
+        "page_size": 20,
+        "show_pagination": true
+      }
+    },
+    "comparison_table": {
+      "description": "Multi-ticker comparison table",
+      "defaults": {
+        "sortable": true,
+        "highlight_differences": true,
+        "show_percent_change": true
+      }
+    },
+    "sector_table": {
+      "description": "Sector-level data table",
+      "defaults": {
+        "group_by_sector": true,
+        "show_aggregates": true
+      }
+    }
+  },
+  "column_formatting": {
+    "price": {
+      "format": "number",
+      "decimal_places": 2,
+      "show_currency": true
+    },
+    "percentage": {
+      "format": "percentage",
+      "decimal_places": 2,
+      "show_sign": true,
+      "color_code": true
+    },
+    "volume": {
+      "format": "number",
+      "abbreviate_millions": false
+    },
+    "ratio": {
+      "format": "number",
+      "decimal_places": 2
+    }
+  }
+}

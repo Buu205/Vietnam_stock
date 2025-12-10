@@ -1,0 +1,37 @@
+{
+  "name": "Trading Decision Rules",
+  "version": "1.0.0",
+  "description": "Trading decision rules and logic",
+  "decision_rules": {
+    "buy": {
+      "conditions": [
+        "overall_score > 70",
+        "fundamental_score > 60",
+        "technical_score > 50",
+        "valuation_score < 30"
+      ],
+      "priority": "high"
+    },
+    "sell": {
+      "conditions": [
+        "overall_score < 30",
+        "fundamental_score < 40",
+        "technical_score < 30",
+        "valuation_score > 70"
+      ],
+      "priority": "high"
+    },
+    "hold": {
+      "conditions": [
+        "40 <= overall_score <= 70",
+        "mixed_signals"
+      ],
+      "priority": "medium"
+    }
+  },
+  "rule_priority": {
+    "fundamental": 1,
+    "valuation": 2,
+    "technical": 3
+  }
+}

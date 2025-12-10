@@ -1,0 +1,41 @@
+{
+  "name": "Fundamental Metric Definitions",
+  "version": "1.0.0",
+  "description": "Fundamental metric definitions and mappings",
+  "registry_file": "metadata_registry/metrics/metric_registry.json",
+  "schema_file": "schema_registry/domain/fundamental/metrics.json",
+  "note": "This file references the detailed metric registry. The actual comprehensive metric registry with all metric codes is in metric_registry.json in this same directory.",
+  "structure": {
+    "metric_registry.json": {
+      "description": "Complete metric registry with all metric codes for financial reports (INCOME, BALANCE, CASHFLOW) for all entity types (COMPANY, BANK, INSURANCE, SECURITY)",
+      "source": "Converted from BSC - Mô tả CSDL.xlsx",
+      "structure": {
+        "entity_types": {
+          "COMPANY": ["INCOME", "BALANCE", "CASHFLOW"],
+          "BANK": ["INCOME", "BALANCE", "CASHFLOW"],
+          "INSURANCE": ["INCOME", "BALANCE", "CASHFLOW"],
+          "SECURITY": ["INCOME", "BALANCE", "CASHFLOW"]
+        },
+        "metric_fields": [
+          "code",
+          "name_vi",
+          "name_en",
+          "data_type",
+          "unit",
+          "category",
+          "is_calculated",
+          "sheet_name",
+          "entity_type"
+        ]
+      }
+    },
+    "schema_registry/domain/fundamental/metrics.json": {
+      "description": "High-level metric definitions and formulas for calculated metrics (ROE, ROA, margins, etc.)",
+      "purpose": "Defines calculated metrics and their formulas"
+    }
+  },
+  "usage": {
+    "loading_registry": "Use SchemaRegistry.get_metadata('metrics', 'metric_registry') to load the full registry",
+    "loading_schema": "Use SchemaRegistry.get_domain_schema('fundamental', 'metrics') to load metric definitions"
+  }
+}

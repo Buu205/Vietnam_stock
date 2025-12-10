@@ -18,8 +18,8 @@ project_root = os.path.dirname(os.path.dirname(current_dir))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from streamlit_app.core.utils import get_data_path, load_custom_css, get_pyecharts_font_config, get_pyecharts_global_opts_with_font
-from streamlit_app.layout.navigation import render_top_nav
+from WEBAPP.core.utils import get_data_path, load_custom_css, get_pyecharts_font_config, get_pyecharts_global_opts_with_font
+from WEBAPP.layout.navigation import render_top_nav
 
 # Load custom CSS (Nunito font)
 load_custom_css()
@@ -62,8 +62,8 @@ def _ensure_columns(df: pd.DataFrame, required_cols: list[str], context: str) ->
 # Removed custom tooltip formatter to revert to default tooltips
 
 # Import formatting utilities
-from streamlit_app.core.formatters import formatter, format_value, format_valuation_df, format_summary_data
-from streamlit_app.core.display_config import format_df_for_display, format_metrics_for_display, get_chart_tooltip_config
+from WEBAPP.core.formatters import formatter, format_value, format_valuation_df, format_summary_data
+from WEBAPP.core.display_config import format_df_for_display, format_metrics_for_display, get_chart_tooltip_config
 
 # Page config for wide layout
 st.set_page_config(layout="wide", page_title="Company Dashboard (PyEcharts)", page_icon="🏢")
@@ -82,7 +82,7 @@ st.markdown(
 )
 
 # New modular imports (domain loaders, components, features)
-from streamlit_app.domains.company.data_loading_company import (
+from WEBAPP.domains.company.data_loading_company import (
     get_company_symbols,
     load_company_valuation,
 )

@@ -7,6 +7,7 @@ import pandas as pd
 import streamlit as st
 from typing import Any, Dict, List, Optional, Union
 from .config import DisplayConfig, format_currency, format_percentage, format_ratio, format_decimal, format_date
+from config.schema_registry.core.entities import SchemaRegistry
 
 class DataFormatter:
     """Centralized data formatting class."""

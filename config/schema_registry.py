@@ -52,29 +52,54 @@ class SchemaRegistry:
             SchemaRegistry._schemas_loaded = True
 
     def _load_all_schemas(self):
-        """Load all schemas from config/schemas/"""
+        """Load all schemas from config/schemas/ and new schema_registry structure"""
         self.config_dir = Path(__file__).parent
         self.schema_dir = self.config_dir / "schemas"
+        
+        # New schema registry paths
+        self.schema_registry_dir = self.config_dir / "schema_registry"
+        self.metadata_registry_dir = self.config_dir / "metadata_registry"
+        self.business_logic_dir = self.config_dir / "business_logic"
 
-        # Load master schema
+        # Load master schema (backward compatibility)
         master_path = self.schema_dir / "master_schema.json"
-        with open(master_path, 'r', encoding='utf-8') as f:
-            self.master_schema = json.load(f)
+        if master_path.exists():
+            with open(master_path, 'r', encoding='utf-8') as f:
+                self.master_schema = json.load(f)
 
-        # Extract commonly used settings
-        self.app_metadata = self.master_schema['app_metadata']
-        self.global_settings = self.master_schema['global_settings']
-        self.theme = self.master_schema['theme']
-        self.formatting_rules = self.master_schema['formatting_rules']
-        self.frequency_codes = self.master_schema['frequency_codes']
-        self.validation_thresholds = self.master_schema['validation_thresholds']
-        self.entity_types = self.master_schema['entity_types']
-        self.chart_defaults = self.master_schema['chart_defaults']
+            # Extract commonly used settings
+            self.app_metadata = self.master_schema['app_metadata']
+            self.global_settings = self.master_schema['global_settings']
+            self.theme = self.master_schema['theme']
+            self.formatting_rules = self.master_schema['formatting_rules']
+            self.frequency_codes = self.master_schema['frequency_codes']
+            self.validation_thresholds = self.master_schema['validation_thresholds']
+            self.entity_types = self.master_schema['entity_types']
+            self.chart_defaults = self.master_schema['chart_defaults']
+        else:
+            # Fallback if master schema doesn't exist
+            logger.warning("master_schema.json not found, using defaults")
+            self._load_defaults()
 
         # Cache for loaded schemas
         self._schema_cache = {}
 
         logger.info("SchemaRegistry initialized successfully")
+    
+    def _load_defaults(self):
+        """Load default values if master schema is not available"""
+        self.app_metadata = {
+            "app_name": "Vietnamese Stock Market Dashboard",
+            "version": "2.0.0",
+            "default_language": "vi"
+        }
+        self.global_settings = {"display": {"currency_symbol": "đ"}}
+        self.theme = {"colors": {"primary": "#1976D2"}, "semantic_colors": {}}
+        self.formatting_rules = {}
+        self.frequency_codes = {}
+        self.validation_thresholds = {}
+        self.entity_types = {}
+        self.chart_defaults = {}
 
     # ============================================================================
     # FORMATTING METHODS
@@ -236,55 +261,153 @@ class SchemaRegistry:
     # SCHEMA LOADING
     # ============================================================================
 
-    def get_schema(self, schema_name: str) -> Dict[str, Any]:
+    def get_schema(self, schema_name: str, schema_type: Optional[str] = None) -> Dict[str, Any]:
         """
-        Load a specific schema
+        Load a specific schema from new organized structure
 
         Args:
-            schema_name: Schema name (e.g., 'ohlcv', 'fundamental')
+            schema_name: Schema name (e.g., 'entities', 'metrics', 'indicators')
+            schema_type: Optional schema type/category (e.g., 'core', 'domain', 'display')
 
         Returns:
             Schema dictionary
         """
-        if schema_name in self._schema_cache:
-            return self._schema_cache[schema_name]
+        cache_key = f"{schema_type}:{schema_name}" if schema_type else schema_name
+        if cache_key in self._schema_cache:
+            return self._schema_cache[cache_key]
 
-        # Find schema file
         schema_file = None
 
-        # Check data schemas
-        data_path = self.schema_dir / "data" / f"{schema_name}.json"
-        if data_path.exists():
-            schema_file = data_path
+        # New structure: schema_registry/
+        if self.schema_registry_dir.exists():
+            # Core schemas
+            if schema_type == "core" or not schema_type:
+                core_path = self.schema_registry_dir / "core" / f"{schema_name}.json"
+                if core_path.exists():
+                    schema_file = core_path
+                    schema_type = "core"
 
-        # Check display schemas
-        if not schema_file:
-            display_path = self.schema_dir / "display" / f"{schema_name}.json"
-            if display_path.exists():
-                schema_file = display_path
+            # Domain schemas
+            if not schema_file:
+                for domain in ["fundamental", "technical", "valuation", "unified"]:
+                    domain_path = self.schema_registry_dir / "domain" / domain / f"{schema_name}.json"
+                    if domain_path.exists():
+                        schema_file = domain_path
+                        schema_type = f"domain/{domain}"
+                        break
 
-        # Check metadata schemas
-        if not schema_file:
-            metadata_path = self.schema_dir / "metadata" / f"{schema_name}.json"
-            if metadata_path.exists():
-                schema_file = metadata_path
+            # Display schemas
+            if not schema_file and (schema_type == "display" or not schema_type):
+                display_path = self.schema_registry_dir / "display" / f"{schema_name}.json"
+                if display_path.exists():
+                    schema_file = display_path
+                    schema_type = "display"
 
-        # Fallback to old locations (backward compatibility)
+        # Metadata registry
+        if not schema_file and self.metadata_registry_dir.exists():
+            for subdir in ["sectors", "tickers", "metrics", "config"]:
+                metadata_path = self.metadata_registry_dir / subdir / f"{schema_name}.json"
+                if metadata_path.exists():
+                    schema_file = metadata_path
+                    schema_type = f"metadata/{subdir}"
+                    break
+
+        # Business logic
+        if not schema_file and self.business_logic_dir.exists():
+            for subdir in ["analysis", "decisions", "alerts"]:
+                logic_path = self.business_logic_dir / subdir / f"{schema_name}.json"
+                if logic_path.exists():
+                    schema_file = logic_path
+                    schema_type = f"business_logic/{subdir}"
+                    break
+
+        # Backward compatibility: old structure
         if not schema_file:
-            # Check calculated_results/schemas/
+            # Check old data schemas
+            data_path = self.schema_dir / "data" / f"{schema_name}.json"
+            if data_path.exists():
+                schema_file = data_path
+                logger.warning(f"Using old schema location: {data_path}")
+
+            # Check old display schemas
+            if not schema_file:
+                display_path = self.schema_dir / "display" / f"{schema_name}.json"
+                if display_path.exists():
+                    schema_file = display_path
+                    logger.warning(f"Using old schema location: {display_path}")
+
+            # Check old metadata schemas
+            if not schema_file:
+                metadata_path = self.schema_dir / "metadata" / f"{schema_name}.json"
+                if metadata_path.exists():
+                    schema_file = metadata_path
+                    logger.warning(f"Using old schema location: {metadata_path}")
+
+        # Fallback to very old locations
+        if not schema_file:
             old_path = Path(__file__).parent.parent / "calculated_results" / "schemas" / f"{schema_name}_data_schema.json"
             if old_path.exists():
                 schema_file = old_path
-                logger.warning(f"Using old schema location: {old_path}")
+                logger.warning(f"Using deprecated schema location: {old_path}")
 
         if not schema_file:
-            raise FileNotFoundError(f"Schema '{schema_name}' not found")
+            raise FileNotFoundError(
+                f"Schema '{schema_name}' not found. "
+                f"Checked: schema_registry/, metadata_registry/, business_logic/, and old locations."
+            )
 
         with open(schema_file, 'r', encoding='utf-8') as f:
             schema = json.load(f)
 
-        self._schema_cache[schema_name] = schema
+        self._schema_cache[cache_key] = schema
         return schema
+    
+    def get_core_schema(self, schema_name: str) -> Dict[str, Any]:
+        """Get core schema (entities, types, mappings)"""
+        return self.get_schema(schema_name, schema_type="core")
+    
+    def get_domain_schema(self, domain: str, schema_name: str) -> Dict[str, Any]:
+        """Get domain schema (fundamental, technical, valuation, unified)"""
+        return self.get_schema(schema_name, schema_type=f"domain/{domain}")
+    
+    def get_display_schema(self, schema_name: str) -> Dict[str, Any]:
+        """Get display schema (charts, tables, dashboards)"""
+        return self.get_schema(schema_name, schema_type="display")
+    
+    def get_metadata(self, category: str, schema_name: str) -> Dict[str, Any]:
+        """Get metadata registry (sectors, tickers, metrics, config)"""
+        return self.get_schema(schema_name, schema_type=f"metadata/{category}")
+    
+    def get_business_logic(self, category: str, schema_name: str) -> Dict[str, Any]:
+        """Get business logic config (analysis, decisions, alerts)"""
+        return self.get_schema(schema_name, schema_type=f"business_logic/{category}")
+    
+    def get_metric_registry(self) -> Dict[str, Any]:
+        """
+        Get the complete metric registry (all metric codes for financial reports)
+        
+        Returns:
+            Complete metric registry with entity_types, INCOME, BALANCE, CASHFLOW metrics
+        """
+        return self.get_metadata("metrics", "metric_registry")
+    
+    def get_metric_info(self, entity_type: str, report_type: str, metric_code: str) -> Optional[Dict[str, Any]]:
+        """
+        Get specific metric information from registry
+        
+        Args:
+            entity_type: Entity type (COMPANY, BANK, INSURANCE, SECURITY)
+            report_type: Report type (INCOME, BALANCE, CASHFLOW)
+            metric_code: Metric code (e.g., 'CIS_1')
+        
+        Returns:
+            Metric information dict or None if not found
+        """
+        registry = self.get_metric_registry()
+        try:
+            return registry["entity_types"][entity_type][report_type][metric_code]
+        except KeyError:
+            return None
 
     # ============================================================================
     # VALIDATION

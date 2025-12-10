@@ -1,0 +1,22 @@
+{
+  "name": "Alert Delivery Channels",
+  "version": "1.0.0",
+  "description": "Alert delivery channel configurations",
+  "channels": {
+    "email": {
+      "enabled": false,
+      "settings": {}
+    },
+    "dashboard": {
+      "enabled": true,
+      "settings": {
+        "show_notifications": true,
+        "notification_duration": 5000
+      }
+    },
+    "api": {
+      "enabled": false,
+      "settings": {}
+    }
+  }
+}

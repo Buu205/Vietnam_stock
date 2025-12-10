@@ -1,0 +1,123 @@
+{
+  "name": "Technical Indicator Definitions",
+  "version": "1.0.0",
+  "description": "Technical analysis indicator definitions",
+  "indicators": {
+    "moving_averages": {
+      "description": "Moving average indicators",
+      "indicators": {
+        "ma_20": {
+          "name": "20-Day Moving Average",
+          "code": "ma_20",
+          "period": 20,
+          "type": "trend",
+          "formula": "SMA(close, 20)",
+          "calculation": "simple"
+        },
+        "ma_50": {
+          "name": "50-Day Moving Average",
+          "code": "ma_50",
+          "period": 50,
+          "type": "trend",
+          "formula": "SMA(close, 50)",
+          "calculation": "simple"
+        },
+        "ma_200": {
+          "name": "200-Day Moving Average",
+          "code": "ma_200",
+          "period": 200,
+          "type": "trend",
+          "formula": "SMA(close, 200)",
+          "calculation": "simple"
+        },
+        "ema_12": {
+          "name": "12-Day Exponential Moving Average",
+          "code": "ema_12",
+          "period": 12,
+          "type": "trend",
+          "formula": "EMA(close, 12)",
+          "calculation": "exponential"
+        },
+        "ema_26": {
+          "name": "26-Day Exponential Moving Average",
+          "code": "ema_26",
+          "period": 26,
+          "type": "trend",
+          "formula": "EMA(close, 26)",
+          "calculation": "exponential"
+        }
+      }
+    },
+    "momentum": {
+      "description": "Momentum indicators",
+      "indicators": {
+        "rsi": {
+          "name": "Relative Strength Index",
+          "code": "rsi",
+          "period": 14,
+          "type": "momentum",
+          "formula": "100 - (100 / (1 + RS)) where RS = avg_gain / avg_loss",
+          "range": [0, 100],
+          "overbought": 70,
+          "oversold": 30
+        },
+        "macd": {
+          "name": "Moving Average Convergence Divergence",
+          "code": "macd",
+          "type": "momentum",
+          "components": {
+            "macd_line": "EMA(12) - EMA(26)",
+            "signal_line": "EMA(macd_line, 9)",
+            "histogram": "macd_line - signal_line"
+          }
+        }
+      }
+    },
+    "volatility": {
+      "description": "Volatility indicators",
+      "indicators": {
+        "bollinger_bands": {
+          "name": "Bollinger Bands",
+          "code": "bb",
+          "period": 20,
+          "std_dev": 2,
+          "type": "volatility",
+          "components": {
+            "upper_band": "SMA(20) + 2*STD(20)",
+            "middle_band": "SMA(20)",
+            "lower_band": "SMA(20) - 2*STD(20)"
+          }
+        },
+        "atr": {
+          "name": "Average True Range",
+          "code": "atr",
+          "period": 14,
+          "type": "volatility",
+          "formula": "SMA(TrueRange, 14)"
+        }
+      }
+    },
+    "volume": {
+      "description": "Volume-based indicators",
+      "indicators": {
+        "volume_ma": {
+          "name": "Volume Moving Average",
+          "code": "volume_ma",
+          "period": 20,
+          "type": "volume",
+          "formula": "SMA(volume, 20)"
+        },
+        "obv": {
+          "name": "On-Balance Volume",
+          "code": "obv",
+          "type": "volume",
+          "formula": "cumulative sum based on price direction"
+        }
+      }
+    }
+  },
+  "data_structure": {
+    "columns": ["date", "ticker", "indicator_code", "value", "signal"],
+    "required": ["date", "ticker", "indicator_code", "value"]
+  }
+}

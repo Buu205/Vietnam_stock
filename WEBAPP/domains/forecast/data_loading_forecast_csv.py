@@ -17,8 +17,8 @@ import logging
 from pathlib import Path
 from datetime import datetime
 import streamlit as st
-from streamlit_app.core.utils import get_data_path
-from streamlit_app.core.data_paths import DataPaths, get_valuation_path, get_fundamental_path
+from WEBAPP.core.utils import get_data_path
+from WEBAPP.core.data_paths import DataPaths, get_valuation_path, get_fundamental_path
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class ForecastDataLoaderCSV:
         """Initialize with CSV file path"""
         if csv_path is None:
             # Default path to latest CSV file from auto processor
-            self.csv_path = Path(get_data_path('calculated_results/forecast/bsc/bsc_forecast_latest.csv'))
+            self.csv_path = Path(get_data_path('DATA/processed/forecast/bsc/bsc_forecast_latest.csv'))
         else:
             self.csv_path = Path(csv_path)
         
@@ -183,7 +183,7 @@ class ForecastDataLoaderCSV:
             logger.info(f"Loading YTD data for {len(forecast_symbols)} forecast symbols")
             
             # Load full database
-            full_db_path = get_data_path('data_warehouse/raw/fundamental/full_database.parquet')
+            full_db_path = get_data_path('DATA/raw/fundamental/full_database.parquet')
             df = pd.read_parquet(full_db_path)
             
             # Filter early to reduce memory usage
@@ -372,7 +372,7 @@ class ForecastDataLoaderCSV:
                     row_data['upside_pct'] = None
                     row_data['recommendation'] = '⚪ N/A'
                 
-                # Current PE/PB (TTM) from calculated_results/valuation
+                # Current PE/PB (TTM) from DATA/processed/valuation
                 symbol_pe_pb = pe_pb_ttm_data.get(symbol, {})
                 row_data['pe_ttm'] = symbol_pe_pb.get('pe_ttm')
                 row_data['pb_ttm'] = symbol_pe_pb.get('pb_ttm')
@@ -537,12 +537,12 @@ class ForecastDataLoaderCSV:
         return symbol_data.iloc[0].get('close')
     
     def load_pe_pb_ttm_for_bsc_symbols(self, bsc_symbols: list) -> dict:
-        """Load PE/PB TTM from calculated_results for BSC symbols only"""
+        """Load PE/PB TTM from DATA/processed for BSC symbols only"""
         pe_pb_data = {}
         
         try:
             # Load PE TTM data
-            pe_path = Path(get_data_path('calculated_results/valuation/pe/pe_historical_all_symbols_final.parquet'))
+            pe_path = Path(get_data_path('DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet'))
             if pe_path.exists():
                 pe_df = pd.read_parquet(pe_path)
                 # Get latest date for each BSC symbol
@@ -556,7 +556,7 @@ class ForecastDataLoaderCSV:
                         pe_pb_data[symbol]['pe_ttm'] = row.get('pe_ratio')
             
             # Load PB TTM data
-            pb_path = Path(get_data_path('calculated_results/valuation/pb/pb_historical_all_symbols_final.parquet'))
+            pb_path = Path(get_data_path('DATA/processed/valuation/pb/pb_historical_all_symbols_final.parquet'))
             if pb_path.exists():
                 pb_df = pd.read_parquet(pb_path)
                 # Get latest date for each BSC symbol
@@ -619,7 +619,7 @@ def get_forecast_symbols_csv() -> List[str]:
 
 def check_csv_data_freshness() -> Dict[str, str]:
     """Check freshness of CSV data"""
-    csv_path = Path(get_data_path('calculated_results/forecast/bsc/bsc_forecast_latest.csv'))
+    csv_path = Path(get_data_path('DATA/processed/forecast/bsc/bsc_forecast_latest.csv'))
     
     if not csv_path.exists():
         return {

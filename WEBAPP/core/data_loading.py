@@ -8,9 +8,9 @@ from __future__ import annotations
 import duckdb
 import pandas as pd
 from typing import Dict, List
-from streamlit_app.core.constants import OUTLIERS_DEFAULT
-from streamlit_app.core.utils import clip_outliers
-from streamlit_app.core.formatters import format_valuation_df, format_value
+from WEBAPP.core.constants import OUTLIERS_DEFAULT
+from WEBAPP.core.utils import clip_outliers
+from WEBAPP.core.formatters import format_valuation_df, format_value
 
 
 def get_connection() -> duckdb.DuckDBPyConnection:

@@ -1,0 +1,26 @@
+{
+  "name": "Decision Threshold Settings",
+  "version": "1.0.0",
+  "description": "Threshold settings for decision-making",
+  "score_thresholds": {
+    "buy": 70,
+    "hold_upper": 70,
+    "hold_lower": 40,
+    "sell": 30
+  },
+  "metric_thresholds": {
+    "rsi": {
+      "oversold": 30,
+      "overbought": 70
+    },
+    "pe_ratio": {
+      "undervalued": 10,
+      "overvalued": 20
+    },
+    "roe": {
+      "excellent": 20,
+      "good": 15,
+      "poor": 10
+    }
+  }
+}

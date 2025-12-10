@@ -1,0 +1,21 @@
+{
+  "name": "ICB Industry Classifications",
+  "version": "1.0.0",
+  "description": "ICB (Industry Classification Benchmark) industry classifications",
+  "source": "ICB classification system",
+  "levels": {
+    "ICB_L1": {
+      "description": "Industry Group (Level 1)",
+      "example": "Financials"
+    },
+    "ICB_L2": {
+      "description": "Industry (Level 2)",
+      "example": "Banks"
+    },
+    "ICB_L3": {
+      "description": "Sub-Industry (Level 3)",
+      "example": "Diversified Banks"
+    }
+  },
+  "note": "Actual ICB data should be loaded from DATA/metadata/sector_industry_registry.json or PROCESSORS/core/registries/sector_lookup.py"
+}

@@ -1,0 +1,39 @@
+{
+  "name": "Valuation Analysis Settings",
+  "version": "1.0.0",
+  "description": "Valuation analysis configuration and settings",
+  "valuation_metrics": {
+    "primary": ["pe", "pb", "ev_ebitda"],
+    "weights": {
+      "pe": 0.4,
+      "pb": 0.3,
+      "ev_ebitda": 0.3
+    }
+  },
+  "comparison_methods": {
+    "historical": {
+      "enabled": true,
+      "periods": ["1_year", "3_year", "5_year"]
+    },
+    "sector": {
+      "enabled": true,
+      "method": "median"
+    },
+    "peer": {
+      "enabled": true,
+      "peer_selection": "same_sector_similar_size"
+    }
+  },
+  "valuation_ranges": {
+    "pe": {
+      "undervalued": "< 10",
+      "fair": "10-20",
+      "overvalued": "> 20"
+    },
+    "pb": {
+      "undervalued": "< 1",
+      "fair": "1-3",
+      "overvalued": "> 3"
+    }
+  }
+}
