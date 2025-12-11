@@ -162,31 +162,6 @@ class BankFormulas:
         return round((non_performing_loans / total_loans) * 100, 2)
     
     @staticmethod
-    def calculate_roa(net_profit: float, total_assets: float) -> Optional[float]:
-        """
-        Return on Assets (ROA).
-        
-        Formula: (Net Profit / Total Assets) × 100
-        Unit: Percentage (%)
-        Good range: 0.5-2% (Vietnam banking sector)
-        """
-        if total_assets == 0 or pd.isna(total_assets):
-            return None
-        return round((net_profit / total_assets) * 100, 2)
-    
-    @staticmethod
-    def calculate_asset_turnover(total_loans: float, total_assets: float) -> Optional[float]:
-        """
-        Asset Turnover for Banks.
-        
-        Formula: Total Loans / Total Assets
-        Unit: Times per year
-        Good range: 0.05-0.15 (typical for Vietnam banks)
-        """
-        if total_assets == 0 or pd.isna(total_assets):
-            return None
-        return round(total_loans / total_assets, 3)
-    
     # Efficiency Metrics
     @staticmethod
     def calculate_efficiency_ratio(operating_income: float, operating_expense: float) -> Optional[float]:

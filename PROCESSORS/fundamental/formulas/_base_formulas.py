@@ -634,56 +634,8 @@ def calculate_book_value_per_share(
     return safe_divide(equity, shares_outstanding)
 
 
-def calculate_pe_ratio(
-    price: Optional[float],
-    eps: Optional[float]
-) -> Optional[float]:
-    """
-    Price-to-Earnings Ratio (P/E)
-
-    Formula: Price per Share / Earnings per Share
-
-    Measures: Market valuation relative to earnings
-
-    Interpretation:
-        - < 10: Undervalued (or low growth)
-        - 10-20: Fair value
-        - > 20: Overvalued (or high growth expected)
-
-    Args:
-        price: Current stock price
-        eps: Earnings per share
-
-    Returns:
-        P/E ratio or None
-    """
-    return safe_divide(price, eps)
-
-
-def calculate_pb_ratio(
-    price: Optional[float],
-    bvps: Optional[float]
-) -> Optional[float]:
-    """
-    Price-to-Book Ratio (P/B)
-
-    Formula: Price per Share / Book Value per Share
-
-    Measures: Market valuation relative to book value
-
-    Interpretation:
-        - < 1.0: Trading below book value
-        - 1.0-3.0: Fair value
-        - > 3.0: Premium valuation
-
-    Args:
-        price: Current stock price
-        bvps: Book value per share
-
-    Returns:
-        P/B ratio or None
-    """
-    return safe_divide(price, bvps)
+# NOTE: PE and PB ratios moved to valuation module
+# Use: from PROCESSORS.valuation.formulas.valuation_formulas import calculate_pe_ratio, calculate_pb_ratio
 
 
 def calculate_ev_ebitda(
@@ -746,7 +698,217 @@ if __name__ == "__main__":
 
     print("\n💰 VALUATION METRICS:")
     print(f"  EPS: {calculate_eps(100_000, 50_000):.2f}")
-    print(f"  P/E Ratio: {calculate_pe_ratio(50, 2):.2f}")
-    print(f"  P/B Ratio: {calculate_pb_ratio(50, 10):.2f}")
+    print(f"  P/E Ratio: Moved to valuation module")
+    print(f"  P/B Ratio: Moved to valuation module")
+
+# =============================================================================
+# GROWTH RATES
+# =============================================================================
+
+def calculate_yoy_growth(
+    current_value: Optional[float],
+    previous_value: Optional[float]
+) -> Optional[float]:
+    """
+    Tốc độ tăng trưởng năm so với năm (Year-over-Year Growth)
+
+    Công thức: ((Giá trị hiện tại - Giá trị năm trước) / Giá trị năm trước) × 100
+
+    Đo lường tốc độ tăng trưởng của chỉ số tài chính giữa các năm.
+
+    Diễn giải:
+        - > 20%: Tăng trưởng vượt trội
+        - 10-20%: Tăng trưởng rất tốt
+        - 5-10%: Tăng trưởng tốt
+        - 0-5%: Tăng trưởng vừa phải
+        - < 0%: Sụt giảm
+
+    Args:
+        current_value: Giá trị năm hiện tại
+        previous_value: Giá trị năm trước
+
+    Returns:
+        Tốc độ tăng trưởng YoY (%), hoặc None nếu không hợp lệ
+
+    Examples:
+        >>> calculate_yoy_growth(120_000, 100_000)
+        20.0  # 20% growth
+    """
+    if previous_value is None or previous_value == 0 or current_value is None:
+        return None
+    return round(((current_value - previous_value) / previous_value) * 100, 2)
+
+def calculate_qoq_growth(
+    current_value: Optional[float],
+    previous_value: Optional[float]
+) -> Optional[float]:
+    """
+    Tốc độ tăng trưởng quý so với quý (Quarter-over-Quarter Growth)
+
+    Công thức: ((Giá trị quý hiện tại - Giá trị quý trước) / Giá trị quý trước) × 100
+
+    Đo lường tốc độ tăng trưởng của chỉ số tài chính giữa các quý.
+
+    Diễn giải:
+        - > 15%: Tăng trưởng quý vượt trội
+        - 8-15%: Tăng trưởng quý tốt
+        - 3-8%: Tăng trưởng quý vừa phải
+        - 0-3%: Tăng trưởng quý chậm
+        - < 0%: Sụt giảm quý
+
+    Args:
+        current_value: Giá trị quý hiện tại
+        previous_value: Giá trị quý trước
+
+    Returns:
+        Tốc độ tăng trưởng QoQ (%), hoặc None nếu không hợp lệ
+
+    Examples:
+        >>> calculate_qoq_growth(115_000, 100_000)
+        15.0  # 15% growth
+    """
+    if previous_value is None or previous_value == 0 or current_value is None:
+        return None
+    return round(((current_value - previous_value) / previous_value) * 100, 2)
+
+# =============================================================================
+# TTM (TRAILING TWELVE MONTHS) FORMULAS
+# =============================================================================
+
+def calculate_ttm_sum(
+    q1: Optional[float],
+    q2: Optional[float],
+    q3: Optional[float],
+    q4: Optional[float]
+) -> Optional[float]:
+    """
+    TTM Sum (Trailing Twelve Months - Tổng 12 tháng gần nhất)
+
+    Công thức: Q1 + Q2 + Q3 + Q4
+
+    Tính tổng giá trị của 4 quý gần nhất để có cái nhìn toàn diện 
+    về hiệu suất hoạt động trong 12 tháng.
+
+    Args:
+        q1: Giá trị quý 1
+        q2: Giá trị quý 2
+        q3: Giá trị quý 3
+        q4: Giá trị quý 4
+
+    Returns:
+        TTM sum, hoặc None nếu tất cả đều None
+
+    Examples:
+        >>> calculate_ttm_sum(100_000, 120_000, 110_000, 130_000)
+        460_000  # TTM total
+    """
+    values = [q1, q2, q3, q4]
+    valid_values = [v for v in values if v is not None]
+    
+    if not valid_values:
+        return None
+    
+    return sum(valid_values)
+
+def calculate_ttm_avg(
+    q1: Optional[float],
+    q2: Optional[float],
+    q3: Optional[float],
+    q4: Optional[float]
+) -> Optional[float]:
+    """
+    TTM Average (Trailing Twelve Months - Trung bình 12 tháng gần nhất)
+
+    Công thức: (Q1 + Q2 + Q3 + Q4) / 4
+
+    Tính trung bình giá trị của 4 quý gần nhất để smooth out 
+    biến động theo mùa và có cái nhìn ổn định hơn.
+
+    Args:
+        q1: Giá trị quý 1
+        q2: Giá trị quý 2
+        q3: Giá trị quý 3
+        q4: Giá trị quý 4
+
+    Returns:
+        TTM average, hoặc None nếu tất cả đều None
+
+    Examples:
+        >>> calculate_ttm_avg(100_000, 120_000, 110_000, 130_000)
+        115_000  # TTM average
+    """
+    values = [q1, q2, q3, q4]
+    valid_values = [v for v in values if v is not None]
+    
+    if not valid_values:
+        return None
+    
+    return round(sum(valid_values) / len(valid_values), 2)
+
+# =============================================================================
+# ENHANCED EFFICIENCY RATIOS
+# =============================================================================
+
+def calculate_receivables_turnover(
+    revenue: Optional[float],
+    accounts_receivable: Optional[float]
+) -> Optional[float]:
+    """
+    Tỷ lệ quay vòng các khoản phải thu (Receivables Turnover)
+
+    Công thức: Doanh thu / Các khoản phải thu trung bình
+
+    Đo lường hiệu quả thu hồi công nợ từ khách hàng.
+    Tỷ lệ cao hơn = thu hồi nhanh hơn.
+
+    Diễn giải:
+        - > 12: Thu hồi rất nhanh
+        - 8-12: Thu hồi tốt
+        - 4-8: Thu hồi vừa phải
+        - < 4: Thu hồi chậm
+
+    Args:
+        revenue: Doanh thu năm
+        accounts_receivable: Các khoản phải thu trung bình
+
+    Returns:
+        Tỷ lệ quay vòng, hoặc None nếu không hợp lệ
+
+    Examples:
+        >>> calculate_receivables_turnover(1_000_000, 100_000)
+        10.0  # 10 lần quay vòng/năm
+    """
+    return safe_divide(revenue, accounts_receivable)
+
+def calculate_payables_turnover(
+    cost_of_goods_sold: Optional[float],
+    accounts_payable: Optional[float]
+) -> Optional[float]:
+    """
+    Tỷ lệ quay vòng các khoản phải trả (Payables Turnover)
+
+    Công thức: Giá vốn hàng bán / Các khoản phải trả trung bình
+
+    Đo lường tốc độ trả nợ cho nhà cung cấp.
+    Tỷ lệ cao hơn = trả nhanh hơn.
+
+    Diễn giải:
+        - > 12: Trả rất nhanh
+        - 8-12: Trả tốt
+        - 4-8: Trả vừa phải
+        - < 4: Trả chậm
+
+    Args:
+        cost_of_goods_sold: Giá vốn hàng bán
+        accounts_payable: Các khoản phải trả trung bình
+
+    Returns:
+        Tỷ lệ quay vòng, hoặc None nếu không hợp lệ
+
+    Examples:
+        >>> calculate_payables_turnover(600_000, 50_000)
+        12.0  # 12 lần quay vòng/năm
+    """
+    return safe_divide(cost_of_goods_sold, accounts_payable)
 
     print("\n✅ All base formulas working!")

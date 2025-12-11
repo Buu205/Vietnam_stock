@@ -1,12 +1,11 @@
 """
 Company Financial Formulas
 
-Extracted pure calculation functions from company_financial_calculator.py.
+Entity-specific formulas for COMPANY entities that are NOT in _base_formulas.py.
 
-This module contains all financial formulas used for COMPANY entity calculations,
-separated from data loading and orchestration logic.
+These formulas are specific to companies and should not be duplicated in other entity files.
 
-Registry mapping:
+Registry mapping for company-specific metrics:
 - CIS_10: total_revenue (Doanh thu thuần)
 - CIS_11: gross_profit (Lợi nhuận gộp)
 - CIS_12: selling_expenses (Chi phí bán hàng)
@@ -59,91 +58,52 @@ Registry mapping:
 - CBS_320: comprehensive_income (Tổng thu nhập)
 - CBS_340: total_assets (Tổng tài sản)
 - CBS_400: common_shares (Số cổ phiếu thường)
+
+Author: Formula Extraction Team
+Date: 2025-12-11
 """
 
 import pandas as pd
 import numpy as np
-from typing import Optional, Dict, Any
+from typing import Optional
+
+# Handle imports for both module usage and standalone testing
+try:
+    from .utils import safe_divide, to_percentage
+except ImportError:
+    from utils import safe_divide, to_percentage
 
 
 class CompanyFormulas:
-    """Pure calculation functions for company financial metrics."""
+    """Entity-specific calculation functions for COMPANY entities."""
     
-    # Profitability Ratios
-    @staticmethod
-    def calculate_roe(net_profit: float, total_equity: float) -> Optional[float]:
-        """
-        Return on Equity (ROE).
-        
-        Formula: (Net Profit / Total Equity) × 100
-        Unit: Percentage (%)
-        Good range: 15-25% (Vietnam market)
-        """
-        if total_equity == 0 or pd.isna(total_equity):
-            return None
-        return round((net_profit / total_equity) * 100, 2)
-    
-    @staticmethod
-    def calculate_roa(net_profit: float, total_assets: float) -> Optional[float]:
-        """
-        Return on Assets (ROA).
-        
-        Formula: (Net Profit / Total Assets) × 100
-        Unit: Percentage (%)
-        Good range: 5-15% (Vietnam market)
-        """
-        if total_assets == 0 or pd.isna(total_assets):
-            return None
-        return round((net_profit / total_assets) * 100, 2)
-    
-    @staticmethod
-    def calculate_gross_margin(gross_profit: float, revenue: float) -> Optional[float]:
-        """
-        Gross Profit Margin.
-        
-        Formula: (Gross Profit / Revenue) × 100
-        Unit: Percentage (%)
-        Good range: 20-40% (manufacturing), 15-30% (services)
-        """
-        if revenue == 0 or pd.isna(revenue):
-            return None
-        return round((gross_profit / revenue) * 100, 2)
-    
-    @staticmethod
-    def calculate_net_margin(net_profit: float, revenue: float) -> Optional[float]:
-        """
-        Net Profit Margin.
-        
-        Formula: (Net Profit / Revenue) × 100
-        Unit: Percentage (%)
-        Good range: 5-15% (Vietnam market)
-        """
-        if revenue == 0 or pd.isna(revenue):
-            return None
-        return round((net_profit / revenue) * 100, 2)
-    
-    @staticmethod
-    def calculate_operating_margin(operating_profit: float, revenue: float) -> Optional[float]:
-        """
-        Operating Profit Margin.
-        
-        Formula: (Operating Profit / Revenue) × 100
-        Unit: Percentage (%)
-        Good range: 10-20% (Vietnam market)
-        """
-        if revenue == 0 or pd.isna(revenue):
-            return None
-        return round((operating_profit / revenue) * 100, 2)
-    
-    # Growth Rates
+    # Growth Rates - Company Specific
     @staticmethod
     def calculate_revenue_growth(current_revenue: float, previous_revenue: float) -> Optional[float]:
         """
-        Revenue Growth Rate.
-        
-        Formula: ((Current Revenue - Previous Revenue) / Previous Revenue) × 100
-        Unit: Percentage (%)
-        Good range: 10-20% (growth companies)
+        Tốc độ tăng trưởng doanh thu (Revenue Growth Rate)
+
+        Công thức: ((Doanh thu hiện tại - Doanh thu kỳ trước) / Doanh thu kỳ trước) × 100
+
+        Đo lường khả năng tăng trưởng doanh thu của công ty.
+
+        Diễn giải:
+            - > 20%: Tăng trưởng vượt trội
+            - 10-20%: Tăng trưởng tốt
+            - 5-10%: Tăng trưởng vừa phải
+            - 0-5%: Tăng trưởng chậm
+            - < 0%: Sụt giảm doanh thu
+
+        Args:
+            current_revenue: Doanh thu kỳ hiện tại (VND)
+            previous_revenue: Doanh thu kỳ trước (VND)
+
+        Returns:
+            Tốc độ tăng trưởng (%), hoặc None nếu không hợp lệ
+
+        Examples:
+            >>> calculate_revenue_growth(120_000_000_000, 100_000_000_000)
+            20.0  # 20% growth
         """
         if previous_revenue == 0 or pd.isna(previous_revenue):
             return None
@@ -152,148 +112,61 @@ class CompanyFormulas:
     @staticmethod
     def calculate_profit_growth(current_profit: float, previous_profit: float) -> Optional[float]:
         """
-        Profit Growth Rate.
-        
-        Formula: ((Current Profit - Previous Profit) / Previous Profit) × 100
-        Unit: Percentage (%)
+        Tốc độ tăng trưởng lợi nhuận (Profit Growth Rate)
+
+        Công thức: ((Lợi nhuận hiện tại - Lợi nhuận kỳ trước) / Lợi nhuận kỳ trước) × 100
+
+        Đo lường khả năng tăng trưởng lợi nhuận của công ty.
+
+        Diễn giải:
+            - > 25%: Tăng trưởng lợi nhuận vượt trội
+            - 15-25%: Tăng trưởng lợi nhuận tốt
+            - 5-15%: Tăng trưởng lợi nhuận vừa phải
+            - 0-5%: Tăng trưởng lợi nhuận chậm
+            - < 0%: Sụt giảm lợi nhuận
+
+        Args:
+            current_profit: Lợi nhuận kỳ hiện tại (VND)
+            previous_profit: Lợi nhuận kỳ trước (VND)
+
+        Returns:
+            Tốc độ tăng trưởng (%), hoặc None nếu không hợp lệ
+
+        Examples:
+            >>> calculate_profit_growth(24_000_000_000, 20_000_000_000)
+            20.0  # 20% growth
         """
         if previous_profit == 0 or pd.isna(previous_profit):
             return None
         return round(((current_profit - previous_profit) / previous_profit) * 100, 2)
     
-    # Financial Health Ratios
-    @staticmethod
-    def calculate_debt_to_equity(total_liabilities: float, total_equity: float) -> Optional[float]:
-        """
-        Debt to Equity Ratio.
-        
-        Formula: (Total Liabilities / Total Equity)
-        Unit: Ratio (x:1)
-        Good range: < 2.0 (healthy)
-        """
-        if total_equity == 0 or pd.isna(total_equity):
-            return None
-        return round(total_liabilities / total_equity, 2)
-    
-    @staticmethod
-    def calculate_current_ratio(current_assets: float, current_liabilities: float) -> Optional[float]:
-        """
-        Current Ratio.
-        
-        Formula: (Current Assets / Current Liabilities)
-        Unit: Ratio (x:1)
-        Good range: > 1.5 (healthy)
-        """
-        if current_liabilities == 0 or pd.isna(current_liabilities):
-            return None
-        return round(current_assets / current_liabilities, 2)
-    
-    # Efficiency Ratios
-    @staticmethod
-    def calculate_asset_turnover(revenue: float, total_assets: float) -> Optional[float]:
-        """
-        Asset Turnover Ratio.
-        
-        Formula: (Revenue / Total Assets)
-        Unit: Times per year
-        Good range: > 1.0 (efficient)
-        """
-        if total_assets == 0 or pd.isna(total_assets):
-            return None
-        return round(revenue / total_assets, 2)
-    
-    @staticmethod
-    def calculate_inventory_turnover(cogs: float, inventory: float) -> Optional[float]:
-        """
-        Inventory Turnover Ratio.
-        
-        Formula: (Cost of Goods Sold / Inventory)
-        Unit: Times per year
-        Good range: > 6.0 (efficient)
-        """
-        if inventory == 0 or pd.isna(inventory):
-            return None
-        return round(cogs / inventory, 2)
-    
-    # Market Metrics
-    @staticmethod
-    def calculate_eps(net_profit: float, common_shares: float) -> Optional[float]:
-        """
-        Earnings Per Share.
-        
-        Formula: (Net Profit / Common Shares) × 10,000
-        Unit: VND per share
-        """
-        if common_shares == 0 or pd.isna(common_shares):
-            return None
-        return round((net_profit * 1e9) / (common_shares * 10000), 0)
-    
-    @staticmethod
-    def calculate_pe_ratio(price_per_share: float, eps: float) -> Optional[float]:
-        """
-        Price to Earnings Ratio.
-        
-        Formula: (Price per Share / Earnings Per Share)
-        Unit: Times (years)
-        Good range: 5-25 (reasonable valuation)
-        """
-        if eps == 0 or pd.isna(eps) or eps < 0:
-            return None
-        return round(price_per_share / eps, 2)
-    
-    @staticmethod
-    def calculate_pb_ratio(price_per_share: float, book_value_per_share: float) -> Optional[float]:
-        """
-        Price to Book Value Ratio.
-        
-        Formula: (Price per Share / Book Value per Share)
-        Unit: Times
-        Good range: 1-5 (reasonable valuation)
-        """
-        if book_value_per_share == 0 or pd.isna(book_value_per_share):
-            return None
-        return round(price_per_share / book_value_per_share, 2)
-    
-    # Cash Flow Metrics
-    @staticmethod
-    def calculate_operating_cash_flow_ratio(operating_cash_flow: float, net_profit: float) -> Optional[float]:
-        """
-        Operating Cash Flow to Net Profit Ratio.
-        
-        Formula: (Operating Cash Flow / Net Profit)
-        Unit: Ratio (x:1)
-        Good range: > 1.0 (healthy)
-        """
-        if net_profit == 0 or pd.isna(net_profit) or net_profit < 0:
-            return None
-        return round(operating_cash_flow / net_profit, 2)
-    
+    # Free Cash Flow - Company Specific
     @staticmethod
     def calculate_free_cash_flow(operating_cash_flow: float, capital_expenditure: float) -> Optional[float]:
         """
-        Free Cash Flow.
-        
-        Formula: (Operating Cash Flow - Capital Expenditure)
-        Unit: Amount in VND
+        Dòng tiền tự do (Free Cash Flow)
+
+        Công thức: Dòng tiền từ hoạt động kinh doanh - Chi tiêu vốn đầu tư
+
+        Đo lường lượng tiền mặt thực tế công ty tạo ra sau khi đầu tư vào 
+        tài sản cố định và vốn lưu động cần thiết để duy trì hoạt động.
+
+        Diễn giải:
+            - > 0: FCF dương - công ty tạo ra tiền mặt
+            - = 0: FCF bằng không - công ty hòa vốn
+            - < 0: FCF âm - công ty tiêu dùng nhiều tiền hơn tạo ra
+
+        Args:
+            operating_cash_flow: Dòng tiền từ hoạt động kinh doanh (VND)
+            capital_expenditure: Chi tiêu vốn đầu tư (VND)
+
+        Returns:
+            Dòng tiền tự do (VND), hoặc None nếu không hợp lệ
+
+        Examples:
+            >>> calculate_free_cash_flow(50_000_000_000, 30_000_000_000)
+            20_000_000_000  # 20 tỷ VND FCF
         """
         if operating_cash_flow is None or capital_expenditure is None:
             return None
         return operating_cash_flow - capital_expenditure
-    
-    # Utility Functions
-    @staticmethod
-    def safe_divide(numerator: float, denominator: float, result_nan: bool = True) -> Optional[float]:
-        """
-        Safely divide two values, handling division by zero and NaN.
-        
-        Args:
-            numerator: Value to divide
-            denominator: Value to divide by
-            result_nan: Whether to return NaN if denominator is zero
-            
-        Returns:
-            Division result or None/NaN
-        """
-        if denominator == 0 or pd.isna(denominator):
-            return np.nan if result_nan else None
-        return numerator / denominator

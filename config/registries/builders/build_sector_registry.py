@@ -28,13 +28,14 @@ logger = logging.getLogger(__name__)
 
 
 def find_project_root() -> Path:
-    """Find project root (stock_dashboard directory)"""
+    """Find project root"""
     current = Path(__file__).resolve()
     while current.parent != current:
-        if current.name == 'stock_dashboard':
+        if current.name in ['Vietnam_dashboard', 'stock_dashboard']:
             return current
         current = current.parent
-    return Path(__file__).resolve().parent.parent.parent
+    # Fallback: file is in config/registries/builders (3 levels deep from config, 4 from root)
+    return Path(__file__).resolve().parent.parent.parent.parent
 
 
 PROJECT_ROOT = find_project_root()
@@ -43,17 +44,17 @@ PROJECT_ROOT = find_project_root()
 class SectorRegistryBuilder:
     """
     Build unified sector/industry registry
-
+    
     Consolidates multiple data sources into single source of truth
     for sector, industry, and entity type mappings.
     """
 
     def __init__(self):
         """Initialize paths to source files"""
-        self.ticker_details_path = PROJECT_ROOT / "data_warehouse" / "raw" / "metadata" / "ticker_details.json"
-        self.entity_stats_path = PROJECT_ROOT / "data_warehouse" / "raw" / "metadata" / "entity_statistics.json"
-        self.metric_registry_path = PROJECT_ROOT / "data_warehouse" / "metadata" / "metric_registry.json"
-        self.output_path = PROJECT_ROOT / "data_warehouse" / "metadata" / "sector_industry_registry.json"
+        self.ticker_details_path = PROJECT_ROOT / "config" / "metadata" / "ticker_details.json"
+        # self.entity_stats_path is no longer needed as we compute it
+        self.metric_registry_path = PROJECT_ROOT / "config" / "metadata" / "metric_registry.json"
+        self.output_path = PROJECT_ROOT / "DATA" / "metadata" / "sector_industry_registry.json"
 
         # Data containers
         self.ticker_details = {}
@@ -76,6 +77,35 @@ class SectorRegistryBuilder:
             "INSURANCE": ["roe", "roa", "combined_ratio", "loss_ratio"]
         }
 
+    def _compute_entity_stats(self):
+        """Compute entity statistics from ticker details"""
+        stats = {
+            "by_entity": {},
+            "by_sector": {}
+        }
+        
+        # Count by entity and sector
+        for ticker, details in self.ticker_details.items():
+            entity = details.get("entity")
+            sector = details.get("sector")
+            
+            if not entity or not sector:
+                continue
+                
+            # Entity counts
+            stats["by_entity"][entity] = stats["by_entity"].get(entity, 0) + 1
+            
+            # Sector info
+            if sector not in stats["by_sector"]:
+                stats["by_sector"][sector] = {
+                    "entity": entity,
+                    "count": 0
+                }
+            stats["by_sector"][sector]["count"] += 1
+            
+        self.entity_stats = stats
+        logger.info(f"  Computed statistics: {len(stats['by_entity'])} entities, {len(stats['by_sector'])} sectors")
+
     def load_source_files(self):
         """Load all source JSON files"""
         logger.info("Loading source files...")
@@ -87,19 +117,15 @@ class SectorRegistryBuilder:
             self.ticker_details = json.load(f)
         logger.info(f"  Loaded {len(self.ticker_details)} tickers from ticker_details.json")
 
-        # Load entity statistics
-        if not self.entity_stats_path.exists():
-            raise FileNotFoundError(f"Entity statistics not found: {self.entity_stats_path}")
-        with open(self.entity_stats_path, 'r', encoding='utf-8') as f:
-            self.entity_stats = json.load(f)
-        logger.info(f"  Loaded entity statistics for {len(self.entity_stats['by_sector'])} sectors")
+        # Compute entity statistics instead of loading
+        self._compute_entity_stats()
 
         # Load metric registry (for linking)
         if not self.metric_registry_path.exists():
             raise FileNotFoundError(f"Metric registry not found: {self.metric_registry_path}")
         with open(self.metric_registry_path, 'r', encoding='utf-8') as f:
             self.metric_registry = json.load(f)
-        logger.info(f"  Loaded metric registry v{self.metric_registry['version']}")
+        logger.info(f"  Loaded metric registry v{self.metric_registry.get('version', 'unknown')}")
 
     def build_entity_types_section(self) -> Dict:
         """Build entity_types section with metadata"""

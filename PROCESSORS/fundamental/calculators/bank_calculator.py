@@ -23,6 +23,9 @@ import os
 
 # Use relative imports instead of sys.path manipulation
 from PROCESSORS.fundamental.calculators.base_financial_calculator import BaseFinancialCalculator
+import logging
+
+logger = logging.getLogger(__name__)
 
 class BankFinancialCalculator(BaseFinancialCalculator):
     """

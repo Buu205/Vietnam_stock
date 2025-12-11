@@ -1,0 +1,4121 @@
+{
+  "version": "1.0",
+  "last_updated": "2025-12-11T21:45:57.668645",
+  "metadata": {
+    "total_tickers": 457,
+    "total_sectors": 19,
+    "total_entity_types": 4
+  },
+  "entity_types": {
+    "BANK": {
+      "description": "Ngân hàng thương mại",
+      "count": 24,
+      "metric_registry_key": "BANK",
+      "calculator_class": "BankFinancialCalculator",
+      "sectors": [
+        "Ngân hàng"
+      ]
+    },
+    "SECURITY": {
+      "description": "Công ty chứng khoán",
+      "count": 37,
+      "metric_registry_key": "SECURITY",
+      "calculator_class": "SecurityFinancialCalculator",
+      "sectors": [
+        "Dịch vụ tài chính"
+      ]
+    },
+    "COMPANY": {
+      "description": "Các ngành sản xuất và dịch vụ",
+      "count": 390,
+      "metric_registry_key": "COMPANY",
+      "calculator_class": "CompanyFinancialCalculator",
+      "sectors": [
+        "Xây dựng và Vật liệu",
+        "Thực phẩm và đồ uống",
+        "Tài nguyên Cơ bản",
+        "Điện, nước & xăng dầu khí đốt",
+        "Công nghệ Thông tin",
+        "Hóa chất",
+        "Hàng & Dịch vụ Công nghiệp",
+        "Bán lẻ",
+        "Bất động sản",
+        "Truyền thông",
+        "Du lịch và Giải trí",
+        "Viễn thông",
+        "Ô tô và phụ tùng",
+        "Dầu khí",
+        "Hàng cá nhân & Gia dụng",
+        "Y tế"
+      ]
+    },
+    "INSURANCE": {
+      "description": "Công ty bảo hiểm",
+      "count": 6,
+      "metric_registry_key": "INSURANCE",
+      "calculator_class": "InsuranceFinancialCalculator",
+      "sectors": [
+        "Bảo hiểm"
+      ]
+    }
+  },
+  "sectors": {
+    "Ngân hàng": {
+      "entity_type": "BANK",
+      "count": 24,
+      "description": "Ngành Ngân hàng",
+      "tickers": [
+        "ABB",
+        "ACB",
+        "BID",
+        "BVB",
+        "CTG",
+        "EIB",
+        "HDB",
+        "KLB",
+        "LPB",
+        "MBB",
+        "MSB",
+        "NAB",
+        "NVB",
+        "OCB",
+        "PGB",
+        "SHB",
+        "SSB",
+        "STB",
+        "TCB",
+        "TPB",
+        "VBB",
+        "VCB",
+        "VIB",
+        "VPB"
+      ],
+      "metric_prefixes": [
+        "BIS_",
+        "BBS_",
+        "BCF_",
+        "BNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "nim",
+        "car",
+        "npl_ratio"
+      ]
+    },
+    "Dịch vụ tài chính": {
+      "entity_type": "SECURITY",
+      "count": 37,
+      "description": "Ngành Dịch vụ tài chính",
+      "tickers": [
+        "AAS",
+        "ABW",
+        "AGR",
+        "APG",
+        "APS",
+        "BCG",
+        "BMS",
+        "BSI",
+        "BVS",
+        "CTS",
+        "DSC",
+        "DSE",
+        "EVF",
+        "EVS",
+        "FTS",
+        "HCM",
+        "HVA",
+        "IVS",
+        "MBS",
+        "OGC",
+        "ORS",
+        "PSI",
+        "SBS",
+        "SHS",
+        "SSI",
+        "TCI",
+        "TVB",
+        "TVC",
+        "TVS",
+        "VCI",
+        "VDS",
+        "VFS",
+        "VIG",
+        "VIX",
+        "VND",
+        "VUA",
+        "WSS"
+      ],
+      "metric_prefixes": [
+        "SIS_",
+        "SBS_",
+        "SCF_",
+        "SNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "commission_ratio",
+        "leverage_ratio"
+      ]
+    },
+    "Xây dựng và Vật liệu": {
+      "entity_type": "COMPANY",
+      "count": 76,
+      "description": "Ngành Xây dựng và Vật liệu",
+      "tickers": [
+        "BCC",
+        "BCE",
+        "BCR",
+        "BMP",
+        "BOT",
+        "C47",
+        "C4G",
+        "C69",
+        "CDC",
+        "CIG",
+        "CII",
+        "CMS",
+        "CRC",
+        "CSC",
+        "CTD",
+        "CTI",
+        "CTR",
+        "CTX",
+        "DC4",
+        "DFF",
+        "DGT",
+        "DHA",
+        "DLG",
+        "DNP",
+        "DPG",
+        "DSH",
+        "EVG",
+        "FCM",
+        "FCN",
+        "G36",
+        "GKM",
+        "HBC",
+        "HHV",
+        "HT1",
+        "HTI",
+        "HUB",
+        "HVH",
+        "ICN",
+        "L14",
+        "L18",
+        "L40",
+        "LBM",
+        "LCG",
+        "LHC",
+        "LIC",
+        "LIG",
+        "MBG",
+        "MCG",
+        "MST",
+        "MVC",
+        "NED",
+        "NHA",
+        "NNC",
+        "NTP",
+        "PC1",
+        "PFL",
+        "PHC",
+        "PVX",
+        "RYG",
+        "S99",
+        "SCG",
+        "SCL",
+        "SJE",
+        "SVN",
+        "TCD",
+        "THG",
+        "TL4",
+        "VC2",
+        "VC7",
+        "VCG",
+        "VCS",
+        "VE9",
+        "VGC",
+        "VLB",
+        "VNE",
+        "VSI"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Thực phẩm và đồ uống": {
+      "entity_type": "COMPANY",
+      "count": 39,
+      "description": "Ngành Thực phẩm và đồ uống",
+      "tickers": [
+        "ABT",
+        "ANT",
+        "ANV",
+        "APF",
+        "ASM",
+        "BAF",
+        "BNA",
+        "CLX",
+        "CMX",
+        "CTP",
+        "DBC",
+        "FMC",
+        "HAG",
+        "HNG",
+        "HNM",
+        "HSL",
+        "IDI",
+        "KDC",
+        "LSS",
+        "LTG",
+        "MCH",
+        "MCM",
+        "MLS",
+        "MML",
+        "MPC",
+        "MSN",
+        "NAF",
+        "PAN",
+        "QNS",
+        "SAB",
+        "SBT",
+        "SEA",
+        "SLS",
+        "SMB",
+        "TCO",
+        "VHC",
+        "VLC",
+        "VNM",
+        "VOC"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Tài nguyên Cơ bản": {
+      "entity_type": "COMPANY",
+      "count": 37,
+      "description": "Ngành Tài nguyên Cơ bản",
+      "tickers": [
+        "AAH",
+        "ACG",
+        "BKC",
+        "BMC",
+        "BMJ",
+        "CST",
+        "DHC",
+        "GDA",
+        "HAP",
+        "HGM",
+        "HHP",
+        "HPG",
+        "HSG",
+        "ITQ",
+        "KCB",
+        "KSB",
+        "KSV",
+        "KVC",
+        "MSR",
+        "MTA",
+        "MZG",
+        "NBC",
+        "NKG",
+        "POM",
+        "PTB",
+        "SHI",
+        "SHN",
+        "SMC",
+        "TD6",
+        "TLH",
+        "TNI",
+        "TNT",
+        "TTF",
+        "TTH",
+        "TVN",
+        "VGS",
+        "VPG"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Điện, nước & xăng dầu khí đốt": {
+      "entity_type": "COMPANY",
+      "count": 18,
+      "description": "Ngành Điện, nước & xăng dầu khí đốt",
+      "tickers": [
+        "BGE",
+        "BWE",
+        "CHP",
+        "CNG",
+        "DDG",
+        "GAS",
+        "GEG",
+        "NT2",
+        "PGV",
+        "POW",
+        "PPC",
+        "PPT",
+        "QTP",
+        "REE",
+        "SJD",
+        "TDM",
+        "TTA",
+        "VCP"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Công nghệ Thông tin": {
+      "entity_type": "COMPANY",
+      "count": 8,
+      "description": "Ngành Công nghệ Thông tin",
+      "tickers": [
+        "CMG",
+        "ELC",
+        "FPT",
+        "ICT",
+        "ITD",
+        "SAM",
+        "SGT",
+        "ST8"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Hóa chất": {
+      "entity_type": "COMPANY",
+      "count": 27,
+      "description": "Ngành Hóa chất",
+      "tickers": [
+        "AAA",
+        "ABS",
+        "AVG",
+        "BFC",
+        "CSV",
+        "DCM",
+        "DDV",
+        "DGC",
+        "DPM",
+        "DPR",
+        "DRI",
+        "ECO",
+        "GVR",
+        "HII",
+        "HVT",
+        "LAS",
+        "NHH",
+        "PAT",
+        "PCH",
+        "PHR",
+        "PLC",
+        "PSW",
+        "TNC",
+        "TRC",
+        "TSC",
+        "VFG",
+        "VTZ"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Hàng & Dịch vụ Công nghiệp": {
+      "entity_type": "COMPANY",
+      "count": 38,
+      "description": "Ngành Hàng & Dịch vụ Công nghiệp",
+      "tickers": [
+        "ACV",
+        "AMS",
+        "APH",
+        "CKA",
+        "CLL",
+        "DL1",
+        "DVP",
+        "DXP",
+        "GEE",
+        "GEX",
+        "GMD",
+        "GSP",
+        "HAH",
+        "IPA",
+        "MHC",
+        "NAG",
+        "NCT",
+        "NO1",
+        "PAC",
+        "PHP",
+        "PVP",
+        "PVT",
+        "SBG",
+        "SGN",
+        "SGP",
+        "TCL",
+        "TDP",
+        "TV1",
+        "TV2",
+        "VEA",
+        "VGR",
+        "VHG",
+        "VIP",
+        "VMS",
+        "VOS",
+        "VSC",
+        "VTO",
+        "VTP"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Bán lẻ": {
+      "entity_type": "COMPANY",
+      "count": 9,
+      "description": "Ngành Bán lẻ",
+      "tickers": [
+        "AFX",
+        "AST",
+        "DGW",
+        "DHT",
+        "FRT",
+        "MWG",
+        "PET",
+        "PSD",
+        "SAS"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Bất động sản": {
+      "entity_type": "COMPANY",
+      "count": 75,
+      "description": "Ngành Bất động sản",
+      "tickers": [
+        "AAV",
+        "AGG",
+        "API",
+        "BCM",
+        "CCL",
+        "CEO",
+        "CKG",
+        "CRE",
+        "D2D",
+        "DIG",
+        "DRH",
+        "DTD",
+        "DXG",
+        "DXS",
+        "FIR",
+        "HAR",
+        "HD6",
+        "HDC",
+        "HDG",
+        "HLD",
+        "HPX",
+        "HQC",
+        "HTN",
+        "IDC",
+        "IDJ",
+        "IDV",
+        "IJC",
+        "ITC",
+        "KBC",
+        "KDH",
+        "KHG",
+        "KOS",
+        "KSF",
+        "LDG",
+        "LGL",
+        "LHG",
+        "LSG",
+        "NBB",
+        "NDN",
+        "NLG",
+        "NRC",
+        "NTC",
+        "NTL",
+        "NVL",
+        "PDR",
+        "PTL",
+        "PV2",
+        "PXL",
+        "QCG",
+        "SCR",
+        "SGR",
+        "SIP",
+        "SJS",
+        "SSH",
+        "SZB",
+        "SZC",
+        "SZL",
+        "TAL",
+        "TCH",
+        "TDC",
+        "TDH",
+        "TEG",
+        "TIG",
+        "TIP",
+        "TLD",
+        "VC3",
+        "VCR",
+        "VEF",
+        "VHM",
+        "VIC",
+        "VPH",
+        "VPI",
+        "VRC",
+        "VRE",
+        "VRG"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Truyền thông": {
+      "entity_type": "COMPANY",
+      "count": 6,
+      "description": "Ngành Truyền thông",
+      "tickers": [
+        "FOC",
+        "ODE",
+        "STH",
+        "VNB",
+        "VNZ",
+        "YEG"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Du lịch và Giải trí": {
+      "entity_type": "COMPANY",
+      "count": 10,
+      "description": "Ngành Du lịch và Giải trí",
+      "tickers": [
+        "DAH",
+        "DSN",
+        "HVN",
+        "SCS",
+        "SKG",
+        "VJC",
+        "VNS",
+        "VPL",
+        "VTD",
+        "VTR"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Viễn thông": {
+      "entity_type": "COMPANY",
+      "count": 4,
+      "description": "Ngành Viễn thông",
+      "tickers": [
+        "FOX",
+        "MFS",
+        "TTN",
+        "VGI"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Ô tô và phụ tùng": {
+      "entity_type": "COMPANY",
+      "count": 7,
+      "description": "Ngành Ô tô và phụ tùng",
+      "tickers": [
+        "CSM",
+        "CTF",
+        "DRC",
+        "HAX",
+        "HHS",
+        "HUT",
+        "VVS"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Dầu khí": {
+      "entity_type": "COMPANY",
+      "count": 8,
+      "description": "Ngành Dầu khí",
+      "tickers": [
+        "BSR",
+        "OIL",
+        "PLX",
+        "PVB",
+        "PVC",
+        "PVD",
+        "PVS",
+        "TOS"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Hàng cá nhân & Gia dụng": {
+      "entity_type": "COMPANY",
+      "count": 14,
+      "description": "Ngành Hàng cá nhân & Gia dụng",
+      "tickers": [
+        "ADS",
+        "EVE",
+        "GDT",
+        "GIL",
+        "HTG",
+        "LIX",
+        "MSH",
+        "PNJ",
+        "RAL",
+        "STK",
+        "TCM",
+        "TLG",
+        "TNG",
+        "VGT"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Y tế": {
+      "entity_type": "COMPANY",
+      "count": 14,
+      "description": "Ngành Y tế",
+      "tickers": [
+        "DBD",
+        "DCL",
+        "DHG",
+        "DVM",
+        "DVN",
+        "FIT",
+        "IMP",
+        "JVC",
+        "OPC",
+        "PMC",
+        "TNH",
+        "VDP",
+        "VHE",
+        "YTC"
+      ],
+      "metric_prefixes": [
+        "CIS_",
+        "CBS_",
+        "CCF_",
+        "CNOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "gross_margin",
+        "net_margin",
+        "eps"
+      ]
+    },
+    "Bảo hiểm": {
+      "entity_type": "INSURANCE",
+      "count": 6,
+      "description": "Ngành Bảo hiểm",
+      "tickers": [
+        "ABI",
+        "BIC",
+        "BMI",
+        "BVH",
+        "MIG",
+        "PVI"
+      ],
+      "metric_prefixes": [
+        "IIS_",
+        "IBS_",
+        "ICF_",
+        "INOT_"
+      ],
+      "key_metrics": [
+        "roe",
+        "roa",
+        "combined_ratio",
+        "loss_ratio"
+      ]
+    }
+  },
+  "ticker_mapping": {
+    "TPB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "NVB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "VPB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "STB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "VCB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "LPB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "PGB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "ABB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "EVF": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "MSB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "KLB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "VIB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "MBB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "NAB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "OCB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "TCB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "BID": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "EIB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "VBB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "HDB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "CTG": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "ACB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "SHB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "BVB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "SSB": {
+      "entity_type": "BANK",
+      "sector": "Ngân hàng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BANK"
+    },
+    "VLB": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "HSL": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "VC2": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TNI": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "LSS": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "SLS": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "C4G": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "THG": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "VCP": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "DFF": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "ICT": {
+      "entity_type": "COMPANY",
+      "sector": "Công nghệ Thông tin",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "IT"
+    },
+    "HSG": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "TTF": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "APF": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "NHH": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "CMX": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "NAF": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "VTO": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "FRT": {
+      "entity_type": "COMPANY",
+      "sector": "Bán lẻ",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "RETAIL"
+    },
+    "SBT": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "MST": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "HGM": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "MTA": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "TLD": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "SGR": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "VRG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "VNZ": {
+      "entity_type": "COMPANY",
+      "sector": "Truyền thông",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "MEDIA"
+    },
+    "HVN": {
+      "entity_type": "COMPANY",
+      "sector": "Du lịch và Giải trí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TRAVEL_LEISURE"
+    },
+    "SBG": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "CMG": {
+      "entity_type": "COMPANY",
+      "sector": "Công nghệ Thông tin",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "IT"
+    },
+    "POM": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "CKG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "VC7": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "VJC": {
+      "entity_type": "COMPANY",
+      "sector": "Du lịch và Giải trí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TRAVEL_LEISURE"
+    },
+    "AMS": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "TCO": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "LIC": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TTN": {
+      "entity_type": "COMPANY",
+      "sector": "Viễn thông",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TELECOM"
+    },
+    "CRC": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "ITQ": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "BKC": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "DPR": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "NVL": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "CTD": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "DLG": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "DAH": {
+      "entity_type": "COMPANY",
+      "sector": "Du lịch và Giải trí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TRAVEL_LEISURE"
+    },
+    "PHC": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "PTL": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "CIG": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "VPI": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "DTD": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "TL4": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "VNS": {
+      "entity_type": "COMPANY",
+      "sector": "Du lịch và Giải trí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TRAVEL_LEISURE"
+    },
+    "DHC": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "BMP": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "VVS": {
+      "entity_type": "COMPANY",
+      "sector": "Ô tô và phụ tùng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "AUTOMOBILE"
+    },
+    "VSC": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "DVP": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "HAP": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "DBC": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "VE9": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "CLL": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "DL1": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "DRI": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "CMS": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "VOC": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "BAF": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "PLX": {
+      "entity_type": "COMPANY",
+      "sector": "Dầu khí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "OIL_GAS"
+    },
+    "HAG": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "VGT": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "DIG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "MVC": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "OIL": {
+      "entity_type": "COMPANY",
+      "sector": "Dầu khí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "OIL_GAS"
+    },
+    "LIG": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "DNP": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "LCG": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "NRC": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "AAA": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "VCR": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "PPC": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "ABS": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "DXP": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "API": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "VGI": {
+      "entity_type": "COMPANY",
+      "sector": "Viễn thông",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TELECOM"
+    },
+    "SZB": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "SIP": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "SJD": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "BSR": {
+      "entity_type": "COMPANY",
+      "sector": "Dầu khí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "OIL_GAS"
+    },
+    "NTL": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "HVT": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "HTG": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "AFX": {
+      "entity_type": "COMPANY",
+      "sector": "Bán lẻ",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "RETAIL"
+    },
+    "CTI": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "PHP": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "EVE": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "LIX": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "DVN": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "DSN": {
+      "entity_type": "COMPANY",
+      "sector": "Du lịch và Giải trí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TRAVEL_LEISURE"
+    },
+    "MCH": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "QTP": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "SCS": {
+      "entity_type": "COMPANY",
+      "sector": "Du lịch và Giải trí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TRAVEL_LEISURE"
+    },
+    "KSV": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "GVR": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "SHN": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "KDC": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "TLH": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "BCC": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "NHA": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "LHC": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "HVH": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "PVT": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "KSB": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "VIC": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "VSI": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "YEG": {
+      "entity_type": "COMPANY",
+      "sector": "Truyền thông",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "MEDIA"
+    },
+    "GAS": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "TNG": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "PSD": {
+      "entity_type": "COMPANY",
+      "sector": "Bán lẻ",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "RETAIL"
+    },
+    "ASM": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "PXL": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "HDC": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "C69": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TEG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "OGC": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "PDR": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "PMC": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "OPC": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "NNC": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "ACG": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "BMJ": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "FIR": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "LHG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "CII": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "VHE": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "FIT": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "VNB": {
+      "entity_type": "COMPANY",
+      "sector": "Truyền thông",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "MEDIA"
+    },
+    "AGG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "MCG": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TRC": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "HD6": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "PVP": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "DGT": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TTA": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "EVG": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TDP": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "PSW": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "NLG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "STH": {
+      "entity_type": "COMPANY",
+      "sector": "Truyền thông",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "MEDIA"
+    },
+    "SVN": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "PPT": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "HLD": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "ACV": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "HNM": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "CNG": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "TV2": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "SGP": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "NAG": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "TNC": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "TDM": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "SEA": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "BWE": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "TNH": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "G36": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "SAB": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "PVI": {
+      "entity_type": "INSURANCE",
+      "sector": "Bảo hiểm",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INSURANCE"
+    },
+    "KBC": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "DPG": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "HTN": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "QCG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "BVH": {
+      "entity_type": "INSURANCE",
+      "sector": "Bảo hiểm",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INSURANCE"
+    },
+    "HAX": {
+      "entity_type": "COMPANY",
+      "sector": "Ô tô và phụ tùng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "AUTOMOBILE"
+    },
+    "HQC": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "MML": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "MPC": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "TCL": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "IDC": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "SZC": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "FOC": {
+      "entity_type": "COMPANY",
+      "sector": "Truyền thông",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "MEDIA"
+    },
+    "HVA": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "PV2": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "DHA": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "GDT": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "RAL": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "TLG": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "PET": {
+      "entity_type": "COMPANY",
+      "sector": "Bán lẻ",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "RETAIL"
+    },
+    "GEE": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "MHC": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "ST8": {
+      "entity_type": "COMPANY",
+      "sector": "Công nghệ Thông tin",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "IT"
+    },
+    "PTB": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "BCM": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "GEX": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "PGV": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "KVC": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "LTG": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "SGT": {
+      "entity_type": "COMPANY",
+      "sector": "Công nghệ Thông tin",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "IT"
+    },
+    "SZL": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "DDV": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "CTR": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "SJS": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "KDH": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "DPM": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "ITD": {
+      "entity_type": "COMPANY",
+      "sector": "Công nghệ Thông tin",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "IT"
+    },
+    "VHC": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "VFG": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "NBC": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "BFC": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "NO1": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "IJC": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "TIP": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "VGS": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "VC3": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "SCG": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TSC": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "PHR": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "FOX": {
+      "entity_type": "COMPANY",
+      "sector": "Viễn thông",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TELECOM"
+    },
+    "VCG": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "SJE": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "FPT": {
+      "entity_type": "COMPANY",
+      "sector": "Công nghệ Thông tin",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "IT"
+    },
+    "VTR": {
+      "entity_type": "COMPANY",
+      "sector": "Du lịch và Giải trí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TRAVEL_LEISURE"
+    },
+    "SAS": {
+      "entity_type": "COMPANY",
+      "sector": "Bán lẻ",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "RETAIL"
+    },
+    "VMS": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "PAN": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "VOS": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "CHP": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "CSV": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "HPG": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "CTP": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "L40": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "DGW": {
+      "entity_type": "COMPANY",
+      "sector": "Bán lẻ",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "RETAIL"
+    },
+    "HPX": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "GIL": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "S99": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "GSP": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "NED": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "IPA": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "GEG": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "IMP": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "DCM": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "SKG": {
+      "entity_type": "COMPANY",
+      "sector": "Du lịch và Giải trí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TRAVEL_LEISURE"
+    },
+    "ABI": {
+      "entity_type": "INSURANCE",
+      "sector": "Bảo hiểm",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INSURANCE"
+    },
+    "CST": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "LBM": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TCM": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "GMD": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "BNA": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "VIP": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "ABT": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "LDG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "HAR": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "GKM": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TIG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "L18": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "SGN": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "QNS": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "SCL": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "NT2": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "DXG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "MSR": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "STK": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "HAH": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "HHV": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "DGC": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "L14": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "CEO": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "JVC": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "VNM": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "NKG": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "VHG": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "FCN": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "ELC": {
+      "entity_type": "COMPANY",
+      "sector": "Công nghệ Thông tin",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "IT"
+    },
+    "TTH": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "CSM": {
+      "entity_type": "COMPANY",
+      "sector": "Ô tô và phụ tùng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "AUTOMOBILE"
+    },
+    "D2D": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "VDP": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "MCM": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "CDC": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "DRC": {
+      "entity_type": "COMPANY",
+      "sector": "Ô tô và phụ tùng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "AUTOMOBILE"
+    },
+    "NBB": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "DBD": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "HNG": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "CTF": {
+      "entity_type": "COMPANY",
+      "sector": "Ô tô và phụ tùng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "AUTOMOBILE"
+    },
+    "NTC": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "KOS": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "IDI": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "SCR": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "PVD": {
+      "entity_type": "COMPANY",
+      "sector": "Dầu khí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "OIL_GAS"
+    },
+    "DC4": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "SMB": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "LAS": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "HUB": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "FCM": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TDC": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "C47": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "IDV": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "SAM": {
+      "entity_type": "COMPANY",
+      "sector": "Công nghệ Thông tin",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "IT"
+    },
+    "HBC": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "SHI": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "VHM": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "APH": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "MBG": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "AST": {
+      "entity_type": "COMPANY",
+      "sector": "Bán lẻ",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "RETAIL"
+    },
+    "BMC": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "KHG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "BCG": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "SMC": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "TVC": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "VRC": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "DDG": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "VLC": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "CTX": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "NCT": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "VEF": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "CLX": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "CRE": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "PVB": {
+      "entity_type": "COMPANY",
+      "sector": "Dầu khí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "OIL_GAS"
+    },
+    "PC1": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "REE": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "NTP": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "HII": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "VPH": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "HTI": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "IDJ": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "BCE": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "PVC": {
+      "entity_type": "COMPANY",
+      "sector": "Dầu khí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "OIL_GAS"
+    },
+    "TOS": {
+      "entity_type": "COMPANY",
+      "sector": "Dầu khí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "OIL_GAS"
+    },
+    "DHG": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "VGC": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "CSC": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "HUT": {
+      "entity_type": "COMPANY",
+      "sector": "Ô tô và phụ tùng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "AUTOMOBILE"
+    },
+    "AAV": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "HHP": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "HDG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "FMC": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "PFL": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TDH": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "HHS": {
+      "entity_type": "COMPANY",
+      "sector": "Ô tô và phụ tùng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "AUTOMOBILE"
+    },
+    "MSN": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "PVS": {
+      "entity_type": "COMPANY",
+      "sector": "Dầu khí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "OIL_GAS"
+    },
+    "VEA": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "LGL": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "TNT": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "PAC": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "HT1": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "VPG": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "ADS": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "PNJ": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "VNE": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "ITC": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "GDA": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "DRH": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "VTP": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "VCS": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TCD": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TVN": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "POW": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "MWG": {
+      "entity_type": "COMPANY",
+      "sector": "Bán lẻ",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "RETAIL"
+    },
+    "BOT": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "DHT": {
+      "entity_type": "COMPANY",
+      "sector": "Bán lẻ",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "RETAIL"
+    },
+    "DVM": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "VTZ": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "KSF": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "VGR": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "PLC": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "SSH": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "VRE": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "ANV": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "TCH": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "DCL": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "CCL": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "NDN": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "ICN": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "DXS": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "TV1": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "VTD": {
+      "entity_type": "COMPANY",
+      "sector": "Du lịch và Giải trí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TRAVEL_LEISURE"
+    },
+    "PAT": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "PCH": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "TAL": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "BGE": {
+      "entity_type": "COMPANY",
+      "sector": "Điện, nước & xăng dầu khí đốt",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "UTILITIES"
+    },
+    "MSH": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng cá nhân & Gia dụng",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "PERSONAL_GOODS"
+    },
+    "PVX": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "AVG": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "AAH": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "LSG": {
+      "entity_type": "COMPANY",
+      "sector": "Bất động sản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "REAL_ESTATE"
+    },
+    "BCR": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "RYG": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "MZG": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "ANT": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "VND": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "SSI": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "HCM": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "VCI": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "ODE": {
+      "entity_type": "COMPANY",
+      "sector": "Truyền thông",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "MEDIA"
+    },
+    "SHS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "PSI": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "APG": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "TCI": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "VIG": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "FTS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "CTS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "MIG": {
+      "entity_type": "INSURANCE",
+      "sector": "Bảo hiểm",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INSURANCE"
+    },
+    "VIX": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "MBS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "BMI": {
+      "entity_type": "INSURANCE",
+      "sector": "Bảo hiểm",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INSURANCE"
+    },
+    "IVS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "EVS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "BIC": {
+      "entity_type": "INSURANCE",
+      "sector": "Bảo hiểm",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INSURANCE"
+    },
+    "BMS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "VFS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "BSI": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "AGR": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "APS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "WSS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "TVS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "BVS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "AAS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "DSC": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "TVB": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "VDS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "MLS": {
+      "entity_type": "COMPANY",
+      "sector": "Thực phẩm và đồ uống",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "FOOD_BEVERAGE"
+    },
+    "SBS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "ORS": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "CKA": {
+      "entity_type": "COMPANY",
+      "sector": "Hàng & Dịch vụ Công nghiệp",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "INDUSTRIAL"
+    },
+    "KCB": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "MFS": {
+      "entity_type": "COMPANY",
+      "sector": "Viễn thông",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TELECOM"
+    },
+    "VPL": {
+      "entity_type": "COMPANY",
+      "sector": "Du lịch và Giải trí",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "TRAVEL_LEISURE"
+    },
+    "YTC": {
+      "entity_type": "COMPANY",
+      "sector": "Y tế",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "HEALTHCARE"
+    },
+    "VUA": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "ABW": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    },
+    "ECO": {
+      "entity_type": "COMPANY",
+      "sector": "Hóa chất",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CHEMICALS"
+    },
+    "DSH": {
+      "entity_type": "COMPANY",
+      "sector": "Xây dựng và Vật liệu",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "CONSTRUCTION"
+    },
+    "TD6": {
+      "entity_type": "COMPANY",
+      "sector": "Tài nguyên Cơ bản",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "BASIC_RESOURCES"
+    },
+    "DSE": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY"
+    }
+  },
+  "sector_to_entity_mapping": {
+    "Ngân hàng": "BANK",
+    "Dịch vụ tài chính": "SECURITY",
+    "Xây dựng và Vật liệu": "COMPANY",
+    "Thực phẩm và đồ uống": "COMPANY",
+    "Tài nguyên Cơ bản": "COMPANY",
+    "Điện, nước & xăng dầu khí đốt": "COMPANY",
+    "Công nghệ Thông tin": "COMPANY",
+    "Hóa chất": "COMPANY",
+    "Hàng & Dịch vụ Công nghiệp": "COMPANY",
+    "Bán lẻ": "COMPANY",
+    "Bất động sản": "COMPANY",
+    "Truyền thông": "COMPANY",
+    "Du lịch và Giải trí": "COMPANY",
+    "Viễn thông": "COMPANY",
+    "Ô tô và phụ tùng": "COMPANY",
+    "Dầu khí": "COMPANY",
+    "Hàng cá nhân & Gia dụng": "COMPANY",
+    "Y tế": "COMPANY",
+    "Bảo hiểm": "INSURANCE"
+  }
+}

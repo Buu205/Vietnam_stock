@@ -17,13 +17,15 @@ import numpy as np
 from pathlib import Path
 import logging
 
+import sys
+
 # Use relative imports instead of sys.path manipulation
 from PROCESSORS.core.shared.unified_mapper import UnifiedTickerMapper
 from PROCESSORS.fundamental.calculators.base_financial_calculator import BaseFinancialCalculator
-from PROCESSORS.fundamental.calculators.company_financial_calculator import CompanyFinancialCalculator
-from PROCESSORS.fundamental.calculators.bank_financial_calculator import BankFinancialCalculator
-from PROCESSORS.fundamental.calculators.insurance_financial_calculator import InsuranceFinancialCalculator
-from PROCESSORS.fundamental.calculators.security_financial_calculator import SecurityFinancialCalculator
+from PROCESSORS.fundamental.calculators.company_calculator import CompanyFinancialCalculator
+from PROCESSORS.fundamental.calculators.bank_calculator import BankFinancialCalculator
+from PROCESSORS.fundamental.calculators.insurance_calculator import InsuranceFinancialCalculator
+from PROCESSORS.fundamental.calculators.security_calculator import SecurityFinancialCalculator
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -34,12 +36,12 @@ class CalculatorIntegrationTest:
     
     def __init__(self):
         """Initialize test suite."""
-        self.base_path = Path(__file__).parent.parent.parent.parent.parent
+        self.base_path = Path(__file__).parent.parent.parent.parent
         self.data_paths = {
-            "COMPANY": self.base_path / "DATA/raw/fundamental/processed/company_full.parquet",
-            "BANK": self.base_path / "DATA/raw/fundamental/processed/bank_full.parquet",
-            "INSURANCE": self.base_path / "DATA/raw/fundamental/processed/insurance_full.parquet",
-            "SECURITY": self.base_path / "DATA/raw/fundamental/processed/security_full.parquet"
+            "COMPANY": self.base_path / "DATA/processed/fundamental/company_full.parquet",
+            "BANK": self.base_path / "DATA/processed/fundamental/bank_full.parquet",
+            "INSURANCE": self.base_path / "DATA/processed/fundamental/insurance_full.parquet",
+            "SECURITY": self.base_path / "DATA/processed/fundamental/security_full.parquet"
         }
         self.calculators = {
             "COMPANY": CompanyFinancialCalculator,

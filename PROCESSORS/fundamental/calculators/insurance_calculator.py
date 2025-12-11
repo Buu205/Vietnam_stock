@@ -23,6 +23,9 @@ import os
 
 # Use relative imports instead of sys.path manipulation
 from PROCESSORS.fundamental.calculators.base_financial_calculator import BaseFinancialCalculator
+import logging
+
+logger = logging.getLogger(__name__)
 
 class InsuranceFinancialCalculator(BaseFinancialCalculator):
     """
@@ -48,7 +51,7 @@ class InsuranceFinancialCalculator(BaseFinancialCalculator):
         return {
             'profitability': self.calculate_profitability,
             'underwriting': self.calculate_underwriting_ratios,
-            'investment': self.calculateinvestment_performance,
+            'investment': self.calculate_investment_performance,
             'solvency': self.calculate_solvency_ratios,
             'components': self.calculate_basic_components,
         }
@@ -155,7 +158,7 @@ class InsuranceFinancialCalculator(BaseFinancialCalculator):
         
         return result_df
     
-    def calculateinvestment_performance(self, df: pd.DataFrame) -> pd.DataFrame:
+    def calculate_investment_performance(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate investment performance for INSURANCE entities.
         
