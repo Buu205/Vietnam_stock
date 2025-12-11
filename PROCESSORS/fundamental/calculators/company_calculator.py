@@ -93,9 +93,10 @@ class CompanyFinancialCalculator(BaseFinancialCalculator):
         result_df = df.copy()
         
         # Core Income Statement metrics (convert to billions VND)
-        result_df['net_revenue'] = self.convert_to_billions(df.get('CIS_10', np.nan))
-        result_df['cogs'] = self.convert_to_billions(df.get('CIS_11', np.nan))
-        result_df['gross_profit'] = self.convert_to_billions(df.get('CIS_20', np.nan))
+        # type: ignore
+        result_df['net_revenue'] = df.get('CIS_10', np.nan) / 1e9
+        result_df['cogs'] = df.get('CIS_11', np.nan) / 1e9
+        result_df['gross_profit'] = df.get('CIS_20', np.nan) / 1e9
         
         # SG&A = CIS_25 + CIS_26 (selling + admin expenses)
         sga_sales = df.get('CIS_25', np.nan)
