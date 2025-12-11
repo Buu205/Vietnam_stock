@@ -1,6 +1,0 @@
-{
-  "name": "Ticker to Sector Mappings",
-  "version": "1.0.0",
-  "description": "Mappings between tickers and sectors",
-  "note": "This is a reference file. Actual mappings should be loaded from PROCESSORS/core/registries/sector_lookup.py or UnifiedTickerMapper"
-}

@@ -1,0 +1,21 @@
+2025-12-10 15:38:59,334 - INFO - ✅ Found project root: /Users/buuphan/Dev/Vietnam_dashboard
+2025-12-10 15:38:59,335 - INFO - 📁 Using project root: /Users/buuphan/Dev/Vietnam_dashboard
+2025-12-10 15:38:59,335 - INFO - Looking for config at: /Users/buuphan/Dev/Vietnam_dashboard/config/data_sources.json
+2025-12-10 15:38:59,335 - INFO - 📊 Loading PE data...
+2025-12-10 15:38:59,623 - INFO -    Loaded 609,893 PE records
+2025-12-10 15:38:59,624 - INFO - 📈 Loading OHLCV data...
+2025-12-10 15:38:59,762 - INFO -    Loaded 999,150 OHLCV records
+2025-12-10 15:38:59,777 - INFO -    Found 450 unique symbols
+2025-12-10 15:38:59,777 - INFO - ⚡ Pre-processing data for optimization...
+2025-12-10 15:38:59,777 - INFO -    📊 Creating daily PE data...
+2025-12-10 15:38:59,869 - INFO -    ✅ Created daily PE data with 609,893 records
+2025-12-10 15:38:59,869 - INFO -    📈 Pre-computing daily market data...
+2025-12-10 15:39:00,208 - INFO -    ✅ Pre-computed market data with 999,150 records
+2025-12-10 15:39:00,208 - INFO - ✅ Pre-processing completed in 0.43 seconds!
+2025-12-10 15:39:00,210 - INFO - 🚀 Calculating VN-Index PE for 2025-12-03
+2025-12-10 15:39:00,211 - INFO -    📊 Processing 450 symbols
+2025-12-10 15:39:00,266 - INFO - ✅ VN-Index PE calculation completed in 0.06 seconds:
+2025-12-10 15:39:00,266 - INFO -    PE Ratio: 15.90
+2025-12-10 15:39:00,266 - INFO -    Total Market Cap: 8,673,786.34 billion VND
+2025-12-10 15:39:00,266 - INFO -    Total TTM Earnings: 545,590.08 billion VND
+2025-12-10 15:39:00,266 - INFO -    Valid symbols: 410/450

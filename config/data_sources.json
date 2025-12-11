@@ -38,6 +38,18 @@
       "effective_date"
     ]
   },
+  "valuation_standards": {
+    "description": "Standard configuration for valuation calculations",
+    "frequency": {
+      "target_code": "Q",
+      "description": "Standard frequency for TTM calculations (Q=Quarterly, S=Semi-Annual, A=Annual)",
+      "allowed_codes": [
+        "Q",
+        "S",
+        "A"
+      ]
+    }
+  },
   "data_sources": {
     "ohlcv": {
       "name": "OHLCV Price Data",
@@ -51,7 +63,9 @@
       "update_frequency": "daily",
       "last_updated": "2025-01-11",
       "status": "active",
-      "dependencies": ["vnstock_data"],
+      "dependencies": [
+        "vnstock_data"
+      ],
       "validation_rules": [
         "price_consistency",
         "volume_validation",
@@ -70,27 +84,50 @@
       "update_frequency": "quarterly",
       "last_updated": "2025-01-11",
       "status": "active",
-      "dependencies": ["vnstock_data"],
+      "dependencies": [
+        "vnstock_data"
+      ],
       "sub_types": {
         "bank": {
           "path": "fundamental/bank",
           "description": "Banking sector financial metrics",
-          "metrics": ["roea_ttm", "roaa_ttm", "nim_q", "casa_ratio", "cir", "npl_ratio"]
+          "metrics": [
+            "roea_ttm",
+            "roaa_ttm",
+            "nim_q",
+            "casa_ratio",
+            "cir",
+            "npl_ratio"
+          ]
         },
         "company": {
           "path": "fundamental/company",
           "description": "Corporate financial metrics",
-          "metrics": ["gross_margin", "ebit_margin", "net_margin", "roe", "roa"]
+          "metrics": [
+            "gross_margin",
+            "ebit_margin",
+            "net_margin",
+            "roe",
+            "roa"
+          ]
         },
         "insurance": {
           "path": "fundamental/insurance",
           "description": "Insurance sector metrics",
-          "metrics": ["combined_ratio", "loss_ratio", "expense_ratio"]
+          "metrics": [
+            "combined_ratio",
+            "loss_ratio",
+            "expense_ratio"
+          ]
         },
         "security": {
           "path": "fundamental/security",
           "description": "Securities sector metrics",
-          "metrics": ["trading_volume", "commission_income", "net_interest_income"]
+          "metrics": [
+            "trading_volume",
+            "commission_income",
+            "net_interest_income"
+          ]
         }
       },
       "validation_rules": [
@@ -111,27 +148,49 @@
       "update_frequency": "daily",
       "last_updated": "2025-01-11",
       "status": "active",
-      "dependencies": ["ohlcv"],
+      "dependencies": [
+        "ohlcv"
+      ],
       "sub_types": {
         "indicators": {
           "path": "technical/indicators",
           "description": "Technical indicators (MA, RSI, MACD, etc.)",
-          "indicators": ["sma", "ema", "rsi", "macd", "bollinger_bands", "atr"]
+          "indicators": [
+            "sma",
+            "ema",
+            "rsi",
+            "macd",
+            "bollinger_bands",
+            "atr"
+          ]
         },
         "signals": {
           "path": "technical/signals",
           "description": "Trading signals and recommendations",
-          "signals": ["ma_cross", "rsi_signal", "macd_signal", "overall_signal"]
+          "signals": [
+            "ma_cross",
+            "rsi_signal",
+            "macd_signal",
+            "overall_signal"
+          ]
         },
         "market_breadth": {
           "path": "technical/market_breadth",
           "description": "Market breadth indicators",
-          "indicators": ["advance_decline", "new_highs_lows", "mcclellan_oscillator"]
+          "indicators": [
+            "advance_decline",
+            "new_highs_lows",
+            "mcclellan_oscillator"
+          ]
         },
         "sector_rotation": {
           "path": "technical/sector_rotation",
           "description": "Sector rotation analysis",
-          "indicators": ["relative_strength", "momentum_score", "rotation_phase"]
+          "indicators": [
+            "relative_strength",
+            "momentum_score",
+            "rotation_phase"
+          ]
         }
       },
       "validation_rules": [
@@ -152,27 +211,46 @@
       "update_frequency": "weekly",
       "last_updated": "2025-01-11",
       "status": "active",
-      "dependencies": ["fundamental", "ohlcv"],
+      "dependencies": [
+        "fundamental",
+        "ohlcv"
+      ],
       "sub_types": {
         "pe": {
           "path": "valuation/pe",
           "description": "Price-to-Earnings valuation",
-          "metrics": ["pe_ttm", "pe_forward", "pe_fair_value"]
+          "metrics": [
+            "pe_ttm",
+            "pe_forward",
+            "pe_fair_value"
+          ]
         },
         "pb": {
           "path": "valuation/pb",
           "description": "Price-to-Book valuation",
-          "metrics": ["pb_current", "pb_fair_value", "pb_percentile"]
+          "metrics": [
+            "pb_current",
+            "pb_fair_value",
+            "pb_percentile"
+          ]
         },
         "ev": {
           "path": "valuation/ev",
           "description": "Enterprise Value valuation",
-          "metrics": ["ev_ebitda", "ev_revenue", "ev_fair_value"]
+          "metrics": [
+            "ev_ebitda",
+            "ev_revenue",
+            "ev_fair_value"
+          ]
         },
         "dcf": {
           "path": "valuation/dcf",
           "description": "Discounted Cash Flow valuation",
-          "metrics": ["dcf_fair_value", "wacc", "terminal_growth"]
+          "metrics": [
+            "dcf_fair_value",
+            "wacc",
+            "terminal_growth"
+          ]
         }
       },
       "validation_rules": [
@@ -195,7 +273,10 @@
         "validate_data_quality",
         "update_cache"
       ],
-      "dependencies": ["ohlcv", "technical"],
+      "dependencies": [
+        "ohlcv",
+        "technical"
+      ],
       "last_run": "2025-01-11T02:00:00Z",
       "status": "success"
     },
@@ -211,7 +292,10 @@
         "validate_consistency",
         "update_cache"
       ],
-      "dependencies": ["fundamental", "valuation"],
+      "dependencies": [
+        "fundamental",
+        "valuation"
+      ],
       "last_run": "2025-01-01T03:00:00Z",
       "status": "success"
     },
@@ -227,7 +311,10 @@
         "validate_models",
         "update_cache"
       ],
-      "dependencies": ["valuation", "ohlcv"],
+      "dependencies": [
+        "valuation",
+        "ohlcv"
+      ],
       "last_run": "2025-01-06T04:00:00Z",
       "status": "success"
     }
@@ -340,4 +427,3 @@
     }
   }
 }
-

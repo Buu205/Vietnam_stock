@@ -168,6 +168,37 @@ def load_vnindex_pe_data(start_date: Optional[str] = None, end_date: Optional[st
         print(f"Lỗi khi tải VN-Index PE data: {e}")
         return pd.DataFrame()
 
+def get_latest_valuation_date() -> Optional[datetime]:
+    """
+    Lấy ngày cập nhật mới nhất của dữ liệu valuation
+    
+    Returns:
+        Latest date from valuation data or None if no data available
+    """
+    try:
+        # Try PE data first
+        pe_df = pd.read_parquet(PE_FUND_PATH)
+        if not pe_df.empty and 'date' in pe_df.columns:
+            latest_date = pe_df['date'].max()
+            if pd.isna(latest_date):
+                return None
+            return pd.to_datetime(latest_date)
+    except Exception as e:
+        print(f"Lỗi khi lấy latest valuation date từ PE: {e}")
+    
+    try:
+        # Fallback to PB data
+        pb_df = pd.read_parquet(PB_FUND_PATH)
+        if not pb_df.empty and 'date' in pb_df.columns:
+            latest_date = pb_df['date'].max()
+            if pd.isna(latest_date):
+                return None
+            return pd.to_datetime(latest_date)
+    except Exception as e:
+        print(f"Lỗi khi lấy latest valuation date từ PB: {e}")
+    
+    return None
+
 def get_latest_valuation_summary(symbol: str) -> Dict:
     """
     Get latest valuation summary for a specific symbol
@@ -230,3 +261,34 @@ def get_latest_valuation_summary(symbol: str) -> Dict:
             'ev_ebitda': None,
             'ev_ebitda_date': None
         }
+
+def get_latest_valuation_date() -> Optional[datetime]:
+    """
+    Lấy ngày cập nhật mới nhất của dữ liệu valuation
+    
+    Returns:
+        Latest date from valuation data or None if no data available
+    """
+    try:
+        # Try PE data first
+        pe_df = pd.read_parquet(PE_FUND_PATH)
+        if not pe_df.empty and 'date' in pe_df.columns:
+            latest_date = pe_df['date'].max()
+            if pd.isna(latest_date):
+                return None
+            return pd.to_datetime(latest_date)
+    except Exception as e:
+        print(f"Lỗi khi lấy latest valuation date từ PE: {e}")
+    
+    try:
+        # Fallback to PB data
+        pb_df = pd.read_parquet(PB_FUND_PATH)
+        if not pb_df.empty and 'date' in pb_df.columns:
+            latest_date = pb_df['date'].max()
+            if pd.isna(latest_date):
+                return None
+            return pd.to_datetime(latest_date)
+    except Exception as e:
+        print(f"Lỗi khi lấy latest valuation date từ PB: {e}")
+    
+    return None

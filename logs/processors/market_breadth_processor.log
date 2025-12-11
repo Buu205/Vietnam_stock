@@ -1,0 +1,111 @@
+2025-12-03 16:49:19,483 - INFO - Loaded 458 symbols with sector mapping
+2025-12-03 16:49:19,483 - INFO - Market Breadth Processor initialized
+2025-12-03 16:49:19,483 - INFO - Data dir: /Users/buuphan/Dev/stock_dashboard
+2025-12-03 16:49:19,483 - INFO - OHLCV path: /Users/buuphan/Dev/stock_dashboard/data_warehouse/raw/ohlcv/OHLCV_mktcap.parquet
+2025-12-03 16:49:19,483 - INFO - Output dir: /Users/buuphan/Dev/stock_dashboard/calculated_results/technical/market_breadth
+2025-12-03 16:49:19,513 - INFO - Loading OHLCV data...
+2025-12-03 16:49:19,653 - INFO - Loaded 997,359 OHLCV records
+2025-12-03 16:49:19,686 - INFO - Date range: 2015-01-05 to 2025-12-03
+2025-12-03 16:49:19,705 - INFO - Updating market breadth incrementally...
+2025-12-03 16:49:19,714 - INFO - Loading OHLCV history from 2025-08-05 to 2025-12-03 for MA calculation...
+2025-12-03 16:49:19,714 - INFO - Loading OHLCV data...
+2025-12-03 16:49:19,866 - INFO - Loaded 997,359 OHLCV records
+2025-12-03 16:49:19,899 - INFO - Date range: 2015-01-05 to 2025-12-03
+2025-12-03 16:49:20,038 - INFO - Loaded 38,619 OHLCV records for MA calculation (date range: 2025-08-05 to 2025-12-03)
+2025-12-03 16:49:20,038 - INFO - Calculating Market Breadth...
+2025-12-03 16:49:20,044 - INFO - Loading MA data from file (faster) for date range: 2025-08-05 to 2025-12-03
+2025-12-03 16:49:20,244 - INFO - Loaded 38,619 MA records from file (date range: 2025-08-05 to 2025-12-03)
+2025-12-03 16:49:20,252 - INFO - Using MA data from file (faster) - 38,619 records, missing MA: 1,446 (3.7%)
+2025-12-03 16:49:20,301 - INFO - Processing 85 dates for market breadth...
+2025-12-03 16:49:20,301 - INFO - Processing date 1/85: 2025-08-05
+2025-12-03 16:49:20,302 - INFO - DEBUG: Processing sectors for date 2025-08-05: 19 unique sectors
+2025-12-03 16:49:20,303 - INFO - DEBUG: Appending sector data for Hóa chất on 2025-08-05
+2025-12-03 16:49:20,847 - INFO - ✅ Found 1615 sector breadth records
+2025-12-03 16:49:20,849 - INFO - ✅ Created result_by_sector DataFrame: 1615 records, 17 columns
+2025-12-03 16:49:20,849 - INFO - Calculating trading value metrics for sectors...
+2025-12-03 16:49:20,875 - INFO - Calculating trend indicators for sectors...
+2025-12-03 16:49:20,902 - INFO - Market breadth calculation completed:
+2025-12-03 16:49:20,902 - INFO -   - Global: 85 records
+2025-12-03 16:49:20,902 - INFO -   - Sector: 1615 records
+2025-12-03 16:49:20,906 - INFO - Filtered GLOBAL breadth data to 1 records for new dates only
+2025-12-03 16:49:20,906 - INFO - Filtered SECTOR breadth data to 19 records for new dates only
+2025-12-03 16:49:20,910 - INFO - ✅ Saved global market breadth: 229 records -> /Users/buuphan/Dev/stock_dashboard/calculated_results/technical/market_breadth/market_breadth_global.parquet
+2025-12-03 16:49:20,910 - INFO -    Date range: 2025-01-02 to 2025-12-03
+2025-12-03 16:49:20,917 - INFO - ✅ Saved sector breadth: 4351 records -> /Users/buuphan/Dev/stock_dashboard/calculated_results/technical/market_breadth/market_breadth_sector.parquet
+2025-12-03 16:49:20,918 - INFO -    Date range: 2025-01-02 to 2025-12-03
+2025-12-03 16:49:20,918 - INFO -    Unique sectors: 19
+2025-12-03 16:49:20,918 - INFO - Market breadth incremental update completed!
+2025-12-05 11:00:47,007 - INFO - Loaded 458 symbols with sector mapping
+2025-12-05 11:00:47,007 - INFO - Market Breadth Processor initialized
+2025-12-05 11:00:47,007 - INFO - Data dir: /Users/buuphan/Dev/stock_dashboard
+2025-12-05 11:00:47,007 - INFO - OHLCV path: /Users/buuphan/Dev/stock_dashboard/data_warehouse/raw/ohlcv/OHLCV_mktcap.parquet
+2025-12-05 11:00:47,007 - INFO - Output dir: /Users/buuphan/Dev/stock_dashboard/calculated_results/technical/market_breadth
+2025-12-05 11:00:47,037 - INFO - Loading OHLCV data...
+2025-12-05 11:00:47,193 - INFO - Loaded 997,815 OHLCV records
+2025-12-05 11:00:47,226 - INFO - Date range: 2015-01-05 to 2025-12-04
+2025-12-05 11:00:47,247 - INFO - Updating market breadth incrementally...
+2025-12-05 11:00:47,253 - INFO - Loading OHLCV history from 2025-08-06 to 2025-12-04 for MA calculation...
+2025-12-05 11:00:47,253 - INFO - Loading OHLCV data...
+2025-12-05 11:00:47,416 - INFO - Loaded 997,815 OHLCV records
+2025-12-05 11:00:47,449 - INFO - Date range: 2015-01-05 to 2025-12-04
+2025-12-05 11:00:47,589 - INFO - Loaded 38,659 OHLCV records for MA calculation (date range: 2025-08-06 to 2025-12-04)
+2025-12-05 11:00:47,589 - INFO - Calculating Market Breadth...
+2025-12-05 11:00:47,595 - INFO - Loading MA data from file (faster) for date range: 2025-08-06 to 2025-12-04
+2025-12-05 11:00:47,797 - INFO - Loaded 38,659 MA records from file (date range: 2025-08-06 to 2025-12-04)
+2025-12-05 11:00:47,805 - INFO - Using MA data from file (faster) - 38,659 records, missing MA: 1,458 (3.8%)
+2025-12-05 11:00:47,855 - INFO - Processing 85 dates for market breadth...
+2025-12-05 11:00:47,855 - INFO - Processing date 1/85: 2025-08-06
+2025-12-05 11:00:47,857 - INFO - DEBUG: Processing sectors for date 2025-08-06: 19 unique sectors
+2025-12-05 11:00:47,857 - INFO - DEBUG: Appending sector data for Hóa chất on 2025-08-06
+2025-12-05 11:00:48,435 - INFO - ✅ Found 1615 sector breadth records
+2025-12-05 11:00:48,437 - INFO - ✅ Created result_by_sector DataFrame: 1615 records, 17 columns
+2025-12-05 11:00:48,437 - INFO - Calculating trading value metrics for sectors...
+2025-12-05 11:00:48,464 - INFO - Calculating trend indicators for sectors...
+2025-12-05 11:00:48,490 - INFO - Market breadth calculation completed:
+2025-12-05 11:00:48,490 - INFO -   - Global: 85 records
+2025-12-05 11:00:48,490 - INFO -   - Sector: 1615 records
+2025-12-05 11:00:48,493 - INFO - Filtered GLOBAL breadth data to 1 records for new dates only
+2025-12-05 11:00:48,493 - INFO - Filtered SECTOR breadth data to 19 records for new dates only
+2025-12-05 11:00:48,498 - INFO - ✅ Saved global market breadth: 230 records -> /Users/buuphan/Dev/stock_dashboard/calculated_results/technical/market_breadth/market_breadth_global.parquet
+2025-12-05 11:00:48,498 - INFO -    Date range: 2025-01-02 to 2025-12-04
+2025-12-05 11:00:48,504 - INFO - ✅ Saved sector breadth: 4370 records -> /Users/buuphan/Dev/stock_dashboard/calculated_results/technical/market_breadth/market_breadth_sector.parquet
+2025-12-05 11:00:48,505 - INFO -    Date range: 2025-01-02 to 2025-12-04
+2025-12-05 11:00:48,505 - INFO -    Unique sectors: 19
+2025-12-05 11:00:48,505 - INFO - Market breadth incremental update completed!
+2025-12-05 15:19:55,891 - INFO - Loaded 458 symbols with sector mapping
+2025-12-05 15:19:55,891 - INFO - Market Breadth Processor initialized
+2025-12-05 15:19:55,891 - INFO - Data dir: /Users/buuphan/Dev/stock_dashboard
+2025-12-05 15:19:55,891 - INFO - OHLCV path: /Users/buuphan/Dev/stock_dashboard/data_warehouse/raw/ohlcv/OHLCV_mktcap.parquet
+2025-12-05 15:19:55,891 - INFO - Output dir: /Users/buuphan/Dev/stock_dashboard/calculated_results/technical/market_breadth
+2025-12-05 15:19:55,920 - INFO - Loading OHLCV data...
+2025-12-05 15:19:56,065 - INFO - Loaded 998,271 OHLCV records
+2025-12-05 15:19:56,099 - INFO - Date range: 2015-01-05 to 2025-12-05
+2025-12-05 15:19:56,119 - INFO - Updating market breadth incrementally...
+2025-12-05 15:19:56,126 - INFO - Loading OHLCV history from 2025-08-07 to 2025-12-05 for MA calculation...
+2025-12-05 15:19:56,126 - INFO - Loading OHLCV data...
+2025-12-05 15:19:56,277 - INFO - Loaded 998,271 OHLCV records
+2025-12-05 15:19:56,310 - INFO - Date range: 2015-01-05 to 2025-12-05
+2025-12-05 15:19:56,453 - INFO - Loaded 38,701 OHLCV records for MA calculation (date range: 2025-08-07 to 2025-12-05)
+2025-12-05 15:19:56,453 - INFO - Calculating Market Breadth...
+2025-12-05 15:19:56,459 - INFO - Loading MA data from file (faster) for date range: 2025-08-07 to 2025-12-05
+2025-12-05 15:19:56,655 - INFO - Loaded 38,701 MA records from file (date range: 2025-08-07 to 2025-12-05)
+2025-12-05 15:19:56,662 - INFO - Using MA data from file (faster) - 38,701 records, missing MA: 1,471 (3.8%)
+2025-12-05 15:19:56,711 - INFO - Processing 85 dates for market breadth...
+2025-12-05 15:19:56,711 - INFO - Processing date 1/85: 2025-08-07
+2025-12-05 15:19:56,712 - INFO - DEBUG: Processing sectors for date 2025-08-07: 19 unique sectors
+2025-12-05 15:19:56,713 - INFO - DEBUG: Appending sector data for Hóa chất on 2025-08-07
+2025-12-05 15:19:57,260 - INFO - ✅ Found 1615 sector breadth records
+2025-12-05 15:19:57,262 - INFO - ✅ Created result_by_sector DataFrame: 1615 records, 17 columns
+2025-12-05 15:19:57,262 - INFO - Calculating trading value metrics for sectors...
+2025-12-05 15:19:57,289 - INFO - Calculating trend indicators for sectors...
+2025-12-05 15:19:57,315 - INFO - Market breadth calculation completed:
+2025-12-05 15:19:57,315 - INFO -   - Global: 85 records
+2025-12-05 15:19:57,315 - INFO -   - Sector: 1615 records
+2025-12-05 15:19:57,317 - INFO - Filtered GLOBAL breadth data to 1 records for new dates only
+2025-12-05 15:19:57,318 - INFO - Filtered SECTOR breadth data to 19 records for new dates only
+2025-12-05 15:19:57,322 - INFO - ✅ Saved global market breadth: 231 records -> /Users/buuphan/Dev/stock_dashboard/calculated_results/technical/market_breadth/market_breadth_global.parquet
+2025-12-05 15:19:57,322 - INFO -    Date range: 2025-01-02 to 2025-12-05
+2025-12-05 15:19:57,329 - INFO - ✅ Saved sector breadth: 4389 records -> /Users/buuphan/Dev/stock_dashboard/calculated_results/technical/market_breadth/market_breadth_sector.parquet
+2025-12-05 15:19:57,329 - INFO -    Date range: 2025-01-02 to 2025-12-05
+2025-12-05 15:19:57,329 - INFO -    Unique sectors: 19
+2025-12-05 15:19:57,329 - INFO - Market breadth incremental update completed!

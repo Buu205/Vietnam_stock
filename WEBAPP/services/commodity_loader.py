@@ -12,46 +12,26 @@ import logging
 import pandas as pd
 import streamlit as st
 
-from WEBAPP.core.utils import get_data_path
+from WEBAPP.core.data_paths import DataPaths
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_COMMODITY_REL_PATH = "DATA/processed/commodity/commodity_prices.parquet"
-
 
 def _resolve_data_path(explicit_path: Optional[str] = None) -> Path:
-    """Resolve commodity parquet path using env overrides with project fallback."""
+    """
+    Resolve commodity parquet path using canonical DataPaths.
+    
+    Args:
+        explicit_path: Explicit path override
+        
+    Returns:
+        Path to commodity data file
+    """
     if explicit_path:
         return Path(explicit_path).expanduser()
 
-    env_override = os.getenv("COMMODITY_DATA_PATH")
-    if env_override:
-        return Path(env_override).expanduser()
-
-    # Ưu tiên path cụ thể mà user chỉ định
-    default_absolute_path = Path("/Users/buuphan/Dev/Vietnam_dashboard/DATA/refined/commodity/commodity_prices.parquet")
-    if default_absolute_path.exists():
-        return default_absolute_path
-
-    data_dir = os.getenv("DATA_DIR")
-    if data_dir:
-        # Try calculated_results first, then fallback to old location
-        candidate = Path(data_dir).expanduser() / "calculated_results" / "commodity" / "commodity_prices.parquet"
-        if candidate.exists():
-            return candidate
-        # Fallback to old location for backward compatibility
-        candidate = Path(data_dir).expanduser() / "data_warehouse" / "raw" / "commodity" / "commodity_prices.parquet"
-        if candidate.exists():
-            return candidate
-
-    # Try new location first, then fallback to old
-    new_path = get_data_path(DEFAULT_COMMODITY_REL_PATH)
-    if new_path.exists():
-        return new_path
-    
-    # Fallback to old location for backward compatibility
-    old_path = get_data_path("data_warehouse/raw/commodity/commodity_prices.parquet")
-    return old_path
+    # Use canonical DataPaths for commodity data
+    return DataPaths.processed('commodity', 'commodity_prices.parquet')
 
 
 @st.cache_data(ttl=300, show_spinner=False)  # Cache 5 phút, dùng latest_date làm key

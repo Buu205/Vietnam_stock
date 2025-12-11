@@ -1,0 +1,292 @@
+{
+  "name": "OHLCV Trading Data Schema",
+  "version": "1.0.0",
+  "description": "Schema for standardized OHLCV trading data from APIs",
+  "definitions": {
+    "common_ohlcv_fields": {
+      "symbol": {
+        "type": "string",
+        "description": "Stock symbol",
+        "pattern": "^[A-Z0-9]{2,10}$"
+      },
+      "date": {
+        "type": "string",
+        "format": "date",
+        "description": "Trading date in YYYY-MM-DD format"
+      },
+      "open": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Opening price in VND",
+        "display_format": "decimal",
+        "decimal_places": 2,
+        "thousands_separator": true
+      },
+      "high": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Highest price in VND",
+        "display_format": "decimal",
+        "decimal_places": 2,
+        "thousands_separator": true
+      },
+      "low": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Lowest price in VND",
+        "display_format": "decimal",
+        "decimal_places": 2,
+        "thousands_separator": true
+      },
+      "close": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Closing price in VND",
+        "display_format": "decimal",
+        "decimal_places": 2,
+        "thousands_separator": true
+      },
+      "volume": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Trading volume",
+        "display_format": "integer",
+        "thousands_separator": true
+      },
+      "market_cap": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Market capitalization in VND",
+        "display_format": "decimal",
+        "decimal_places": 0,
+        "thousands_separator": true
+      }
+    },
+    "derived_ohlcv_fields": {
+      "price_change": {
+        "type": "number",
+        "description": "Price change from previous close",
+        "display_format": "decimal",
+        "decimal_places": 2,
+        "thousands_separator": true,
+        "show_sign": true
+      },
+      "price_change_pct": {
+        "type": "number",
+        "description": "Percentage price change from previous close",
+        "display_format": "percentage",
+        "decimal_places": 2,
+        "show_sign": true
+      },
+      "avg_price": {
+        "type": "number",
+        "description": "Average price (high+low)/2",
+        "display_format": "decimal",
+        "decimal_places": 2,
+        "thousands_separator": true
+      },
+      "price_range": {
+        "type": "number",
+        "description": "Price range (high-low)",
+        "display_format": "decimal",
+        "decimal_places": 2,
+        "thousands_separator": true
+      },
+      "price_range_pct": {
+        "type": "number",
+        "description": "Price range percentage (high-low)/low*100",
+        "display_format": "percentage",
+        "decimal_places": 2
+      },
+      "turnover": {
+        "type": "number",
+        "description": "Turnover (close * volume)",
+        "display_format": "decimal",
+        "decimal_places": 0,
+        "thousands_separator": true
+      }
+    },
+    "additional_ohlcv_fields": {
+      "vwap": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Volume Weighted Average Price",
+        "display_format": "decimal",
+        "decimal_places": 2,
+        "thousands_separator": true
+      },
+      "shares_outstanding": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "Total shares outstanding",
+        "display_format": "integer",
+        "thousands_separator": true
+      },
+      "pe_ratio": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Price to Earnings Ratio",
+        "display_format": "decimal",
+        "decimal_places": 2
+      },
+      "pb_ratio": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Price to Book Ratio",
+        "display_format": "decimal",
+        "decimal_places": 2
+      }
+    },
+    "frequency_codes": {
+      "D": {
+        "description": "Daily",
+        "aggregation_period": "1 day",
+        "typical_use": "Technical analysis, short-term trading"
+      },
+      "W": {
+        "description": "Weekly",
+        "aggregation_period": "1 week",
+        "typical_use": "Medium-term trend analysis"
+      },
+      "M": {
+        "description": "Monthly",
+        "aggregation_period": "1 month",
+        "typical_use": "Long-term investment analysis"
+      },
+      "Q": {
+        "description": "Quarterly",
+        "aggregation_period": "3 months",
+        "typical_use": "Fundamental analysis alignment"
+      },
+      "Y": {
+        "description": "Yearly",
+        "aggregation_period": "1 year",
+        "typical_use": "Long-term performance review"
+      }
+    }
+  },
+  "schemas": {
+    "ohlcv_daily": {
+      "type": "object",
+      "allOf": [
+        {"$ref": "#/definitions/common_ohlcv_fields"},
+        {
+          "properties": {
+            "freq_code": {
+              "type": "string",
+              "enum": ["D"],
+              "description": "Frequency code"
+            },
+            "data_source": {
+              "type": "string",
+              "description": "Source of the data (e.g., 'vnd', 'cafef', etc.)"
+            },
+            "created_date": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Date when record was created"
+            }
+          }
+        }
+      ],
+      "required": ["symbol", "date", "open", "high", "low", "close", "volume", "freq_code"]
+    },
+    "ohlcv_with_derived": {
+      "type": "object",
+      "allOf": [
+        {"$ref": "#/schemas/ohlcv_daily"},
+        {
+          "properties": {
+            "derived_fields": {"$ref": "#/definitions/derived_ohlcv_fields"}
+          }
+        }
+      ]
+    },
+    "ohlcv_complete": {
+      "type": "object",
+      "allOf": [
+        {"$ref": "#/schemas/ohlcv_with_derived"},
+        {
+          "properties": {
+            "additional_fields": {"$ref": "#/definitions/additional_ohlcv_fields"}
+          }
+        }
+      ]
+    }
+  },
+  "display_formats": {
+    "price": {
+      "decimal_places": 2,
+      "thousands_separator": true,
+      "currency_symbol": "đ",
+      "example": "25,750.50đ"
+    },
+    "volume": {
+      "decimal_places": 0,
+      "thousands_separator": true,
+      "example": "1,250,000"
+    },
+    "percentage": {
+      "decimal_places": 2,
+      "suffix": "%",
+      "example": "2.35%"
+    },
+    "market_cap": {
+      "decimal_places": 0,
+      "thousands_separator": true,
+      "special_formatting": "abbreviate_billions",
+      "example": "25.7B"
+    },
+    "ratio": {
+      "decimal_places": 2,
+      "example": "12.35"
+    }
+  },
+  "validation_rules": {
+    "data_quality": {
+      "description": "Data quality checks for OHLCV data",
+      "rules": [
+        "Low should not be greater than high",
+        "Close should be between low and high",
+        "Open should be between low and high",
+        "Volume should be positive integer",
+        "Price changes should match previous day's close",
+        "Market cap should be approximately close * shares_outstanding"
+      ]
+    },
+    "display_consistency": {
+      "description": "Display formatting consistency",
+      "rules": [
+        "All prices in VND with 2 decimal places",
+        "All percentages with 2 decimal places",
+        "All large numbers with thousand separators",
+        "All dates in ISO format YYYY-MM-DD",
+        "Color coding for positive/negative changes"
+      ]
+    },
+    "business_rules": {
+      "description": "Business logic validation",
+      "rules": [
+        "Price change % should be approximately (price_change / prev_close) * 100",
+        "Average price should be between low and high",
+        "Price range % should be consistent with price_range and low",
+        "Turnover should be approximately close * volume"
+      ]
+    }
+  },
+  "metadata": {
+    "last_updated": "2025-12-07",
+    "version_history": [
+      {
+        "version": "1.0.0",
+        "date": "2025-12-07",
+        "changes": "Initial schema creation for OHLCV standardization"
+      }
+    ],
+    "dependencies": {
+      "technical_indicators_schema": "technical_calculated_schema.json",
+      "fundamental_schema": "fundamental_calculated_schema.json",
+      "data_sources": ["vnd", "cafef", "tcbs"]
+    }
+  }
+}

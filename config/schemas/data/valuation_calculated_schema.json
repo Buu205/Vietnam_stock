@@ -1,0 +1,311 @@
+{
+  "name": "Valuation Calculated Results Schema",
+  "version": "1.0.0",
+  "description": "Schema for calculated valuation metrics and models",
+  "definitions": {
+    "common_valuation_fields": {
+      "symbol": {
+        "type": "string",
+        "description": "Stock symbol",
+        "pattern": "^[A-Z0-9]{2,10}$"
+      },
+      "valuation_date": {
+        "type": "string",
+        "format": "date",
+        "description": "Date of valuation calculation"
+      },
+      "current_price": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Current stock price in VND"
+      },
+      "market_cap": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Market capitalization in VND"
+      },
+      "shares_outstanding": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Shares outstanding"
+      },
+      "calculation_date": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Date when calculation was performed"
+      },
+      "model_version": {
+        "type": "string",
+        "description": "Version of valuation model"
+      },
+      "data_source": {
+        "type": "string",
+        "description": "Source of financial data used"
+      }
+    },
+    "pe_metrics": {
+      "pe_ttm": {
+        "type": "number",
+        "description": "Price-to-Earnings TTM",
+        "minimum": 0
+      },
+      "pe_forward": {
+        "type": "number",
+        "description": "Forward Price-to-Earnings",
+        "minimum": 0
+      },
+      "pe_5y_avg": {
+        "type": "number",
+        "description": "5-Year Average P/E",
+        "minimum": 0
+      },
+      "pe_sector_avg": {
+        "type": "number",
+        "description": "Sector Average P/E",
+        "minimum": 0
+      },
+      "pe_percentile": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "description": "P/E Percentile vs Historical"
+      },
+      "pe_fair_value": {
+        "type": "number",
+        "description": "Fair Value based on P/E",
+        "minimum": 0
+      },
+      "pe_upside_downside": {
+        "type": "number",
+        "description": "Upside/Downside based on P/E (%)"
+      }
+    },
+    "pb_metrics": {
+      "pb_current": {
+        "type": "number",
+        "description": "Price-to-Book Current",
+        "minimum": 0
+      },
+      "pb_5y_avg": {
+        "type": "number",
+        "description": "5-Year Average P/B",
+        "minimum": 0
+      },
+      "pb_sector_avg": {
+        "type": "number",
+        "description": "Sector Average P/B",
+        "minimum": 0
+      },
+      "pb_percentile": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "description": "P/B Percentile vs Historical"
+      },
+      "pb_fair_value": {
+        "type": "number",
+        "description": "Fair Value based on P/B",
+        "minimum": 0
+      },
+      "pb_upside_downside": {
+        "type": "number",
+        "description": "Upside/Downside based on P/B (%)"
+      }
+    },
+    "ev_metrics": {
+      "enterprise_value": {
+        "type": "number",
+        "description": "Enterprise Value in VND",
+        "minimum": 0
+      },
+      "ev_revenue": {
+        "type": "number",
+        "description": "EV/Revenue ratio",
+        "minimum": 0
+      },
+      "ev_ebitda": {
+        "type": "number",
+        "description": "EV/EBITDA ratio",
+        "minimum": 0
+      },
+      "ev_ebit": {
+        "type": "number",
+        "description": "EV/EBIT ratio",
+        "minimum": 0
+      },
+      "ev_sector_avg": {
+        "type": "number",
+        "description": "Sector Average EV/EBITDA",
+        "minimum": 0
+      },
+      "ev_percentile": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "description": "EV/EBITDA Percentile vs Sector"
+      }
+    },
+    "dcf_metrics": {
+      "dcf_fair_value": {
+        "type": "number",
+        "description": "DCF Fair Value in VND",
+        "minimum": 0
+      },
+      "dcf_upside_downside": {
+        "type": "number",
+        "description": "DCF Upside/Downside (%)"
+      },
+      "wacc": {
+        "type": "number",
+        "description": "Weighted Average Cost of Capital (%)",
+        "minimum": 0,
+        "maximum": 50
+      },
+      "terminal_growth_rate": {
+        "type": "number",
+        "description": "Terminal Growth Rate (%)",
+        "minimum": 0,
+        "maximum": 10
+      },
+      "discount_rate": {
+        "type": "number",
+        "description": "Discount Rate (%)",
+        "minimum": 0,
+        "maximum": 30
+      },
+      "dcf_sensitivity": {
+        "type": "object",
+        "description": "DCF Sensitivity Analysis",
+        "properties": {
+          "wacc_sensitivity": {
+            "type": "array",
+            "description": "Fair value at different WACC levels"
+          },
+          "growth_sensitivity": {
+            "type": "array",
+            "description": "Fair value at different growth rates"
+          }
+        }
+      }
+    },
+    "relative_valuation": {
+      "sector_ranking": {
+        "type": "integer",
+        "description": "Ranking within sector (1 = best value)",
+        "minimum": 1
+      },
+      "market_ranking": {
+        "type": "integer",
+        "description": "Ranking within market (1 = best value)",
+        "minimum": 1
+      },
+      "value_score": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "description": "Overall value score (0-100)"
+      },
+      "attractiveness": {
+        "type": "string",
+        "enum": ["very_attractive", "attractive", "fair", "expensive", "very_expensive"],
+        "description": "Overall attractiveness rating"
+      }
+    }
+  },
+  "schemas": {
+    "pe_valuation": {
+      "type": "object",
+      "allOf": [
+        {"$ref": "#/definitions/common_valuation_fields"},
+        {
+          "properties": {
+            "pe_metrics": {"$ref": "#/definitions/pe_metrics"}
+          }
+        }
+      ],
+      "required": ["symbol", "valuation_date", "current_price", "pe_ttm"]
+    },
+    "pb_valuation": {
+      "type": "object",
+      "allOf": [
+        {"$ref": "#/definitions/common_valuation_fields"},
+        {
+          "properties": {
+            "pb_metrics": {"$ref": "#/definitions/pb_metrics"}
+          }
+        }
+      ],
+      "required": ["symbol", "valuation_date", "current_price", "pb_current"]
+    },
+    "ev_valuation": {
+      "type": "object",
+      "allOf": [
+        {"$ref": "#/definitions/common_valuation_fields"},
+        {
+          "properties": {
+            "ev_metrics": {"$ref": "#/definitions/ev_metrics"}
+          }
+        }
+      ],
+      "required": ["symbol", "valuation_date", "enterprise_value", "ev_ebitda"]
+    },
+    "dcf_valuation": {
+      "type": "object",
+      "allOf": [
+        {"$ref": "#/definitions/common_valuation_fields"},
+        {
+          "properties": {
+            "dcf_metrics": {"$ref": "#/definitions/dcf_metrics"}
+          }
+        }
+      ],
+      "required": ["symbol", "valuation_date", "dcf_fair_value", "wacc"]
+    },
+    "comprehensive_valuation": {
+      "type": "object",
+      "allOf": [
+        {"$ref": "#/definitions/common_valuation_fields"},
+        {
+          "properties": {
+            "pe_metrics": {"$ref": "#/definitions/pe_metrics"},
+            "pb_metrics": {"$ref": "#/definitions/pb_metrics"},
+            "ev_metrics": {"$ref": "#/definitions/ev_metrics"},
+            "dcf_metrics": {"$ref": "#/definitions/dcf_metrics"},
+            "relative_valuation": {"$ref": "#/definitions/relative_valuation"}
+          }
+        }
+      ],
+      "required": ["symbol", "valuation_date", "current_price", "value_score"]
+    }
+  },
+  "validation_rules": {
+    "valuation_consistency": {
+      "description": "Valuation metrics should be consistent",
+      "rules": [
+        "P/E ratios should be positive",
+        "P/B ratios should be positive",
+        "EV ratios should be positive",
+        "Fair values should be reasonable compared to current price"
+      ]
+    },
+    "model_validation": {
+      "description": "Valuation models should be validated",
+      "rules": [
+        "DCF assumptions should be reasonable",
+        "WACC should be within industry range",
+        "Growth rates should be sustainable",
+        "Sensitivity analysis should be comprehensive"
+      ]
+    },
+    "data_quality": {
+      "description": "Data quality checks for valuation",
+      "rules": [
+        "Financial data should be recent and accurate",
+        "Market data should be current",
+        "Sector comparisons should be relevant",
+        "Historical data should be sufficient"
+      ]
+    }
+  }
+}
+

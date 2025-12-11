@@ -1,0 +1,52 @@
+[
+  {
+    "timestamp": "2025-12-08T16:38:22.357924",
+    "source_file": "/Users/buuphan/Dev/DATA/processed/commodity/commodity_prices.parquet",
+    "backup_file": "/Users/buuphan/Dev/DATA/processed/commodity/commodity_prices_backup_20251208_163822.parquet",
+    "source_size_bytes": 283507,
+    "backup_size_bytes": 283507,
+    "source_size_mb": 0.27,
+    "backup_size_mb": 0.27,
+    "status": "success"
+  },
+  {
+    "timestamp": "2025-12-08T16:44:29.841025",
+    "source_file": "/Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/commodity/commodity_prices.parquet",
+    "backup_file": "/Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/commodity/commodity_prices_backup_20251208_164429.parquet",
+    "source_size_bytes": 291417,
+    "backup_size_bytes": 291417,
+    "source_size_mb": 0.28,
+    "backup_size_mb": 0.28,
+    "status": "success"
+  },
+  {
+    "timestamp": "2025-12-08T16:45:13.239917",
+    "source_file": "/Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/commodity/commodity_prices.parquet",
+    "backup_file": "/Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/commodity/commodity_prices_backup_20251208_164513.parquet",
+    "source_size_bytes": 294805,
+    "backup_size_bytes": 294805,
+    "source_size_mb": 0.28,
+    "backup_size_mb": 0.28,
+    "status": "success"
+  },
+  {
+    "timestamp": "2025-12-09T16:34:08.804888",
+    "source_file": "/Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/commodity/commodity_prices.parquet",
+    "backup_file": "/Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/commodity/commodity_prices_backup_20251209_163408.parquet",
+    "source_size_bytes": 294805,
+    "backup_size_bytes": 294805,
+    "source_size_mb": 0.28,
+    "backup_size_mb": 0.28,
+    "status": "success"
+  },
+  {
+    "timestamp": "2025-12-10T16:14:28.087796",
+    "source_file": "/Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/commodity/commodity_prices.parquet",
+    "backup_file": "/Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/commodity/commodity_prices_backup_20251210_161428.parquet",
+    "source_size_bytes": 286611,
+    "backup_size_bytes": 286611,
+    "source_size_mb": 0.27,
+    "backup_size_mb": 0.27,
+    "status": "success"
+  }
+]

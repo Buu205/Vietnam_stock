@@ -57,7 +57,10 @@ from WEBAPP.domains.technical.data_loading_technical import (
     load_ma_screening,
     get_ma_screening_metadata,
 )
-from WEBAPP.services.commodity_loader import CommodityLoader, COMMODITY_DESCRIPTIONS
+    get_ma_screening_metadata,
+)
+from WEBAPP.services.commodity_loader import COMMODITY_DESCRIPTIONS
+from WEBAPP.services.macro_commodity_loader import MacroCommodityLoader
 
 
 @st.cache_data(ttl=3600)
@@ -184,12 +187,12 @@ def render_market_breadth_chart():
     st.subheader("Market Breadth")
 
     # Resolve file path tương đối từ project root (không dùng iCloud absolute path)
-    local_path = get_data_path("calculated_results/technical/market_breadth/market_breadth_global.parquet")
+    local_path = get_data_path("DATA/processed/technical/market_breadth_global.parquet")
     file_exists = local_path.exists()
 
     if not file_exists:
         st.error(f"⚠️ File không tồn tại tại: `{local_path}`")
-        st.info("💡 Vui lòng kiểm tra lại file `calculated_results/technical/market_breadth/market_breadth_global.parquet` dưới project root.")
+        st.info("💡 Vui lòng kiểm tra lại file `DATA/processed/technical/market_breadth_global.parquet` dưới project root.")
         st.info("💡 Bạn cần chạy script tổng hợp dữ liệu market breadth và đảm bảo quyền truy cập file.")
         return
 
@@ -372,7 +375,7 @@ def render_trading_value_chart():
         import duckdb
         import plotly.graph_objects as go
         
-        sector_path = get_data_path("calculated_results/technical/market_breadth/market_breadth_sector.parquet")
+        sector_path = get_data_path("DATA/processed/technical/market_breadth/market_breadth_sector.parquet")
         sector_path_str = str(sector_path)
         
         if not Path(sector_path).exists():
@@ -457,7 +460,7 @@ def render_sector_breadth_table():
     st.markdown("---")
 
     # Resolve file path tương đối từ project root (không dùng iCloud absolute path)
-    local_sector_path = get_data_path("calculated_results/technical/market_breadth/market_breadth_sector.parquet")
+    local_sector_path = get_data_path("DATA/processed/technical/market_breadth/market_breadth_sector.parquet")
 
     if not local_sector_path.exists():
         st.warning(f"⚠️ File sector breadth không tồn tại tại: `{local_sector_path}`")
@@ -635,7 +638,7 @@ def render_vnindex_pe_chart():
     
     try:
         # Load VN-Index PE data (single file with all data including BSC Universal PE)
-        pe_data_path = get_data_path("calculated_results/valuation/vnindex_pe_historical_final.parquet")
+        pe_data_path = get_data_path("DATA/processed/valuation/vnindex_pe_historical_final.parquet")
         
         if not os.path.exists(pe_data_path):
             st.warning("⚠️ Chưa có dữ liệu VN-Index PE. Vui lòng chạy script tính toán PE trước.")
@@ -1022,16 +1025,16 @@ def render_commodity_chart():
     col_reload, _ = st.columns([1, 10])
     with col_reload:
         if st.button("🔄 Reload Data", help="Force reload commodity data từ file (dùng khi file vừa được update)"):
-            CommodityLoader.clear_cache()
+            MacroCommodityLoader.clear_cache()
             st.success("✅ Cache cleared! Data sẽ được reload.")
             st.rerun()
     
     try:
         # Initialize loader
-        loader = CommodityLoader()
+        loader = MacroCommodityLoader()
         
         # Get available commodity types
-        commodity_types = loader.get_commodity_types()
+        commodity_types = loader.get_available_symbols(category='commodity')
         
         if not commodity_types:
             st.warning("⚠️ Chưa có dữ liệu commodity. Vui lòng chạy script cập nhật dữ liệu trước.")
@@ -1125,12 +1128,23 @@ def render_commodity_chart():
             start_date = end_date - pd.Timedelta(days=365)
         
         # Load data for selected commodities
+        # Load data for selected commodities
         with st.spinner("Đang tải dữ liệu commodity..."):
-            df = loader.get_multiple_commodities(
-                commodities_to_load,
-                start_date=start_date.strftime('%Y-%m-%d'),
-                end_date=end_date.strftime('%Y-%m-%d')
-            )
+            # Load unified data and filter
+            df_unified = loader.load_data()
+            if df_unified.empty:
+                df = pd.DataFrame()
+            else:
+                # Filter by category and date
+                mask = (
+                    (df_unified['category'] == 'commodity') & 
+                    (df_unified['symbol'].isin(commodities_to_load)) &
+                    (df_unified['date'] >= pd.to_datetime(start_date)) &
+                    (df_unified['date'] <= pd.to_datetime(end_date))
+                )
+                df = df_unified[mask].copy()
+                # Rename 'symbol' to 'commodity_type' for compatibility with existing chart logic
+                df = df.rename(columns={'symbol': 'commodity_type'})
         
         if df.empty:
             st.warning("Không có dữ liệu cho khoảng thời gian đã chọn")
@@ -1440,11 +1454,15 @@ def render_commodity_chart():
         start_date_perf = end_date - pd.Timedelta(days=1095)  # 3 years for performance calculation
         
         # Load ALL commodities data for performance table
+        # Load ALL commodities data for performance table
         with st.spinner("Đang tải dữ liệu commodity cho bảng performance..."):
-            df_all = loader.load_data()
-            if not df_all.empty and 'date' in df_all.columns:
-                df_all['date'] = pd.to_datetime(df_all['date'])
-                df_all = df_all[df_all['date'] >= start_date_perf].copy()
+            df_all_unified = loader.load_data()
+            if not df_all_unified.empty:
+                df_all = df_all_unified[df_all_unified['category'] == 'commodity'].copy()
+                df_all = df_all.rename(columns={'symbol': 'commodity_type'})
+                if 'date' in df_all.columns:
+                    df_all['date'] = pd.to_datetime(df_all['date'])
+                    df_all = df_all[df_all['date'] >= start_date_perf].copy()
         
         if not df_all.empty:
             # Calculate performance for ALL commodities
@@ -1779,55 +1797,76 @@ def render_macro_dashboard():
     """Hiển thị tab chỉ số vĩ mô (FX, rates, bonds)."""
     st.subheader("Macro Indicators Reference")
     
-    macro_datasets = {
-        "💱 Tỷ giá ngoại hối": {
-            "path": "calculated_results/macro/exchange_rates.parquet",
-            "value_col": "value",
-            "decimals": 2,
-        },
-        "🏦 Lãi suất liên ngân hàng": {
-            "path": "calculated_results/macro/interest_rates.parquet",
-            "value_col": "value",
-            "decimals": 2,
-        },
-        "💰 Lãi suất huy động NHTM lớn": {
-            "path": "calculated_results/macro/deposit_interest_rates.parquet",
-            "value_col": "value",
-            "decimals": 2,
-        },
-        "📉 Trái phiếu Chính phủ VN 5Y": {
-            "path": "calculated_results/macro/gov_bond_yields.parquet",
-            "value_col": "value",
-            "decimals": 3,
-        },
+    # Define groups of symbols
+    macro_groups = {
+        "💱 Tỷ giá ngoại hối": [
+            'ty_gia_usd_trung_tam', 'ty_gia_tran', 'ty_gia_san', 
+            'ty_gia_usd_nhtm_ban_ra', 'ty_gia_usd_tu_do_ban_ra'
+        ],
+        "🏦 Lãi suất liên ngân hàng": [
+            'ls_qua_dem_lien_ngan_hang', 'ls_lien_ngan_hang_ky_han_1_tuan', 
+            'ls_lien_ngan_hang_ky_han_2_tuan'
+        ],
+        "💰 Lãi suất huy động NHTM lớn": [
+            'ls_huy_dong_1_3_thang', 'ls_huy_dong_6_9_thang', 'ls_huy_dong_13_thang'
+        ],
+        "📉 Trái phiếu Chính phủ VN 5Y": [
+            'vn_gov_bond_5y'
+        ],
     }
     
-    dataset_label = st.selectbox("Chọn nhóm dữ liệu vĩ mô", list(macro_datasets.keys()))
-    dataset_cfg = macro_datasets[dataset_label]
-    df, path_str = load_macro_dataset(dataset_cfg["path"])
+    dataset_label = st.selectbox("Chọn nhóm dữ liệu vĩ mô", list(macro_groups.keys()))
+    selected_symbols = macro_groups[dataset_label]
+    
+    # Load data using MacroCommodityLoader
+    loader = MacroCommodityLoader()
+    df_unified = loader.load_data()
+    
+    if df_unified.empty:
+        st.warning("Chưa có dữ liệu macro.")
+        return
+        
+    # Filter for selected symbols
+    df = df_unified[df_unified['symbol'].isin(selected_symbols)].copy()
     
     if df.empty:
-        st.warning("Chưa có dữ liệu cho nhóm này hoặc file chưa được upload.")
+        st.warning("Chưa có dữ liệu cho nhóm này.")
         return
+        
+    # Rename columns to match expected format for _render_macro_section
+    # Expected: rate_name, value, date, unit
+    df = df.rename(columns={'name': 'rate_name', 'symbol': 'symbol_id'})
     
-    min_date = df['date'].min().date()
-    max_date = df['date'].max().date()
+    min_date = df['date'].min()
+    max_date = df['date'].max()
+    
     title_col, info_col = st.columns([1, 0.35])
     with title_col:
         st.markdown(f"**{dataset_label}**")
     with info_col:
+        if isinstance(min_date, pd.Timestamp):
+            min_d_str = min_date.strftime('%Y-%m-%d')
+            max_d_str = max_date.strftime('%Y-%m-%d')
+        else:
+            min_d_str = str(min_date)
+            max_d_str = str(max_date)
+            
         info_col.markdown(
             f"<div style='text-align:right;color:#6c757d;font-size:0.85rem;'>"
-            f"{min_date} → {max_date}"
+            f"{min_d_str} → {max_d_str}"
             f"</div>",
             unsafe_allow_html=True,
         )
+
+    # Determine decimals based on group
+    decimals = 3 if "Trái phiếu" in dataset_label else 2
+
     _render_macro_section(
         df=df,
         dataset_label=dataset_label,
-        value_col=dataset_cfg["value_col"],
-        multiselect_key=dataset_cfg["path"],
-        decimals=dataset_cfg.get("decimals", 2),
+        value_col="value",
+        multiselect_key=dataset_label, # Use label as key since path is not unique anymore
+        decimals=decimals,
     )
 
 

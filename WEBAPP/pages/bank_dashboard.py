@@ -322,7 +322,7 @@ def load_bank_valuation_data(symbol, start_year):
         conn = duckdb.connect()
         
         # Load PE data with filtering
-        pe_path = get_data_path('calculated_results/valuation/pe/pe_historical_all_symbols_final.parquet')
+        pe_path = get_data_path('DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet')
         pe_data = conn.execute("""
             SELECT * FROM read_parquet(?)
             WHERE symbol = ? AND TRY_CAST(date AS DATE) >= ?
@@ -333,7 +333,7 @@ def load_bank_valuation_data(symbol, start_year):
             pe_data['date'] = pd.to_datetime(pe_data['date'])
         
         # Load PB data with filtering
-        pb_path = get_data_path('calculated_results/valuation/pb/pb_historical_all_symbols_final.parquet')
+        pb_path = get_data_path('DATA/processed/valuation/pb/pb_historical_all_symbols_final.parquet')
         pb_data = conn.execute("""
             SELECT * FROM read_parquet(?)
             WHERE symbol = ? AND TRY_CAST(date AS DATE) >= ?
@@ -871,8 +871,8 @@ def render_valuation_tab(valuation_data, selected_symbol, start_year):
     
     # Load real PE/PB data for analysis
     try:
-        pe_file = get_data_path("calculated_results/valuation/pe/pe_historical_all_symbols_final.parquet")
-        pb_file = get_data_path("calculated_results/valuation/pb/pb_historical_all_symbols_final.parquet")
+        pe_file = get_data_path("DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet")
+        pb_file = get_data_path("DATA/processed/valuation/pb/pb_historical_all_symbols_final.parquet")
         
         file_path = pe_file if metric_type == "P/E" else pb_file
         if not os.path.exists(file_path):
@@ -1682,7 +1682,7 @@ def render_pe_pb_dotplot(valuation_data, selected_symbol, start_year):
         if metric_type == "P/E":
             # Try to load latest PE data
             pe_files = [
-                get_data_path("calculated_results/valuation/pe/pe_historical_all_symbols_final.parquet")
+                get_data_path("DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet")
             ]
             
             all_data = None
@@ -1696,7 +1696,7 @@ def render_pe_pb_dotplot(valuation_data, selected_symbol, start_year):
                     continue
                     
         else:  # P/B
-            pb_file = get_data_path("calculated_results/valuation/pb/pb_historical_all_symbols_final.parquet")
+            pb_file = get_data_path("DATA/processed/valuation/pb/pb_historical_all_symbols_final.parquet")
             all_data = pd.read_parquet(pb_file)
         
         # Prepare data for each bank
@@ -1895,7 +1895,7 @@ def render_bank_historical_trend(selected_ticker, metric_type, start_year):
         if metric_type == "P/E":
             # Try to load latest PE data
             pe_files = [
-                get_data_path("calculated_results/valuation/pe/pe_historical_all_symbols_final.parquet")
+                get_data_path("DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet")
             ]
             
             ticker_df = None
@@ -1914,7 +1914,7 @@ def render_bank_historical_trend(selected_ticker, metric_type, start_year):
                     
         else:  # P/B
             # Load latest PB data
-            pb_file = get_data_path("calculated_results/valuation/pb/pb_historical_all_symbols_final.parquet")
+            pb_file = get_data_path("DATA/processed/valuation/pb/pb_historical_all_symbols_final.parquet")
             df = pd.read_parquet(pb_file)
             
             if 'symbol' in df.columns:

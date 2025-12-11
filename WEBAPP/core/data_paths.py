@@ -311,6 +311,11 @@ class DataPaths:
             )
             
         return get_data_path(f"DATA/processed/{indicator_map[indicator]}")
+
+    @staticmethod
+    def unified_macro_commodity() -> Path:
+        """Get path to unified macro/commodity parquet file."""
+        return get_data_path("DATA/processed/macro_commodity/macro_commodity_unified.parquet")
     
     # ============================================================================
     # FORECAST DATA

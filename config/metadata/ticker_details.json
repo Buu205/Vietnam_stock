@@ -1,0 +1,1830 @@
+{
+  "TPB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "NVB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "VPB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "STB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "VCB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "LPB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "PGB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "ABB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "EVF": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "MSB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "KLB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "VIB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "MBB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "NAB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "OCB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "TCB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "BID": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "EIB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "VBB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "HDB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "CTG": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "ACB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "SHB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "BVB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "SSB": {
+    "entity": "BANK",
+    "sector": "Ngân hàng"
+  },
+  "VLB": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "HSL": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "VC2": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TNI": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "LSS": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "SLS": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "C4G": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "THG": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "VCP": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "DFF": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "ICT": {
+    "entity": "COMPANY",
+    "sector": "Công nghệ Thông tin"
+  },
+  "HSG": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "TTF": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "APF": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "NHH": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "CMX": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "NAF": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "VTO": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "FRT": {
+    "entity": "COMPANY",
+    "sector": "Bán lẻ"
+  },
+  "SBT": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "MST": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "HGM": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "MTA": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "TLD": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "SGR": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "VRG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "VNZ": {
+    "entity": "COMPANY",
+    "sector": "Truyền thông"
+  },
+  "HVN": {
+    "entity": "COMPANY",
+    "sector": "Du lịch và Giải trí"
+  },
+  "SBG": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "CMG": {
+    "entity": "COMPANY",
+    "sector": "Công nghệ Thông tin"
+  },
+  "POM": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "CKG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "VC7": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "VJC": {
+    "entity": "COMPANY",
+    "sector": "Du lịch và Giải trí"
+  },
+  "AMS": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "TCO": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "LIC": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TTN": {
+    "entity": "COMPANY",
+    "sector": "Viễn thông"
+  },
+  "CRC": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "ITQ": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "BKC": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "DPR": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "NVL": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "CTD": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "DLG": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "DAH": {
+    "entity": "COMPANY",
+    "sector": "Du lịch và Giải trí"
+  },
+  "PHC": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "PTL": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "CIG": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "VPI": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "DTD": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "TL4": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "VNS": {
+    "entity": "COMPANY",
+    "sector": "Du lịch và Giải trí"
+  },
+  "DHC": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "BMP": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "VVS": {
+    "entity": "COMPANY",
+    "sector": "Ô tô và phụ tùng"
+  },
+  "VSC": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "DVP": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "HAP": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "DBC": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "VE9": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "CLL": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "DL1": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "DRI": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "CMS": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "VOC": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "BAF": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "PLX": {
+    "entity": "COMPANY",
+    "sector": "Dầu khí"
+  },
+  "HAG": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "VGT": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "DIG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "MVC": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "OIL": {
+    "entity": "COMPANY",
+    "sector": "Dầu khí"
+  },
+  "LIG": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "DNP": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "LCG": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "NRC": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "AAA": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "VCR": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "PPC": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "ABS": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "DXP": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "API": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "VGI": {
+    "entity": "COMPANY",
+    "sector": "Viễn thông"
+  },
+  "SZB": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "SIP": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "SJD": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "BSR": {
+    "entity": "COMPANY",
+    "sector": "Dầu khí"
+  },
+  "NTL": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "HVT": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "HTG": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "AFX": {
+    "entity": "COMPANY",
+    "sector": "Bán lẻ"
+  },
+  "CTI": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "PHP": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "EVE": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "LIX": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "DVN": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "DSN": {
+    "entity": "COMPANY",
+    "sector": "Du lịch và Giải trí"
+  },
+  "MCH": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "QTP": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "SCS": {
+    "entity": "COMPANY",
+    "sector": "Du lịch và Giải trí"
+  },
+  "KSV": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "GVR": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "SHN": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "KDC": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "TLH": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "BCC": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "NHA": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "LHC": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "HVH": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "PVT": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "KSB": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "VIC": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "VSI": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "YEG": {
+    "entity": "COMPANY",
+    "sector": "Truyền thông"
+  },
+  "GAS": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "TNG": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "PSD": {
+    "entity": "COMPANY",
+    "sector": "Bán lẻ"
+  },
+  "ASM": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "PXL": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "HDC": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "C69": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TEG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "OGC": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "PDR": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "PMC": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "OPC": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "NNC": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "ACG": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "BMJ": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "FIR": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "LHG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "CII": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "VHE": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "FIT": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "VNB": {
+    "entity": "COMPANY",
+    "sector": "Truyền thông"
+  },
+  "AGG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "MCG": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TRC": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "HD6": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "PVP": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "DGT": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TTA": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "EVG": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TDP": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "PSW": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "NLG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "STH": {
+    "entity": "COMPANY",
+    "sector": "Truyền thông"
+  },
+  "SVN": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "PPT": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "HLD": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "ACV": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "HNM": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "CNG": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "TV2": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "SGP": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "NAG": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "TNC": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "TDM": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "SEA": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "BWE": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "TNH": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "G36": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "SAB": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "PVI": {
+    "entity": "INSURANCE",
+    "sector": "Bảo hiểm"
+  },
+  "KBC": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "DPG": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "HTN": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "QCG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "BVH": {
+    "entity": "INSURANCE",
+    "sector": "Bảo hiểm"
+  },
+  "HAX": {
+    "entity": "COMPANY",
+    "sector": "Ô tô và phụ tùng"
+  },
+  "HQC": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "MML": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "MPC": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "TCL": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "IDC": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "SZC": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "FOC": {
+    "entity": "COMPANY",
+    "sector": "Truyền thông"
+  },
+  "HVA": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "PV2": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "DHA": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "GDT": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "RAL": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "TLG": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "PET": {
+    "entity": "COMPANY",
+    "sector": "Bán lẻ"
+  },
+  "GEE": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "MHC": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "ST8": {
+    "entity": "COMPANY",
+    "sector": "Công nghệ Thông tin"
+  },
+  "PTB": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "BCM": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "GEX": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "PGV": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "KVC": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "LTG": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "SGT": {
+    "entity": "COMPANY",
+    "sector": "Công nghệ Thông tin"
+  },
+  "SZL": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "DDV": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "CTR": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "SJS": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "KDH": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "DPM": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "ITD": {
+    "entity": "COMPANY",
+    "sector": "Công nghệ Thông tin"
+  },
+  "VHC": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "VFG": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "NBC": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "BFC": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "NO1": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "IJC": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "TIP": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "VGS": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "VC3": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "SCG": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TSC": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "PHR": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "FOX": {
+    "entity": "COMPANY",
+    "sector": "Viễn thông"
+  },
+  "VCG": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "SJE": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "FPT": {
+    "entity": "COMPANY",
+    "sector": "Công nghệ Thông tin"
+  },
+  "VTR": {
+    "entity": "COMPANY",
+    "sector": "Du lịch và Giải trí"
+  },
+  "SAS": {
+    "entity": "COMPANY",
+    "sector": "Bán lẻ"
+  },
+  "VMS": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "PAN": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "VOS": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "CHP": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "CSV": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "HPG": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "CTP": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "L40": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "DGW": {
+    "entity": "COMPANY",
+    "sector": "Bán lẻ"
+  },
+  "HPX": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "GIL": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "S99": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "GSP": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "NED": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "IPA": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "GEG": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "IMP": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "DCM": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "SKG": {
+    "entity": "COMPANY",
+    "sector": "Du lịch và Giải trí"
+  },
+  "ABI": {
+    "entity": "INSURANCE",
+    "sector": "Bảo hiểm"
+  },
+  "CST": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "LBM": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TCM": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "GMD": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "BNA": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "VIP": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "ABT": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "LDG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "HAR": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "GKM": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TIG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "L18": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "SGN": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "QNS": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "SCL": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "NT2": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "DXG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "MSR": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "STK": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "HAH": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "HHV": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "DGC": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "L14": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "CEO": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "JVC": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "VNM": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "NKG": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "VHG": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "FCN": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "ELC": {
+    "entity": "COMPANY",
+    "sector": "Công nghệ Thông tin"
+  },
+  "TTH": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "CSM": {
+    "entity": "COMPANY",
+    "sector": "Ô tô và phụ tùng"
+  },
+  "D2D": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "VDP": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "MCM": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "CDC": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "DRC": {
+    "entity": "COMPANY",
+    "sector": "Ô tô và phụ tùng"
+  },
+  "NBB": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "DBD": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "HNG": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "CTF": {
+    "entity": "COMPANY",
+    "sector": "Ô tô và phụ tùng"
+  },
+  "NTC": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "KOS": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "IDI": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "SCR": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "PVD": {
+    "entity": "COMPANY",
+    "sector": "Dầu khí"
+  },
+  "DC4": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "SMB": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "LAS": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "HUB": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "FCM": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TDC": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "C47": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "IDV": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "SAM": {
+    "entity": "COMPANY",
+    "sector": "Công nghệ Thông tin"
+  },
+  "HBC": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "SHI": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "VHM": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "APH": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "MBG": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "AST": {
+    "entity": "COMPANY",
+    "sector": "Bán lẻ"
+  },
+  "BMC": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "KHG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "BCG": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "SMC": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "TVC": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "VRC": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "DDG": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "VLC": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "CTX": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "NCT": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "VEF": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "CLX": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "CRE": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "PVB": {
+    "entity": "COMPANY",
+    "sector": "Dầu khí"
+  },
+  "PC1": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "REE": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "NTP": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "HII": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "VPH": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "HTI": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "IDJ": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "BCE": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "PVC": {
+    "entity": "COMPANY",
+    "sector": "Dầu khí"
+  },
+  "TOS": {
+    "entity": "COMPANY",
+    "sector": "Dầu khí"
+  },
+  "DHG": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "VGC": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "CSC": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "HUT": {
+    "entity": "COMPANY",
+    "sector": "Ô tô và phụ tùng"
+  },
+  "AAV": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "HHP": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "HDG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "FMC": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "PFL": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TDH": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "HHS": {
+    "entity": "COMPANY",
+    "sector": "Ô tô và phụ tùng"
+  },
+  "MSN": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "PVS": {
+    "entity": "COMPANY",
+    "sector": "Dầu khí"
+  },
+  "VEA": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "LGL": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "TNT": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "PAC": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "HT1": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "VPG": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "ADS": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "PNJ": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "VNE": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "ITC": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "GDA": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "DRH": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "VTP": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "VCS": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TCD": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TVN": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "POW": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "MWG": {
+    "entity": "COMPANY",
+    "sector": "Bán lẻ"
+  },
+  "BOT": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "DHT": {
+    "entity": "COMPANY",
+    "sector": "Bán lẻ"
+  },
+  "DVM": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "VTZ": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "KSF": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "VGR": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "PLC": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "SSH": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "VRE": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "ANV": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "TCH": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "DCL": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "CCL": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "NDN": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "ICN": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "DXS": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "TV1": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "VTD": {
+    "entity": "COMPANY",
+    "sector": "Du lịch và Giải trí"
+  },
+  "PAT": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "PCH": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "TAL": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "BGE": {
+    "entity": "COMPANY",
+    "sector": "Điện, nước & xăng dầu khí đốt"
+  },
+  "MSH": {
+    "entity": "COMPANY",
+    "sector": "Hàng cá nhân & Gia dụng"
+  },
+  "PVX": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "AVG": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "AAH": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "LSG": {
+    "entity": "COMPANY",
+    "sector": "Bất động sản"
+  },
+  "BCR": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "RYG": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "MZG": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "ANT": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "VND": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "SSI": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "HCM": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "VCI": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "ODE": {
+    "entity": "COMPANY",
+    "sector": "Truyền thông"
+  },
+  "SHS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "PSI": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "APG": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "TCI": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "VIG": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "FTS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "CTS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "MIG": {
+    "entity": "INSURANCE",
+    "sector": "Bảo hiểm"
+  },
+  "VIX": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "MBS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "BMI": {
+    "entity": "INSURANCE",
+    "sector": "Bảo hiểm"
+  },
+  "IVS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "EVS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "BIC": {
+    "entity": "INSURANCE",
+    "sector": "Bảo hiểm"
+  },
+  "BMS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "VFS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "BSI": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "AGR": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "APS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "WSS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "TVS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "BVS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "AAS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "DSC": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "TVB": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "VDS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "MLS": {
+    "entity": "COMPANY",
+    "sector": "Thực phẩm và đồ uống"
+  },
+  "SBS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "ORS": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "CKA": {
+    "entity": "COMPANY",
+    "sector": "Hàng & Dịch vụ Công nghiệp"
+  },
+  "KCB": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "MFS": {
+    "entity": "COMPANY",
+    "sector": "Viễn thông"
+  },
+  "VPL": {
+    "entity": "COMPANY",
+    "sector": "Du lịch và Giải trí"
+  },
+  "YTC": {
+    "entity": "COMPANY",
+    "sector": "Y tế"
+  },
+  "VUA": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "ABW": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "ECO": {
+    "entity": "COMPANY",
+    "sector": "Hóa chất"
+  },
+  "DSH": {
+    "entity": "COMPANY",
+    "sector": "Xây dựng và Vật liệu"
+  },
+  "TD6": {
+    "entity": "COMPANY",
+    "sector": "Tài nguyên Cơ bản"
+  },
+  "DSE": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  }
+}

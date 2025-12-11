@@ -1,0 +1,102 @@
+2025-12-09 16:33:59,606 - INFO - 🚀 Starting daily macro data update...
+2025-12-09 16:33:59,606 - INFO - BackupLogger initialized. Log directory: /Users/buuphan/Dev/Vietnam_dashboard/data_processor/logs/backup
+2025-12-09 16:33:59,606 - INFO - Initialized MacroDataFetcher
+2025-12-09 16:33:59,606 - INFO - Updating exchange rates...
+2025-12-09 16:33:59,639 - INFO - Loaded existing data: 2598 records
+2025-12-09 16:33:59,641 - INFO - Fetching exchange rates from wichart.vn API...
+2025-12-09 16:33:59,904 - INFO - Retrieved 2598 records from wichart.vn API
+2025-12-09 16:33:59,904 - INFO - Rate types: ['ty_gia_san', 'ty_gia_tran', 'ty_gia_usd_nhtm_ban_ra', 'ty_gia_usd_trung_tam', 'ty_gia_usd_tu_do_ban_ra']
+2025-12-09 16:33:59,904 - INFO - Date range: 2023-12-10 to 2025-12-08
+2025-12-09 16:33:59,906 - INFO - Found 1 new records for ty_gia_san (after 2025-12-07)
+2025-12-09 16:33:59,906 - INFO - Found 1 new records for ty_gia_tran (after 2025-12-07)
+2025-12-09 16:33:59,906 - INFO - Found 1 new records for ty_gia_usd_nhtm_ban_ra (after 2025-12-07)
+2025-12-09 16:33:59,907 - INFO - Found 1 new records for ty_gia_usd_trung_tam (after 2025-12-07)
+2025-12-09 16:33:59,907 - INFO - Found 1 new records for ty_gia_usd_tu_do_ban_ra (after 2025-12-07)
+2025-12-09 16:33:59,909 - INFO - ✅ Backup created: exchange_rates_backup_20251209_163359.parquet (0.03 MB)
+2025-12-09 16:33:59,912 - INFO - Saved 2603 records to /Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/macro/exchange_rates.parquet
+2025-12-09 16:33:59,912 - INFO - Added 5 new exchange rate records. Total: 2603 records
+2025-12-09 16:33:59,912 - INFO - Updating interest rates...
+2025-12-09 16:33:59,914 - INFO - Loaded existing interest rates: 1491 records
+2025-12-09 16:33:59,915 - INFO - Fetching interest rates from wichart.vn API...
+2025-12-09 16:34:00,114 - INFO - Retrieved 1491 records from wichart.vn API
+2025-12-09 16:34:00,114 - INFO - Rate types: ['ls_lien_ngan_hang_ky_han_1_tuan', 'ls_lien_ngan_hang_ky_han_2_tuan', 'ls_qua_dem_lien_ngan_hang']
+2025-12-09 16:34:00,115 - INFO - Date range: 2023-12-10 to 2025-12-04
+2025-12-09 16:34:00,116 - INFO - Found 1 new records for ls_lien_ngan_hang_ky_han_1_tuan (after 2025-12-03)
+2025-12-09 16:34:00,116 - INFO - Found 1 new records for ls_lien_ngan_hang_ky_han_2_tuan (after 2025-12-03)
+2025-12-09 16:34:00,117 - INFO - Found 1 new records for ls_qua_dem_lien_ngan_hang (after 2025-12-03)
+2025-12-09 16:34:00,119 - INFO - ✅ Backup created: interest_rates_backup_20251209_163400.parquet (0.02 MB)
+2025-12-09 16:34:00,121 - INFO - Saved 1494 interest rate records to /Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/macro/interest_rates.parquet
+2025-12-09 16:34:00,121 - INFO - Added 3 new interest rate records. Total: 1494 records
+2025-12-09 16:34:00,121 - INFO - Updating deposit interest rates...
+2025-12-09 16:34:00,123 - INFO - Loaded existing deposit interest rates: 1506 records
+2025-12-09 16:34:00,124 - INFO - Fetching deposit interest rates from wichart.vn API...
+2025-12-09 16:34:00,270 - INFO - Retrieved 1506 records from wichart.vn API
+2025-12-09 16:34:00,270 - INFO - Rate types: ['ls_huy_dong_13_thang', 'ls_huy_dong_1_3_thang', 'ls_huy_dong_6_9_thang']
+2025-12-09 16:34:00,270 - INFO - Date range: 2023-12-10 to 2025-12-08
+2025-12-09 16:34:00,272 - INFO - Found 1 new records for ls_huy_dong_13_thang (after 2025-12-07)
+2025-12-09 16:34:00,272 - INFO - Found 1 new records for ls_huy_dong_1_3_thang (after 2025-12-07)
+2025-12-09 16:34:00,272 - INFO - Found 1 new records for ls_huy_dong_6_9_thang (after 2025-12-07)
+2025-12-09 16:34:00,274 - INFO - ✅ Backup created: deposit_interest_rates_backup_20251209_163400.parquet (0.02 MB)
+2025-12-09 16:34:00,276 - INFO - Saved 1509 deposit interest rate records to /Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/macro/deposit_interest_rates.parquet
+2025-12-09 16:34:00,276 - INFO - Added 3 new deposit interest rate records. Total: 1509 records
+2025-12-09 16:34:00,276 - INFO - Updating government bond yields...
+2025-12-09 16:34:00,278 - INFO - Loaded existing gov bond data: 330 records
+2025-12-09 16:34:00,279 - INFO - Fetching VN 5Y gov bond yields from simplize.vn...
+2025-12-09 16:34:00,525 - INFO - Retrieved 330 gov bond records from simplize.vn
+2025-12-09 16:34:00,525 - INFO - Gov bond date range: 2024-09-04 to 2025-12-09
+2025-12-09 16:34:00,526 - INFO - Found 1 new gov bond records for vn_gov_bond_5y (after 2025-12-08)
+2025-12-09 16:34:00,529 - INFO - ✅ Backup created: gov_bond_yields_backup_20251209_163400.parquet (0.02 MB)
+2025-12-09 16:34:00,531 - INFO - Saved 331 gov bond records to /Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/macro/gov_bond_yields.parquet
+2025-12-09 16:34:00,531 - INFO - Added 1 new government bond records. Total: 331 records
+2025-12-09 16:34:00,531 - INFO - ✅ Daily macro update completed. Added 12 new records total.
+2025-12-10 16:14:18,713 - INFO - 🚀 Starting daily macro data update...
+2025-12-10 16:14:18,714 - INFO - BackupLogger initialized. Log directory: /Users/buuphan/Dev/Vietnam_dashboard/data_processor/logs/backup
+2025-12-10 16:14:18,714 - INFO - Initialized MacroDataFetcher
+2025-12-10 16:14:18,714 - INFO - Updating exchange rates...
+2025-12-10 16:14:18,780 - INFO - Loaded existing data: 2603 records
+2025-12-10 16:14:18,786 - INFO - Fetching exchange rates from wichart.vn API...
+2025-12-10 16:14:19,042 - INFO - Retrieved 2603 records from wichart.vn API
+2025-12-10 16:14:19,042 - INFO - Rate types: ['ty_gia_san', 'ty_gia_tran', 'ty_gia_usd_nhtm_ban_ra', 'ty_gia_usd_trung_tam', 'ty_gia_usd_tu_do_ban_ra']
+2025-12-10 16:14:19,042 - INFO - Date range: 2023-12-10 to 2025-12-09
+2025-12-10 16:14:19,044 - INFO - Found 1 new records for ty_gia_san (after 2025-12-08)
+2025-12-10 16:14:19,044 - INFO - Found 1 new records for ty_gia_tran (after 2025-12-08)
+2025-12-10 16:14:19,044 - INFO - Found 1 new records for ty_gia_usd_nhtm_ban_ra (after 2025-12-08)
+2025-12-10 16:14:19,045 - INFO - Found 1 new records for ty_gia_usd_trung_tam (after 2025-12-08)
+2025-12-10 16:14:19,045 - INFO - Found 1 new records for ty_gia_usd_tu_do_ban_ra (after 2025-12-08)
+2025-12-10 16:14:19,048 - INFO - ✅ Backup created: exchange_rates_backup_20251210_161419.parquet (0.03 MB)
+2025-12-10 16:14:19,054 - INFO - Saved 2608 records to /Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/macro/exchange_rates.parquet
+2025-12-10 16:14:19,054 - INFO - Added 5 new exchange rate records. Total: 2608 records
+2025-12-10 16:14:19,054 - INFO - Updating interest rates...
+2025-12-10 16:14:19,055 - INFO - Loaded existing interest rates: 1494 records
+2025-12-10 16:14:19,056 - INFO - Fetching interest rates from wichart.vn API...
+2025-12-10 16:14:19,144 - INFO - Retrieved 1494 records from wichart.vn API
+2025-12-10 16:14:19,144 - INFO - Rate types: ['ls_lien_ngan_hang_ky_han_1_tuan', 'ls_lien_ngan_hang_ky_han_2_tuan', 'ls_qua_dem_lien_ngan_hang']
+2025-12-10 16:14:19,144 - INFO - Date range: 2023-12-10 to 2025-12-07
+2025-12-10 16:14:19,146 - INFO - Found 1 new records for ls_lien_ngan_hang_ky_han_1_tuan (after 2025-12-04)
+2025-12-10 16:14:19,146 - INFO - Found 1 new records for ls_lien_ngan_hang_ky_han_2_tuan (after 2025-12-04)
+2025-12-10 16:14:19,146 - INFO - Found 1 new records for ls_qua_dem_lien_ngan_hang (after 2025-12-04)
+2025-12-10 16:14:19,148 - INFO - ✅ Backup created: interest_rates_backup_20251210_161419.parquet (0.02 MB)
+2025-12-10 16:14:19,150 - INFO - Saved 1497 interest rate records to /Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/macro/interest_rates.parquet
+2025-12-10 16:14:19,150 - INFO - Added 3 new interest rate records. Total: 1497 records
+2025-12-10 16:14:19,150 - INFO - Updating deposit interest rates...
+2025-12-10 16:14:19,151 - INFO - Loaded existing deposit interest rates: 1509 records
+2025-12-10 16:14:19,152 - INFO - Fetching deposit interest rates from wichart.vn API...
+2025-12-10 16:14:19,298 - INFO - Retrieved 1509 records from wichart.vn API
+2025-12-10 16:14:19,298 - INFO - Rate types: ['ls_huy_dong_13_thang', 'ls_huy_dong_1_3_thang', 'ls_huy_dong_6_9_thang']
+2025-12-10 16:14:19,298 - INFO - Date range: 2023-12-10 to 2025-12-09
+2025-12-10 16:14:19,300 - INFO - Found 1 new records for ls_huy_dong_13_thang (after 2025-12-08)
+2025-12-10 16:14:19,300 - INFO - Found 1 new records for ls_huy_dong_1_3_thang (after 2025-12-08)
+2025-12-10 16:14:19,300 - INFO - Found 1 new records for ls_huy_dong_6_9_thang (after 2025-12-08)
+2025-12-10 16:14:19,302 - INFO - ✅ Backup created: deposit_interest_rates_backup_20251210_161419.parquet (0.02 MB)
+2025-12-10 16:14:19,304 - INFO - Saved 1512 deposit interest rate records to /Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/macro/deposit_interest_rates.parquet
+2025-12-10 16:14:19,304 - INFO - Added 3 new deposit interest rate records. Total: 1512 records
+2025-12-10 16:14:19,304 - INFO - Updating government bond yields...
+2025-12-10 16:14:19,306 - INFO - Loaded existing gov bond data: 331 records
+2025-12-10 16:14:19,307 - INFO - Fetching VN 5Y gov bond yields from simplize.vn...
+2025-12-10 16:14:19,549 - INFO - Retrieved 330 gov bond records from simplize.vn
+2025-12-10 16:14:19,550 - INFO - Gov bond date range: 2024-09-05 to 2025-12-10
+2025-12-10 16:14:19,550 - INFO - Found 1 new gov bond records for vn_gov_bond_5y (after 2025-12-09)
+2025-12-10 16:14:19,552 - INFO - ✅ Backup created: gov_bond_yields_backup_20251210_161419.parquet (0.02 MB)
+2025-12-10 16:14:19,553 - INFO - Saved 332 gov bond records to /Users/buuphan/Dev/Vietnam_dashboard/DATA/processed/macro/gov_bond_yields.parquet
+2025-12-10 16:14:19,553 - INFO - Added 1 new government bond records. Total: 332 records
+2025-12-10 16:14:19,553 - INFO - ✅ Daily macro update completed. Added 12 new records total.

@@ -102,7 +102,7 @@ def load_financial_summary_data(symbol, start_year):
     try:
         # Use DuckDB for efficient selective loading
         conn = get_duckdb_connection()
-        data_path = get_data_path('calculated_results/fundamental/company/company_financial_metrics.parquet')
+        data_path = get_data_path('DATA/processed/fundamental/company/company_financial_metrics.parquet')
         
         # Check if 'year' column exists, if not extract from report_date
         # First, load data to check columns
@@ -163,24 +163,12 @@ def load_financial_summary_data(symbol, start_year):
 
 @st.cache_data(ttl=3600, max_entries=16)  # Cache for 1 hour, max 16 entries
 def get_valuation_data_update_info():
-    """Get the latest valuation data update date"""
+    """Lấy ngày cập nhật mới nhất của dữ liệu valuation"""
     try:
-        conn = get_duckdb_connection()
-        pe_path = get_data_path('calculated_results/valuation/pe/pe_historical_all_symbols_final.parquet')
-        query = """
-        SELECT MAX(report_date) as latest_date
-        FROM read_parquet(?)
-        """
-        result = conn.execute(query, [str(pe_path)]).fetchone()
-        latest_date = result[0] if result else None
-        
-        # Ensure latest_date is a datetime object
-        if latest_date and isinstance(latest_date, str):
-            latest_date = pd.to_datetime(latest_date)
-        
-        return latest_date
+        from WEBAPP.domains.valuation.data_loading_valuation import get_latest_valuation_date
+        return get_latest_valuation_date()
     except Exception as e:
-        st.error(f"Error getting valuation data update info: {e}")
+        st.error(f"Lỗi khi lấy thông tin cập nhật dữ liệu valuation: {e}")
         return None
 
 def render_company_dashboard():
@@ -312,7 +300,7 @@ def render_income_statement_overview(data):
         ma4_display = []
         try:
             conn = get_duckdb_connection()
-            data_path = get_data_path('calculated_results/fundamental/company/company_financial_metrics.parquet')
+            data_path = get_data_path('DATA/processed/fundamental/company/company_financial_metrics.parquet')
             query = """
                 SELECT symbol, report_date, net_revenue, gross_profit, ebit, ebitda, npatmi
                 FROM read_parquet(?)
@@ -474,7 +462,7 @@ def render_metric_chart(data, metric, title, y_axis_title):
     # Calculate MA4 trend line
     try:
         conn = get_duckdb_connection()
-        data_path = get_data_path('calculated_results/fundamental/company/company_financial_metrics.parquet')
+        data_path = get_data_path('DATA/processed/fundamental/company/company_financial_metrics.parquet')
         query = """
         SELECT symbol, report_date, year, quarter, net_revenue, gross_profit, ebit, ebitda
         FROM read_parquet(?)
@@ -846,7 +834,7 @@ def render_html_table(pivot_df, table_title):
 
 def create_financial_pivot_table(symbol, start_year, metrics_list):
     """Create pivot table with KEYCODE as rows and quarterly periods as columns"""
-    data_path = get_data_path('calculated_results/fundamental/company/company_financial_metrics.parquet')
+    data_path = get_data_path('DATA/processed/fundamental/company/company_financial_metrics.parquet')
     
     try:
         # Load data

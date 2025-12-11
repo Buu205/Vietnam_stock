@@ -1,6 +1,0 @@
-{
-  "name": "Technical Indicator Definitions",
-  "version": "1.0.0",
-  "description": "Technical indicator definitions",
-  "note": "Technical indicator definitions are in schema_registry/domain/technical/indicators.json"
-}
