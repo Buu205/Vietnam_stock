@@ -23,6 +23,19 @@ import os
 
 # Use relative imports instead of sys.path manipulation
 from PROCESSORS.fundamental.calculators.base_financial_calculator import BaseFinancialCalculator
+from PROCESSORS.fundamental.formulas import (
+    # Universal formulas
+    calculate_roe, calculate_roa, calculate_gross_margin, calculate_net_margin,
+    calculate_operating_margin, calculate_current_ratio, calculate_debt_to_equity,
+    calculate_asset_turnover, calculate_inventory_turnover, calculate_eps,
+    calculate_yoy_growth, calculate_qoq_growth, calculate_ttm_sum, calculate_ttm_avg,
+    calculate_receivables_turnover, calculate_payables_turnover,
+    safe_divide, to_percentage,
+    # Entity-specific formulas
+    calculate_revenue_growth, calculate_profit_growth, calculate_free_cash_flow,
+    # Valuation formulas
+    calculate_pe_ratio, calculate_pb_ratio
+)
 import logging
 
 logger = logging.getLogger(__name__)
@@ -120,23 +133,26 @@ class CompanyFinancialCalculator(BaseFinancialCalculator):
         """
         result_df = df.copy()
         
-        # Avoid division by zero
-        net_revenue = df['net_revenue'].replace(0, np.nan)
+        # Use formula functions instead of inline calculations
+        result_df['gross_profit_margin'] = df.apply(
+            lambda row: calculate_gross_margin(row['gross_profit'], row['net_revenue']),
+            axis=1
+        )
         
-        # Calculate margins as percentages
-        margin_calculations = {
-            'gross_profit_margin': ('gross_profit', net_revenue),
-            'ebit_margin': ('ebit', net_revenue),
-            'ebitda_margin': ('ebitda', net_revenue),
-            'net_margin': ('npatmi', net_revenue)
-        }
+        result_df['ebit_margin'] = df.apply(
+            lambda row: calculate_gross_margin(row['ebit'], row['net_revenue']),
+            axis=1
+        )
         
-        for margin_name, (numerator, denominator) in margin_calculations.items():
-            result_df[margin_name] = self.safe_divide(
-                numerator=df[numerator], 
-                denominator=denominator, 
-                result_nan=True
-            ) * 100
+        result_df['ebitda_margin'] = df.apply(
+            lambda row: calculate_gross_margin(row['ebitda'], row['net_revenue']),
+            axis=1
+        )
+        
+        result_df['net_margin'] = df.apply(
+            lambda row: calculate_net_margin(row['npatmi'], row['net_revenue']),
+            axis=1
+        )
         
         return result_df
     
