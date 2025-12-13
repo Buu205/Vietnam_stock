@@ -23,6 +23,7 @@ import os
 
 # Use relative imports instead of sys.path manipulation
 from PROCESSORS.fundamental.calculators.base_financial_calculator import BaseFinancialCalculator
+from PROCESSORS.fundamental.formulas.registry import formula_registry
 import logging
 
 logger = logging.getLogger(__name__)
@@ -49,19 +50,44 @@ class BankFinancialCalculator(BaseFinancialCalculator):
     def get_entity_specific_calculations(self) -> Dict[str, callable]:
         """Return BANK-specific calculation methods."""
         return {
-            'components': self.calculate_components,
-            'growth': self.calculate_growth,
+            'income_statement': self.calculate_income_statement,
+            'balance_sheet': self.calculate_balance_sheet,
             'profitability': self.calculate_profitability,
+            'quality': self.calculate_asset_quality,
             'efficiency': self.calculate_efficiency,
-            'liquidity_and_capital': self.calculate_liquidity_and_capital,
+            'growth': self.calculate_growth_rates,
+            'ttm': self.calculate_ttm_metrics,
             'valuation': self.calculate_valuation,
         }
     
     # ==================== BANK-SPECIFIC CALCULATIONS ====================
     
-    def calculate_components(self, df: pd.DataFrame) -> pd.DataFrame:
+    def calculate_balance_sheet(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Calculate basic components for BANK entities.
+        Calculate balance sheet metrics for BANK entities.
+        
+        Args:
+            df: Pivoted DataFrame with balance sheet codes
+            
+        Returns:
+            DataFrame with balance sheet metrics calculated
+        """
+        result_df = df.copy()
+        
+        # Balance Sheet metrics (convert to billions VND)
+        result_df['total_assets'] = df.get('BBS_100', np.nan) / 1e9
+        result_df['total_liabilities'] = df.get('BBS_300', np.nan) / 1e9
+        result_df['total_equity'] = df.get('BBS_400', np.nan) / 1e9
+        
+        # Loans and Deposits
+        result_df['customer_loans'] = df.get('BBS_161', np.nan) / 1e9
+        result_df['customer_deposits'] = df.get('BBS_330', np.nan) / 1e9
+        
+        return result_df
+    
+    def calculate_income_statement(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate income statement and component metrics for BANK entities.
         
         Args:
             df: Pivoted DataFrame with raw metrics
@@ -140,6 +166,41 @@ class BankFinancialCalculator(BaseFinancialCalculator):
         
         return result_df
     
+    def calculate_growth_rates(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate growth rates for key Bank metrics.
+        Tính toán tốc độ tăng trưởng cho các chỉ số Ngân hàng.
+        """
+        # Key metrics for Bank
+        growth_metrics = [
+            'net_interest_income', 'total_operating_income', 
+            'operating_profit', 'npatmi', 'customer_loans', 'customer_deposits'
+        ]
+        
+        # Calculate QoQ growth
+        df = super().calculate_growth_rates(df, growth_metrics)
+        
+        # Calculate YoY growth
+        df = super().calculate_yoy_growth_rates(df, growth_metrics)
+        
+        return df
+
+    def calculate_ttm_metrics(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate TTM metrics for Bank.
+        Tính toán các chỉ số TTM cho Ngân hàng.
+        """
+        # Key metrics for TTM
+        ttm_metrics = [
+            'net_interest_income', 'total_operating_income', 
+            'operating_profit', 'npatmi'
+        ]
+        
+        # Calculate TTM
+        df = super().calculate_ttm(df, ttm_metrics)
+        
+        return df
+    
     def calculate_profitability(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate profitability ratios for BANK entities.
@@ -159,20 +220,31 @@ class BankFinancialCalculator(BaseFinancialCalculator):
             .transform(lambda s: s.rolling(window=4, min_periods=1).sum()) / 1e9
         )
         
-        # ROEA (TTM) and ROAA (TTM) in percentage
-        result_df["roea_ttm"] = self.safe_divide(
-            numerator=result_df["bis22a_ttm"],
-            denominator=result_df["equity_avg_2q"],
-            result_nan=True
-        ) * 100
+        # Get formulas
+        calc_roe = formula_registry.get_formula('calculate_roe')
+        calc_roa = formula_registry.get_formula('calculate_roa')
+        calc_nim = formula_registry.get_formula('calculate_nim')
         
-        result_df["roaa_ttm"] = self.safe_divide(
-            numerator=result_df["bis22a_ttm"],
-            denominator=result_df["assets_avg_2q"],
-            result_nan=True
-        ) * 100
+        # ROEA (TTM) and ROAA (TTM)
+        # Note: registry formulas expect raw numbers, but safe_divide handles series too?
+        # Registry formulas were designed for single float. Using apply is safer/cleaner.
+        
+        if calc_roe:
+             result_df["roea_ttm"] = result_df.apply(
+                lambda row: calc_roe(row["bis22a_ttm"], row["equity_avg_2q"]),
+                axis=1
+            )
+             
+        if calc_roa:
+             result_df["roaa_ttm"] = result_df.apply(
+                lambda row: calc_roa(row["bis22a_ttm"], row["assets_avg_2q"]),
+                axis=1
+            )
         
         # Asset Yield, Funding Cost, NIM (quarterly %)
+        # These are simple ratios, using safe_divide manually for now or use generic ratio from registry if available?
+        # Keeping existing logic for simple ratios where registry doesn't have exact match or it's just A/B.
+        
         result_df["asset_yield_q"] = self.safe_divide(
             numerator=result_df["BIS_1"] / 1e9,
             denominator=result_df["avg_iea_2q"],
@@ -185,11 +257,17 @@ class BankFinancialCalculator(BaseFinancialCalculator):
             result_nan=True
         ) * 100
         
-        result_df["nim_q"] = self.safe_divide(
-            numerator=result_df["BIS_3"] / 1e9,
-            denominator=result_df["avg_iea_2q"],
-            result_nan=True
-        ) * 100
+        if calc_nim:
+            result_df["nim_q"] = result_df.apply(
+                lambda row: calc_nim(row["BIS_3"] / 1e9, row["avg_iea_2q"]),
+                axis=1
+            )
+        else:
+             result_df["nim_q"] = self.safe_divide(
+                numerator=result_df["BIS_3"] / 1e9,
+                denominator=result_df["avg_iea_2q"],
+                result_nan=True
+            ) * 100
         
         # Loan Yield
         result_df["loan_base"] = (result_df.get("BBS_160", 0) + result_df.get("BBS_180", 0)) / 1e9
@@ -206,6 +284,18 @@ class BankFinancialCalculator(BaseFinancialCalculator):
         ) * 100
         
         return result_df
+    
+    def calculate_asset_quality(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate asset quality metrics for BANK entities.
+        
+        Args:
+            df: DataFrame with component metrics
+            
+        Returns:
+            DataFrame with asset quality metrics calculated
+        """
+        return self.calculate_liquidity_and_capital(df)
     
     def calculate_efficiency(self, df: pd.DataFrame) -> pd.DataFrame:
         """

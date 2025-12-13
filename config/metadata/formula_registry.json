@@ -1,0 +1,147 @@
+{
+  "version": "1.0",
+  "last_updated": "2025-12-11T23:38:48.291364",
+  "description": "Calculated financial formulas",
+  "calculated_metrics": {
+    "roe": {
+      "name_vi": "Tỷ suất sinh lời trên vốn chủ sở hữu",
+      "name_en": "Return on Equity",
+      "formula": "(net_profit / total_equity) * 100",
+      "formula_description": "Net Profit / Total Equity * 100",
+      "unit": "%",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_62",
+          "CBS_270"
+        ],
+        "BANK": [
+          "BIS_22A",
+          "BBS_400"
+        ],
+        "INSURANCE": [
+          "IIS_60",
+          "IBS_270"
+        ],
+        "SECURITY": [
+          "SIS_60",
+          "SBS_270"
+        ]
+      },
+      "entity_types": [
+        "COMPANY",
+        "BANK",
+        "INSURANCE",
+        "SECURITY"
+      ]
+    },
+    "roa": {
+      "name_vi": "Tỷ suất sinh lời trên tổng tài sản",
+      "name_en": "Return on Assets",
+      "formula": "(net_profit / total_assets) * 100",
+      "formula_description": "Net Profit / Total Assets * 100",
+      "unit": "%",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_62",
+          "CBS_100"
+        ],
+        "BANK": [
+          "BIS_22A",
+          "BBS_100"
+        ],
+        "INSURANCE": [
+          "IIS_60",
+          "IBS_100"
+        ],
+        "SECURITY": [
+          "SIS_60",
+          "SBS_100"
+        ]
+      },
+      "entity_types": [
+        "COMPANY",
+        "BANK",
+        "INSURANCE",
+        "SECURITY"
+      ]
+    },
+    "gross_margin": {
+      "name_vi": "Biên lợi nhuận gộp",
+      "name_en": "Gross Profit Margin",
+      "formula": "(gross_profit / net_revenue) * 100",
+      "formula_description": "Gross Profit / Net Revenue * 100",
+      "unit": "%",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_20",
+          "CIS_10"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "net_margin": {
+      "name_vi": "Biên lợi nhuận ròng",
+      "name_en": "Net Profit Margin",
+      "formula": "(net_profit / net_revenue) * 100",
+      "formula_description": "Net Profit / Net Revenue * 100",
+      "unit": "%",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_62",
+          "CIS_10"
+        ],
+        "BANK": [
+          "BIS_22A",
+          "BIS_1"
+        ],
+        "INSURANCE": [
+          "IIS_60",
+          "IIS_01"
+        ],
+        "SECURITY": [
+          "SIS_60",
+          "SIS_10"
+        ]
+      },
+      "entity_types": [
+        "COMPANY",
+        "BANK",
+        "INSURANCE",
+        "SECURITY"
+      ]
+    },
+    "eps": {
+      "name_vi": "Lãi cơ bản trên cổ phiếu",
+      "name_en": "Earnings Per Share",
+      "formula": "(net_profit * 1e9) / (common_shares / 10000)",
+      "formula_description": "Net Profit / Common Shares Outstanding",
+      "unit": "VND",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_62",
+          "CBS_411A"
+        ],
+        "BANK": [
+          "BIS_22A",
+          "BBS_411"
+        ],
+        "INSURANCE": [
+          "IIS_60",
+          "IBS_411"
+        ],
+        "SECURITY": [
+          "SIS_60",
+          "SBS_411"
+        ]
+      },
+      "entity_types": [
+        "COMPANY",
+        "BANK",
+        "INSURANCE",
+        "SECURITY"
+      ]
+    }
+  }
+}

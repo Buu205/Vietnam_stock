@@ -1,0 +1,118 @@
+{
+    "entity_type": "COMPANY",
+    "version": "1.0",
+    "description": "Schema định nghĩa các cột đầu ra cho thực thể COMPANY (Sản xuất, Thương mại, Dịch vụ...)",
+    "columns": {
+        "symbol": {
+            "type": "string",
+            "required": true,
+            "description": "Mã chứng khoán"
+        },
+        "report_date": {
+            "type": "string",
+            "format": "date",
+            "required": true,
+            "description": "Ngày báo cáo (YYYY-MM-DD)"
+        },
+        "year": {
+            "type": "integer",
+            "required": true,
+            "description": "Năm tài chính"
+        },
+        "quarter": {
+            "type": "integer",
+            "required": true,
+            "description": "Quý tài chính"
+        },
+        "freq_code": {
+            "type": "string",
+            "required": false,
+            "description": "Mã tần suất báo cáo (Q/Y/S)"
+        },
+        "net_revenue": {
+            "type": "float",
+            "required": true,
+            "description": "Doanh thu thuần (Tỷ VND)"
+        },
+        "cogs": {
+            "type": "float",
+            "required": false,
+            "description": "Giá vốn hàng bán (Tỷ VND)"
+        },
+        "gross_profit": {
+            "type": "float",
+            "required": true,
+            "description": "Lợi nhuận gộp (Tỷ VND)"
+        },
+        "ebit": {
+            "type": "float",
+            "required": true,
+            "description": "Lợi nhuận trước thuế và lãi vay (Tỷ VND)"
+        },
+        "ebitda": {
+            "type": "float",
+            "required": true,
+            "description": "Lợi nhuận trước thuế, lãi vay và khấu hao (Tỷ VND)"
+        },
+        "npatmi": {
+            "type": "float",
+            "required": true,
+            "description": "Lợi nhuận sau thuế của cổ đông công ty mẹ (Tỷ VND)"
+        },
+        "total_assets": {
+            "type": "float",
+            "required": true,
+            "description": "Tổng tài sản (Tỷ VND)"
+        },
+        "total_equity": {
+            "type": "float",
+            "required": true,
+            "description": "Tổng vốn chủ sở hữu (Tỷ VND)"
+        },
+        "operating_cf": {
+            "type": "float",
+            "required": false,
+            "description": "Dòng tiền từ hoạt động kinh doanh (Tỷ VND)"
+        },
+        "fcf": {
+            "type": "float",
+            "required": false,
+            "description": "Dòng tiền tự do (Tỷ VND)"
+        },
+        "gross_profit_margin": {
+            "type": "float",
+            "required": false,
+            "description": "Biên lợi nhuận gộp (%)"
+        },
+        "net_margin": {
+            "type": "float",
+            "required": false,
+            "description": "Biên lợi nhuận ròng (%)"
+        },
+        "roe": {
+            "type": "float",
+            "required": true,
+            "description": "Tỷ suất sinh lời trên vốn chủ sở hữu (%)"
+        },
+        "roa": {
+            "type": "float",
+            "required": true,
+            "description": "Tỷ suất sinh lời trên tổng tài sản (%)"
+        },
+        "eps": {
+            "type": "float",
+            "required": false,
+            "description": "Thu nhập trên mỗi cổ phần (VND)"
+        },
+        "net_revenue_growth": {
+            "type": "float",
+            "required": false,
+            "description": "Tăng trưởng doanh thu so với cùng kỳ (%)"
+        },
+        "npatmi_growth": {
+            "type": "float",
+            "required": false,
+            "description": "Tăng trưởng lợi nhuận ròng so với cùng kỳ (%)"
+        }
+    }
+}

@@ -36,7 +36,7 @@ class CalculatorIntegrationTest:
     
     def __init__(self):
         """Initialize test suite."""
-        self.base_path = Path(__file__).parent.parent.parent.parent
+        self.base_path = Path(__file__).parent.parent.parent
         self.data_paths = {
             "COMPANY": self.base_path / "DATA/processed/fundamental/company_full.parquet",
             "BANK": self.base_path / "DATA/processed/fundamental/bank_full.parquet",
@@ -95,10 +95,12 @@ class CalculatorIntegrationTest:
             calculator = self.calculators[entity_type](str(data_path))
             
             # Test basic functionality
-            test_result = self.test_basic_functionality(calculator, entity_type)
-            test_result['details']['basic_functionality'] = test_result
+            basic_result = self.test_basic_functionality(calculator, entity_type)
+            test_result['details']['basic_functionality'] = basic_result
             
-            if not test_result['success']:
+            if not basic_result['success']:
+                test_result['success'] = False
+                test_result['error'] = basic_result['error']
                 return test_result
                 
             # Test with sample ticker
@@ -113,10 +115,19 @@ class CalculatorIntegrationTest:
             test_result['details']['metric_validation'] = validation_result
             
             test_result['success'] = all([
-                test_result['success'],
+                basic_result['success'],
                 ticker_result['success'],
                 validation_result['success']
             ])
+            
+            if not test_result['success']:
+                if not basic_result['success']:
+                    test_result['error'] = f"Basic: {basic_result['error']}"
+                elif not ticker_result['success']:
+                    test_result['error'] = f"Ticker: {ticker_result['error']}"
+                elif not validation_result['success']:
+                    test_result['error'] = f"Validation: {validation_result['error']}"
+
             
         except Exception as e:
             test_result['error'] = str(e)

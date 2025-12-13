@@ -11,6 +11,7 @@ Tính năng chính:
 2. Thực hiện các tính toán đặc thù cho COMPANY
 3. Sử dụng metric_registry.json để validation
 4. Tích hợp với UnifiedTickerMapper
+5. [Phase 3] Tích hợp Schema Validation (cập nhật 2025-12-11)
 
 Tác giả: Claude Code
 Ngày: 2025-12-07
@@ -23,19 +24,8 @@ import os
 
 # Use relative imports instead of sys.path manipulation
 from PROCESSORS.fundamental.calculators.base_financial_calculator import BaseFinancialCalculator
-from PROCESSORS.fundamental.formulas import (
-    # Universal formulas
-    calculate_roe, calculate_roa, calculate_gross_margin, calculate_net_margin,
-    calculate_operating_margin, calculate_current_ratio, calculate_debt_to_equity,
-    calculate_asset_turnover, calculate_inventory_turnover, calculate_eps,
-    calculate_yoy_growth, calculate_qoq_growth, calculate_ttm_sum, calculate_ttm_avg,
-    calculate_receivables_turnover, calculate_payables_turnover,
-    safe_divide, to_percentage,
-    # Entity-specific formulas
-    calculate_revenue_growth, calculate_profit_growth, calculate_free_cash_flow,
-    # Valuation formulas
-    calculate_pe_ratio, calculate_pb_ratio
-)
+from PROCESSORS.fundamental.calculators.base_financial_calculator import BaseFinancialCalculator
+from PROCESSORS.fundamental.formulas.registry import formula_registry
 import logging
 
 logger = logging.getLogger(__name__)
@@ -70,12 +60,17 @@ class CompanyFinancialCalculator(BaseFinancialCalculator):
         """Return COMPANY-specific calculation methods."""
         return {
             'income_statement': self.calculate_income_statement,
-            'margins': self.calculate_margins,
-            'growth_rates': self.calculate_growth_rates,
             'balance_sheet': self.calculate_balance_sheet,
             'cash_flow': self.calculate_cash_flow,
-            'ratios': self.calculate_profitability_ratios,
-            'ttm_metrics': self.calculate_ttm_metrics,
+            'profitability': self.calculate_profitability_ratios,
+            'liquidity': self.calculate_liquidity_ratios,
+            'solvency': self.calculate_solvency_ratios,
+            'activity': self.calculate_activity_ratios,
+            'margins': self.calculate_margins,
+            'growth': self.calculate_growth_rates,
+            'ttm': self.calculate_ttm_metrics,
+            'valuation': self.calculate_valuation_ratios,
+            'free_cash_flow': self.calculate_free_cash_flow
         }
     
     # ==================== COMPANY-SPECIFIC CALCULATIONS ====================
@@ -134,51 +129,74 @@ class CompanyFinancialCalculator(BaseFinancialCalculator):
         """
         result_df = df.copy()
         
-        # Use formula functions instead of inline calculations
-        result_df['gross_profit_margin'] = df.apply(
-            lambda row: calculate_gross_margin(row['gross_profit'], row['net_revenue']),
-            axis=1
-        )
+        # Get formulas from registry
+        calc_gross_margin = formula_registry.get_formula('calculate_gross_margin')
+        calc_net_margin = formula_registry.get_formula('calculate_net_margin')
         
-        result_df['ebit_margin'] = df.apply(
-            lambda row: calculate_gross_margin(row['ebit'], row['net_revenue']),
-            axis=1
-        )
+        # Use formula functions
+        if calc_gross_margin:
+            result_df['gross_profit_margin'] = df.apply(
+                lambda row: calc_gross_margin(row['gross_profit'], row['net_revenue']),
+                axis=1
+            )
+            result_df['ebit_margin'] = df.apply(
+                lambda row: calc_gross_margin(row['ebit'], row['net_revenue']),
+                axis=1
+            )
+            result_df['ebitda_margin'] = df.apply(
+                lambda row: calc_gross_margin(row['ebitda'], row['net_revenue']),
+                axis=1
+            )
         
-        result_df['ebitda_margin'] = df.apply(
-            lambda row: calculate_gross_margin(row['ebitda'], row['net_revenue']),
-            axis=1
-        )
-        
-        result_df['net_margin'] = df.apply(
-            lambda row: calculate_net_margin(row['npatmi'], row['net_revenue']),
-            axis=1
-        )
+        if calc_net_margin:
+            result_df['net_margin'] = df.apply(
+                lambda row: calc_net_margin(row['npatmi'], row['net_revenue']),
+                axis=1
+            )
         
         return result_df
     
     def calculate_growth_rates(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Calculate quarter-over-quarter growth rates for key metrics.
+        Calculate growth rates for key metrics.
+        Tính toán tốc độ tăng trưởng cho các chỉ số chính.
         
         Args:
-            df: DataFrame with base metrics
+            df: Pivoted DataFrame
             
         Returns:
-            DataFrame with growth rate columns added
+            DataFrame with growth rates
         """
-        # Sort by ticker and date for correct growth calculation
-        df = df.sort_values(['SECURITY_CODE', 'REPORT_DATE'])
+        # Define key metrics for growth calculation
+        # CIS_10: Net Revenue, CIS_20: Gross Profit, CIS_50: PBT, CIS_61: Net Profit
+        growth_metrics = ['CIS_10', 'CIS_20', 'CIS_50', 'CIS_61']
         
-        # Metrics to calculate growth for
-        growth_metrics = [
-            'net_revenue', 'gross_profit', 'ebit', 'ebitda', 'npatmi'
-        ]
+        # Calculate QoQ growth
+        df = super().calculate_growth_rates(df, growth_metrics)
         
-        # Calculate growth rates
-        result_df = self.calculate_growth_rates(df, growth_metrics)
+        # Calculate YoY growth
+        df = super().calculate_yoy_growth_rates(df, growth_metrics)
         
-        return result_df
+        return df
+
+    def calculate_ttm_metrics(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate TTM metrics.
+        Tính toán các chỉ số TTM.
+        
+        Args:
+            df: Pivoted DataFrame
+            
+        Returns:
+            DataFrame with TTM metrics
+        """
+        # Define key metrics for TTM
+        ttm_metrics = ['CIS_10', 'CIS_20', 'CIS_50', 'CIS_61']
+        
+        # Calculate TTM
+        df = super().calculate_ttm(df, ttm_metrics)
+        
+        return df
     
     def calculate_balance_sheet(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -204,6 +222,10 @@ class CompanyFinancialCalculator(BaseFinancialCalculator):
         result_df['lt_debt'] = self.convert_to_billions(df.get('CBS_338', np.nan))
         result_df['common_shares'] = df.get('CBS_411A', np.nan)  # Not converted, used for EPS
         
+        # Liquidity components
+        result_df['current_assets'] = self.convert_to_billions(df.get('CBS_100', np.nan))
+        result_df['current_liabilities'] = self.convert_to_billions(df.get('CBS_310', np.nan))
+        
         return result_df
     
     def calculate_cash_flow(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -227,6 +249,137 @@ class CompanyFinancialCalculator(BaseFinancialCalculator):
         
         return result_df
     
+    def calculate_liquidity_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate liquidity ratios for COMPANY entities.
+        
+        Args:
+            df: DataFrame with balance sheet metrics
+            
+        Returns:
+            DataFrame with liquidity ratios calculated
+        """
+        result_df = df.copy()
+        
+        # Current Ratio
+        result_df['current_ratio'] = self.safe_divide(
+            numerator=result_df['current_assets'],
+            denominator=result_df['current_liabilities'],
+            result_nan=True
+        )
+        
+        # Quick Ratio = (Current Assets - Inventory) / Current Liabilities
+        result_df['quick_ratio'] = self.safe_divide(
+            numerator=result_df['current_assets'] - result_df['inventory'],
+            denominator=result_df['current_liabilities'],
+            result_nan=True
+        )
+        
+        # Cash Ratio = Cash / Current Liabilities
+        result_df['cash_ratio'] = self.safe_divide(
+            numerator=result_df['cash'],
+            denominator=result_df['current_liabilities'],
+            result_nan=True
+        )
+        
+        return result_df
+
+    def calculate_activity_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate activity ratios for COMPANY entities.
+        
+        Args:
+            df: DataFrame with component metrics
+            
+        Returns:
+            DataFrame with activity ratios calculated
+        """
+        result_df = df.copy()
+        
+        # Asset Turnover = Net Revenue / Total Assets
+        result_df['asset_turnover'] = self.safe_divide(
+            numerator=result_df['net_revenue'],
+            denominator=result_df['total_assets'],
+            result_nan=True
+        )
+        
+        # Inventory Turnover = COGS / Inventory
+        result_df['inventory_turnover'] = self.safe_divide(
+            numerator=result_df['cogs'],
+            denominator=result_df['inventory'],
+            result_nan=True
+        )
+        
+        # Receivables Turnover = Net Revenue / Account Receivable
+        result_df['receivables_turnover'] = self.safe_divide(
+            numerator=result_df['net_revenue'],
+            denominator=result_df['account_receivable'],
+            result_nan=True
+        )
+        
+        return result_df
+
+    def calculate_valuation_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate valuation ratios for COMPANY entities.
+        
+        Args:
+            df: DataFrame with component metrics
+            
+        Returns:
+            DataFrame with valuation ratios calculated
+        """
+        result_df = df.copy()
+        
+        # Book Value Per Share = Total Equity / Common Shares
+        result_df['bvps'] = self.safe_divide(
+            numerator=result_df['total_equity'] * 1e9,
+            denominator=result_df['common_shares'],
+            result_nan=True
+        )
+        
+        return result_df
+
+    def calculate_free_cash_flow(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate free cash flow for COMPANY entities.
+        
+        Args:
+            df: DataFrame with cash flow metrics
+            
+        Returns:
+            DataFrame with FCF metrics calculated
+        """
+        return self.calculate_cash_flow(df)
+    
+    def calculate_solvency_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate solvency ratios for COMPANY entities.
+        
+        Args:
+            df: DataFrame with balance sheet metrics
+            
+        Returns:
+            DataFrame with solvency ratios calculated
+        """
+        result_df = df.copy()
+        
+        # Debt to Equity
+        result_df['debt_to_equity'] = self.safe_divide(
+            numerator=result_df['st_debt'] + result_df['lt_debt'],
+            denominator=result_df['total_equity'],
+            result_nan=True
+        )
+        
+        # Debt to Assets
+        result_df['debt_to_assets'] = self.safe_divide(
+            numerator=result_df['st_debt'] + result_df['lt_debt'],
+            denominator=result_df['total_assets'],
+            result_nan=True
+        )
+        
+        return result_df
+
     def calculate_profitability_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate profitability ratios for COMPANY entities.
@@ -239,30 +392,34 @@ class CompanyFinancialCalculator(BaseFinancialCalculator):
         """
         result_df = df.copy()
         
-        # ROE = NPATMI / Total Equity
-        result_df['roe'] = self.safe_divide(
-            numerator=df['npatmi'] * 1e9,  # Convert back to VND
-            denominator=df['total_equity'] * 1e9,
-            result_nan=True
-        ) * 100
+        # Get formulas
+        calc_roe = formula_registry.get_formula('calculate_roe')
+        calc_roa = formula_registry.get_formula('calculate_roa')
+        calc_eps = formula_registry.get_formula('calculate_eps')
         
-        # ROA = NPATMI / Total Assets
-        result_df['roa'] = self.safe_divide(
-            numerator=df['npatmi'] * 1e9,  # Convert back to VND
-            denominator=df['total_assets'] * 1e9,
-            result_nan=True
-        ) * 100
+        if calc_roe:
+            result_df['roe'] = df.apply(
+                lambda row: calc_roe(row['npatmi'] * 1e9, row['total_equity'] * 1e9),
+                axis=1
+            )
+        
+        if calc_roa:
+            result_df['roa'] = df.apply(
+                lambda row: calc_roa(row['npatmi'] * 1e9, row['total_assets'] * 1e9),
+                axis=1
+            )
         
         # EPS = NPATMI (TTM) * 1e9 / (common_shares * 10,000)
         # First calculate TTM NPATMI if not already done
         if 'npatmi_ttm' not in df.columns:
             df = self.calculate_ttm(df, ['npatmi'])
+            result_df = df # Update result_df to include TTM columns
         
-        result_df['eps'] = self.safe_divide(
-            numerator=df['npatmi_ttm'] * 1e9,
-            denominator=df['common_shares'] * 10000,
-            result_nan=True
-        )
+        if calc_eps:
+             result_df['eps'] = df.apply(
+                lambda row: calc_eps(row['npatmi_ttm'] * 1e9, row['common_shares'] * 10000),
+                axis=1
+            )
         
         return result_df
     

@@ -66,6 +66,11 @@ import pandas as pd
 import numpy as np
 from typing import Optional, Dict, Any
 
+try:
+    from .utils import safe_divide, to_percentage
+except ImportError:
+    from utils import safe_divide, to_percentage
+
 
 class BankFormulas:
     """Pure calculation functions for bank financial metrics."""
@@ -177,19 +182,6 @@ class BankFormulas:
         return round(operating_income / operating_expense, 2)
     
     # Utility Functions
-    @staticmethod
-    def safe_divide(numerator: float, denominator: float, result_nan: bool = True) -> Optional[float]:
-        """
-        Safely divide two values, handling division by zero and NaN.
-        
-        Args:
-            numerator: Value to divide
-            denominator: Value to divide by
-            result_nan: Whether to return NaN if denominator is zero
-            
-        Returns:
-            Division result or None/NaN
-        """
-        if denominator == 0 or pd.isna(denominator):
-            return np.nan if result_nan else None
-        return numerator / denominator
+    # safe_divide is imported from utils and used directly in calculations where needed,
+    # or provided by the base calculator if using object methods.
+    # But since these are static methods, we rely on the import.

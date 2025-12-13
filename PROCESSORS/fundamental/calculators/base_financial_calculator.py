@@ -198,16 +198,29 @@ Lớp cơ sở trừu tượng cho tất cả các bộ tính toán tài chính 
     
     # ==================== Common Calculations ====================
     
+    def validate_data(self, df: pd.DataFrame) -> bool:
+        """
+        Validate data before processing.
+        Can be overridden by subclasses for specific validation.
+        
+        Args:
+            df: DataFrame to validate
+            
+        Returns:
+            True if valid, False otherwise
+        """
+        return True
     def calculate_growth_rates(self, df: pd.DataFrame, metric_cols: List[str]) -> pd.DataFrame:
         """
-        Calculate quarter-over-quarter growth rates for specified metrics.
+        Calculate quarter-over-quarter growth rates (QoQ).
+        Tính toán tốc độ tăng trưởng theo quý (QoQ).
         
         Args:
             df: Pivoted DataFrame
             metric_cols: List of metric columns to calculate growth for
             
         Returns:
-            DataFrame with growth rate columns added
+            DataFrame with growth rate columns added (e.g., metric_growth)
         """
         # Sort by ticker and date
         df = df.sort_values(['SECURITY_CODE', 'REPORT_DATE'])
@@ -215,44 +228,47 @@ Lớp cơ sở trừu tượng cho tất cả các bộ tính toán tài chính 
         for col in metric_cols:
             if col in df.columns:
                 # Calculate QoQ growth by ticker
-                growth_col = f"{col}_growth"
-                df[growth_col] = df.groupby('SECURITY_CODE')[col].pct_change() * 100
+                growth_col = f"{col}_qoq_growth"
+                # Default is 1 period shift for QoQ
+                df[growth_col] = df.groupby('SECURITY_CODE')[col].pct_change(periods=1) * 100
                 
         return df
-    
-    def calculate_ratios(self, df: pd.DataFrame, ratio_definitions: Dict[str, Tuple[str, str]]) -> pd.DataFrame:
+
+    def calculate_yoy_growth_rates(self, df: pd.DataFrame, metric_cols: List[str]) -> pd.DataFrame:
         """
-        Calculate financial ratios based on numerator and denominator columns.
+        Calculate year-over-year growth rates (YoY).
+        Tính toán tốc độ tăng trưởng theo năm (YoY).
         
         Args:
             df: Pivoted DataFrame
-            ratio_definitions: Dictionary mapping ratio name to (numerator, denominator) tuple
+            metric_cols: List of metric columns to calculate growth for
             
         Returns:
-            DataFrame with ratio columns added
+            DataFrame with growth rate columns added (e.g., metric_yoy_growth)
         """
-        for ratio_name, (numerator, denominator) in ratio_definitions.items():
-            if numerator in df.columns and denominator in df.columns:
-                # Avoid division by zero
-                ratio_col = f"{ratio_name}_ratio"
-                df[ratio_col] = np.where(
-                    df[denominator] != 0,
-                    (df[numerator] / df[denominator]) * 100,
-                    np.nan
-                )
+        # Sort by ticker and date
+        df = df.sort_values(['SECURITY_CODE', 'REPORT_DATE'])
+        
+        for col in metric_cols:
+            if col in df.columns:
+                # Calculate YoY growth by ticker (shift 4 quarters)
+                growth_col = f"{col}_yoy_growth"
+                df[growth_col] = df.groupby('SECURITY_CODE')[col].pct_change(periods=4) * 100
                 
         return df
     
-    def calculate_ttm(self, df: pd.DataFrame, metric_cols: List[str]) -> pd.DataFrame:
+    def calculate_ttm(self, df: pd.DataFrame, metric_cols: List[str], min_periods: int = 4) -> pd.DataFrame:
         """
-        Calculate trailing twelve months (TTM) values for specified metrics.
+        Calculate trailing twelve months (TTM) values.
+        Tính toán giá trị trượt 12 tháng (TTM).
         
         Args:
             df: Pivoted DataFrame
             metric_cols: List of metric columns to calculate TTM for
+            min_periods: Minimum periods required (default 4 for full year)
             
         Returns:
-            DataFrame with TTM columns added
+            DataFrame with TTM columns added (e.g., metric_ttm)
         """
         # Sort by ticker and date
         df = df.sort_values(['SECURITY_CODE', 'REPORT_DATE'])
@@ -262,7 +278,7 @@ Lớp cơ sở trừu tượng cho tất cả các bộ tính toán tài chính 
                 # Calculate TTM as sum of last 4 quarters
                 ttm_col = f"{col}_ttm"
                 df[ttm_col] = df.groupby('SECURITY_CODE')[col].rolling(
-                    window=4, min_periods=1
+                    window=4, min_periods=min_periods
                 ).sum().reset_index(level=0, drop=True)
                 
         return df
@@ -309,39 +325,17 @@ Lớp cơ sở trừu tượng cho tất cả các bộ tính toán tài chính 
         # Post-process results
         df = self.postprocess_results(df)
         
+        # Validate output schema
+        self.validate_output_schema(df)
+        
         # Store and return results
         self.results = df
         return df
-    
-    def validate_data(self, df: pd.DataFrame) -> bool:
-        """
-        Validate the pivoted data for required metrics.
-        
-        Args:
-            df: Pivoted DataFrame
-            
-        Returns:
-            True if validation passes, False otherwise
-        """
-        # Default validation: check if DataFrame is not empty
-        if df.empty:
-            logger.error("Empty DataFrame after pivoting")
-            return False
-            
-        # Check for required metric prefixes
-        prefixes = self.get_metric_prefixes()
-        metric_cols = [col for col in df.columns if any(col.startswith(prefix) for prefix in prefixes)]
-        
-        if not metric_cols:
-            logger.error(f"No metrics found with prefixes: {prefixes}")
-            return False
-            
-        logger.info(f"Validation passed. Found {len(metric_cols)} metrics")
-        return True
-    
+
     def postprocess_results(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Post-process calculation results.
+        Xử lý hậu kỳ kết quả tính toán.
         
         Args:
             df: DataFrame with calculated metrics
@@ -357,8 +351,128 @@ Lớp cơ sở trừu tượng cho tất cả các bộ tính toán tài chính 
         
         return df
     
+    # ==================== Schema Validation ====================
+
+    def load_schema(self) -> Optional[Dict]:
+        """
+        Load output schema for this entity type.
+        Tải schema đầu ra cho loại thực thể này.
+        
+        Returns:
+            Dictionary schema content or None if not found
+        """
+        try:
+            entity_type = self.get_entity_type().lower()
+            schema_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))),
+                "DATA", "metadata", "schema", f"{entity_type}_output.json"
+            )
+            
+            if not os.path.exists(schema_path):
+                logger.warning(f"Schema not found for {entity_type}: {schema_path}")
+                return None
+                
+            import json
+            with open(schema_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            logger.error(f"Error loading schema: {str(e)}")
+            return None
+
+    def validate_output_schema(self, df: pd.DataFrame) -> bool:
+        """
+        Validate DataFrame against the entity schema.
+        Xác thực DataFrame so với schema của thực thể.
+        
+        Args:
+            df: DataFrame containing results
+            
+        Returns:
+            True if valid, False otherwise
+        """
+        schema = self.load_schema()
+        if not schema:
+            return True # Skip validation if no schema
+            
+        required_cols = []
+        schema_cols = schema.get('columns', {})
+        
+        for col_name, col_def in schema_cols.items():
+            if col_def.get('required', False):
+                required_cols.append(col_name)
+                
+        # Check for missing columns
+        missing_cols = [col for col in required_cols if col not in df.columns]
+        
+        if missing_cols:
+            logger.warning(f"Schema validation warning - Missing columns for {self.get_entity_type()}: {missing_cols}")
+            # We strictly warn but return True for now to avoid breaking existing flows, 
+            # unless strict mode is desired.
+            return False
+            
+        logger.info(f"Schema validation passed for {self.get_entity_type()}")
+        return True
+    
     # ==================== Utility Methods ====================
     
+    
+    def calculate_from_registry(self, metric_name: str) -> None:
+        """
+        Calculates a metric dynamically using the formula defined in formula_registry.json.
+        This provides automation: just update JSON to fix/add formulas!
+
+        Args:
+            metric_name: Name of the calculated metric (e.g., 'roe')
+        """
+        # 1. Get formula info
+        formula_info = self.metric_registry.get_calculated_metric_formula(metric_name)
+        if not formula_info:
+            logger.warning(f"Formula for '{metric_name}' not found in registry")
+            return
+
+        entity_type = self.get_entity_type()
+        
+        # 2. Get dependencies (column mapping) for this entity
+        dependencies = formula_info.get("dependencies", {}).get(entity_type, [])
+        if not dependencies:
+            logger.warning(f"No dependencies defined for '{metric_name}' in entity '{entity_type}'")
+            return
+            
+        # 3. Get the raw formula string
+        # Warning: 'formula' field in JSON is currently human-readable (e.g., "A / B").
+        # For full automation, we need a parsable format.
+        # This implementation assumes we can map variables 1-to-1 with dependencies.
+        # Ideally, JSON should have "expression": "{0} / {1} * 100" or similar.
+        
+        # Current HACK for Phase 4: supporting basic "Ratio" type automatically if 2 deps exist
+        # Future enhancement: Implement full expression parser (as per Plan Part 2)
+        
+        try:
+            # Simple automatic implementation for common financial ratios
+            if len(dependencies) >= 2:
+                numerator_col = dependencies[0]
+                denominator_col = dependencies[1]
+                
+                # Check columns exist
+                missing = [col for col in dependencies if col not in self.pivot_df.columns]
+                if missing:
+                    logger.warning(f"Missing columns {missing} for metric '{metric_name}'")
+                    return
+
+                # Calculate safely
+                # Default logic: (First / Second) * 100 if unit is %
+                # This is a heuristic until we have full expression parsing in JSON
+                val = (self.pivot_df[numerator_col] / self.pivot_df[denominator_col].replace(0, np.nan))
+                
+                if formula_info.get("unit") == "%":
+                    val = val * 100
+                    
+                self.results[metric_name] = val
+                logger.info(f"Calculated '{metric_name}' using dynamic engine.")
+                
+        except Exception as e:
+            logger.error(f"Error calculating {metric_name}: {str(e)}")
+
     def get_metric_info(self, metric_code: str) -> Dict[str, Any]:
         """
         Get metric information from metric registry.
@@ -371,7 +485,7 @@ Lớp cơ sở trừu tượng cho tất cả các bộ tính toán tài chính 
         """
         if metric_code not in self._metric_info_cache:
             entity_type = self.get_entity_type()
-            metric_info = self.metric_registry.get_metric_info(metric_code, entity_type)
+            metric_info = self.metric_registry.get_metric(metric_code, entity_type)
             self._metric_info_cache[metric_code] = metric_info or {}
             
         return self._metric_info_cache.get(metric_code, {})

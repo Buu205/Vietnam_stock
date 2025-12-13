@@ -23,6 +23,7 @@ import os
 
 # Use relative imports instead of sys.path manipulation
 from PROCESSORS.fundamental.calculators.base_financial_calculator import BaseFinancialCalculator
+from PROCESSORS.fundamental.formulas.registry import formula_registry
 import logging
 
 logger = logging.getLogger(__name__)
@@ -53,12 +54,14 @@ class SecurityFinancialCalculator(BaseFinancialCalculator):
     def get_entity_specific_calculations(self) -> Dict[str, callable]:
         """Return SECURITY-specific calculation methods."""
         return {
+            'components': self.calculate_basic_components, # Keeping original name for now, as instruction implies adding to existing.
             'profitability': self.calculate_profitability,
             'revenue_composition': self.calculate_revenue_composition,
             'efficiency': self.calculate_efficiency,
             'risk_metrics': self.calculate_risk_metrics,
             'capital_adequacy': self.calculate_capital_adequacy,
-            'components': self.calculate_basic_components,
+            'growth': self.calculate_growth_rates,
+            'ttm': self.calculate_ttm_metrics
         }
     
     # ==================== SECURITY-SPECIFIC CALCULATIONS ====================
@@ -87,6 +90,39 @@ class SecurityFinancialCalculator(BaseFinancialCalculator):
         
         return result_df
     
+    def calculate_growth_rates(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate growth rates for Security metrics.
+        Tính toán tốc độ tăng trưởng cho Chứng khoán.
+        """
+        # Key metrics for Security
+        growth_metrics = [
+            'total_revenue', 'net_profit'
+        ]
+        
+        # Calculate QoQ growth
+        df = super().calculate_growth_rates(df, growth_metrics)
+        
+        # Calculate YoY growth
+        df = super().calculate_yoy_growth_rates(df, growth_metrics)
+        
+        return df
+
+    def calculate_ttm_metrics(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate TTM metrics for Security.
+        Tính toán các chỉ số TTM cho Chứng khoán.
+        """
+        # Key metrics for TTM
+        ttm_metrics = [
+            'total_revenue', 'net_profit'
+        ]
+        
+        # Calculate TTM
+        df = super().calculate_ttm(df, ttm_metrics)
+        
+        return df
+    
     def calculate_profitability(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate profitability ratios for SECURITY entities.
@@ -99,19 +135,35 @@ class SecurityFinancialCalculator(BaseFinancialCalculator):
         """
         result_df = df.copy()
         
+        # Get formulas
+        calc_roe = formula_registry.get_formula('calculate_roe')
+        calc_roa = formula_registry.get_formula('calculate_roa')
+        
         # ROE = Net Profit / Equity
-        result_df['roe'] = self.safe_divide(
-            numerator=df.get('SIS_37', 0),
-            denominator=df.get('SBS_65', 1),
-            result_nan=True
-        ) * 100
+        if calc_roe:
+            result_df['roe'] = df.apply(
+                lambda row: calc_roe(row.get('SIS_37', 0), row.get('SBS_65', 1)),
+                axis=1
+            )
+        else:
+            result_df['roe'] = self.safe_divide(
+                numerator=df.get('SIS_37', 0),
+                denominator=df.get('SBS_65', 1),
+                result_nan=True
+            ) * 100
         
         # ROA = Net Profit / Total Assets
-        result_df['roa'] = self.safe_divide(
-            numerator=df.get('SIS_37', 0),
-            denominator=df.get('SBS_39', 1),
-            result_nan=True
-        ) * 100
+        if calc_roa:
+            result_df['roa'] = df.apply(
+                lambda row: calc_roa(row.get('SIS_37', 0), row.get('SBS_39', 1)),
+                axis=1
+            )
+        else:
+            result_df['roa'] = self.safe_divide(
+                numerator=df.get('SIS_37', 0),
+                denominator=df.get('SBS_39', 1),
+                result_nan=True
+            ) * 100
         
         # Profit Margin = Net Profit / Total Revenue
         result_df['profit_margin'] = self.safe_divide(

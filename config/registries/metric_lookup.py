@@ -65,29 +65,49 @@ class MetricRegistry:
 
     def __init__(self, registry_path: Optional[str] = None):
         """
-        Initialize metric registry
-
-        Args:
-            registry_path: Path to metric_registry.json (default: auto-detect)
+        Initialize metric registry. Loads both raw and formula registries.
         """
-        if registry_path is None:
-            registry_path = PROJECT_ROOT / "DATA" / "metadata" / "metric_registry.json"
+        if registry_path:
+             # Legacy support or specific path override (assumes combined file)
+            self.raw_registry_path = Path(registry_path)
+            self.formula_registry_path = None
         else:
-            registry_path = Path(registry_path)
+            # Default split paths
+            self.raw_registry_path = PROJECT_ROOT / "config" / "metadata" / "raw_metric_registry.json"
+            self.formula_registry_path = PROJECT_ROOT / "config" / "metadata" / "formula_registry.json"
 
-        if not registry_path.exists():
-            raise FileNotFoundError(
-                f"Metric registry not found: {registry_path}\n"
-                f"Please run: python data_processor/core/build_metric_registry.py"
-            )
+        # 1. Load Raw Registry
+        if not self.raw_registry_path.exists():
+            # Fallback to old combined file if new one doesn't exist
+            fallback = PROJECT_ROOT / "config" / "metadata" / "metric_registry.json"
+            if fallback.exists():
+                logger.warning(f"Raw registry not found at {self.raw_registry_path}, falling back to {fallback}")
+                self.raw_registry_path = fallback
+            else:
+                # Try DATA/metadata (legacy)
+                fallback_legacy = PROJECT_ROOT / "DATA" / "metadata" / "metric_registry.json"
+                if fallback_legacy.exists():
+                    logger.warning(f"Falling back to legacy path: {fallback_legacy}")
+                    self.raw_registry_path = fallback_legacy
+                else:
+                     raise FileNotFoundError(f"Metric registry not found at {self.raw_registry_path}")
 
-        # Load registry
-        with open(registry_path, 'r', encoding='utf-8') as f:
+        with open(self.raw_registry_path, 'r', encoding='utf-8') as f:
             self.registry = json.load(f)
 
-        logger.info(f"Loaded metric registry v{self.registry['version']}")
-        logger.info(f"  Total entity types: {len(self.registry['entity_types'])}")
-        logger.info(f"  Calculated metrics: {len(self.registry['calculated_metrics'])}")
+        # 2. Load Formula Registry (if distinct)
+        self.formulas = {}
+        if self.formula_registry_path and self.formula_registry_path.exists():
+            with open(self.formula_registry_path, 'r', encoding='utf-8') as f:
+                formula_data = json.load(f)
+                self.formulas = formula_data.get("calculated_metrics", {})
+                logger.info(f"Loaded formula registry from {self.formula_registry_path}")
+        else:
+            # If using combined file, formulas are inside 'calculated_metrics' key
+            self.formulas = self.registry.get("calculated_metrics", {})
+
+        logger.info(f"Loaded metric registry v{self.registry.get('version', 'unknown')}")
+        logger.info(f"  Calculated metrics: {len(self.formulas)}")
 
     def get_metric(self, code: str, entity_type: Optional[str] = None) -> Optional[Dict]:
         """
@@ -183,7 +203,7 @@ class MetricRegistry:
             >>> print(roe_info['dependencies']['COMPANY'])
             ['CIS_62', 'CBS_270']
         """
-        return self.registry["calculated_metrics"].get(metric_name)
+        return self.formulas.get(metric_name)
 
     def get_all_calculated_metrics(self) -> Dict[str, Dict]:
         """
@@ -198,7 +218,7 @@ class MetricRegistry:
             >>> for name, info in calc_metrics.items():
             ...     print(f"{name}: {info['name_vi']}")
         """
-        return self.registry["calculated_metrics"]
+        return self.formulas
 
     def validate_dependencies(self, metric_name: str, available_codes: Set[str],
                             entity_type: str) -> Dict[str, any]:
@@ -344,7 +364,7 @@ class MetricRegistry:
     def __repr__(self) -> str:
         """String representation"""
         total_metrics = sum(self.get_metric_count().values())
-        calc_metrics = len(self.registry["calculated_metrics"])
+        calc_metrics = len(self.formulas)
         return (
             f"MetricRegistry(version={self.get_version()}, "
             f"raw_metrics={total_metrics}, "

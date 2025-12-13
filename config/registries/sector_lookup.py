@@ -132,13 +132,13 @@ class SectorRegistry:
     def get_entity_type_info(self, entity_type: str) -> Optional[Dict]:
         """
         Get complete information for an entity type
-
+        
         Args:
             entity_type: Entity type (COMPANY, BANK, INSURANCE, SECURITY)
-
+            
         Returns:
             Entity type information dictionary, or None if not found
-
+            
         Example:
             >>> registry = SectorRegistry()
             >>> info = registry.get_entity_type_info("BANK")
@@ -148,6 +148,35 @@ class SectorRegistry:
             ['Ngân hàng']
         """
         return self.registry["entity_types"].get(entity_type)
+
+    def get_all_tickers(self) -> List[str]:
+        """
+        Get list of all tickers in the registry
+        
+        Returns:
+            List of all ticker symbols
+        """
+        return sorted(list(self.registry["ticker_mapping"].keys()))
+
+    def get_tickers_by_entity_type(self, entity_type: str) -> List[str]:
+        """
+        Get all tickers for a specific entity type
+        
+        Args:
+            entity_type: Entity type (COMPANY, BANK, INSURANCE, SECURITY)
+            
+        Returns:
+            List of tickers belonging to this entity type
+            
+        Example:
+            >>> registry = SectorRegistry()
+            >>> bank_tickers = registry.get_tickers_by_entity_type("BANK")
+        """
+        sectors = self.get_sectors_by_entity(entity_type)
+        all_tickers = []
+        for sector in sectors:
+            all_tickers.extend(self.get_tickers_by_sector(sector))
+        return sorted(list(set(all_tickers)))
 
     def get_tickers_by_sector(self, sector_name: str) -> List[str]:
         """

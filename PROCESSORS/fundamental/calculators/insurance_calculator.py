@@ -23,6 +23,7 @@ import os
 
 # Use relative imports instead of sys.path manipulation
 from PROCESSORS.fundamental.calculators.base_financial_calculator import BaseFinancialCalculator
+from PROCESSORS.fundamental.formulas.registry import formula_registry
 import logging
 
 logger = logging.getLogger(__name__)
@@ -49,12 +50,47 @@ class InsuranceFinancialCalculator(BaseFinancialCalculator):
     def get_entity_specific_calculations(self) -> Dict[str, callable]:
         """Return INSURANCE-specific calculation methods."""
         return {
+            'components': self.calculate_basic_components,
             'profitability': self.calculate_profitability,
             'underwriting': self.calculate_underwriting_ratios,
             'investment': self.calculate_investment_performance,
             'solvency': self.calculate_solvency_ratios,
-            'components': self.calculate_basic_components,
+            'growth': self.calculate_growth_rates,
+            'ttm': self.calculate_ttm_metrics
         }
+    
+    def calculate_growth_rates(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate growth rates for Insurance metrics.
+        Tính toán tốc độ tăng trưởng cho Bảo hiểm.
+        """
+        # Key metrics for Insurance
+        growth_metrics = [
+            'net_profit', 'total_revenue', 'technical_reserves', 'investment_income'
+        ]
+        
+        # Calculate QoQ growth
+        df = super().calculate_growth_rates(df, growth_metrics)
+        
+        # Calculate YoY growth
+        df = super().calculate_yoy_growth_rates(df, growth_metrics)
+        
+        return df
+
+    def calculate_ttm_metrics(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Calculate TTM metrics for Insurance.
+        Tính toán các chỉ số TTM cho Bảo hiểm.
+        """
+        # Key metrics for TTM
+        ttm_metrics = [
+            'net_profit', 'total_revenue', 'investment_income'
+        ]
+        
+        # Calculate TTM
+        df = super().calculate_ttm(df, ttm_metrics)
+        
+        return df
     
     # ==================== INSURANCE-SPECIFIC CALCULATIONS ====================
     
@@ -95,19 +131,35 @@ class InsuranceFinancialCalculator(BaseFinancialCalculator):
         """
         result_df = df.copy()
         
+        # Get formulas
+        calc_roe = formula_registry.get_formula('calculate_roe')
+        calc_roa = formula_registry.get_formula('calculate_roa')
+        
         # ROE = Net Profit / Equity
-        result_df['roe'] = self.safe_divide(
-            numerator=df.get('IIS_20', 0),
-            denominator=df.get('IBS_36', 1),
-            result_nan=True
-        ) * 100
+        if calc_roe:
+            result_df['roe'] = df.apply(
+                lambda row: calc_roe(row.get('IIS_20', 0), row.get('IBS_36', 1)),
+                axis=1
+            )
+        else:
+            result_df['roe'] = self.safe_divide(
+                numerator=df.get('IIS_20', 0),
+                denominator=df.get('IBS_36', 1),
+                result_nan=True
+            ) * 100
         
         # ROA = Net Profit / Total Assets
-        result_df['roa'] = self.safe_divide(
-            numerator=df.get('IIS_20', 0),
-            denominator=df.get('IBS_18', 1),
-            result_nan=True
-        ) * 100
+        if calc_roa:
+             result_df['roa'] = df.apply(
+                lambda row: calc_roa(row.get('IIS_20', 0), row.get('IBS_18', 1)),
+                axis=1
+            )
+        else:
+            result_df['roa'] = self.safe_divide(
+                numerator=df.get('IIS_20', 0),
+                denominator=df.get('IBS_18', 1),
+                result_nan=True
+            ) * 100
         
         # Profit Margin = Net Profit / Total Revenue
         result_df['profit_margin'] = self.safe_divide(
