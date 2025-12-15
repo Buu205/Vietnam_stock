@@ -239,20 +239,20 @@ from PROCESSORS.core.registries.schema_registry import SchemaRegistry
 ### Daily Update Pipelines
 
 ```bash
-# Update all valuation metrics (PE/PB/EV_EBITDA, VN-Index PE, sector PE)
-python3 PROCESSORS/valuation/daily_full_valuation_pipeline.py
+# ✅ UNIFIED DAILY UPDATE (Recommended - runs everything)
+python3 PROCESSORS/daily_sector_complete_update.py
+# Updates:
+#   - Sector TA/Valuation metrics (daily)
+#   - Market & Sector PE/PB (VNINDEX + all 19 sectors)
+#   - Sector scores + BUY/SELL/HOLD signals
+#   - Unified valuation file (market + sectors in one place)
 
-# Update OHLCV data
-python3 PROCESSORS/technical/daily_ohlcv_update.py
-
-# Update macro & commodity data
-python3 PROCESSORS/technical/daily_macro_commodity_update.py
-
-# Update news data
-python3 PROCESSORS/news/news_pipeline.py
-
-# Update BSC forecast data
-python3 PROCESSORS/Bsc_forecast/run_bsc_auto_update.py
+# Legacy individual updates (if needed)
+python3 PROCESSORS/valuation/daily_full_valuation_pipeline.py  # PE/PB/EV_EBITDA
+python3 PROCESSORS/technical/daily_ohlcv_update.py              # OHLCV data
+python3 PROCESSORS/technical/daily_macro_commodity_update.py    # Macro & commodity
+python3 PROCESSORS/news/news_pipeline.py                        # News data
+python3 PROCESSORS/Bsc_forecast/run_bsc_auto_update.py         # BSC forecast
 ```
 
 ### Fundamental Data Processing
