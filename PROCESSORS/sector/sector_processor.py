@@ -290,19 +290,19 @@ class SectorProcessor:
         """
         Run TA aggregation step.
 
-        UPDATED (2025-12-15): Now uses aggregate_sector_valuation_v2() which
-        leverages VNIndexValuationCalculator for PE/PB calculation.
+        UPDATED (2025-12-15): Uses aggregate_sector_valuation() with full metrics
+        (PE, PB, PS, EV/EBITDA) instead of v2 which only has PE/PB.
 
         Args:
             start_date: Start date for range
             end_date: End date for range
 
         Returns:
-            TA metrics DataFrame
+            TA metrics DataFrame with PE, PB, PS, EV/EBITDA
         """
         try:
-            # Use V2 method which uses VNIndexValuationCalculator
-            ta_metrics = self.ta_aggregator.aggregate_sector_valuation_v2(
+            # Use full method with PE/PB/PS/EV_EBITDA
+            ta_metrics = self.ta_aggregator.aggregate_sector_valuation(
                 start_date=start_date,
                 end_date=end_date
             )

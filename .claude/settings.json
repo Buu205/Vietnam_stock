@@ -1,0 +1,56 @@
+{
+  "plugins": [
+    {
+      "source": "local",
+      "path": "./plugins/frontend-design"
+    },
+    {
+      "source": "local",
+      "path": "./plugins/feature-dev"
+    },
+    {
+      "source": "local",
+      "path": "./plugins/commit-commands"
+    },
+    {
+      "source": "local",
+      "path": "./plugins/code-review"
+    },
+    {
+      "source": "local",
+      "path": "./plugins/agent-sdk-dev"
+    },
+    {
+      "source": "local",
+      "path": "./plugins/claude-opus-4-5-migration"
+    },
+    {
+      "source": "local",
+      "path": "./plugins/explanatory-output-style"
+    },
+    {
+      "source": "local",
+      "path": "./plugins/hookify"
+    },
+    {
+      "source": "local",
+      "path": "./plugins/plugin-dev"
+    },
+    {
+      "source": "local",
+      "path": "./plugins/pr-review-toolkit"
+    },
+    {
+      "source": "local",
+      "path": "./plugins/ralph-wiggum"
+    },
+    {
+      "source": "local",
+      "path": "./plugins/security-guidance"
+    },
+    {
+      "source": "local",
+      "path": "./plugins/learning-output-style"
+    }
+  ]
+}

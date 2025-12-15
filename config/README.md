@@ -2,7 +2,7 @@
 # Hệ thống Cấu hình & Registry - Bảng điều khiển Thị trường Chứng khoán Việt Nam
 
 **Version:** 4.0.0
-**Last Updated:** 2025-12-14
+**Last Updated:** 2025-12-15
 **Status:** ✅ READY FOR STREAMLIT REBUILD
 
 ---
@@ -387,15 +387,8 @@ config/
 │
 ├── 📏 STANDARDS & CONFIG
 │   ├── unit_standards.json                 # v4.0.0 formatting rules
-│   ├── data_sources.json                   # Data source configurations
-│   ├── frequency_filtering_rules.json      # Frequency rules
+│   ├── __init__.py                         # Package initialization
 │   └── README.md                           # This file
-│
-├── ⚙️ CONFIGURATION FILES
-│   ├── unit_standards.json                 # 🎯 v4.0.0 Unit Standardization (NEW)
-│   ├── data_sources.json                   # Data source configurations
-│   ├── frequency_filtering_rules.json      # Data frequency filters
-│   └── __init__.py                         # Package initialization
 │
 └── 📖 DOCUMENTATION
     ├── README.md                            # This file
@@ -872,7 +865,6 @@ python3 config/registries/builders/build_sector_registry.py
 | `unit_standards.json` | v4.0.0 Unit standardization | 8.5 KB | Canonical |
 | `metric_registry.json` | Financial metrics lookup | 770 KB | 2,099 metrics |
 | `sector_industry_registry.json` | Sector/ticker mapping | ~50 KB | 457 tickers |
-| `data_sources.json` | Data source configs | 11 KB | Multiple sources |
 
 ### External Resources
 
@@ -883,6 +875,17 @@ python3 config/registries/builders/build_sector_registry.py
 ---
 
 ## 🔄 Migration History
+
+### 2025-12-15: Config Cleanup & Daily Pipeline Consolidation
+
+**Changes:**
+1. ✅ Deleted `config/data_sources.json` (old paths, unused)
+2. ✅ Deleted `config/frequency_filtering_rules.json` (unused)
+3. ✅ Fixed `config/sector_analysis/config_manager.py` path casing ("CONFIG" → "config")
+4. ✅ Consolidated all daily scripts to `PROCESSORS/pipelines/`
+5. ✅ Created master orchestrator `run_all_daily_updates.py` with progress tracking
+
+**Impact:** Cleaner config structure, easier daily updates
 
 ### 2025-12-14: Unit Standardization v4.0.0
 
@@ -991,6 +994,6 @@ result_df['total_assets'] = df.get('CBS_270', np.nan) / 1e9  # Billions
 
 ---
 
-**Last Updated:** 2025-12-14
+**Last Updated:** 2025-12-15
 **Version:** 4.0.0
 **Status:** ✅ Production Ready

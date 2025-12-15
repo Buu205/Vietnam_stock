@@ -24,25 +24,46 @@ Repository này **chỉ chứa code Streamlit (WEBAPP)** để deploy lên Strea
 
 ```
 Vietnam_dashboard/
-├── WEBAPP/              # ✅ Streamlit app (được push lên GitHub)
-│   ├── main.py         # Entry point
-│   ├── pages/          # Dashboard pages
-│   ├── components/     # UI components
-│   └── services/       # Data loading services
+├── WEBAPP/                 # ✅ Streamlit app (được push lên GitHub)
+│   ├── main_app.py        # Entry point
+│   ├── pages/             # Dashboard pages
+│   ├── components/        # UI components
+│   └── services/          # Data loading services
 │
-├── config/             # ✅ Configuration files
-│   └── schemas/        # Data schemas
+├── PROCESSORS/            # Core data processing
+│   ├── pipelines/         # 🆕 Daily update scripts (consolidated)
+│   │   ├── run_all_daily_updates.py  # Master orchestrator
+│   │   ├── daily_ohlcv_update.py
+│   │   ├── daily_ta_complete.py
+│   │   ├── daily_macro_commodity.py
+│   │   ├── daily_valuation.py
+│   │   └── daily_sector_analysis.py
+│   ├── core/              # Shared utilities
+│   ├── fundamental/       # Financial metrics calculators
+│   ├── technical/         # Technical analysis indicators
+│   ├── valuation/         # Valuation metrics (PE/PB/EV-EBITDA)
+│   └── sector/            # Sector aggregation & scoring
 │
-├── docs/               # ✅ Documentation
-│   ├── ARCHITECTURE_*.md
-│   └── ...
+├── DATA/
+│   ├── raw/               # Input data
+│   │   ├── ohlcv/
+│   │   ├── fundamental/
+│   │   └── ...
+│   └── processed/         # Output data
+│       ├── fundamental/
+│       ├── technical/
+│       ├── valuation/
+│       └── sector/
 │
-├── PROCESSORS/         # ❌ KHÔNG push (chạy local để tính toán)
-│   └── ... (logic tính toán)
+├── config/                # ✅ Configuration & registries
+│   ├── registries/        # Python registry classes
+│   ├── schema_registry/   # Schema definitions
+│   └── metadata/          # Lookup data
 │
-└── DATA/               # ❌ KHÔNG push (dữ liệu local)
-    ├── raw/            # Dữ liệu thô
-    └── processed/      # Kết quả đã xử lý (có thể push riêng nếu cần)
+└── docs/                  # ✅ Documentation
+    ├── CURRENT/           # Active documentation
+    ├── Formula/           # Formula reference
+    └── archive/           # Historical docs
 ```
 
 ---
@@ -69,6 +90,39 @@ streamlit run WEBAPP/main.py
 1. Connect repository to Streamlit Cloud
 2. Set main file: `WEBAPP/main.py`
 3. Deploy!
+
+---
+
+## 🔄 DAILY DATA UPDATES
+
+### One-Command Update (Recommended)
+
+```bash
+# Run all daily updates in correct order
+python3 PROCESSORS/pipelines/run_all_daily_updates.py
+```
+
+**Pipeline Order:**
+1. **OHLCV** → Raw market data (OHLC + Volume + Market Cap)
+2. **Technical Analysis** → TA indicators, alerts, breadth, money flow
+3. **Macro & Commodity** → Economic data (gold, USD/VND, rates)
+4. **Stock Valuation** → PE/PB/EV-EBITDA + VNINDEX valuation
+5. **Sector Analysis** → Sector metrics, scores, signals
+
+**Total Runtime:** ~80 seconds (~1.3 minutes)
+
+### Individual Updates
+
+```bash
+# Run specific updates
+python3 PROCESSORS/pipelines/daily_ohlcv_update.py
+python3 PROCESSORS/pipelines/daily_ta_complete.py
+python3 PROCESSORS/pipelines/daily_macro_commodity.py
+python3 PROCESSORS/pipelines/daily_valuation.py
+python3 PROCESSORS/pipelines/daily_sector_analysis.py
+```
+
+**For more details:** See [PROCESSORS/pipelines/README.md](PROCESSORS/pipelines/README.md)
 
 ---
 
@@ -110,18 +164,18 @@ path = "s3://bucket/data/"
 
 ### Development (Local)
 ```bash
-# 1. Tính toán data (local)
-python PROCESSORS/pipelines/daily_update.py
+# 1. Update all data (daily)
+python3 PROCESSORS/pipelines/run_all_daily_updates.py
 
-# 2. Chạy Streamlit (local)
-streamlit run WEBAPP/main.py
+# 2. Run Streamlit app
+streamlit run WEBAPP/main_app.py
 ```
 
 ### Production (Streamlit Cloud)
 ```bash
-# 1. Code tự động deploy từ GitHub
-# 2. Streamlit đọc data từ external source
-# 3. Hiển thị dashboard
+# 1. Code auto-deploys from GitHub
+# 2. Streamlit loads data from external source (S3/Drive)
+# 3. Dashboard displays data
 ```
 
 ---
@@ -135,5 +189,14 @@ streamlit run WEBAPP/main.py
 
 ---
 
-**Last Updated:** 2025-12-08  
-**Status:** ✅ Optimized for Streamlit Cloud deployment
+## 📚 Documentation
+
+- **[CLAUDE.md](CLAUDE.md)** - AI/Developer guidelines
+- **[PROCESSORS/pipelines/README.md](PROCESSORS/pipelines/README.md)** - Daily update pipeline details
+- **[docs/CURRENT/](docs/CURRENT/)** - Active documentation
+- **[docs/Formula/](docs/Formula/)** - Formula reference & guides
+
+---
+
+**Last Updated:** 2025-12-15
+**Status:** ✅ Optimized with consolidated daily pipeline

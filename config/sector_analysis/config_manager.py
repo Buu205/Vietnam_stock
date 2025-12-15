@@ -37,7 +37,7 @@ class ConfigManager:
         """
         # Set paths
         project_root = Path(__file__).resolve().parents[2]
-        self.config_dir = project_root / "CONFIG" / "sector_analysis"
+        self.config_dir = project_root / "config" / "sector_analysis"
         self.config_dir.mkdir(parents=True, exist_ok=True)
         
         self.default_config_file = self.config_dir / "default_weights.json"

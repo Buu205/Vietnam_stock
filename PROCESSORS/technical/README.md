@@ -11,10 +11,14 @@
 
 ### Daily Update (RECOMMENDED)
 
-Chạy file này mỗi ngày để cập nhật toàn bộ:
-
+**Option 1: Master script (easiest)**
 ```bash
-python3 PROCESSORS/technical/pipelines/daily_complete_ta_update.py
+python3 PROCESSORS/pipelines/run_all_daily_updates.py
+```
+
+**Option 2: TA only**
+```bash
+python3 PROCESSORS/pipelines/daily_ta_complete.py
 ```
 
 **Thời gian:** ~30-35 giây
@@ -166,13 +170,13 @@ DATA/processed/technical/
 
 ```bash
 # Cập nhật tất cả (200 sessions)
-python3 PROCESSORS/technical/pipelines/daily_complete_ta_update.py
+python3 PROCESSORS/pipelines/daily_ta_complete.py
 
 # Chỉ định số sessions
-python3 PROCESSORS/technical/pipelines/daily_complete_ta_update.py --sessions 250
+python3 PROCESSORS/pipelines/daily_ta_complete.py --sessions 250
 
 # Chỉ định ngày cụ thể
-python3 PROCESSORS/technical/pipelines/daily_complete_ta_update.py --date 2025-12-15
+python3 PROCESSORS/pipelines/daily_ta_complete.py --date 2025-12-15
 ```
 
 ### 2. Chỉ Tính Technical Indicators
@@ -347,23 +351,30 @@ pip install TA-Lib
 
 **Every day at 17:00 (after market close):**
 
-1. **Update OHLCV first:**
-   ```bash
-   python3 PROCESSORS/technical/pipelines/daily_ohlcv_update.py
-   ```
+**Option 1: Master script (easiest)**
+```bash
+python3 PROCESSORS/pipelines/run_all_daily_updates.py
+```
 
-2. **Run complete TA update:**
-   ```bash
-   python3 PROCESSORS/technical/pipelines/daily_complete_ta_update.py
-   ```
+**Option 2: Individual scripts**
+```bash
+# 1. Update OHLCV first
+python3 PROCESSORS/pipelines/daily_ohlcv_update.py
+
+# 2. Run complete TA update
+python3 PROCESSORS/pipelines/daily_ta_complete.py
+```
 
 **Total time:** ~2-3 minutes
 
 **Cron job setup:**
 ```bash
-# Add to crontab -e
-30 17 * * 1-5 cd /Users/buuphan/Dev/Vietnam_dashboard && python3 PROCESSORS/technical/pipelines/daily_ohlcv_update.py
-35 17 * * 1-5 cd /Users/buuphan/Dev/Vietnam_dashboard && python3 PROCESSORS/technical/pipelines/daily_complete_ta_update.py
+# Add to crontab -e (Option 1: Master script)
+30 17 * * 1-5 cd /Users/buuphan/Dev/Vietnam_dashboard && python3 PROCESSORS/pipelines/run_all_daily_updates.py
+
+# OR (Option 2: Individual)
+30 17 * * 1-5 cd /Users/buuphan/Dev/Vietnam_dashboard && python3 PROCESSORS/pipelines/daily_ohlcv_update.py
+35 17 * * 1-5 cd /Users/buuphan/Dev/Vietnam_dashboard && python3 PROCESSORS/pipelines/daily_ta_complete.py
 ```
 
 ---
