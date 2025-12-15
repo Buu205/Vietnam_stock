@@ -113,6 +113,19 @@ Trả lời câu hỏi: *Nên chia ở Engine hay chuẩn hóa từ File kết q
         *   Sẽ được xử lý bởi `BaseCalculator` (hoặc module `Utils`) thông qua hàm `calculate_growth(series, period)`.
         *   Không hardcode công thức trong JSON.
         *   Mapping frequency tự động: QoQ cần data Q, YoY cần data Y hoặc cùng kỳ năm trước của Q.
+    *   **Logic Data Sign Check (Kiểm tra Dấu Dữ liệu)**:
+        *   **Problem**: Trong dữ liệu thô, chi phí (COGS, SG&A, Interest Exp) thường được lưu là số **Âm (-)**, nhưng đôi khi có thể bị lẫn số Dương do nhập liệu.
+        *   **Solution**: Engine cần có cơ chế `Sanity Check` hoặc `Standardize Sign`.
+        *   **Rule**: 
+            *   Mặc định công thức là **Cộng Đại Số** (`Revenue + Expense`).
+            *   Nếu phát hiện Chi phí là số Dương (>0) trong một tỷ lệ lớn records -> Cảnh báo (Warning Log).
+            *   Tuỳ chọn: Thêm flag `force_negative_expense` trong config nếu cần ép kiểu dấu.
+            
+        *   **Signage Logic (Quy tắc Dấu)**:
+            *   **Quy tắc**: Trong hệ thống, các khoản chi phí (Expenses) thường được lưu dưới dạng số **Âm (-)**.
+            *   **Hệ quả**: Khi tính toán lợi nhuận, ta thực hiện phép **Cộng (+)** đại số.
+            *   **Ví dụ**: `Profit = Revenue + Expense` (Vì `Expense` < 0, nên `+` sẽ làm giảm `Profit`).
+            *   **Lưu ý**: Nếu người dùng muốn công thức hiển thị dạng `A - B`, cần lấy giá trị tuyệt đối: `Profit = Revenue - Abs(Expense)`. Quy ước hiện tại ưu tiên cộng đại số để đơn giản hóa logic code.
 
 ### Giai đoạn 4: Kiểm thử & Output
 **Hành động:**
@@ -137,7 +150,7 @@ Trả lời câu hỏi: *Nên chia ở Engine hay chuẩn hóa từ File kết q
     *   Vốn chủ sở hữu: `CBS_400`
     *   Tiền & Tương đương tiền: `CBS_110`
     *   Hàng tồn kho: `CBS_140`
-    *   Phải thu khách hàng: `CBS_130`
+    *   Phải thu khách hàng (Các khoản phải thu ngắn hạn): `CBS_130`
     *   Tài sản cố định hữu hình: `CBS_221`
     *   Vay ngắn hạn: `CBS_320`
     *   Vay dài hạn: `CBS_338`
@@ -146,6 +159,7 @@ Trả lời câu hỏi: *Nên chia ở Engine hay chuẩn hóa từ File kết q
     *   Lưu chuyển tiền từ HĐĐT (Investing CF): `CCFI_30`
     *   Lưu chuyển tiền từ HĐTC (Financing CF): `CCFI_40`
     *   Tiền chi mua sắm TSCĐ (Capex): `CCFI_21`
+    *   Khấu hao tài sản cố định (depreciation cost- chi phí khấu hao): `CCFI_2`
 
 #### 2. Các chỉ số Tài chính & Biên lợi nhuận (Ratios & Margins)
 *   **Margins**:
@@ -156,6 +170,9 @@ Trả lời câu hỏi: *Nên chia ở Engine hay chuẩn hóa từ File kết q
 *   **Efficiency**:
     *   Tỷ lệ chi phí hoạt động: `(SG&A / Net Revenue) * 100`
     *   *Ghi chú*: `SG&A` = Chi phí BH (`CIS_25`) + Chi phí QLDN (`CIS_26`)
+ # Đầu tư :
+    *   Tỷ lệ Khấu hao tích lũy (Accumulated Depreciation Rate): `(CBS_222 / CBS_221) * 100` (Giả định `CBS_222` là Giá trị hao mòn lũy kế và `CBS_221` là Nguyên giá TSCĐ)
+    *   Tỷ lệ CIP (Capital Investment Profile): `(CBS_190 / CBS_270) * 100` (Giả định `CBS_190` là Chi phí xây dựng cơ bản dở dang và `CBS_270` là Tổng tài sản)
 *   **Profitability**:
     *   ROE: `(NPATMI / Total Equity) * 100`
     *   ROA: `(NPATMI / Total Assets) * 100`
@@ -168,20 +185,20 @@ Trả lời câu hỏi: *Nên chia ở Engine hay chuẩn hóa từ File kết q
     *   **Thành phần**:
         *   Doanh thu thuần (`CIS_10`)
         *   Giá vốn hàng bán (`CIS_11`)
-    *   **Công thức**: `Gross Profit = CIS_10 - CIS_11` (Code `CIS_20`).
+    *   **Công thức**: `Gross Profit = CIS_10 + CIS_11` (Do `CIS_11` là chi phí nên thường được lưu dưới dạng số âm, thực hiện phép cộng đại số).
 
 2.  **EBIT (Earnings Before Interest & Tax - Lợi nhuận Trước Lãi và Thuế)**:
     *   **Định nghĩa**: Lợi nhuận từ hoạt động kinh doanh trước khi tính lãi vay và thuế.
     *   **Thành phần**:
         *   `Gross Profit`: Lợi nhuận gộp (`CIS_20`).
         *   `SG&A`: Chi phí Bán hàng (`CIS_25`) + Chi phí Quản lý Doanh nghiệp (`CIS_26`).
-    *   **Công thức**: `EBIT = Gross Profit - (CIS_25 + CIS_26)`.
+    *   **Công thức**: `EBIT = Gross Profit + CIS_25 + CIS_26` (Do `CIS_25`, `CIS_26` là số âm/negative).
 
 3.  **EBITDA (Earnings Before Interest, Tax, Depreciation & Amortization)**:
     *   **Định nghĩa**: Lợi nhuận trước lãi, thuế và khấu hao. Thước đo dòng tiền từ hoạt động kinh doanh cốt lõi.
     *   **Thành phần**:
         *   `EBIT`: Lợi nhuận trước lãi và thuế.
-        *   `Depreciation`: Khấu hao TSCĐ (Thường lấy từ `CCFI_2` trong LCTT gián tiếp, hoặc `CCFI_1A` trực tiếp).
+        *   `Depreciation`: Khấu hao tài sản cố định (`CCFI_2`).
     *   **Công thức**: `EBITDA = EBIT + Depreciation`.
 
 4.  **Net Financial Income (Thu nhập Tài chính Ròng)**:
@@ -189,7 +206,7 @@ Trả lời câu hỏi: *Nên chia ở Engine hay chuẩn hóa từ File kết q
     *   **Thành phần**:
         *   Doanh thu hoạt động tài chính (`CIS_21`)
         *   Chi phí tài chính (`CIS_22` - *Lưu ý: Check kỹ dấu của dữ liệu*)
-    *   **Công thức**: `Net Fin Income = CIS_21 - CIS_22`.
+    *   **Công thức**: `Net Fin Income = CIS_21 + CIS_22` (Algebraic Addition).
 
 5.  **Net Debt (Nợ Ròng)**:
     *   **Định nghĩa**: Tổng nợ vay chịu lãi trừ đi tiền mặt và các khoản đầu tư ngắn hạn tương đương tiền.
@@ -206,10 +223,28 @@ Trả lời câu hỏi: *Nên chia ở Engine hay chuẩn hóa từ File kết q
         *   Nợ ngắn hạn (`CBS_300` hoặc `CBS_310` - *Check logic cũ*)
     *   **Công thức**: `Working Capital = CBS_100 - CBS_310`.
 
+8.  **Signage Logic (Quy tắc Dấu)**:
+    *   **Quy tắc**: Trong hệ thống, các khoản chi phí (Expenses) thường được lưu dưới dạng số **Âm (-)**.
+    *   **Hệ quả**: Khi tính toán lợi nhuận, ta thực hiện phép **Cộng (+)** đại số.
+    *   **Ví dụ**: `Profit = Revenue + Expense` (Vì `Expense` < 0, nên `+` sẽ làm giảm `Profit`).
+    *   **Lưu ý**: Nếu người dùng muốn công thức hiển thị dạng `A - B`, cần lấy giá trị tuyệt đối: `Profit = Revenue - Abs(Expense)`. Quy ước hiện tại ưu tiên cộng đại số để đơn giản hóa logic code.
+
 7.  **Free Cash Flow (FCF - Dòng tiền Tự do)**:
     *   **Định nghĩa**: Dòng tiền thuần doanh nghiệp tạo ra sau khi trừ chi phí đầu tư (Capex).
-    *   **Hiện trạng**: Logic cũ đang dùng `CCFI_50` (Lưu chuyển tiền thuần trong kỳ).
-    *   **Khuyến nghị**: Nên cân nhắc chuyển sang công thức chuẩn `Operating CF - Capex` nếu cần phản ánh đúng bản chất FCF.
+    *   **Thành phần**:
+        *   Lưu chuyển tiền từ HĐKD (Operating CF): `CCFI_20`
+        *   Tiền chi mua sắm TSCĐ (Capex): `CCFI_21`
+    *   **Công thức**: `FCF = CCFI_20 - CCFI_21`.
+
+8.  **Free Cash Flow to Equity (FCFE - Dòng tiền Tự do cho Chủ sở hữu)**:
+    *   **Định nghĩa**: Dòng tiền còn lại cho các cổ đông sau khi đã thanh toán tất cả các chi phí, thuế, nợ và tái đầu tư cần thiết.
+    *   **Thành phần**:
+        *   Lợi nhuận sau thuế (NPATMI): `CIS_61`
+        *   Khấu hao tài sản cố định (Depreciation): `CCFI_2`
+        *   Tiền chi mua sắm TSCĐ (Capex): `CCFI_21`
+        *   Thay đổi Vốn lưu động (Delta Working Capital): `(CBS_100 - CBS_310)_t - (CBS_100 - CBS_310)_{t-1}`
+        *   Thay đổi Vay nợ ròng (Delta Net Borrowing): `((CBS_320 + CBS_338) - CBS_110)_t - ((CBS_320 + CBS_338) - CBS_110)_{t-1}`
+    *   **Công thức**: `FCFE = NPATMI + Depreciation - Capex - Delta Working Capital + Delta Net Borrowing`.
 
 ### B. Bank Formulas (Chi tiết)
 
@@ -254,22 +289,23 @@ Trả lời câu hỏi: *Nên chia ở Engine hay chuẩn hóa từ File kết q
     *   **Định nghĩa**: Các tài sản mang lại thu nhập lãi cho ngân hàng.
     *   **Thành phần**:
         *   Tiền gửi tại NHNN (`BBS_120`)
-        *   Tiền gửi & cho vay TCTD khác (`BBS_130`)
-        *   Chứng khoán kinh doanh (`BBS_140`)
-        *   Cho vay khách hàng (`BBS_160`)
-        *   Chứng khoán đầu tư (`BBS_170`)
-        *   Góp vốn đầu tư dài hạn (`BBS_180`)
-    *   **Công thức**: `IEA = BBS_120 + BBS_130 + BBS_140 + BBS_160 + BBS_170 + BBS_180`.
+        *   Tiền gửi & cho vay TCTD khác (`BBS_131`)
+        *   Tiền gửi & cho vay TCTD khác (`BBS_132`)
+        *   Chứng khoán kinh doanh (`BBS_141`)
+        *   Cho vay khách hàng (`BBS_161`)
+        *   Chứng khoán đầu tư (`BBS_171`)
+        *   Chứng khoán đầu tư (`BBS_172`)
+    *   **Công thức**: `IEA = BBS_120 + BBS_131+ BBS_132 + BBS_141+ BBS_161 + BBS_171 + BBS_172`.
 
 3.  **IBL (Interest Bearing Liabilities - Nợ Chịu lãi)**:
     *   **Định nghĩa**: Các khoản nợ mà ngân hàng phải trả lãi.
     *   **Thành phần**:
-        *   Vay các TCTD khác (`BBS_320` - *Lưu ý: Check lại code cũ xem có dùng `BBS_320` hay `310`*)
-        *   Tiền gửi của TCTD khác (`BBS_321` - *Cần verify code*)
+        *   Các khoản nợ khác (`BBS_310`)
+        *   Vay các TCTD khác (`BBS_320`)
         *   Tiền gửi của khách hàng (`BBS_330`)
+        *   Các khoản phải trả khác (`BBS_350`)
         *   Phát hành giấy tờ có giá (`BBS_360`)
-        *   Vốn tài trợ, ủy thác đầu tư (`BBS_370`)
-    *   **Công thức**: `IBL = BBS_320 + BBS_321 + BBS_330 + BBS_360 + BBS_370`.
+    *   **Công thức**: `IBL = BBS_320 + BBS_310 + BBS_330 + BBS_360 + BBS_350`.
 
 4.  **NPL Amount (Non-Performing Loans - Tổng Nợ xấu)**:
     *   **Định nghĩa**: Tổng dư nợ của các nhóm nợ từ 3 đến 5 (dưới tiêu chuẩn, nghi ngờ, có khả năng mất vốn).
@@ -308,8 +344,8 @@ Trả lời câu hỏi: *Nên chia ở Engine hay chuẩn hóa từ File kết q
     *   **Định nghĩa**: Lợi nhuận từ hoạt động kinh doanh trước khi trừ chi phí dự phòng rủi ro tín dụng.
     *   **Thành phần**:
         *   Tổng thu nhập hoạt động (`TOI`)
-        *   Chi phí hoạt động (`OPEX`)
-    *   **Công thức**: `PPOP = TOI - OPEX` (hoặc lấy trực tiếp `BIS_15`).
+        *   Chi phí hoạt động (`OPEX` - số âm)
+    *   **Công thức**: `PPOP = TOI + OPEX` (Cộng đại số).
 
 9.  **Provision Expenses (Chi phí Dự phòng)**:
     *   **Định nghĩa**: Chi phí trích lập dự phòng rủi ro tín dụng trong kỳ.
@@ -338,7 +374,7 @@ Trả lời câu hỏi: *Nên chia ở Engine hay chuẩn hóa từ File kết q
 13. **CIR (Cost to Income Ratio - Tỷ lệ Chi phí trên Thu nhập)**:
     *   **Định nghĩa**: Tỷ lệ chi phí hoạt động trên tổng thu nhập hoạt động. Đo lường hiệu quả vận hành.
     *   **Thành phần**: `OPEX`, `TOI`.
-    *   **Công thức**: `CIR = (OPEX / TOI) * 100`.
+    *   **Công thức**: `CIR = (Abs(OPEX) / TOI) * 100`.
 
 14. **LDR Pure (Loan to Deposit Ratio - Tỷ lệ Dư nợ trên Huy động)**:
     *   **Định nghĩa**: Tỷ lệ cho vay khách hàng trên tổng tiền gửi và giấy tờ có giá.
@@ -373,3 +409,189 @@ Trả lời câu hỏi: *Nên chia ở Engine hay chuẩn hóa từ File kết q
     *   **Định nghĩa**: Lợi nhuận sau thuế phân bổ cho mỗi cổ phiếu thường.
     *   **Thành phần**: `NPATMI`, `Shares` (`BBS_411`).
     *   **Công thức**: `EPS = NPATMI / BBS_411`.
+19. **Total bond (Tổng trái phiếu đầu tư)**:
+    *   **Định nghĩa**: Tổng trái phiếu đầu tư.
+    *   **Thành phần**: `BBS_141`, `BBS_171`, `BBS_172`.
+    *   **Công thức**: `Total bond = BBS_141 + BBS_171 + BBS_172`.
+20. **Total Average Cash & Placements (Tiền gửi & Tiền gửi TCTD khác bình quân)**:
+    *   **Định nghĩa**: Tổng tiền gửi & Tiền gửi TCTD khác bình quân.
+    *   **Thành phần**: `BBS_120`, `BBS_131`, `BBS_132`.
+    *   **Công thức**: `Total deposit = BBS_120 + BBS_131 + BBS_132`.
+21. **Total Average Customer Loan (Tiền gửi & Tiền gửi TCTD khác bình quân)**:
+    *   **Định nghĩa**: Tổng tiền gửi & Tiền gửi TCTD khác bình quân.
+    *   **Thành phần**: `BBS_160`, `BBS_181`
+    *   **Công thức**: `Total customer loan = BBS_160 + BBS_181`.
+22. **Total Deposit from customer  (Tiền gửi & Tiền gửi từ khách hàng và các tổ chức tín dụng)**:
+    *   **Định nghĩa**: Tiền gửi từ khách hàng và các tổ chức tín dụng.
+    *   **Thành phần**: `BBS_321`, `BBS_330`
+    *   **Công thức**: `Total customer loan = BBS_321 + BBS_330`.
+23  **Total Loan from SBV and credit instit (Tiền vay từ SBV và các tổ chức tín dụng khác)**:
+    *   **Định nghĩa**: Tổng tiền vay từ SBV và các tổ chức tín dụng khác.
+    *   **Thành phần**: `BBS_310`, `BBS_322`, `BBS_350`  
+    *   **Công thức**: `Total customer loan = BBS_310 + BBS_322 + BBS_350`.
+24  **Total Loan from value paper (Tiền vay từ giấy tờ có giá & trái phiếu)**:
+    *   **Định nghĩa**: Tổng tiền vay từ giấy tờ có giá & trái phiếu.
+    *   **Thành phần**: `BBS_360`
+    *   **Công thức**: `Total customer loan = BBS_360`.
+
+
+### Bank Sheet 
+#### Size (Quy mô)
+    1. Total asset (Tổng tài sản): `BBS_300`
+    2. Total credit (Tổng tín dụng): `BBS_161` (Tổng dư nợ cho vay) + `BBS_181` (Mua nợ ) + `BNOT_5_1_3` (Trái phiếu do các TCKT trong nước phát hành - Chứng khoán nợ) + `BNOT_13_1_1_3` (Trái phiếu do các TCKT trong nước phát hành) + `BNOT_13_2_3` (Trái phiếu do các TCKT trong nước phát hành)
+       2.1 Total loan (Tổng dư nợ cho vay): `BBS_161`
+       2.2 Total corp bond (Tổng trái phiếu doanh nghiệp): `BNOT_13_1_1_3`
+    3. Total customer deposit (Tổng tiền gửi khách hàng): `BBS_330`
+
+#### Income Statement (Kết quả kinh doanh)
+    1. NII (Thu nhập lãi thuần): `BIS_3`
+    2. TOI (Tổng thu nhập hoạt động): `BIS_14A`
+    3. NOII (Thu Nhập phi lãi) = TOI- NII = `BIS_14A - BIS_3`
+    3. OPEX (Chi phí hoạt động): `BIS_14`
+    4. PPOP (Lợi nhuận trước dự phòng): `BIS_14A + BIS_14` / Hoặc `BIS_15`
+        4.1 Provision expenses (Chi phí dự phòng): `BIS_16`
+    5. PBT (Lợi nhuận trước thuế): `BIS_17`
+    6. NPATMI (Lợi nhuận sau thuế của cổ đông công ty mẹ): `BIS_22A`
+
+#### Growth (Tăng trưởng)
+> **Note**: Các chỉ số Tăng trưởng (Growth) có thể được tính theo YoY (Year-over-Year) hoặc QoQ (Quarter-over-Quarter) tùy theo yêu cầu phân tích cụ thể. Công thức bên dưới đang mô tả mặc định.
+    1. Credit growth (Tăng trưởng tín dụng): `(Total_Credit - Total_Credit_PrevYearEnd) / Total_Credit_PrevYearEnd`
+    2. Asset growth (Tăng trưởng tài sản): `(BBS_300 - BBS_300_PrevYearEnd) / BBS_300_PrevYearEnd`
+    3. Customer loan growth (ytd) (Tăng trưởng cho vay khách hàng (YTD)): `(BBS_161 - BBS_161_PrevYearEnd) / BBS_161_PrevYearEnd`
+    4. Customer deposit growth (ytd) (Tăng trưởng tiền gửi khách hàng (YTD)): `(BBS_330 - BBS_330_PrevYearEnd) / BBS_330_PrevYearEnd`
+    5. NII growth (yoy) (Tăng trưởng thu nhập lãi thuần (YoY)): `(BIS_3 - BIS_3_SamePeriodLastYear) / BIS_3_SamePeriodLastYear`
+    6. TOI growth (yoy) (Tăng trưởng tổng thu nhập hoạt động (YoY)): `(BIS_14A - BIS_14A_SamePeriodLastYear) / BIS_14A_SamePeriodLastYear`
+    7. PPOP growth (yoy) (Tăng trưởng lợi nhuận trước dự phòng (YoY)): `(BIS_15 - BIS_15_SamePeriodLastYear) / BIS_15_SamePeriodLastYear`
+    8. PBT growth (yoy) (Tăng trưởng lợi nhuận trước thuế (YoY)): `(BIS_17 - BIS_17_SamePeriodLastYear) / BIS_17_SamePeriodLastYear`
+    9. NPATMI growth (yoy) (Tăng trưởng lợi nhuận sau thuế của CĐ mẹ (YoY)): `(BIS_22A - BIS_22A_SamePeriodLastYear) / BIS_22A_SamePeriodLastYear`
+
+#### Asset Quality (Chất lượng tài sản)
+    1. Group 2 (%) (Tỷ lệ nợ nhóm 2) = (BNOT_4_2/BNOT_4) * 100
+    2. NPL (%) (Tỷ lệ nợ xấu): ((BNOT_4_3 + BNOT_4_4 + BNOT_4_5) / BNOT_4) * 100
+    3. Provision/ Total loan (Tỷ lệ dự phòng/Tổng dư nợ): (BBS_169/BBS_161) * 100
+    4. LLCRs (Tỷ lệ bao phủ nợ xấu): ((BBS_169) / (BNOT_4_3 + BNOT_4_4 + BNOT_4_5)) * 100
+    5. Accrued/ Total loan (Tỷ lệ lãi dự thu/Tổng dư nợ): `(BBS_252 / ( (BBS_160 + BBS_181) + (BBS_141 + BBS_171 + BBS_172) )) * 100`
+    6. Credit cost (Chi phí tín dụng) = BIS_16 / BBS_160_Avg_2Q (BBS_160 lấy trung bình 2 quý gần nhất)
+    7. NPL formation (%) (Tỷ lệ hình thành nợ xấu) = (NPL Amount / BBS_160_Avg_2Q) * 100 (NPL Amount là tổng nợ nhóm 3, 4, 5; BBS_160 lấy trung bình 2 quý gần nhất)
+    8. G2 formation (%) (Tỷ lệ hình thành nợ nhóm 2) = (Group 2 Amount / BBS_160_Avg_2Q) * 100 (Group 2 Amount BNOT_4_2/BNOT_4; BBS_160 lấy trung bình 2 quý gần nhất)
+
+   
+
+#### Capital Adequacy (An toàn vốn)
+    1. LDR (Tỷ lệ dư nợ/huy động vốn): `((BBS_161 + BBS_170)`/ (BBS_330 + BBS_360)) * 100`
+    2. Fair LDR (CB+CL/CD + VP) (LDR thực chất / điều chỉnh): `((BBS_161 + BNOT_5_1_3)`/ (BBS_330 + BBS_360)) * 100`
+    3. Net Interbank deposit/ Customer deposit (Tỷ lệ tiền gửi LNH ròng/Tiền gửi KH): `((BBS_321- BBS_131)/BBS_330) * 100`
+    4. Leverage (Đòn bẩy tài chính): `(BBS_100/BBS_500) * 100`
+    5. CASA (Tỷ lệ tiền gửi không kỳ hạn): `((BNOT_26_1 + BNOT_26_3 + BNOT_26_5)/BNOT_26) * 100`
+    6. Short term loan/ total loan (Tỷ lệ cho vay ngắn hạn/Tổng dư nợ): `(BNOT_9_1/BNOT_9) * 100`
+    7. Required Liquid Reserve (Tỷ lệ dự trữ thanh khoản bắt buộc): `((BNOT_5_1_1+BNOT_5_1_2+BNOT_13_1_1_1+BNOT_13_1_1_2+BNOT_13_2_2+BNOT_13_2_3+BBS_110+BBS_120)/BBS_400) * 100`
+
+#### Earning quality (Chất lượng lợi nhuận) Toàn bộ sử dụng %, * 100 
+    1. Average gross yield (Lợi suất sinh lời bình quân): `(BIS_1/IEA_Avg_2Q) * 100`
+        1.1 Loan yield (Lợi suất cho vay): `(BNOT_31_2/Total customer loan_Avg_2Q) * 100`, trong đó  total customer loan_avg_2Q = BBS_160 + BBS_181
+        1.2 Bond yield (Lợi suất trái phiếu): `(BNOT_31_3/Totalbond_Avg_2Q) * 100`, trong đó totalbond_Avg_2Q = BBS_141+BBS_171+BBS_172
+        1.3 Deposit yield (Lợi suất tiền gửi): `(BNOT_31_1/Total Average Cash & Placements(Tiền gửi & Tiền gửi TCTD khác bình quân)_Avg_2Q) * 100` trong đó Total Average Cash & Placements(Tiền gửi & Tiền gửi TCTD khác bình quân)_Avg_2Q = BBS_120+BBS_131+BBS_132
+    2. Average funding cost (Chi phí vốn bình quân): `(BIS_2/IBL_Avg_2Q) * 100`
+        2.1 COF deposit (Chi phí vốn tiền gửi): `(BNOT_32_1/Total Average Cash & Placements(Tiền gửi & Tiền gửi TCTD khác bình quân)_Avg_2Q) * 100`
+        2.2 COF loan (Chi phí vốn vay): `(BNOT_32_2/Total customer loan_Avg_2Q) * 100`
+        2.3 COF valuable paper (Chi phí vốn giấy tờ có giá): `(BNOT_32_3/Totalbond_Avg_2Q) * 100`
+    3. NIM (%) (Biên lãi ròng): `(BIS_3 / IEA_Avg_2Q) * 100`
+    4. NII/ TOI (Tỷ lệ Thu nhập lãi thuần/Tổng thu nhập HĐ): `(BIS_3 / BIS_14A) * 100`
+    5. Provisioning/PPOP (Tỷ lệ trích lập dự phòng/PPOP): `(BIS_16 / (BIS_14A + BIS_14)) * 100`
+    6. CIR (Tỷ lệ chi phí/Thu nhập): `((BIS_14) / BIS_14A) * 100`
+    7. Fees Income/ Total Loan (Thu nhập phí/Tổng dư nợ)
+    8. ROEA (Lợi nhuận/Tài sản BQ - ROAA): `(BIS_22A / Assets_Avg_2Q) * 100`
+    9. ROEE (Lợi nhuận/Vốn chủ sở hữu BQ - ROAE): `(BIS_22A / Equity_Avg_2Q) * 100`
+    
+
+### C. Securities Formulas (Detailed)
+
+#### 1. Các chỉ số cơ bản (Direct Mappings)
+*   **Scale (Quy Mô)**:
+    *   Total Assets: `SBS_270`
+    *   Total Equity: `SBS_400`
+    *   Total Investment: `SBS_112 + SBS_113 + SBS_115`
+    *   Total Loans (Margin): `SBS_114`
+    *   Total Debt: `SBS_311 + SBS_341`
+*   **Income Statement (Kết Quả Kinh Doanh)**:
+    *   Total Revenue (Doanh thu): `SIS_20`
+    *   Gross Profit: `SIS_50_1` (hoặc `SIS_20 - SIS_40`)
+    *   Income from FVTPL: `SIS_1`
+    *   Income from HTM: `SIS_2`
+    *   Income from Loans: `SIS_3`
+    *   NPATMI: `SIS_201`
+
+#### 2. Các chỉ số Hiệu quả (Ratios & Safety)
+*   **Capital & Structure**:
+    *   Leverage: `SBS_270 / SBS_400`
+    *   Loans/Equity: `SBS_114 / SBS_400`
+    *   Inv/Assets: `Total Investment / SBS_270`
+    *   Loans/Assets: `SBS_114 / SBS_270`
+*   **Profitability (TTM)**:
+    *   ROAE: `Sum(SIS_200, 4Q) / Avg(SBS_400, 5Q)`
+    *   ROAA: `Sum(SIS_200, 4Q) / Avg(SBS_270, 5Q)`
+    *   Investment Yield: `Sum(SIS_1+SIS_2+SIS_4, 4Q) / Avg(Total Investment, 5Q)`
+    *   Loan Yield: `Sum(SIS_3, 4Q) / Avg(SBS_114, 5Q)`
+    *   Funding Cost: `Sum(SIS_52, 4Q) / Avg(Total Debt, 5Q)`
+
+#### 3. Các chỉ số Phức tạp & Công thức chi tiết (Complex Metrics):
+
+1.  **Total Investment (Tổng danh mục đầu tư)**:
+    *   **Định nghĩa**: Tổng giá trị các khoản đầu tư tài chính.
+    *   **Thành phần**: `FVTPL (SBS_112) + HTM (SBS_113) + AFS (SBS_115)`.
+
+2.  **Net Investment Yield (Hiệu suất đầu tư ròng)**:
+    *   **Định nghĩa**: Lợi nhuận thuần từ đầu tư trên quy mô danh mục bình quân.
+    *   **Thành phần**:
+        *   Tử số: `Sum((SIS_1+SIS_21) + (SIS_2+SIS_22) + (SIS_4+SIS_24), 4Q)` (Lãi + C.Phí).
+        *   Mẫu số: `Avg(Total Investment, 5Q)`.
+    *   **Công thức**: `Net Inv Yield = Net Inv Income / Avg Inv Assets`.
+
+3.  **Net Loan Yield (Hiệu suất cho vay ròng)**:
+    *   **Định nghĩa**: Lãi suất cho vay thực tế sau khi trừ chi phí vốn/lỗ liên quan.
+    *   **Thành phần**:
+        *   Tử số: `Sum(SIS_3 + SIS_22_1, 4Q)` (Thu lãi vay + Chi phí/Lỗ cho vay).
+        *   Mẫu số: `Avg(SBS_114, 5Q)` (Dư nợ Margin bình quân).
+    *   **Công thức**: `Net Loan Yield = Net Loan Income / Avg Loan Assets`.
+
+4.  **Net Broker Yield (Hiệu suất môi giới ròng)**:
+    *   **Định nghĩa**: Tỷ suất lợi nhuận gộp mảng môi giới.
+    *   **Thành phần**:
+        *   Tử số: `Sum(SIS_6 + SIS_27, 4Q)` (Doanh thu môi giới + Chi phí môi giới).
+        *   Mẫu số: `Sum(SIS_6, 4Q)` (Tổng doanh thu môi giới).
+    *   **Công thức**: `Net Broker Yield = Gross Broker Profit / Broker Revenue`.
+
+5.  **Funding Cost (Chi phí vốn COF)**:
+    *   **Định nghĩa**: Chi phí nợ vay bình quân.
+    *   **Thành phần**:
+        *   Tử số: `Sum(SIS_52, 4Q)` (Chi phí lãi vay).
+        *   Mẫu số: `Avg(SBS_311 + SBS_341, 5Q)` (Tổng nợ vay bình quân).
+    *   **Công thức**: `Funding Cost = Interest Expense / Avg Total Debt`.
+
+6.  **Leverage (Tỷ lệ Đòn bẩy)**:
+    *   **Định nghĩa**: Mức độ sử dụng nợ vay so với vốn chủ sở hữu (hoặc Tổng tài sản / VCSH).
+    *   **Thành phần**: `Tổng Tài sản (SBS_270)`, `Vốn Chủ sở hữu (SBS_400)`.
+    *   **Công thức**: `Leverage = SBS_270 / SBS_400`.
+
+7.  **Loans to Equity Ratio (Dư nợ / VCSH)**:
+    *   **Định nghĩa**: Tỷ lệ dư nợ cho vay margin trên vốn chủ sở hữu.
+    *   **Thành phần**: `Dư nợ Margin (SBS_114)`, `Vốn Chủ sở hữu (SBS_400)`.
+    *   **Công thức**: `Loans/Equity = SBS_114 / SBS_400`.
+
+8.  **Investment Portfolio Ratio (Tỷ trọng Danh mục đầu tư)**:
+    *   **Định nghĩa**: Tỷ trọng tài sản phân bổ vào hoạt động tự doanh.
+    *   **Thành phần**: `Total Investment (SBS_112 + 113 + 115)`, `Total Assets (SBS_270)`.
+    *   **Công thức**: `Inv Ratio = Total Investment / Total Assets`.
+
+9.  **CIR (Cost to Income Ratio)**:
+    *   **Định nghĩa**: Tỷ lệ chi phí hoạt động và quản lý trên tổng doanh thu.
+    *   **Thành phần**: `Chi phí (SIS_40 + SIS_62)`, `Doanh thu (SIS_20)`.
+    *   **Công thức**: `CIR = Abs(SIS_40 + SIS_62) / SIS_20`.
+
+10. **Gross Profit (Lợi nhuận gộp)**:
+    *   **Định nghĩa**: Lợi nhuận gộp từ hoạt động kinh doanh (hoặc lấy trực tiếp từ báo cáo nếu có).
+    *   **Thành phần**: `Doanh thu (SIS_20)`, `Chi phí HĐ (SIS_40)`.
+    *   **Công thức**: `Gross Profit = SIS_50_1` (hoặc `SIS_20 + SIS_40`).
+
+
+

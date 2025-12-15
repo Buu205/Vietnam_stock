@@ -52,34 +52,18 @@ class SchemaRegistry:
             SchemaRegistry._schemas_loaded = True
 
     def _load_all_schemas(self):
-        """Load all schemas from config/schemas/ and new schema_registry structure"""
+        """Load all schemas from schema_registry structure"""
         self.config_dir = Path(__file__).parent
-        self.schema_dir = self.config_dir / "schemas"
-        
-        # New schema registry paths
+
+        # Active schema registry paths (v4.0.0+)
         self.schema_registry_dir = self.config_dir / "schema_registry"
         self.metadata_registry_dir = self.config_dir / "metadata_registry"
         self.business_logic_dir = self.config_dir / "business_logic"
 
-        # Load master schema (backward compatibility)
-        master_path = self.schema_dir / "master_schema.json"
-        if master_path.exists():
-            with open(master_path, 'r', encoding='utf-8') as f:
-                self.master_schema = json.load(f)
-
-            # Extract commonly used settings
-            self.app_metadata = self.master_schema['app_metadata']
-            self.global_settings = self.master_schema['global_settings']
-            self.theme = self.master_schema['theme']
-            self.formatting_rules = self.master_schema['formatting_rules']
-            self.frequency_codes = self.master_schema['frequency_codes']
-            self.validation_thresholds = self.master_schema['validation_thresholds']
-            self.entity_types = self.master_schema['entity_types']
-            self.chart_defaults = self.master_schema['chart_defaults']
-        else:
-            # Fallback if master schema doesn't exist
-            logger.warning("master_schema.json not found, using defaults")
-            self._load_defaults()
+        # Load defaults (no more master_schema.json dependency)
+        # UI/UX configs will be in schema_registry/display/
+        logger.info("Loading default settings for Streamlit rebuild")
+        self._load_defaults()
 
         # Cache for loaded schemas
         self._schema_cache = {}
@@ -321,39 +305,11 @@ class SchemaRegistry:
                     schema_type = f"business_logic/{subdir}"
                     break
 
-        # Backward compatibility: old structure
-        if not schema_file:
-            # Check old data schemas
-            data_path = self.schema_dir / "data" / f"{schema_name}.json"
-            if data_path.exists():
-                schema_file = data_path
-                logger.warning(f"Using old schema location: {data_path}")
-
-            # Check old display schemas
-            if not schema_file:
-                display_path = self.schema_dir / "display" / f"{schema_name}.json"
-                if display_path.exists():
-                    schema_file = display_path
-                    logger.warning(f"Using old schema location: {display_path}")
-
-            # Check old metadata schemas
-            if not schema_file:
-                metadata_path = self.schema_dir / "metadata" / f"{schema_name}.json"
-                if metadata_path.exists():
-                    schema_file = metadata_path
-                    logger.warning(f"Using old schema location: {metadata_path}")
-
-        # Fallback to very old locations
-        if not schema_file:
-            old_path = Path(__file__).parent.parent / "calculated_results" / "schemas" / f"{schema_name}_data_schema.json"
-            if old_path.exists():
-                schema_file = old_path
-                logger.warning(f"Using deprecated schema location: {old_path}")
-
         if not schema_file:
             raise FileNotFoundError(
                 f"Schema '{schema_name}' not found. "
-                f"Checked: schema_registry/, metadata_registry/, business_logic/, and old locations."
+                f"Checked: schema_registry/, metadata_registry/, business_logic/. "
+                f"For Streamlit UI/UX configs, use schema_registry/display/ directory."
             )
 
         with open(schema_file, 'r', encoding='utf-8') as f:

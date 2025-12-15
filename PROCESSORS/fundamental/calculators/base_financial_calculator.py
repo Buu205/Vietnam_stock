@@ -544,15 +544,23 @@ Lớp cơ sở trừu tượng cho tất cả các bộ tính toán tài chính 
     @staticmethod
     def convert_to_billions(series: pd.Series) -> pd.Series:
         """
-        Convert values to billions (VND / 1e9).
-        
+        DEPRECATED: Returns raw VND values (no conversion).
+
+        As per v4.0.0 Unit Standardization (formula_migration_plan.md):
+        - Storage Layer: Keep values in VND (raw data)
+        - Display Layer: UI/Streamlit handles conversion to "Tỷ VND" when rendering
+
+        This function is kept for backward compatibility but now returns
+        values unchanged (in VND).
+
         Args:
-            series: Series to convert
-            
+            series: Series in VND
+
         Returns:
-            Series converted to billions
+            Series unchanged (in VND, not billions)
         """
-        return series / 1e9
+        # NO CONVERSION - store in VND as per standardization
+        return series
     
     @staticmethod
     def convert_to_millions(series: pd.Series) -> pd.Series:

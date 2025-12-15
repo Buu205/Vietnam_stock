@@ -1,0 +1,176 @@
+{
+  "enabled": {
+    "fundamental": {
+      "revenue_growth": true,
+      "gross_margin": true,
+      "operating_margin": true,
+      "roe": true,
+      "roa": true,
+      "debt_to_equity": true
+    },
+    "technical": {
+      "ma_20": true,
+      "ma_50": true,
+      "ma_100": true,
+      "ma_200": true,
+      "rsi_14": true,
+      "macd": true,
+      "bollinger": true,
+      "atr": true,
+      "momentum": true,
+      "volume_trend": true
+    },
+    "valuation": {
+      "pe_ratio": true,
+      "pb_ratio": true,
+      "ps_ratio": true,
+      "ev_ebitda": true
+    }
+  },
+  "alerts": {
+    "price_movement": true,
+    "volume_spike": true,
+    "rsi_divergence": true,
+    "ma_crossover": true,
+    "sector_momentum_change": true,
+    "valuation_extreme": true
+  },
+  "thresholds": {
+    "rsi_oversold": 30,
+    "rsi_overbought": 70,
+    "volume_spike_multiplier": 2.0,
+    "price_spike_percent": 5.0,
+    "ma_signal_period": 10,
+    "low_pe_threshold": 10,
+    "high_pe_threshold": 25
+  },
+  "scoring_thresholds": {
+    "growth": {
+      "revenue_yoy": {
+        "excellent": 0.20,
+        "good": 0.10,
+        "neutral": 0.05,
+        "poor": 0.00,
+        "terrible": -0.05
+      },
+      "profit_yoy": {
+        "excellent": 0.25,
+        "good": 0.15,
+        "neutral": 0.05,
+        "poor": 0.00,
+        "terrible": -0.10
+      }
+    },
+    "profitability": {
+      "roe": {
+        "excellent": 0.20,
+        "good": 0.15,
+        "neutral": 0.10,
+        "poor": 0.05,
+        "terrible": 0.00
+      },
+      "net_margin": {
+        "excellent": 0.15,
+        "good": 0.10,
+        "neutral": 0.05,
+        "poor": 0.02,
+        "terrible": 0.00
+      }
+    },
+    "efficiency": {
+      "asset_turnover": {
+        "excellent": 1.5,
+        "good": 1.0,
+        "neutral": 0.7,
+        "poor": 0.5
+      },
+      "sga_ratio_max": {
+        "excellent": 0.05,
+        "good": 0.10,
+        "neutral": 0.15,
+        "poor": 0.20
+      }
+    },
+    "financial_health": {
+      "debt_to_equity_max": {
+        "excellent": 0.5,
+        "good": 1.0,
+        "neutral": 1.5,
+        "poor": 2.0
+      }
+    },
+    "valuation": {
+      "pe_percentile_max": {
+        "very_cheap": 10,
+        "cheap": 25,
+        "fair": 50,
+        "expensive": 75,
+        "very_expensive": 90
+      }
+    },
+    "momentum": {
+      "price_change_20d": {
+        "strong_up": 0.10,
+        "up": 0.05,
+        "neutral": 0.00,
+        "down": -0.05,
+        "strong_down": -0.10
+      }
+    }
+  },
+  "sector_specific": {
+    "Banking": {
+      "description": "Bank sector",
+      "focus_metrics": [
+        "nim_q",
+        "cir",
+        "npl_ratio",
+        "casa_ratio",
+        "ldr",
+        "credit_cost"
+      ],
+      "benchmark_metrics": [
+        "roe",
+        "roa",
+        "credit_growth"
+      ]
+    },
+    "Insurance": {
+      "description": "Insurance sector",
+      "focus_metrics": [
+        "combined_ratio",
+        "loss_ratio",
+        "retention_ratio"
+      ],
+      "benchmark_metrics": [
+        "roe",
+        "premium_growth"
+      ]
+    },
+    "Financial Services": {
+      "description": "Securities sector",
+      "focus_metrics": [
+        "brokerage_revenue",
+        "margin_loans",
+        "fvtpl_assets",
+        "cost_to_income"
+      ],
+      "benchmark_metrics": [
+        "roe",
+        "market_share"
+      ]
+    },
+    "Real Estate": {
+      "description": "Real Estate sector",
+      "focus_metrics": [
+        "inventory_turnover",
+        "pre_sales",
+        "debt_to_equity"
+      ],
+      "benchmark_metrics": [
+        "gross_margin",
+        "profit_growth"
+      ]
+    }
+  }
+}

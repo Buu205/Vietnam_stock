@@ -86,26 +86,26 @@ class CompanyFinancialCalculator(BaseFinancialCalculator):
             DataFrame with income statement metrics calculated
         """
         result_df = df.copy()
-        
-        # Core Income Statement metrics (convert to billions VND)
-        # type: ignore
-        result_df['net_revenue'] = df.get('CIS_10', np.nan) / 1e9
-        result_df['cogs'] = df.get('CIS_11', np.nan) / 1e9
-        result_df['gross_profit'] = df.get('CIS_20', np.nan) / 1e9
-        
+
+        # Core Income Statement metrics (stored in VND as per v4.0.0 standard)
+        # Display layer will handle conversion to billions
+        result_df['net_revenue'] = df.get('CIS_10', np.nan)
+        result_df['cogs'] = df.get('CIS_11', np.nan)
+        result_df['gross_profit'] = df.get('CIS_20', np.nan)
+
         # SG&A = CIS_25 + CIS_26 (selling + admin expenses)
         sga_sales = df.get('CIS_25', np.nan)
         sga_admin = df.get('CIS_26', np.nan)
         # Handle NaN values properly
-        result_df['sga'] = self._safe_sum_expenses(sga_sales, sga_admin) / 1e9
+        result_df['sga'] = self._safe_sum_expenses(sga_sales, sga_admin)
         
         # EBIT = Gross Profit - SG&A
         result_df['ebit'] = result_df['gross_profit'] + result_df['sga']  # SGA is negative
         
-        # Net Finance Income
+        # Net Finance Income (stored in VND)
         finance_income = df.get('CIS_21', 0)  # Revenue
         finance_cost = df.get('CIS_22', 0)     # Expense (typically negative)
-        result_df['net_finance_income'] = (finance_income + finance_cost) / 1e9
+        result_df['net_finance_income'] = (finance_income + finance_cost)
         
         # EBT and NPATMI
         result_df['ebt'] = self.convert_to_billions(df.get('CIS_50', np.nan))
@@ -231,22 +231,45 @@ class CompanyFinancialCalculator(BaseFinancialCalculator):
     def calculate_cash_flow(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate cash flow metrics for COMPANY entities.
-        
+
         Args:
             df: Pivoted DataFrame with cash flow codes
-            
+
         Returns:
             DataFrame with cash flow metrics calculated
         """
         result_df = df.copy()
-        
+
         # Cash Flow metrics (convert to billions VND)
         result_df['operating_cf'] = self.convert_to_billions(df.get('CCFI_20', np.nan))
         result_df['investment_cf'] = self.convert_to_billions(df.get('CCFI_30', np.nan))
         result_df['capex'] = self.convert_to_billions(df.get('CCFI_21', np.nan))
         result_df['financing_cf'] = self.convert_to_billions(df.get('CCFI_40', np.nan))
         result_df['fcf'] = self.convert_to_billions(df.get('CCFI_50', np.nan))
-        
+
+        # Net Debt = (ST Debt + LT Debt) - Cash
+        result_df['net_debt'] = (result_df.get('st_debt', 0) + result_df.get('lt_debt', 0)) - result_df.get('cash', 0)
+
+        # Working Capital = Current Assets - Current Liabilities
+        result_df['working_capital'] = result_df.get('current_assets', 0) - result_df.get('current_liabilities', 0)
+
+        # Calculate delta Working Capital (for FCFE calculation)
+        result_df = result_df.sort_values(['SECURITY_CODE', 'REPORT_DATE'])
+        result_df['delta_working_capital'] = result_df.groupby('SECURITY_CODE')['working_capital'].diff()
+
+        # Calculate delta Net Borrowing (for FCFE calculation)
+        net_borrowing = (result_df.get('st_debt', 0) + result_df.get('lt_debt', 0)) - result_df.get('cash', 0)
+        result_df['delta_net_borrowing'] = result_df.groupby('SECURITY_CODE')[net_borrowing.name if hasattr(net_borrowing, 'name') else 'net_debt'].transform(lambda x: x.diff())
+
+        # FCFE = NPATMI + Depreciation - Capex - Delta Working Capital + Delta Net Borrowing
+        result_df['fcfe'] = (
+            result_df.get('npatmi', 0) +
+            result_df.get('depreciation', 0) -
+            result_df.get('capex', 0) -
+            result_df.get('delta_working_capital', 0) +
+            result_df.get('delta_net_borrowing', 0)
+        )
+
         return result_df
     
     def calculate_liquidity_ratios(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -509,31 +532,46 @@ class CompanyFinancialCalculator(BaseFinancialCalculator):
         company_cols = [
             # ID columns
             "SECURITY_CODE", "REPORT_DATE", "YEAR", "QUARTER", "FREQ_CODE",
-            
+
             # Income Statement
             "net_revenue", "cogs", "gross_profit", "sga", "ebit",
             "net_finance_income", "ebt", "npatmi", "depreciation", "ebitda",
-            
+
             # Margins
             "gross_profit_margin", "ebit_margin", "ebitda_margin", "net_margin",
-            
+
             # Growth Rates
-            "net_revenue_growth", "gross_profit_growth", "ebit_growth", 
+            "net_revenue_growth", "gross_profit_growth", "ebit_growth",
             "ebitda_growth", "npatmi_growth",
-            
+
             # Balance Sheet
             "total_assets", "total_liabilities", "total_equity", "cash",
             "inventory", "account_receivable", "tangible_fixed_asset",
             "st_debt", "lt_debt", "common_shares",
-            
-            # Cash Flow
+            "current_assets", "current_liabilities",
+
+            # Cash Flow & Complex Metrics
             "operating_cf", "investment_cf", "capex", "financing_cf", "fcf",
-            
+            "net_debt", "working_capital", "delta_working_capital",
+            "delta_net_borrowing", "fcfe",
+
             # TTM Metrics
             "net_revenue_ttm", "npatmi_ttm", "operating_cf_ttm",
-            
-            # Ratios
-            "roe", "roa", "eps"
+
+            # Liquidity Ratios
+            "current_ratio", "quick_ratio", "cash_ratio",
+
+            # Solvency Ratios
+            "debt_to_equity", "debt_to_assets",
+
+            # Activity Ratios
+            "asset_turnover", "inventory_turnover", "receivables_turnover",
+
+            # Profitability Ratios
+            "roe", "roa", "eps",
+
+            # Valuation
+            "bvps"
         ]
         
         # Filter available columns

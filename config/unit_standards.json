@@ -1,0 +1,222 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vietnam Dashboard - Unit Standardization v4.0.0",
+  "description": "Defines canonical unit standards for data storage and display layers across the entire system",
+  "version": "4.0.0",
+  "lastUpdated": "2025-12-14",
+
+  "principles": {
+    "storage_layer": "Store all metrics in their RAW UNITS (VND, decimal ratios). NO conversion at storage.",
+    "display_layer": "UI/Streamlit handles all formatting and conversion (e.g., VND → Tỷ VND, 0.15 → 15%)",
+    "precision": "Maximize data precision by storing full values without rounding",
+    "consistency": "All metrics follow the same unit standard regardless of entity type (Company, Bank, Security)"
+  },
+
+  "unit_categories": {
+    "absolute_values": {
+      "description": "Revenue, Profit, Assets, Equity, Liabilities, etc.",
+      "storage_unit": "VND",
+      "storage_format": "Float64 (no conversion)",
+      "display_formats": {
+        "billions": {
+          "unit": "Tỷ VND",
+          "format": "#,##0.0 Tỷ",
+          "conversion": "value / 1e9",
+          "example": "2,500,123,000 VND → 2.5 Tỷ VND"
+        },
+        "millions": {
+          "unit": "Triệu VND",
+          "format": "#,##0 Triệu",
+          "conversion": "value / 1e6",
+          "example": "2,500,123,000 VND → 2,500 Triệu VND"
+        },
+        "raw": {
+          "unit": "VND",
+          "format": "#,##0",
+          "conversion": "value",
+          "example": "2,500,123,000 VND → 2,500,123,000 VND"
+        }
+      },
+      "applies_to": [
+        "net_revenue", "total_revenue", "cogs", "gross_profit", "ebit", "ebitda", "npatmi",
+        "total_assets", "total_equity", "total_liabilities", "cash", "debt",
+        "nii", "toi", "noii", "opex", "pbt",
+        "operating_cf", "investing_cf", "financing_cf", "fcf", "fcfe",
+        "customer_loans", "customer_deposits", "npl_amount"
+      ]
+    },
+
+    "ratios_and_margins": {
+      "description": "Profitability ratios, margins, growth rates",
+      "storage_unit": "Decimal (0.0 to 1.0 scale)",
+      "storage_format": "Float64 (0.15 means 15%)",
+      "display_formats": {
+        "percentage": {
+          "unit": "%",
+          "format": "0.00%",
+          "conversion": "value * 100",
+          "example": "0.1523 → 15.23%"
+        },
+        "decimal": {
+          "unit": "",
+          "format": "0.0000",
+          "conversion": "value",
+          "example": "0.1523 → 0.1523"
+        }
+      },
+      "applies_to": [
+        "roe", "roa", "roea_ttm", "roaa_ttm",
+        "gross_profit_margin", "ebit_margin", "net_margin", "profit_margin",
+        "nim_q", "asset_yield_q", "funding_cost_q", "loan_yield_q",
+        "casa_ratio", "cir", "nii_toi", "noii_toi",
+        "ldr_pure", "ldr_regulated_estimated", "npl_ratio", "llcr",
+        "debt_group2_ratio", "group2_to_total_ratio",
+        "qoq_growth", "yoy_growth", "investment_ratio", "lending_ratio", "brokerage_ratio"
+      ]
+    },
+
+    "per_share_metrics": {
+      "description": "Earnings, Book Value per share",
+      "storage_unit": "VND/share",
+      "storage_format": "Float64 (VND per share)",
+      "display_formats": {
+        "vnd_per_share": {
+          "unit": "VND/cp",
+          "format": "#,##0",
+          "conversion": "value",
+          "example": "15,234 VND/cp → 15,234 VND/cp"
+        },
+        "thousands": {
+          "unit": "nghìn VND/cp",
+          "format": "#,##0.0 nghìn",
+          "conversion": "value / 1000",
+          "example": "15,234 VND/cp → 15.2 nghìn VND/cp"
+        }
+      },
+      "applies_to": [
+        "eps", "eps_ttm", "bvps", "dps"
+      ]
+    },
+
+    "multiples": {
+      "description": "Valuation multiples, leverage ratios",
+      "storage_unit": "Times (x)",
+      "storage_format": "Float64 (15.2 means 15.2x)",
+      "display_formats": {
+        "times": {
+          "unit": "x",
+          "format": "0.00x",
+          "conversion": "value",
+          "example": "15.23 → 15.23x"
+        },
+        "decimal": {
+          "unit": "",
+          "format": "0.00",
+          "conversion": "value",
+          "example": "15.23 → 15.23"
+        }
+      },
+      "applies_to": [
+        "pe_ratio", "pb_ratio", "ev_ebitda",
+        "debt_to_equity", "debt_to_assets", "leverage",
+        "current_ratio", "quick_ratio", "cash_ratio"
+      ]
+    },
+
+    "counts": {
+      "description": "Share counts, quantities",
+      "storage_unit": "Units",
+      "storage_format": "Int64 or Float64",
+      "display_formats": {
+        "millions": {
+          "unit": "triệu cp",
+          "format": "#,##0 triệu",
+          "conversion": "value / 1e6",
+          "example": "835,999,880,000 → 836,000 triệu cp"
+        },
+        "raw": {
+          "unit": "cp",
+          "format": "#,##0",
+          "conversion": "value",
+          "example": "835,999,880,000 cp"
+        }
+      },
+      "applies_to": [
+        "common_shares", "outstanding_shares"
+      ]
+    }
+  },
+
+  "implementation_guidelines": {
+    "storage_layer": {
+      "description": "Rules for data storage in parquet files",
+      "rules": [
+        "Store ALL absolute values in VND (not billions, not millions)",
+        "Store ALL ratios as decimals (0.15 for 15%, not 15)",
+        "Store ALL multiples as is (15.2 for 15.2x)",
+        "Store per-share metrics in VND/share",
+        "NEVER divide by 1e9, 1e6 in calculator logic",
+        "NEVER multiply by 100 for percentage ratios in calculator logic"
+      ],
+      "validation": [
+        "Check that revenue values > 1e9 (should be in billions range when measured in VND)",
+        "Check that ratio values between 0 and 1 (or -1 to 1 for some metrics)",
+        "Check that EPS values > 1000 for typical stocks (VND per share)"
+      ]
+    },
+
+    "display_layer": {
+      "description": "Rules for UI/Streamlit rendering",
+      "rules": [
+        "Detect metric category using metric_registry.json",
+        "Apply appropriate conversion based on category",
+        "Add unit suffix after conversion",
+        "Use consistent formatting across all dashboards"
+      ],
+      "example_code": {
+        "python": "def format_metric(value, metric_name, metric_registry):\n    category = metric_registry.get_category(metric_name)\n    if category == 'income' or category == 'balance_sheet':\n        return f\"{value / 1e9:,.1f} Tỷ\"\n    elif category == 'ratio':\n        return f\"{value * 100:.2f}%\"\n    elif category == 'multiple':\n        return f\"{value:.2f}x\"\n    elif category == 'per_share':\n        return f\"{value:,.0f} VND/cp\"\n    return str(value)"
+      }
+    },
+
+    "migration_checklist": {
+      "completed": [
+        "✅ Updated BaseFinancialCalculator.convert_to_billions() to return raw VND",
+        "✅ Removed all /1e9 conversions from Company Calculator",
+        "✅ Removed all /1e9 conversions from Bank Calculator",
+        "✅ Removed all /1e9 conversions from Security Calculator",
+        "✅ Removed all *100 conversions for ratios in Bank Calculator",
+        "✅ Created this unit_standards.json config file"
+      ],
+      "pending": [
+        "⏳ Update all PROCESSORS/valuation calculators to follow standard",
+        "⏳ Update all PROCESSORS/technical calculators to follow standard",
+        "⏳ Create display layer helper functions in WEBAPP/core/formatters.py",
+        "⏳ Update all Streamlit dashboards to use formatters",
+        "⏳ Add unit tests to verify storage standards",
+        "⏳ Update documentation with examples"
+      ]
+    }
+  },
+
+  "backward_compatibility": {
+    "description": "How to handle existing files that use old units",
+    "strategy": "File version detection",
+    "rules": [
+      "If file has 'version' metadata >= 4.0.0, use new standards",
+      "If file has no version or version < 4.0.0, assume old standards (values in billions)",
+      "Provide migration script to convert old files to new standard"
+    ]
+  },
+
+  "references": {
+    "source_document": "/Users/buuphan/Dev/Vietnam_dashboard/formula_migration_plan.md",
+    "section": "Section 3.b - Tiêu chuẩn Chuẩn hóa (Propose Standard)",
+    "related_files": [
+      "config/metadata/metric_registry.json",
+      "PROCESSORS/fundamental/calculators/base_financial_calculator.py",
+      "PROCESSORS/fundamental/calculators/company_calculator.py",
+      "PROCESSORS/fundamental/calculators/bank_calculator.py",
+      "PROCESSORS/fundamental/calculators/security_calculator.py"
+    ]
+  }
+}

@@ -78,7 +78,7 @@ class SectorRegistry:
         if not registry_path.exists():
             raise FileNotFoundError(
                 f"Sector registry not found: {registry_path}\n"
-                f"Please run: python data_processor/core/build_sector_registry.py"
+            f"Please run: python config/registries/builders/build_sector_registry.py"
             )
 
         # Load registry

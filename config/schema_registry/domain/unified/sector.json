@@ -23,7 +23,16 @@
         "avg_roe": "Average ROE across sector",
         "avg_roa": "Average ROA across sector",
         "avg_growth": "Average revenue growth",
-        "sector_market_cap": "Total market cap of sector"
+        "sector_market_cap": "Total market cap of sector",
+        "gross_profit": "Sum of Gross Profit",
+        "operating_profit": "Sum of Operating Profit",
+        "selling_expenses": "Sum of Selling Expenses",
+        "general_admin_expenses": "Sum of General & Admin Expenses",
+        "sga_ratio": "SG&A / Revenue Ratio",
+        "total_revenue": "Sum of Total Revenue/TOI",
+        "net_profit": "Sum of Net Profit",
+        "total_assets": "Sum of Total Assets",
+        "total_equity": "Sum of Total Equity"
       }
     },
     "technical": {
@@ -31,7 +40,8 @@
       "metrics": {
         "sector_rsi": "Average RSI across sector",
         "sector_trend": "Overall sector trend",
-        "advance_decline": "Advancing vs declining stocks"
+        "advance_decline": "Advancing vs declining stocks",
+        "total_trading_value": "Sum of Trading Value (Volume * Price)"
       }
     },
     "valuation": {
@@ -44,7 +54,20 @@
     }
   },
   "data_structure": {
-    "columns": ["date", "sector_code", "metric_category", "metric_code", "value", "ticker_count"],
-    "required": ["date", "sector_code", "metric_category", "metric_code", "value"]
+    "columns": [
+      "date",
+      "sector_code",
+      "metric_category",
+      "metric_code",
+      "value",
+      "ticker_count"
+    ],
+    "required": [
+      "date",
+      "sector_code",
+      "metric_category",
+      "metric_code",
+      "value"
+    ]
   }
 }

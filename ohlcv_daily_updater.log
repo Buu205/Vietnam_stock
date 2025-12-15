@@ -1382,3 +1382,1387 @@
 2025-12-12 16:58:07,398 - INFO - Saved 1000522 records to /Users/buuphan/Dev/Vietnam_dashboard/DATA/raw/ohlcv/OHLCV_mktcap.parquet
 2025-12-12 16:58:07,406 - INFO - Daily update completed successfully for 2025-12-12
 2025-12-12 16:58:07,433 - INFO - ✅ OHLCV update completed successfully for 2025-12-12!
+2025-12-15 15:41:12,299 - INFO - Looking for config at: /Users/buuphan/Dev/Vietnam_dashboard/config/data_sources.json
+2025-12-15 15:41:12,300 - INFO - Loaded 457 symbols for processing
+2025-12-15 15:41:12,300 - INFO - Starting update with 457 symbols for date: 2025-12-15
+2025-12-15 15:41:12,300 - INFO - Starting daily update for 2025-12-15
+2025-12-15 15:41:12,410 - INFO - Loaded existing data: 1000522 records
+2025-12-15 15:41:12,428 - INFO - Latest date in existing data: 2025-12-12
+2025-12-15 15:41:12,428 - INFO - Processing AAA (1/457)
+2025-12-15 15:41:13,913 - INFO - ✅ Authentication successful: Phan Quoc Buu
+2025-12-15 15:41:13,913 - INFO - License verified via vnii: is_paid=True, tier=golden
+2025-12-15 15:41:17,304 - INFO - ✅ Authentication successful: Phan Quoc Buu
+2025-12-15 15:41:17,531 - INFO - Retrieved 1 OHLCV records for AAA
+2025-12-15 15:41:17,635 - INFO - Processing AAH (2/457)
+2025-12-15 15:41:17,834 - INFO - Retrieved 1 OHLCV records for AAH
+2025-12-15 15:41:17,939 - INFO - Processing AAS (3/457)
+2025-12-15 15:41:18,152 - INFO - Retrieved 1 OHLCV records for AAS
+2025-12-15 15:41:18,257 - INFO - Processing AAV (4/457)
+2025-12-15 15:41:18,488 - INFO - Retrieved 1 OHLCV records for AAV
+2025-12-15 15:41:18,593 - INFO - Processing ABB (5/457)
+2025-12-15 15:41:18,829 - INFO - Retrieved 1 OHLCV records for ABB
+2025-12-15 15:41:18,934 - INFO - Processing ABI (6/457)
+2025-12-15 15:41:19,175 - INFO - Retrieved 1 OHLCV records for ABI
+2025-12-15 15:41:19,278 - INFO - Processing ABS (7/457)
+2025-12-15 15:41:19,541 - INFO - Retrieved 1 OHLCV records for ABS
+2025-12-15 15:41:19,646 - INFO - Processing ABT (8/457)
+2025-12-15 15:41:19,890 - INFO - Retrieved 1 OHLCV records for ABT
+2025-12-15 15:41:19,993 - INFO - Processing ABW (9/457)
+2025-12-15 15:41:20,205 - INFO - Retrieved 1 OHLCV records for ABW
+2025-12-15 15:41:20,308 - INFO - Processing ACB (10/457)
+2025-12-15 15:41:20,534 - INFO - Retrieved 1 OHLCV records for ACB
+2025-12-15 15:41:20,639 - INFO - Processing ACG (11/457)
+2025-12-15 15:41:20,843 - INFO - Retrieved 1 OHLCV records for ACG
+2025-12-15 15:41:20,948 - INFO - Processing ACV (12/457)
+2025-12-15 15:41:21,172 - INFO - Retrieved 1 OHLCV records for ACV
+2025-12-15 15:41:21,278 - INFO - Processing ADS (13/457)
+2025-12-15 15:41:21,505 - INFO - Retrieved 1 OHLCV records for ADS
+2025-12-15 15:41:21,611 - INFO - Processing AFX (14/457)
+2025-12-15 15:41:21,831 - INFO - Retrieved 1 OHLCV records for AFX
+2025-12-15 15:41:21,934 - INFO - Processing AGG (15/457)
+2025-12-15 15:41:22,154 - INFO - Retrieved 1 OHLCV records for AGG
+2025-12-15 15:41:22,259 - INFO - Processing AGR (16/457)
+2025-12-15 15:41:22,481 - INFO - Retrieved 1 OHLCV records for AGR
+2025-12-15 15:41:22,584 - INFO - Processing AMS (17/457)
+2025-12-15 15:41:22,791 - INFO - Retrieved 1 OHLCV records for AMS
+2025-12-15 15:41:22,894 - INFO - Processing ANT (18/457)
+2025-12-15 15:41:23,101 - INFO - Retrieved 1 OHLCV records for ANT
+2025-12-15 15:41:23,203 - INFO - Processing ANV (19/457)
+2025-12-15 15:41:23,422 - INFO - Retrieved 1 OHLCV records for ANV
+2025-12-15 15:41:23,525 - INFO - Processing APF (20/457)
+2025-12-15 15:41:23,747 - INFO - Retrieved 1 OHLCV records for APF
+2025-12-15 15:41:23,853 - INFO - Processing APG (21/457)
+2025-12-15 15:41:24,083 - INFO - Retrieved 1 OHLCV records for APG
+2025-12-15 15:41:24,189 - INFO - Processing APH (22/457)
+2025-12-15 15:41:24,423 - INFO - Retrieved 1 OHLCV records for APH
+2025-12-15 15:41:24,528 - INFO - Processing API (23/457)
+2025-12-15 15:41:24,738 - INFO - Retrieved 1 OHLCV records for API
+2025-12-15 15:41:24,844 - INFO - Processing APS (24/457)
+2025-12-15 15:41:25,046 - INFO - Retrieved 1 OHLCV records for APS
+2025-12-15 15:41:25,152 - INFO - Processing ASM (25/457)
+2025-12-15 15:41:25,356 - INFO - Retrieved 1 OHLCV records for ASM
+2025-12-15 15:41:25,461 - INFO - Processing AST (26/457)
+2025-12-15 15:41:25,649 - INFO - Retrieved 1 OHLCV records for AST
+2025-12-15 15:41:25,753 - INFO - Processing AVG (27/457)
+2025-12-15 15:41:25,946 - INFO - Retrieved 1 OHLCV records for AVG
+2025-12-15 15:41:26,052 - INFO - Processing BAF (28/457)
+2025-12-15 15:41:26,253 - INFO - Retrieved 1 OHLCV records for BAF
+2025-12-15 15:41:26,359 - INFO - Processing BCC (29/457)
+2025-12-15 15:41:26,561 - INFO - Retrieved 1 OHLCV records for BCC
+2025-12-15 15:41:26,665 - INFO - Processing BCE (30/457)
+2025-12-15 15:41:26,867 - INFO - Retrieved 1 OHLCV records for BCE
+2025-12-15 15:41:26,970 - INFO - Processing BCG (31/457)
+2025-12-15 15:41:27,195 - INFO - Retrieved 1 OHLCV records for BCG
+2025-12-15 15:41:27,297 - INFO - Processing BCM (32/457)
+2025-12-15 15:41:27,507 - INFO - Retrieved 1 OHLCV records for BCM
+2025-12-15 15:41:27,612 - INFO - Processing BCR (33/457)
+2025-12-15 15:41:27,812 - INFO - Retrieved 1 OHLCV records for BCR
+2025-12-15 15:41:27,917 - INFO - Processing BFC (34/457)
+2025-12-15 15:41:28,140 - INFO - Retrieved 1 OHLCV records for BFC
+2025-12-15 15:41:28,246 - INFO - Processing BGE (35/457)
+2025-12-15 15:41:28,476 - INFO - Retrieved 1 OHLCV records for BGE
+2025-12-15 15:41:28,576 - INFO - Processing BIC (36/457)
+2025-12-15 15:41:28,780 - INFO - Retrieved 1 OHLCV records for BIC
+2025-12-15 15:41:28,882 - INFO - Processing BID (37/457)
+2025-12-15 15:41:29,088 - INFO - Retrieved 1 OHLCV records for BID
+2025-12-15 15:41:29,194 - INFO - Processing BKC (38/457)
+2025-12-15 15:41:29,419 - INFO - Retrieved 1 OHLCV records for BKC
+2025-12-15 15:41:29,524 - INFO - Processing BMC (39/457)
+2025-12-15 15:41:29,753 - INFO - Retrieved 1 OHLCV records for BMC
+2025-12-15 15:41:29,858 - INFO - Processing BMI (40/457)
+2025-12-15 15:41:30,065 - INFO - Retrieved 1 OHLCV records for BMI
+2025-12-15 15:41:30,170 - INFO - Processing BMJ (41/457)
+2025-12-15 15:41:30,387 - INFO - Retrieved 1 OHLCV records for BMJ
+2025-12-15 15:41:30,492 - INFO - Processing BMP (42/457)
+2025-12-15 15:41:30,710 - INFO - Retrieved 1 OHLCV records for BMP
+2025-12-15 15:41:30,815 - INFO - Processing BMS (43/457)
+2025-12-15 15:41:31,031 - INFO - Retrieved 1 OHLCV records for BMS
+2025-12-15 15:41:31,136 - INFO - Processing BNA (44/457)
+2025-12-15 15:41:31,359 - INFO - Retrieved 1 OHLCV records for BNA
+2025-12-15 15:41:31,464 - INFO - Processing BOT (45/457)
+2025-12-15 15:41:31,685 - INFO - Retrieved 1 OHLCV records for BOT
+2025-12-15 15:41:31,789 - INFO - Processing BSI (46/457)
+2025-12-15 15:41:32,006 - INFO - Retrieved 1 OHLCV records for BSI
+2025-12-15 15:41:32,111 - INFO - Processing BSR (47/457)
+2025-12-15 15:41:32,322 - INFO - Retrieved 1 OHLCV records for BSR
+2025-12-15 15:41:32,424 - INFO - Processing BVB (48/457)
+2025-12-15 15:41:32,646 - INFO - Retrieved 1 OHLCV records for BVB
+2025-12-15 15:41:32,751 - INFO - Processing BVH (49/457)
+2025-12-15 15:41:32,970 - INFO - Retrieved 1 OHLCV records for BVH
+2025-12-15 15:41:33,074 - INFO - Processing BVS (50/457)
+2025-12-15 15:41:33,289 - INFO - Retrieved 1 OHLCV records for BVS
+2025-12-15 15:41:33,392 - INFO - Processing BWE (51/457)
+2025-12-15 15:41:33,602 - INFO - Retrieved 1 OHLCV records for BWE
+2025-12-15 15:41:33,708 - INFO - Processing C47 (52/457)
+2025-12-15 15:41:33,986 - INFO - Retrieved 1 OHLCV records for C47
+2025-12-15 15:41:34,089 - INFO - Processing C4G (53/457)
+2025-12-15 15:41:34,298 - INFO - Retrieved 1 OHLCV records for C4G
+2025-12-15 15:41:34,404 - INFO - Processing C69 (54/457)
+2025-12-15 15:41:34,631 - INFO - Retrieved 1 OHLCV records for C69
+2025-12-15 15:41:34,736 - INFO - Processing CCL (55/457)
+2025-12-15 15:41:34,947 - INFO - Retrieved 1 OHLCV records for CCL
+2025-12-15 15:41:35,049 - INFO - Processing CDC (56/457)
+2025-12-15 15:41:35,264 - INFO - Retrieved 1 OHLCV records for CDC
+2025-12-15 15:41:35,368 - INFO - Processing CEO (57/457)
+2025-12-15 15:41:35,576 - INFO - Retrieved 1 OHLCV records for CEO
+2025-12-15 15:41:35,677 - INFO - Processing CHP (58/457)
+2025-12-15 15:41:35,887 - INFO - Retrieved 1 OHLCV records for CHP
+2025-12-15 15:41:35,990 - INFO - Processing CIG (59/457)
+2025-12-15 15:41:36,216 - INFO - Retrieved 1 OHLCV records for CIG
+2025-12-15 15:41:36,320 - INFO - Processing CII (60/457)
+2025-12-15 15:41:36,523 - INFO - Retrieved 1 OHLCV records for CII
+2025-12-15 15:41:36,628 - INFO - Processing CKA (61/457)
+2025-12-15 15:41:36,839 - INFO - Retrieved 1 OHLCV records for CKA
+2025-12-15 15:41:36,944 - INFO - Processing CKG (62/457)
+2025-12-15 15:41:37,161 - INFO - Retrieved 1 OHLCV records for CKG
+2025-12-15 15:41:37,267 - INFO - Processing CLL (63/457)
+2025-12-15 15:41:37,467 - INFO - Retrieved 1 OHLCV records for CLL
+2025-12-15 15:41:37,572 - INFO - Processing CLX (64/457)
+2025-12-15 15:41:37,777 - INFO - Retrieved 1 OHLCV records for CLX
+2025-12-15 15:41:37,882 - INFO - Processing CMG (65/457)
+2025-12-15 15:41:38,092 - INFO - Retrieved 1 OHLCV records for CMG
+2025-12-15 15:41:38,197 - INFO - Processing CMS (66/457)
+2025-12-15 15:41:38,415 - INFO - Retrieved 1 OHLCV records for CMS
+2025-12-15 15:41:38,519 - INFO - Processing CMX (67/457)
+2025-12-15 15:41:38,737 - INFO - Retrieved 1 OHLCV records for CMX
+2025-12-15 15:41:38,838 - INFO - Processing CNG (68/457)
+2025-12-15 15:41:39,063 - INFO - Retrieved 1 OHLCV records for CNG
+2025-12-15 15:41:39,165 - INFO - Processing CRC (69/457)
+2025-12-15 15:41:39,382 - INFO - Retrieved 1 OHLCV records for CRC
+2025-12-15 15:41:39,488 - INFO - Processing CRE (70/457)
+2025-12-15 15:41:39,693 - INFO - Retrieved 1 OHLCV records for CRE
+2025-12-15 15:41:39,799 - INFO - Processing CSC (71/457)
+2025-12-15 15:41:40,027 - INFO - Retrieved 1 OHLCV records for CSC
+2025-12-15 15:41:40,128 - INFO - Processing CSM (72/457)
+2025-12-15 15:41:40,355 - INFO - Retrieved 1 OHLCV records for CSM
+2025-12-15 15:41:40,459 - INFO - Processing CST (73/457)
+2025-12-15 15:41:40,670 - INFO - Retrieved 1 OHLCV records for CST
+2025-12-15 15:41:40,775 - INFO - Processing CSV (74/457)
+2025-12-15 15:41:40,986 - INFO - Retrieved 1 OHLCV records for CSV
+2025-12-15 15:41:41,092 - INFO - Processing CTD (75/457)
+2025-12-15 15:41:41,307 - INFO - Retrieved 1 OHLCV records for CTD
+2025-12-15 15:41:41,411 - INFO - Processing CTF (76/457)
+2025-12-15 15:41:41,623 - INFO - Retrieved 1 OHLCV records for CTF
+2025-12-15 15:41:41,727 - INFO - Processing CTG (77/457)
+2025-12-15 15:41:41,941 - INFO - Retrieved 1 OHLCV records for CTG
+2025-12-15 15:41:42,048 - INFO - Processing CTI (78/457)
+2025-12-15 15:41:42,268 - INFO - Retrieved 1 OHLCV records for CTI
+2025-12-15 15:41:42,373 - INFO - Processing CTP (79/457)
+2025-12-15 15:41:42,588 - INFO - Retrieved 1 OHLCV records for CTP
+2025-12-15 15:41:42,690 - INFO - Processing CTR (80/457)
+2025-12-15 15:41:42,895 - INFO - Retrieved 1 OHLCV records for CTR
+2025-12-15 15:41:42,999 - INFO - Processing CTS (81/457)
+2025-12-15 15:41:43,211 - INFO - Retrieved 1 OHLCV records for CTS
+2025-12-15 15:41:43,315 - INFO - Processing CTX (82/457)
+2025-12-15 15:41:43,535 - INFO - Retrieved 1 OHLCV records for CTX
+2025-12-15 15:41:43,637 - INFO - Processing D2D (83/457)
+2025-12-15 15:41:43,846 - INFO - Retrieved 1 OHLCV records for D2D
+2025-12-15 15:41:43,951 - INFO - Processing DAH (84/457)
+2025-12-15 15:41:44,161 - INFO - Retrieved 1 OHLCV records for DAH
+2025-12-15 15:41:44,265 - INFO - Processing DBC (85/457)
+2025-12-15 15:41:44,490 - INFO - Retrieved 1 OHLCV records for DBC
+2025-12-15 15:41:44,593 - INFO - Processing DBD (86/457)
+2025-12-15 15:41:44,820 - INFO - Retrieved 1 OHLCV records for DBD
+2025-12-15 15:41:44,924 - INFO - Processing DC4 (87/457)
+2025-12-15 15:41:45,127 - INFO - Retrieved 1 OHLCV records for DC4
+2025-12-15 15:41:45,232 - INFO - Processing DCL (88/457)
+2025-12-15 15:41:45,440 - INFO - Retrieved 1 OHLCV records for DCL
+2025-12-15 15:41:45,542 - INFO - Processing DCM (89/457)
+2025-12-15 15:41:45,752 - INFO - Retrieved 1 OHLCV records for DCM
+2025-12-15 15:41:45,857 - INFO - Processing DDG (90/457)
+2025-12-15 15:41:46,068 - INFO - Retrieved 1 OHLCV records for DDG
+2025-12-15 15:41:46,172 - INFO - Processing DDV (91/457)
+2025-12-15 15:41:46,384 - INFO - Retrieved 1 OHLCV records for DDV
+2025-12-15 15:41:46,484 - INFO - Processing DFF (92/457)
+2025-12-15 15:41:46,691 - INFO - Retrieved 1 OHLCV records for DFF
+2025-12-15 15:41:46,797 - INFO - Processing DGC (93/457)
+2025-12-15 15:41:47,002 - INFO - Retrieved 1 OHLCV records for DGC
+2025-12-15 15:41:47,108 - INFO - Processing DGT (94/457)
+2025-12-15 15:41:47,334 - INFO - Retrieved 1 OHLCV records for DGT
+2025-12-15 15:41:47,437 - INFO - Processing DGW (95/457)
+2025-12-15 15:41:47,644 - INFO - Retrieved 1 OHLCV records for DGW
+2025-12-15 15:41:47,746 - INFO - Processing DHA (96/457)
+2025-12-15 15:41:47,970 - INFO - Retrieved 1 OHLCV records for DHA
+2025-12-15 15:41:48,074 - INFO - Processing DHC (97/457)
+2025-12-15 15:41:48,289 - INFO - Retrieved 1 OHLCV records for DHC
+2025-12-15 15:41:48,392 - INFO - Processing DHG (98/457)
+2025-12-15 15:41:48,625 - INFO - Retrieved 1 OHLCV records for DHG
+2025-12-15 15:41:48,729 - INFO - Processing DHT (99/457)
+2025-12-15 15:41:48,943 - INFO - Retrieved 1 OHLCV records for DHT
+2025-12-15 15:41:49,048 - INFO - Processing DIG (100/457)
+2025-12-15 15:41:49,255 - INFO - Retrieved 1 OHLCV records for DIG
+2025-12-15 15:41:49,359 - INFO - Processing DL1 (101/457)
+2025-12-15 15:41:49,575 - INFO - Retrieved 1 OHLCV records for DL1
+2025-12-15 15:41:49,677 - INFO - Processing DLG (102/457)
+2025-12-15 15:41:49,901 - INFO - Retrieved 1 OHLCV records for DLG
+2025-12-15 15:41:50,002 - INFO - Processing DNP (103/457)
+2025-12-15 15:41:50,216 - INFO - Retrieved 1 OHLCV records for DNP
+2025-12-15 15:41:50,320 - INFO - Processing DPG (104/457)
+2025-12-15 15:41:50,537 - INFO - Retrieved 1 OHLCV records for DPG
+2025-12-15 15:41:50,643 - INFO - Processing DPM (105/457)
+2025-12-15 15:41:50,857 - INFO - Retrieved 1 OHLCV records for DPM
+2025-12-15 15:41:50,961 - INFO - Processing DPR (106/457)
+2025-12-15 15:41:51,162 - INFO - Retrieved 1 OHLCV records for DPR
+2025-12-15 15:41:51,267 - INFO - Processing DRC (107/457)
+2025-12-15 15:41:51,482 - INFO - Retrieved 1 OHLCV records for DRC
+2025-12-15 15:41:51,583 - INFO - Processing DRH (108/457)
+2025-12-15 15:41:51,794 - INFO - Retrieved 1 OHLCV records for DRH
+2025-12-15 15:41:51,896 - INFO - Processing DRI (109/457)
+2025-12-15 15:41:52,096 - INFO - Retrieved 1 OHLCV records for DRI
+2025-12-15 15:41:52,202 - INFO - Processing DSC (110/457)
+2025-12-15 15:41:52,429 - INFO - Retrieved 1 OHLCV records for DSC
+2025-12-15 15:41:52,534 - INFO - Processing DSE (111/457)
+2025-12-15 15:41:52,726 - INFO - Retrieved 1 OHLCV records for DSE
+2025-12-15 15:41:52,828 - INFO - Processing DSH (112/457)
+2025-12-15 15:41:53,031 - INFO - Retrieved 1 OHLCV records for DSH
+2025-12-15 15:41:53,136 - INFO - Processing DSN (113/457)
+2025-12-15 15:41:53,335 - INFO - Retrieved 1 OHLCV records for DSN
+2025-12-15 15:41:53,441 - INFO - Processing DTD (114/457)
+2025-12-15 15:41:53,695 - INFO - Retrieved 1 OHLCV records for DTD
+2025-12-15 15:41:53,798 - INFO - Processing DVM (115/457)
+2025-12-15 15:41:54,016 - INFO - Retrieved 1 OHLCV records for DVM
+2025-12-15 15:41:54,119 - INFO - Processing DVN (116/457)
+2025-12-15 15:41:54,358 - INFO - Retrieved 1 OHLCV records for DVN
+2025-12-15 15:41:54,460 - INFO - Processing DVP (117/457)
+2025-12-15 15:41:54,682 - INFO - Retrieved 1 OHLCV records for DVP
+2025-12-15 15:41:54,786 - INFO - Processing DXG (118/457)
+2025-12-15 15:41:55,002 - INFO - Retrieved 1 OHLCV records for DXG
+2025-12-15 15:41:55,107 - INFO - Processing DXP (119/457)
+2025-12-15 15:41:55,322 - INFO - Retrieved 1 OHLCV records for DXP
+2025-12-15 15:41:55,428 - INFO - Processing DXS (120/457)
+2025-12-15 15:41:55,632 - INFO - Retrieved 1 OHLCV records for DXS
+2025-12-15 15:41:55,733 - INFO - Processing ECO (121/457)
+2025-12-15 15:41:55,945 - INFO - Retrieved 1 OHLCV records for ECO
+2025-12-15 15:41:56,050 - INFO - Processing EIB (122/457)
+2025-12-15 15:41:56,264 - INFO - Retrieved 1 OHLCV records for EIB
+2025-12-15 15:41:56,367 - INFO - Processing ELC (123/457)
+2025-12-15 15:41:56,586 - INFO - Retrieved 1 OHLCV records for ELC
+2025-12-15 15:41:56,691 - INFO - Processing EVE (124/457)
+2025-12-15 15:41:56,911 - INFO - Retrieved 1 OHLCV records for EVE
+2025-12-15 15:41:57,016 - INFO - Processing EVF (125/457)
+2025-12-15 15:41:57,245 - INFO - Retrieved 1 OHLCV records for EVF
+2025-12-15 15:41:57,346 - INFO - Processing EVG (126/457)
+2025-12-15 15:41:57,594 - INFO - Retrieved 1 OHLCV records for EVG
+2025-12-15 15:41:57,700 - INFO - Processing EVS (127/457)
+2025-12-15 15:41:57,936 - INFO - Retrieved 1 OHLCV records for EVS
+2025-12-15 15:41:58,040 - INFO - Processing FCM (128/457)
+2025-12-15 15:41:58,256 - INFO - Retrieved 1 OHLCV records for FCM
+2025-12-15 15:41:58,361 - INFO - Processing FCN (129/457)
+2025-12-15 15:41:58,579 - INFO - Retrieved 1 OHLCV records for FCN
+2025-12-15 15:41:58,684 - INFO - Processing FIR (130/457)
+2025-12-15 15:41:58,891 - INFO - Retrieved 1 OHLCV records for FIR
+2025-12-15 15:41:58,996 - INFO - Processing FIT (131/457)
+2025-12-15 15:41:59,216 - INFO - Retrieved 1 OHLCV records for FIT
+2025-12-15 15:41:59,322 - INFO - Processing FMC (132/457)
+2025-12-15 15:41:59,556 - INFO - Retrieved 1 OHLCV records for FMC
+2025-12-15 15:41:59,662 - INFO - Processing FOC (133/457)
+2025-12-15 15:41:59,893 - INFO - Retrieved 1 OHLCV records for FOC
+2025-12-15 15:41:59,997 - INFO - Processing FOX (134/457)
+2025-12-15 15:42:00,218 - INFO - Retrieved 1 OHLCV records for FOX
+2025-12-15 15:42:00,323 - INFO - Processing FPT (135/457)
+2025-12-15 15:42:00,541 - INFO - Retrieved 1 OHLCV records for FPT
+2025-12-15 15:42:00,646 - INFO - Processing FRT (136/457)
+2025-12-15 15:42:00,910 - INFO - Retrieved 1 OHLCV records for FRT
+2025-12-15 15:42:01,016 - INFO - Processing FTS (137/457)
+2025-12-15 15:42:01,245 - INFO - Retrieved 1 OHLCV records for FTS
+2025-12-15 15:42:01,346 - INFO - Processing G36 (138/457)
+2025-12-15 15:42:01,540 - INFO - Retrieved 1 OHLCV records for G36
+2025-12-15 15:42:01,646 - INFO - Processing GAS (139/457)
+2025-12-15 15:42:01,878 - INFO - Retrieved 1 OHLCV records for GAS
+2025-12-15 15:42:01,984 - INFO - Processing GDA (140/457)
+2025-12-15 15:42:02,205 - INFO - Retrieved 1 OHLCV records for GDA
+2025-12-15 15:42:02,310 - INFO - Processing GDT (141/457)
+2025-12-15 15:42:02,538 - INFO - Retrieved 1 OHLCV records for GDT
+2025-12-15 15:42:02,644 - INFO - Processing GEE (142/457)
+2025-12-15 15:42:02,850 - INFO - Retrieved 1 OHLCV records for GEE
+2025-12-15 15:42:02,953 - INFO - Processing GEG (143/457)
+2025-12-15 15:42:03,182 - INFO - Retrieved 1 OHLCV records for GEG
+2025-12-15 15:42:03,283 - INFO - Processing GEX (144/457)
+2025-12-15 15:42:03,517 - INFO - Retrieved 1 OHLCV records for GEX
+2025-12-15 15:42:03,622 - INFO - Processing GIL (145/457)
+2025-12-15 15:42:03,831 - INFO - Retrieved 1 OHLCV records for GIL
+2025-12-15 15:42:03,936 - INFO - Processing GKM (146/457)
+2025-12-15 15:42:04,148 - INFO - Retrieved 1 OHLCV records for GKM
+2025-12-15 15:42:04,249 - INFO - Processing GMD (147/457)
+2025-12-15 15:42:04,467 - INFO - Retrieved 1 OHLCV records for GMD
+2025-12-15 15:42:04,569 - INFO - Processing GSP (148/457)
+2025-12-15 15:42:04,789 - INFO - Retrieved 1 OHLCV records for GSP
+2025-12-15 15:42:04,892 - INFO - Processing GVR (149/457)
+2025-12-15 15:42:05,122 - INFO - Retrieved 1 OHLCV records for GVR
+2025-12-15 15:42:05,224 - INFO - Processing HAG (150/457)
+2025-12-15 15:42:05,431 - INFO - Retrieved 1 OHLCV records for HAG
+2025-12-15 15:42:05,533 - INFO - Processing HAH (151/457)
+2025-12-15 15:42:05,758 - INFO - Retrieved 1 OHLCV records for HAH
+2025-12-15 15:42:05,863 - INFO - Processing HAP (152/457)
+2025-12-15 15:42:06,102 - INFO - Retrieved 1 OHLCV records for HAP
+2025-12-15 15:42:06,207 - INFO - Processing HAR (153/457)
+2025-12-15 15:42:06,424 - INFO - Retrieved 1 OHLCV records for HAR
+2025-12-15 15:42:06,527 - INFO - Processing HAX (154/457)
+2025-12-15 15:42:06,746 - INFO - Retrieved 1 OHLCV records for HAX
+2025-12-15 15:42:06,848 - INFO - Processing HBC (155/457)
+2025-12-15 15:42:07,067 - INFO - Retrieved 1 OHLCV records for HBC
+2025-12-15 15:42:07,172 - INFO - Processing HCM (156/457)
+2025-12-15 15:42:07,387 - INFO - Retrieved 1 OHLCV records for HCM
+2025-12-15 15:42:07,492 - INFO - Processing HD6 (157/457)
+2025-12-15 15:42:07,716 - INFO - Retrieved 1 OHLCV records for HD6
+2025-12-15 15:42:07,821 - INFO - Processing HDB (158/457)
+2025-12-15 15:42:08,110 - INFO - Retrieved 1 OHLCV records for HDB
+2025-12-15 15:42:08,215 - INFO - Processing HDC (159/457)
+2025-12-15 15:42:08,430 - INFO - Retrieved 1 OHLCV records for HDC
+2025-12-15 15:42:08,533 - INFO - Processing HDG (160/457)
+2025-12-15 15:42:08,716 - INFO - Retrieved 1 OHLCV records for HDG
+2025-12-15 15:42:08,821 - INFO - Processing HGM (161/457)
+2025-12-15 15:42:09,050 - INFO - Retrieved 1 OHLCV records for HGM
+2025-12-15 15:42:09,155 - INFO - Processing HHP (162/457)
+2025-12-15 15:42:09,401 - INFO - Retrieved 1 OHLCV records for HHP
+2025-12-15 15:42:09,506 - INFO - Processing HHS (163/457)
+2025-12-15 15:42:09,703 - INFO - Retrieved 1 OHLCV records for HHS
+2025-12-15 15:42:09,807 - INFO - Processing HHV (164/457)
+2025-12-15 15:42:10,027 - INFO - Retrieved 1 OHLCV records for HHV
+2025-12-15 15:42:10,130 - INFO - Processing HII (165/457)
+2025-12-15 15:42:10,342 - INFO - Retrieved 1 OHLCV records for HII
+2025-12-15 15:42:10,444 - INFO - Processing HLD (166/457)
+2025-12-15 15:42:10,652 - INFO - Retrieved 1 OHLCV records for HLD
+2025-12-15 15:42:10,756 - INFO - Processing HNG (167/457)
+2025-12-15 15:42:10,965 - INFO - Retrieved 1 OHLCV records for HNG
+2025-12-15 15:42:11,069 - INFO - Processing HNM (168/457)
+2025-12-15 15:42:11,297 - INFO - Retrieved 1 OHLCV records for HNM
+2025-12-15 15:42:11,399 - INFO - Processing HPG (169/457)
+2025-12-15 15:42:11,610 - INFO - Retrieved 1 OHLCV records for HPG
+2025-12-15 15:42:11,716 - INFO - Processing HPX (170/457)
+2025-12-15 15:42:11,928 - INFO - Retrieved 1 OHLCV records for HPX
+2025-12-15 15:42:12,033 - INFO - Processing HQC (171/457)
+2025-12-15 15:42:12,230 - INFO - Retrieved 1 OHLCV records for HQC
+2025-12-15 15:42:12,336 - INFO - Processing HSG (172/457)
+2025-12-15 15:42:12,552 - INFO - Retrieved 1 OHLCV records for HSG
+2025-12-15 15:42:12,658 - INFO - Processing HSL (173/457)
+2025-12-15 15:42:12,862 - INFO - Retrieved 1 OHLCV records for HSL
+2025-12-15 15:42:12,968 - INFO - Processing HT1 (174/457)
+2025-12-15 15:42:13,183 - INFO - Retrieved 1 OHLCV records for HT1
+2025-12-15 15:42:13,286 - INFO - Processing HTG (175/457)
+2025-12-15 15:42:13,485 - INFO - Retrieved 1 OHLCV records for HTG
+2025-12-15 15:42:13,590 - INFO - Processing HTI (176/457)
+2025-12-15 15:42:13,804 - INFO - Retrieved 1 OHLCV records for HTI
+2025-12-15 15:42:13,909 - INFO - Processing HTN (177/457)
+2025-12-15 15:42:14,140 - INFO - Retrieved 1 OHLCV records for HTN
+2025-12-15 15:42:14,246 - INFO - Processing HUB (178/457)
+2025-12-15 15:42:14,459 - INFO - Retrieved 1 OHLCV records for HUB
+2025-12-15 15:42:14,564 - INFO - Processing HUT (179/457)
+2025-12-15 15:42:14,787 - INFO - Retrieved 1 OHLCV records for HUT
+2025-12-15 15:42:14,889 - INFO - Processing HVA (180/457)
+2025-12-15 15:42:15,087 - INFO - Retrieved 1 OHLCV records for HVA
+2025-12-15 15:42:15,189 - INFO - Processing HVH (181/457)
+2025-12-15 15:42:15,396 - INFO - Retrieved 1 OHLCV records for HVH
+2025-12-15 15:42:15,501 - INFO - Processing HVN (182/457)
+2025-12-15 15:42:15,715 - INFO - Retrieved 1 OHLCV records for HVN
+2025-12-15 15:42:15,820 - INFO - Processing HVT (183/457)
+2025-12-15 15:42:16,050 - INFO - Retrieved 1 OHLCV records for HVT
+2025-12-15 15:42:16,155 - INFO - Processing ICN (184/457)
+2025-12-15 15:42:16,385 - INFO - Retrieved 1 OHLCV records for ICN
+2025-12-15 15:42:16,491 - INFO - Processing ICT (185/457)
+2025-12-15 15:42:16,718 - INFO - Retrieved 1 OHLCV records for ICT
+2025-12-15 15:42:16,823 - INFO - Processing IDC (186/457)
+2025-12-15 15:42:17,042 - INFO - Retrieved 1 OHLCV records for IDC
+2025-12-15 15:42:17,148 - INFO - Processing IDI (187/457)
+2025-12-15 15:42:17,375 - INFO - Retrieved 1 OHLCV records for IDI
+2025-12-15 15:42:17,480 - INFO - Processing IDJ (188/457)
+2025-12-15 15:42:17,686 - INFO - Retrieved 1 OHLCV records for IDJ
+2025-12-15 15:42:17,788 - INFO - Processing IDV (189/457)
+2025-12-15 15:42:17,997 - INFO - Retrieved 1 OHLCV records for IDV
+2025-12-15 15:42:18,102 - INFO - Processing IJC (190/457)
+2025-12-15 15:42:18,333 - INFO - Retrieved 1 OHLCV records for IJC
+2025-12-15 15:42:18,438 - INFO - Processing IMP (191/457)
+2025-12-15 15:42:18,666 - INFO - Retrieved 1 OHLCV records for IMP
+2025-12-15 15:42:18,772 - INFO - Processing IPA (192/457)
+2025-12-15 15:42:19,007 - INFO - Retrieved 1 OHLCV records for IPA
+2025-12-15 15:42:19,112 - INFO - Processing ITC (193/457)
+2025-12-15 15:42:19,343 - INFO - Retrieved 1 OHLCV records for ITC
+2025-12-15 15:42:19,447 - INFO - Processing ITD (194/457)
+2025-12-15 15:42:19,682 - INFO - Retrieved 1 OHLCV records for ITD
+2025-12-15 15:42:19,787 - INFO - Processing ITQ (195/457)
+2025-12-15 15:42:20,037 - INFO - Retrieved 1 OHLCV records for ITQ
+2025-12-15 15:42:20,137 - INFO - Processing IVS (196/457)
+2025-12-15 15:42:20,357 - INFO - Retrieved 1 OHLCV records for IVS
+2025-12-15 15:42:20,463 - INFO - Processing JVC (197/457)
+2025-12-15 15:42:20,698 - INFO - Retrieved 1 OHLCV records for JVC
+2025-12-15 15:42:20,803 - INFO - Processing KBC (198/457)
+2025-12-15 15:42:21,025 - INFO - Retrieved 1 OHLCV records for KBC
+2025-12-15 15:42:21,130 - INFO - Processing KCB (199/457)
+2025-12-15 15:42:21,340 - INFO - Retrieved 1 OHLCV records for KCB
+2025-12-15 15:42:21,445 - INFO - Processing KDC (200/457)
+2025-12-15 15:42:21,683 - INFO - Retrieved 1 OHLCV records for KDC
+2025-12-15 15:42:21,787 - INFO - Processing KDH (201/457)
+2025-12-15 15:42:21,999 - INFO - Retrieved 1 OHLCV records for KDH
+2025-12-15 15:42:22,104 - INFO - Processing KHG (202/457)
+2025-12-15 15:42:22,327 - INFO - Retrieved 1 OHLCV records for KHG
+2025-12-15 15:42:22,432 - INFO - Processing KLB (203/457)
+2025-12-15 15:42:22,642 - INFO - Retrieved 1 OHLCV records for KLB
+2025-12-15 15:42:22,744 - INFO - Processing KOS (204/457)
+2025-12-15 15:42:22,951 - INFO - Retrieved 1 OHLCV records for KOS
+2025-12-15 15:42:23,057 - INFO - Processing KSB (205/457)
+2025-12-15 15:42:23,280 - INFO - Retrieved 1 OHLCV records for KSB
+2025-12-15 15:42:23,386 - INFO - Processing KSF (206/457)
+2025-12-15 15:42:23,602 - INFO - Retrieved 1 OHLCV records for KSF
+2025-12-15 15:42:23,707 - INFO - Processing KSV (207/457)
+2025-12-15 15:42:23,935 - INFO - Retrieved 1 OHLCV records for KSV
+2025-12-15 15:42:24,036 - INFO - Processing KVC (208/457)
+2025-12-15 15:42:24,243 - INFO - Retrieved 1 OHLCV records for KVC
+2025-12-15 15:42:24,349 - INFO - Processing L14 (209/457)
+2025-12-15 15:42:24,568 - INFO - Retrieved 1 OHLCV records for L14
+2025-12-15 15:42:24,673 - INFO - Processing L18 (210/457)
+2025-12-15 15:42:24,884 - INFO - Retrieved 1 OHLCV records for L18
+2025-12-15 15:42:24,986 - INFO - Processing L40 (211/457)
+2025-12-15 15:42:25,197 - INFO - Retrieved 1 OHLCV records for L40
+2025-12-15 15:42:25,299 - INFO - Processing LAS (212/457)
+2025-12-15 15:42:25,532 - INFO - Retrieved 1 OHLCV records for LAS
+2025-12-15 15:42:25,638 - INFO - Processing LBM (213/457)
+2025-12-15 15:42:25,844 - INFO - Retrieved 1 OHLCV records for LBM
+2025-12-15 15:42:25,950 - INFO - Processing LCG (214/457)
+2025-12-15 15:42:26,174 - INFO - Retrieved 1 OHLCV records for LCG
+2025-12-15 15:42:26,279 - INFO - Processing LDG (215/457)
+2025-12-15 15:42:26,493 - INFO - Retrieved 1 OHLCV records for LDG
+2025-12-15 15:42:26,596 - INFO - Processing LGL (216/457)
+2025-12-15 15:42:26,806 - INFO - Retrieved 1 OHLCV records for LGL
+2025-12-15 15:42:26,908 - INFO - Processing LHC (217/457)
+2025-12-15 15:42:27,129 - INFO - Retrieved 1 OHLCV records for LHC
+2025-12-15 15:42:27,231 - INFO - Processing LHG (218/457)
+2025-12-15 15:42:27,437 - INFO - Retrieved 1 OHLCV records for LHG
+2025-12-15 15:42:27,542 - INFO - Processing LIC (219/457)
+2025-12-15 15:42:27,765 - INFO - Retrieved 1 OHLCV records for LIC
+2025-12-15 15:42:27,868 - INFO - Processing LIG (220/457)
+2025-12-15 15:42:28,061 - INFO - Retrieved 1 OHLCV records for LIG
+2025-12-15 15:42:28,163 - INFO - Processing LIX (221/457)
+2025-12-15 15:42:28,365 - INFO - Retrieved 1 OHLCV records for LIX
+2025-12-15 15:42:28,469 - INFO - Processing LPB (222/457)
+2025-12-15 15:42:28,726 - INFO - Retrieved 1 OHLCV records for LPB
+2025-12-15 15:42:28,828 - INFO - Processing LSG (223/457)
+2025-12-15 15:42:29,153 - INFO - Retrieved 1 OHLCV records for LSG
+2025-12-15 15:42:29,258 - INFO - Processing LSS (224/457)
+2025-12-15 15:42:29,460 - INFO - Retrieved 1 OHLCV records for LSS
+2025-12-15 15:42:29,561 - INFO - Processing LTG (225/457)
+2025-12-15 15:42:29,794 - INFO - Retrieved 1 OHLCV records for LTG
+2025-12-15 15:42:29,895 - INFO - Processing MBB (226/457)
+2025-12-15 15:42:30,110 - INFO - Retrieved 1 OHLCV records for MBB
+2025-12-15 15:42:30,215 - INFO - Processing MBG (227/457)
+2025-12-15 15:42:30,423 - INFO - Retrieved 1 OHLCV records for MBG
+2025-12-15 15:42:30,528 - INFO - Processing MBS (228/457)
+2025-12-15 15:42:30,730 - INFO - Retrieved 1 OHLCV records for MBS
+2025-12-15 15:42:30,831 - INFO - Processing MCG (229/457)
+2025-12-15 15:42:31,045 - INFO - Retrieved 1 OHLCV records for MCG
+2025-12-15 15:42:31,150 - INFO - Processing MCH (230/457)
+2025-12-15 15:42:31,351 - INFO - Retrieved 1 OHLCV records for MCH
+2025-12-15 15:42:31,453 - INFO - Processing MCM (231/457)
+2025-12-15 15:42:31,671 - INFO - Retrieved 1 OHLCV records for MCM
+2025-12-15 15:42:31,777 - INFO - Processing MFS (232/457)
+2025-12-15 15:42:32,011 - INFO - Retrieved 1 OHLCV records for MFS
+2025-12-15 15:42:32,116 - INFO - Processing MHC (233/457)
+2025-12-15 15:42:32,340 - INFO - Retrieved 1 OHLCV records for MHC
+2025-12-15 15:42:32,444 - INFO - Processing MIG (234/457)
+2025-12-15 15:42:32,653 - INFO - Retrieved 1 OHLCV records for MIG
+2025-12-15 15:42:32,758 - INFO - Processing MLS (235/457)
+2025-12-15 15:42:32,972 - INFO - Retrieved 1 OHLCV records for MLS
+2025-12-15 15:42:33,077 - INFO - Processing MML (236/457)
+2025-12-15 15:42:33,286 - INFO - Retrieved 1 OHLCV records for MML
+2025-12-15 15:42:33,391 - INFO - Processing MPC (237/457)
+2025-12-15 15:42:33,612 - INFO - Retrieved 1 OHLCV records for MPC
+2025-12-15 15:42:33,718 - INFO - Processing MSB (238/457)
+2025-12-15 15:42:33,929 - INFO - Retrieved 1 OHLCV records for MSB
+2025-12-15 15:42:34,034 - INFO - Processing MSH (239/457)
+2025-12-15 15:42:34,269 - INFO - Retrieved 1 OHLCV records for MSH
+2025-12-15 15:42:34,375 - INFO - Processing MSN (240/457)
+2025-12-15 15:42:34,596 - INFO - Retrieved 1 OHLCV records for MSN
+2025-12-15 15:42:34,702 - INFO - Processing MSR (241/457)
+2025-12-15 15:42:34,925 - INFO - Retrieved 1 OHLCV records for MSR
+2025-12-15 15:42:35,031 - INFO - Processing MST (242/457)
+2025-12-15 15:42:35,243 - INFO - Retrieved 1 OHLCV records for MST
+2025-12-15 15:42:35,347 - INFO - Processing MTA (243/457)
+2025-12-15 15:42:35,558 - INFO - Retrieved 1 OHLCV records for MTA
+2025-12-15 15:42:35,661 - INFO - Processing MVC (244/457)
+2025-12-15 15:42:35,842 - INFO - Retrieved 1 OHLCV records for MVC
+2025-12-15 15:42:35,944 - INFO - Processing MWG (245/457)
+2025-12-15 15:42:36,146 - INFO - Retrieved 1 OHLCV records for MWG
+2025-12-15 15:42:36,252 - INFO - Processing MZG (246/457)
+2025-12-15 15:42:36,471 - INFO - Retrieved 1 OHLCV records for MZG
+2025-12-15 15:42:36,577 - INFO - Processing NAB (247/457)
+2025-12-15 15:42:36,816 - INFO - Retrieved 1 OHLCV records for NAB
+2025-12-15 15:42:36,919 - INFO - Processing NAF (248/457)
+2025-12-15 15:42:37,134 - INFO - Retrieved 1 OHLCV records for NAF
+2025-12-15 15:42:37,239 - INFO - Processing NAG (249/457)
+2025-12-15 15:42:37,447 - INFO - Retrieved 1 OHLCV records for NAG
+2025-12-15 15:42:37,551 - INFO - Processing NBB (250/457)
+2025-12-15 15:42:37,765 - INFO - Retrieved 1 OHLCV records for NBB
+2025-12-15 15:42:37,871 - INFO - Processing NBC (251/457)
+2025-12-15 15:42:38,070 - INFO - Retrieved 1 OHLCV records for NBC
+2025-12-15 15:42:38,176 - INFO - Processing NCT (252/457)
+2025-12-15 15:42:38,377 - INFO - Retrieved 1 OHLCV records for NCT
+2025-12-15 15:42:38,482 - INFO - Processing NDN (253/457)
+2025-12-15 15:42:38,684 - INFO - Retrieved 1 OHLCV records for NDN
+2025-12-15 15:42:38,789 - INFO - Processing NED (254/457)
+2025-12-15 15:42:38,986 - INFO - Retrieved 1 OHLCV records for NED
+2025-12-15 15:42:39,086 - INFO - Processing NHA (255/457)
+2025-12-15 15:42:39,304 - INFO - Retrieved 1 OHLCV records for NHA
+2025-12-15 15:42:39,409 - INFO - Processing NHH (256/457)
+2025-12-15 15:42:39,600 - INFO - Retrieved 1 OHLCV records for NHH
+2025-12-15 15:42:39,706 - INFO - Processing NKG (257/457)
+2025-12-15 15:42:39,894 - INFO - Retrieved 1 OHLCV records for NKG
+2025-12-15 15:42:39,995 - INFO - Processing NLG (258/457)
+2025-12-15 15:42:40,210 - INFO - Retrieved 1 OHLCV records for NLG
+2025-12-15 15:42:40,311 - INFO - Processing NNC (259/457)
+2025-12-15 15:42:40,500 - INFO - Retrieved 1 OHLCV records for NNC
+2025-12-15 15:42:40,606 - INFO - Processing NO1 (260/457)
+2025-12-15 15:42:40,825 - INFO - Retrieved 1 OHLCV records for NO1
+2025-12-15 15:42:40,930 - INFO - Processing NRC (261/457)
+2025-12-15 15:42:41,154 - INFO - Retrieved 1 OHLCV records for NRC
+2025-12-15 15:42:41,259 - INFO - Processing NT2 (262/457)
+2025-12-15 15:42:41,466 - INFO - Retrieved 1 OHLCV records for NT2
+2025-12-15 15:42:41,572 - INFO - Processing NTC (263/457)
+2025-12-15 15:42:41,786 - INFO - Retrieved 1 OHLCV records for NTC
+2025-12-15 15:42:41,891 - INFO - Processing NTL (264/457)
+2025-12-15 15:42:42,123 - INFO - Retrieved 1 OHLCV records for NTL
+2025-12-15 15:42:42,228 - INFO - Processing NTP (265/457)
+2025-12-15 15:42:42,459 - INFO - Retrieved 1 OHLCV records for NTP
+2025-12-15 15:42:42,563 - INFO - Processing NVB (266/457)
+2025-12-15 15:42:42,789 - INFO - Retrieved 1 OHLCV records for NVB
+2025-12-15 15:42:42,894 - INFO - Processing NVL (267/457)
+2025-12-15 15:42:43,111 - INFO - Retrieved 1 OHLCV records for NVL
+2025-12-15 15:42:43,215 - INFO - Processing OCB (268/457)
+2025-12-15 15:42:43,455 - INFO - Retrieved 1 OHLCV records for OCB
+2025-12-15 15:42:43,557 - INFO - Processing ODE (269/457)
+2025-12-15 15:42:43,775 - INFO - Retrieved 1 OHLCV records for ODE
+2025-12-15 15:42:43,880 - INFO - Processing OGC (270/457)
+2025-12-15 15:42:44,111 - INFO - Retrieved 1 OHLCV records for OGC
+2025-12-15 15:42:44,216 - INFO - Processing OIL (271/457)
+2025-12-15 15:42:44,438 - INFO - Retrieved 1 OHLCV records for OIL
+2025-12-15 15:42:44,543 - INFO - Processing OPC (272/457)
+2025-12-15 15:42:44,751 - INFO - Retrieved 1 OHLCV records for OPC
+2025-12-15 15:42:44,857 - INFO - Processing ORS (273/457)
+2025-12-15 15:42:45,070 - INFO - Retrieved 1 OHLCV records for ORS
+2025-12-15 15:42:45,176 - INFO - Processing PAC (274/457)
+2025-12-15 15:42:45,395 - INFO - Retrieved 1 OHLCV records for PAC
+2025-12-15 15:42:45,501 - INFO - Processing PAN (275/457)
+2025-12-15 15:42:45,723 - INFO - Retrieved 1 OHLCV records for PAN
+2025-12-15 15:42:45,826 - INFO - Processing PAT (276/457)
+2025-12-15 15:42:46,060 - INFO - Retrieved 1 OHLCV records for PAT
+2025-12-15 15:42:46,165 - INFO - Processing PC1 (277/457)
+2025-12-15 15:42:46,374 - INFO - Retrieved 1 OHLCV records for PC1
+2025-12-15 15:42:46,479 - INFO - Processing PCH (278/457)
+2025-12-15 15:42:46,700 - INFO - Retrieved 1 OHLCV records for PCH
+2025-12-15 15:42:46,802 - INFO - Processing PDR (279/457)
+2025-12-15 15:42:47,023 - INFO - Retrieved 1 OHLCV records for PDR
+2025-12-15 15:42:47,128 - INFO - Processing PET (280/457)
+2025-12-15 15:42:47,358 - INFO - Retrieved 1 OHLCV records for PET
+2025-12-15 15:42:47,461 - INFO - Processing PFL (281/457)
+2025-12-15 15:42:47,691 - INFO - Retrieved 1 OHLCV records for PFL
+2025-12-15 15:42:47,796 - INFO - Processing PGB (282/457)
+2025-12-15 15:42:48,020 - INFO - Retrieved 1 OHLCV records for PGB
+2025-12-15 15:42:48,126 - INFO - Processing PGV (283/457)
+2025-12-15 15:42:48,346 - INFO - Retrieved 1 OHLCV records for PGV
+2025-12-15 15:42:48,448 - INFO - Processing PHC (284/457)
+2025-12-15 15:42:48,648 - INFO - Retrieved 1 OHLCV records for PHC
+2025-12-15 15:42:48,748 - INFO - Processing PHP (285/457)
+2025-12-15 15:42:48,959 - INFO - Retrieved 1 OHLCV records for PHP
+2025-12-15 15:42:49,063 - INFO - Processing PHR (286/457)
+2025-12-15 15:42:49,294 - INFO - Retrieved 1 OHLCV records for PHR
+2025-12-15 15:42:49,398 - INFO - Processing PLC (287/457)
+2025-12-15 15:42:49,613 - INFO - Retrieved 1 OHLCV records for PLC
+2025-12-15 15:42:49,718 - INFO - Processing PLX (288/457)
+2025-12-15 15:42:49,932 - INFO - Retrieved 1 OHLCV records for PLX
+2025-12-15 15:42:50,038 - INFO - Processing PMC (289/457)
+2025-12-15 15:42:50,252 - INFO - Retrieved 1 OHLCV records for PMC
+2025-12-15 15:42:50,358 - INFO - Processing PNJ (290/457)
+2025-12-15 15:42:50,573 - INFO - Retrieved 1 OHLCV records for PNJ
+2025-12-15 15:42:50,679 - INFO - Processing POM (291/457)
+2025-12-15 15:42:50,897 - INFO - Retrieved 1 OHLCV records for POM
+2025-12-15 15:42:51,003 - INFO - Processing POW (292/457)
+2025-12-15 15:42:51,213 - INFO - Retrieved 1 OHLCV records for POW
+2025-12-15 15:42:51,315 - INFO - Processing PPC (293/457)
+2025-12-15 15:42:51,529 - INFO - Retrieved 1 OHLCV records for PPC
+2025-12-15 15:42:51,634 - INFO - Processing PPT (294/457)
+2025-12-15 15:42:51,878 - INFO - Retrieved 1 OHLCV records for PPT
+2025-12-15 15:42:51,982 - INFO - Processing PSD (295/457)
+2025-12-15 15:42:52,174 - INFO - Retrieved 1 OHLCV records for PSD
+2025-12-15 15:42:52,278 - INFO - Processing PSI (296/457)
+2025-12-15 15:42:52,494 - INFO - Retrieved 1 OHLCV records for PSI
+2025-12-15 15:42:52,595 - INFO - Processing PSW (297/457)
+2025-12-15 15:42:52,794 - INFO - Retrieved 1 OHLCV records for PSW
+2025-12-15 15:42:52,899 - INFO - Processing PTB (298/457)
+2025-12-15 15:42:53,108 - INFO - Retrieved 1 OHLCV records for PTB
+2025-12-15 15:42:53,213 - INFO - Processing PTL (299/457)
+2025-12-15 15:42:53,421 - INFO - Retrieved 1 OHLCV records for PTL
+2025-12-15 15:42:53,527 - INFO - Processing PV2 (300/457)
+2025-12-15 15:42:53,731 - INFO - Retrieved 1 OHLCV records for PV2
+2025-12-15 15:42:53,836 - INFO - Processing PVB (301/457)
+2025-12-15 15:42:54,028 - INFO - Retrieved 1 OHLCV records for PVB
+2025-12-15 15:42:54,134 - INFO - Processing PVC (302/457)
+2025-12-15 15:42:54,340 - INFO - Retrieved 1 OHLCV records for PVC
+2025-12-15 15:42:54,441 - INFO - Processing PVD (303/457)
+2025-12-15 15:42:54,626 - INFO - Retrieved 1 OHLCV records for PVD
+2025-12-15 15:42:54,731 - INFO - Processing PVI (304/457)
+2025-12-15 15:42:54,920 - INFO - Retrieved 1 OHLCV records for PVI
+2025-12-15 15:42:55,025 - INFO - Processing PVP (305/457)
+2025-12-15 15:42:55,222 - INFO - Retrieved 1 OHLCV records for PVP
+2025-12-15 15:42:55,324 - INFO - Processing PVS (306/457)
+2025-12-15 15:42:55,606 - INFO - Retrieved 1 OHLCV records for PVS
+2025-12-15 15:42:55,711 - INFO - Processing PVT (307/457)
+2025-12-15 15:42:55,905 - INFO - Retrieved 1 OHLCV records for PVT
+2025-12-15 15:42:56,010 - INFO - Processing PVX (308/457)
+2025-12-15 15:42:56,203 - INFO - Retrieved 1 OHLCV records for PVX
+2025-12-15 15:42:56,308 - INFO - Processing PXL (309/457)
+2025-12-15 15:42:56,499 - INFO - Retrieved 1 OHLCV records for PXL
+2025-12-15 15:42:56,603 - INFO - Processing QCG (310/457)
+2025-12-15 15:42:56,817 - INFO - Retrieved 1 OHLCV records for QCG
+2025-12-15 15:42:56,923 - INFO - Processing QNS (311/457)
+2025-12-15 15:42:57,117 - INFO - Retrieved 1 OHLCV records for QNS
+2025-12-15 15:42:57,219 - INFO - Processing QTP (312/457)
+2025-12-15 15:42:57,406 - INFO - Retrieved 1 OHLCV records for QTP
+2025-12-15 15:42:57,509 - INFO - Processing RAL (313/457)
+2025-12-15 15:42:57,715 - INFO - Retrieved 1 OHLCV records for RAL
+2025-12-15 15:42:57,820 - INFO - Processing REE (314/457)
+2025-12-15 15:42:58,013 - INFO - Retrieved 1 OHLCV records for REE
+2025-12-15 15:42:58,114 - INFO - Processing RYG (315/457)
+2025-12-15 15:42:58,299 - INFO - Retrieved 1 OHLCV records for RYG
+2025-12-15 15:42:58,405 - INFO - Processing S99 (316/457)
+2025-12-15 15:42:58,597 - INFO - Retrieved 1 OHLCV records for S99
+2025-12-15 15:42:58,702 - INFO - Processing SAB (317/457)
+2025-12-15 15:42:58,902 - INFO - Retrieved 1 OHLCV records for SAB
+2025-12-15 15:42:59,004 - INFO - Processing SAM (318/457)
+2025-12-15 15:42:59,198 - INFO - Retrieved 1 OHLCV records for SAM
+2025-12-15 15:42:59,303 - INFO - Processing SAS (319/457)
+2025-12-15 15:42:59,495 - INFO - Retrieved 1 OHLCV records for SAS
+2025-12-15 15:42:59,596 - INFO - Processing SBG (320/457)
+2025-12-15 15:42:59,808 - INFO - Retrieved 1 OHLCV records for SBG
+2025-12-15 15:42:59,911 - INFO - Processing SBS (321/457)
+2025-12-15 15:43:00,112 - INFO - Retrieved 1 OHLCV records for SBS
+2025-12-15 15:43:00,213 - INFO - Processing SBT (322/457)
+2025-12-15 15:43:00,400 - INFO - Retrieved 1 OHLCV records for SBT
+2025-12-15 15:43:00,504 - INFO - Processing SCG (323/457)
+2025-12-15 15:43:00,682 - INFO - Retrieved 1 OHLCV records for SCG
+2025-12-15 15:43:00,786 - INFO - Processing SCL (324/457)
+2025-12-15 15:43:00,974 - INFO - Retrieved 1 OHLCV records for SCL
+2025-12-15 15:43:01,078 - INFO - Processing SCR (325/457)
+2025-12-15 15:43:01,276 - INFO - Retrieved 1 OHLCV records for SCR
+2025-12-15 15:43:01,378 - INFO - Processing SCS (326/457)
+2025-12-15 15:43:01,566 - INFO - Retrieved 1 OHLCV records for SCS
+2025-12-15 15:43:01,669 - INFO - Processing SEA (327/457)
+2025-12-15 15:43:01,858 - INFO - Retrieved 1 OHLCV records for SEA
+2025-12-15 15:43:01,961 - INFO - Processing SGN (328/457)
+2025-12-15 15:43:02,158 - INFO - Retrieved 1 OHLCV records for SGN
+2025-12-15 15:43:02,261 - INFO - Processing SGP (329/457)
+2025-12-15 15:43:02,439 - INFO - Retrieved 1 OHLCV records for SGP
+2025-12-15 15:43:02,544 - INFO - Processing SGR (330/457)
+2025-12-15 15:43:02,735 - INFO - Retrieved 1 OHLCV records for SGR
+2025-12-15 15:43:02,840 - INFO - Processing SGT (331/457)
+2025-12-15 15:43:03,030 - INFO - Retrieved 1 OHLCV records for SGT
+2025-12-15 15:43:03,135 - INFO - Processing SHB (332/457)
+2025-12-15 15:43:03,324 - INFO - Retrieved 1 OHLCV records for SHB
+2025-12-15 15:43:03,428 - INFO - Processing SHI (333/457)
+2025-12-15 15:43:03,625 - INFO - Retrieved 1 OHLCV records for SHI
+2025-12-15 15:43:03,728 - INFO - Processing SHN (334/457)
+2025-12-15 15:43:03,937 - INFO - Retrieved 1 OHLCV records for SHN
+2025-12-15 15:43:04,043 - INFO - Processing SHS (335/457)
+2025-12-15 15:43:04,234 - INFO - Retrieved 1 OHLCV records for SHS
+2025-12-15 15:43:04,336 - INFO - Processing SIP (336/457)
+2025-12-15 15:43:04,530 - INFO - Retrieved 1 OHLCV records for SIP
+2025-12-15 15:43:04,635 - INFO - Processing SJD (337/457)
+2025-12-15 15:43:04,837 - INFO - Retrieved 1 OHLCV records for SJD
+2025-12-15 15:43:04,938 - INFO - Processing SJE (338/457)
+2025-12-15 15:43:05,147 - INFO - Retrieved 1 OHLCV records for SJE
+2025-12-15 15:43:05,253 - INFO - Processing SJS (339/457)
+2025-12-15 15:43:05,473 - INFO - Retrieved 1 OHLCV records for SJS
+2025-12-15 15:43:05,578 - INFO - Processing SKG (340/457)
+2025-12-15 15:43:05,820 - INFO - Retrieved 1 OHLCV records for SKG
+2025-12-15 15:43:05,925 - INFO - Processing SLS (341/457)
+2025-12-15 15:43:06,155 - INFO - Retrieved 1 OHLCV records for SLS
+2025-12-15 15:43:06,261 - INFO - Processing SMB (342/457)
+2025-12-15 15:43:06,481 - INFO - Retrieved 1 OHLCV records for SMB
+2025-12-15 15:43:06,587 - INFO - Processing SMC (343/457)
+2025-12-15 15:43:06,819 - INFO - Retrieved 1 OHLCV records for SMC
+2025-12-15 15:43:06,925 - INFO - Processing SSB (344/457)
+2025-12-15 15:43:07,144 - INFO - Retrieved 1 OHLCV records for SSB
+2025-12-15 15:43:07,247 - INFO - Processing SSH (345/457)
+2025-12-15 15:43:07,468 - INFO - Retrieved 1 OHLCV records for SSH
+2025-12-15 15:43:07,573 - INFO - Processing SSI (346/457)
+2025-12-15 15:43:07,790 - INFO - Retrieved 1 OHLCV records for SSI
+2025-12-15 15:43:07,896 - INFO - Processing ST8 (347/457)
+2025-12-15 15:43:08,124 - INFO - Retrieved 1 OHLCV records for ST8
+2025-12-15 15:43:08,227 - INFO - Processing STB (348/457)
+2025-12-15 15:43:08,448 - INFO - Retrieved 1 OHLCV records for STB
+2025-12-15 15:43:08,554 - INFO - Processing STH (349/457)
+2025-12-15 15:43:08,791 - INFO - Retrieved 1 OHLCV records for STH
+2025-12-15 15:43:08,896 - INFO - Processing STK (350/457)
+2025-12-15 15:43:09,101 - INFO - Retrieved 1 OHLCV records for STK
+2025-12-15 15:43:09,203 - INFO - Processing SVN (351/457)
+2025-12-15 15:43:09,413 - INFO - Retrieved 1 OHLCV records for SVN
+2025-12-15 15:43:09,514 - INFO - Processing SZB (352/457)
+2025-12-15 15:43:09,731 - INFO - Retrieved 1 OHLCV records for SZB
+2025-12-15 15:43:09,836 - INFO - Processing SZC (353/457)
+2025-12-15 15:43:10,060 - INFO - Retrieved 1 OHLCV records for SZC
+2025-12-15 15:43:10,161 - INFO - Processing SZL (354/457)
+2025-12-15 15:43:10,372 - INFO - Retrieved 1 OHLCV records for SZL
+2025-12-15 15:43:10,478 - INFO - Processing TAL (355/457)
+2025-12-15 15:43:10,732 - INFO - Retrieved 1 OHLCV records for TAL
+2025-12-15 15:43:10,838 - INFO - Processing TCB (356/457)
+2025-12-15 15:43:11,056 - INFO - Retrieved 1 OHLCV records for TCB
+2025-12-15 15:43:11,161 - INFO - Processing TCD (357/457)
+2025-12-15 15:43:11,389 - INFO - Retrieved 1 OHLCV records for TCD
+2025-12-15 15:43:11,494 - INFO - Processing TCH (358/457)
+2025-12-15 15:43:11,717 - INFO - Retrieved 1 OHLCV records for TCH
+2025-12-15 15:43:11,823 - INFO - Processing TCI (359/457)
+2025-12-15 15:43:12,066 - INFO - Retrieved 1 OHLCV records for TCI
+2025-12-15 15:43:12,169 - INFO - Processing TCL (360/457)
+2025-12-15 15:43:12,408 - INFO - Retrieved 1 OHLCV records for TCL
+2025-12-15 15:43:12,513 - INFO - Processing TCM (361/457)
+2025-12-15 15:43:12,727 - INFO - Retrieved 1 OHLCV records for TCM
+2025-12-15 15:43:12,833 - INFO - Processing TCO (362/457)
+2025-12-15 15:43:13,110 - INFO - Retrieved 1 OHLCV records for TCO
+2025-12-15 15:43:13,215 - INFO - Processing TD6 (363/457)
+2025-12-15 15:43:13,428 - INFO - Retrieved 1 OHLCV records for TD6
+2025-12-15 15:43:13,534 - INFO - Processing TDC (364/457)
+2025-12-15 15:43:13,766 - INFO - Retrieved 1 OHLCV records for TDC
+2025-12-15 15:43:13,870 - INFO - Processing TDH (365/457)
+2025-12-15 15:43:14,087 - INFO - Retrieved 1 OHLCV records for TDH
+2025-12-15 15:43:14,192 - INFO - Processing TDM (366/457)
+2025-12-15 15:43:14,394 - INFO - Retrieved 1 OHLCV records for TDM
+2025-12-15 15:43:14,500 - INFO - Processing TDP (367/457)
+2025-12-15 15:43:14,710 - INFO - Retrieved 1 OHLCV records for TDP
+2025-12-15 15:43:14,813 - INFO - Processing TEG (368/457)
+2025-12-15 15:43:15,027 - INFO - Retrieved 1 OHLCV records for TEG
+2025-12-15 15:43:15,132 - INFO - Processing THG (369/457)
+2025-12-15 15:43:15,340 - INFO - Retrieved 1 OHLCV records for THG
+2025-12-15 15:43:15,444 - INFO - Processing TIG (370/457)
+2025-12-15 15:43:15,664 - INFO - Retrieved 1 OHLCV records for TIG
+2025-12-15 15:43:15,769 - INFO - Processing TIP (371/457)
+2025-12-15 15:43:15,989 - INFO - Retrieved 1 OHLCV records for TIP
+2025-12-15 15:43:16,095 - INFO - Processing TL4 (372/457)
+2025-12-15 15:43:16,315 - INFO - Retrieved 1 OHLCV records for TL4
+2025-12-15 15:43:16,418 - INFO - Processing TLD (373/457)
+2025-12-15 15:43:16,623 - INFO - Retrieved 1 OHLCV records for TLD
+2025-12-15 15:43:16,729 - INFO - Processing TLG (374/457)
+2025-12-15 15:43:16,938 - INFO - Retrieved 1 OHLCV records for TLG
+2025-12-15 15:43:17,043 - INFO - Processing TLH (375/457)
+2025-12-15 15:43:17,260 - INFO - Retrieved 1 OHLCV records for TLH
+2025-12-15 15:43:17,363 - INFO - Processing TNC (376/457)
+2025-12-15 15:43:17,592 - INFO - Retrieved 1 OHLCV records for TNC
+2025-12-15 15:43:17,696 - INFO - Processing TNG (377/457)
+2025-12-15 15:43:17,917 - INFO - Retrieved 1 OHLCV records for TNG
+2025-12-15 15:43:18,019 - INFO - Processing TNH (378/457)
+2025-12-15 15:43:18,233 - INFO - Retrieved 1 OHLCV records for TNH
+2025-12-15 15:43:18,339 - INFO - Processing TNI (379/457)
+2025-12-15 15:43:18,564 - INFO - Retrieved 1 OHLCV records for TNI
+2025-12-15 15:43:18,669 - INFO - Processing TNT (380/457)
+2025-12-15 15:43:18,883 - INFO - Retrieved 1 OHLCV records for TNT
+2025-12-15 15:43:18,986 - INFO - Processing TOS (381/457)
+2025-12-15 15:43:19,200 - INFO - Retrieved 1 OHLCV records for TOS
+2025-12-15 15:43:19,305 - INFO - Processing TPB (382/457)
+2025-12-15 15:43:19,520 - INFO - Retrieved 1 OHLCV records for TPB
+2025-12-15 15:43:19,625 - INFO - Processing TRC (383/457)
+2025-12-15 15:43:19,840 - INFO - Retrieved 1 OHLCV records for TRC
+2025-12-15 15:43:19,946 - INFO - Processing TSC (384/457)
+2025-12-15 15:43:20,165 - INFO - Retrieved 1 OHLCV records for TSC
+2025-12-15 15:43:20,269 - INFO - Processing TTA (385/457)
+2025-12-15 15:43:20,485 - INFO - Retrieved 1 OHLCV records for TTA
+2025-12-15 15:43:20,586 - INFO - Processing TTF (386/457)
+2025-12-15 15:43:20,799 - INFO - Retrieved 1 OHLCV records for TTF
+2025-12-15 15:43:20,904 - INFO - Processing TTH (387/457)
+2025-12-15 15:43:21,134 - INFO - Retrieved 1 OHLCV records for TTH
+2025-12-15 15:43:21,236 - INFO - Processing TTN (388/457)
+2025-12-15 15:43:21,461 - INFO - Retrieved 1 OHLCV records for TTN
+2025-12-15 15:43:21,565 - INFO - Processing TV1 (389/457)
+2025-12-15 15:43:21,791 - INFO - Retrieved 1 OHLCV records for TV1
+2025-12-15 15:43:21,895 - INFO - Processing TV2 (390/457)
+2025-12-15 15:43:22,114 - INFO - Retrieved 1 OHLCV records for TV2
+2025-12-15 15:43:22,219 - INFO - Processing TVB (391/457)
+2025-12-15 15:43:22,439 - INFO - Retrieved 1 OHLCV records for TVB
+2025-12-15 15:43:22,545 - INFO - Processing TVC (392/457)
+2025-12-15 15:43:22,765 - INFO - Retrieved 1 OHLCV records for TVC
+2025-12-15 15:43:22,870 - INFO - Processing TVN (393/457)
+2025-12-15 15:43:23,086 - INFO - Retrieved 1 OHLCV records for TVN
+2025-12-15 15:43:23,187 - INFO - Processing TVS (394/457)
+2025-12-15 15:43:23,412 - INFO - Retrieved 1 OHLCV records for TVS
+2025-12-15 15:43:23,517 - INFO - Processing VBB (395/457)
+2025-12-15 15:43:23,740 - INFO - Retrieved 1 OHLCV records for VBB
+2025-12-15 15:43:23,845 - INFO - Processing VC2 (396/457)
+2025-12-15 15:43:24,064 - INFO - Retrieved 1 OHLCV records for VC2
+2025-12-15 15:43:24,169 - INFO - Processing VC3 (397/457)
+2025-12-15 15:43:24,386 - INFO - Retrieved 1 OHLCV records for VC3
+2025-12-15 15:43:24,492 - INFO - Processing VC7 (398/457)
+2025-12-15 15:43:24,710 - INFO - Retrieved 1 OHLCV records for VC7
+2025-12-15 15:43:24,811 - INFO - Processing VCB (399/457)
+2025-12-15 15:43:25,020 - INFO - Retrieved 1 OHLCV records for VCB
+2025-12-15 15:43:25,121 - INFO - Processing VCG (400/457)
+2025-12-15 15:43:25,321 - INFO - Retrieved 1 OHLCV records for VCG
+2025-12-15 15:43:25,426 - INFO - Processing VCI (401/457)
+2025-12-15 15:43:25,642 - INFO - Retrieved 1 OHLCV records for VCI
+2025-12-15 15:43:25,747 - INFO - Processing VCP (402/457)
+2025-12-15 15:43:25,978 - INFO - Retrieved 1 OHLCV records for VCP
+2025-12-15 15:43:26,084 - INFO - Processing VCR (403/457)
+2025-12-15 15:43:26,307 - INFO - Retrieved 1 OHLCV records for VCR
+2025-12-15 15:43:26,413 - INFO - Processing VCS (404/457)
+2025-12-15 15:43:26,622 - INFO - Retrieved 1 OHLCV records for VCS
+2025-12-15 15:43:26,727 - INFO - Processing VDP (405/457)
+2025-12-15 15:43:26,950 - INFO - Retrieved 1 OHLCV records for VDP
+2025-12-15 15:43:27,053 - INFO - Processing VDS (406/457)
+2025-12-15 15:43:27,277 - INFO - Retrieved 1 OHLCV records for VDS
+2025-12-15 15:43:27,382 - INFO - Processing VE9 (407/457)
+2025-12-15 15:43:27,607 - INFO - Retrieved 1 OHLCV records for VE9
+2025-12-15 15:43:27,711 - INFO - Processing VEA (408/457)
+2025-12-15 15:43:27,930 - INFO - Retrieved 1 OHLCV records for VEA
+2025-12-15 15:43:28,035 - INFO - Processing VEF (409/457)
+2025-12-15 15:43:28,251 - INFO - Retrieved 1 OHLCV records for VEF
+2025-12-15 15:43:28,356 - INFO - Processing VFG (410/457)
+2025-12-15 15:43:28,581 - INFO - Retrieved 1 OHLCV records for VFG
+2025-12-15 15:43:28,684 - INFO - Processing VFS (411/457)
+2025-12-15 15:43:28,907 - INFO - Retrieved 1 OHLCV records for VFS
+2025-12-15 15:43:29,013 - INFO - Processing VGC (412/457)
+2025-12-15 15:43:29,242 - INFO - Retrieved 1 OHLCV records for VGC
+2025-12-15 15:43:29,347 - INFO - Processing VGI (413/457)
+2025-12-15 15:43:29,556 - INFO - Retrieved 1 OHLCV records for VGI
+2025-12-15 15:43:29,662 - INFO - Processing VGR (414/457)
+2025-12-15 15:43:29,877 - INFO - Retrieved 1 OHLCV records for VGR
+2025-12-15 15:43:29,980 - INFO - Processing VGS (415/457)
+2025-12-15 15:43:30,186 - INFO - Retrieved 1 OHLCV records for VGS
+2025-12-15 15:43:30,291 - INFO - Processing VGT (416/457)
+2025-12-15 15:43:30,498 - INFO - Retrieved 1 OHLCV records for VGT
+2025-12-15 15:43:30,603 - INFO - Processing VHC (417/457)
+2025-12-15 15:43:30,813 - INFO - Retrieved 1 OHLCV records for VHC
+2025-12-15 15:43:30,918 - INFO - Processing VHE (418/457)
+2025-12-15 15:43:31,132 - INFO - Retrieved 1 OHLCV records for VHE
+2025-12-15 15:43:31,237 - INFO - Processing VHG (419/457)
+2025-12-15 15:43:31,448 - INFO - Retrieved 1 OHLCV records for VHG
+2025-12-15 15:43:31,553 - INFO - Processing VHM (420/457)
+2025-12-15 15:43:31,768 - INFO - Retrieved 1 OHLCV records for VHM
+2025-12-15 15:43:31,873 - INFO - Processing VIB (421/457)
+2025-12-15 15:43:32,085 - INFO - Retrieved 1 OHLCV records for VIB
+2025-12-15 15:43:32,190 - INFO - Processing VIC (422/457)
+2025-12-15 15:43:32,440 - INFO - Retrieved 1 OHLCV records for VIC
+2025-12-15 15:43:32,546 - INFO - Processing VIG (423/457)
+2025-12-15 15:43:32,767 - INFO - Retrieved 1 OHLCV records for VIG
+2025-12-15 15:43:32,873 - INFO - Processing VIP (424/457)
+2025-12-15 15:43:33,086 - INFO - Retrieved 1 OHLCV records for VIP
+2025-12-15 15:43:33,189 - INFO - Processing VIX (425/457)
+2025-12-15 15:43:33,413 - INFO - Retrieved 1 OHLCV records for VIX
+2025-12-15 15:43:33,515 - INFO - Processing VJC (426/457)
+2025-12-15 15:43:33,738 - INFO - Retrieved 1 OHLCV records for VJC
+2025-12-15 15:43:33,844 - INFO - Processing VLB (427/457)
+2025-12-15 15:43:34,060 - INFO - Retrieved 1 OHLCV records for VLB
+2025-12-15 15:43:34,166 - INFO - Processing VLC (428/457)
+2025-12-15 15:43:34,373 - INFO - Retrieved 1 OHLCV records for VLC
+2025-12-15 15:43:34,479 - INFO - Processing VMS (429/457)
+2025-12-15 15:43:34,710 - INFO - Retrieved 1 OHLCV records for VMS
+2025-12-15 15:43:34,811 - INFO - Processing VNB (430/457)
+2025-12-15 15:43:35,023 - INFO - Retrieved 1 OHLCV records for VNB
+2025-12-15 15:43:35,128 - INFO - Processing VND (431/457)
+2025-12-15 15:43:35,358 - INFO - Retrieved 1 OHLCV records for VND
+2025-12-15 15:43:35,464 - INFO - Processing VNE (432/457)
+2025-12-15 15:43:35,681 - INFO - Retrieved 1 OHLCV records for VNE
+2025-12-15 15:43:35,786 - INFO - Processing VNM (433/457)
+2025-12-15 15:43:35,992 - INFO - Retrieved 1 OHLCV records for VNM
+2025-12-15 15:43:36,097 - INFO - Processing VNS (434/457)
+2025-12-15 15:43:36,316 - INFO - Retrieved 1 OHLCV records for VNS
+2025-12-15 15:43:36,422 - INFO - Processing VNZ (435/457)
+2025-12-15 15:43:36,626 - INFO - Retrieved 1 OHLCV records for VNZ
+2025-12-15 15:43:36,727 - INFO - Processing VOC (436/457)
+2025-12-15 15:43:36,959 - INFO - Retrieved 1 OHLCV records for VOC
+2025-12-15 15:43:37,064 - INFO - Processing VOS (437/457)
+2025-12-15 15:43:37,277 - INFO - Retrieved 1 OHLCV records for VOS
+2025-12-15 15:43:37,382 - INFO - Processing VPB (438/457)
+2025-12-15 15:43:37,591 - INFO - Retrieved 1 OHLCV records for VPB
+2025-12-15 15:43:37,696 - INFO - Processing VPG (439/457)
+2025-12-15 15:43:37,894 - INFO - Retrieved 1 OHLCV records for VPG
+2025-12-15 15:43:37,999 - INFO - Processing VPH (440/457)
+2025-12-15 15:43:38,202 - INFO - Retrieved 1 OHLCV records for VPH
+2025-12-15 15:43:38,307 - INFO - Processing VPI (441/457)
+2025-12-15 15:43:38,547 - INFO - Retrieved 1 OHLCV records for VPI
+2025-12-15 15:43:38,652 - INFO - Processing VPL (442/457)
+2025-12-15 15:43:38,884 - INFO - Retrieved 1 OHLCV records for VPL
+2025-12-15 15:43:38,989 - INFO - Processing VRC (443/457)
+2025-12-15 15:43:39,199 - INFO - Retrieved 1 OHLCV records for VRC
+2025-12-15 15:43:39,306 - INFO - Processing VRE (444/457)
+2025-12-15 15:43:39,519 - INFO - Retrieved 1 OHLCV records for VRE
+2025-12-15 15:43:39,621 - INFO - Processing VRG (445/457)
+2025-12-15 15:43:39,843 - INFO - Retrieved 1 OHLCV records for VRG
+2025-12-15 15:43:39,948 - INFO - Processing VSC (446/457)
+2025-12-15 15:43:40,148 - INFO - Retrieved 1 OHLCV records for VSC
+2025-12-15 15:43:40,251 - INFO - Processing VSI (447/457)
+2025-12-15 15:43:40,436 - INFO - Retrieved 1 OHLCV records for VSI
+2025-12-15 15:43:40,536 - INFO - Processing VTD (448/457)
+2025-12-15 15:43:40,733 - INFO - Retrieved 1 OHLCV records for VTD
+2025-12-15 15:43:40,839 - INFO - Processing VTO (449/457)
+2025-12-15 15:43:41,046 - INFO - Retrieved 1 OHLCV records for VTO
+2025-12-15 15:43:41,151 - INFO - Processing VTP (450/457)
+2025-12-15 15:43:41,372 - INFO - Retrieved 1 OHLCV records for VTP
+2025-12-15 15:43:41,473 - INFO - Processing VTR (451/457)
+2025-12-15 15:43:41,703 - INFO - Retrieved 1 OHLCV records for VTR
+2025-12-15 15:43:41,808 - INFO - Processing VTZ (452/457)
+2025-12-15 15:43:42,022 - INFO - Retrieved 1 OHLCV records for VTZ
+2025-12-15 15:43:42,128 - INFO - Processing VUA (453/457)
+2025-12-15 15:43:42,343 - INFO - Retrieved 1 OHLCV records for VUA
+2025-12-15 15:43:42,444 - INFO - Processing VVS (454/457)
+2025-12-15 15:43:42,656 - INFO - Retrieved 1 OHLCV records for VVS
+2025-12-15 15:43:42,761 - INFO - Processing WSS (455/457)
+2025-12-15 15:43:42,973 - INFO - Retrieved 1 OHLCV records for WSS
+2025-12-15 15:43:43,078 - INFO - Processing YEG (456/457)
+2025-12-15 15:43:43,294 - INFO - Retrieved 1 OHLCV records for YEG
+2025-12-15 15:43:43,399 - INFO - Processing YTC (457/457)
+2025-12-15 15:43:43,647 - INFO - Retrieved 1 OHLCV records for YTC
+2025-12-15 15:43:43,989 - INFO - Retrieved share outstanding for AAA: 393,742,730
+2025-12-15 15:43:44,314 - INFO - Retrieved share outstanding for AAH: 117,900,000
+2025-12-15 15:43:44,609 - INFO - Retrieved share outstanding for AAS: 229,999,521
+2025-12-15 15:43:44,951 - INFO - Retrieved share outstanding for AAV: 68,987,661
+2025-12-15 15:43:45,255 - INFO - Retrieved share outstanding for ABB: 1,035,036,762
+2025-12-15 15:43:45,579 - INFO - Retrieved share outstanding for ABI: 101,347,632
+2025-12-15 15:43:45,874 - INFO - Retrieved share outstanding for ABS: 80,000,000
+2025-12-15 15:43:46,149 - INFO - Retrieved share outstanding for ABT: 11,777,257
+2025-12-15 15:43:46,498 - INFO - Retrieved share outstanding for ABW: 101,150,000
+2025-12-15 15:43:46,768 - INFO - Retrieved share outstanding for ACB: 5,136,656,599
+2025-12-15 15:43:47,038 - INFO - Retrieved share outstanding for ACG: 150,787,946
+2025-12-15 15:43:47,307 - INFO - Retrieved share outstanding for ACV: 3,582,324,023
+2025-12-15 15:43:47,588 - INFO - Retrieved share outstanding for ADS: 76,394,727
+2025-12-15 15:43:47,848 - INFO - Retrieved share outstanding for AFX: 35,000,000
+2025-12-15 15:43:48,133 - INFO - Retrieved share outstanding for AGG: 162,528,081
+2025-12-15 15:43:48,423 - INFO - Retrieved share outstanding for AGR: 228,311,776
+2025-12-15 15:43:48,788 - INFO - Retrieved share outstanding for AMS: 60,000,000
+2025-12-15 15:43:49,112 - INFO - Retrieved share outstanding for ANT: 24,003,708
+2025-12-15 15:43:49,415 - INFO - Retrieved share outstanding for ANV: 266,255,750
+2025-12-15 15:43:49,688 - INFO - Retrieved share outstanding for APF: 32,747,339
+2025-12-15 15:43:49,985 - INFO - Retrieved share outstanding for APG: 223,621,942
+2025-12-15 15:43:50,302 - INFO - Retrieved share outstanding for APH: 243,884,268
+2025-12-15 15:43:50,597 - INFO - Retrieved share outstanding for API: 84,083,976
+2025-12-15 15:43:50,902 - INFO - Retrieved share outstanding for APS: 83,000,000
+2025-12-15 15:43:51,209 - INFO - Retrieved share outstanding for ASM: 407,194,183
+2025-12-15 15:43:51,545 - INFO - Retrieved share outstanding for AST: 45,000,000
+2025-12-15 15:43:51,827 - INFO - Retrieved share outstanding for AVG: 17,679,982
+2025-12-15 15:43:52,113 - INFO - Retrieved share outstanding for BAF: 304,021,642
+2025-12-15 15:43:52,643 - INFO - Retrieved share outstanding for BCC: 123,209,812
+2025-12-15 15:43:52,924 - INFO - Retrieved share outstanding for BCE: 35,000,000
+2025-12-15 15:43:53,288 - INFO - Retrieved share outstanding for BCG: 880,210,644
+2025-12-15 15:43:53,569 - INFO - Retrieved share outstanding for BCM: 1,035,000,000
+2025-12-15 15:43:53,853 - INFO - Retrieved share outstanding for BCR: 473,799,913
+2025-12-15 15:43:54,173 - INFO - Retrieved share outstanding for BFC: 57,167,993
+2025-12-15 15:43:54,444 - INFO - Retrieved share outstanding for BGE: 730,000,000
+2025-12-15 15:43:54,723 - INFO - Retrieved share outstanding for BIC: 202,067,057
+2025-12-15 15:43:55,010 - INFO - Retrieved share outstanding for BID: 7,021,361,917
+2025-12-15 15:43:55,290 - INFO - Retrieved share outstanding for BKC: 23,475,456
+2025-12-15 15:43:55,647 - INFO - Retrieved share outstanding for BMC: 12,392,630
+2025-12-15 15:43:55,927 - INFO - Retrieved share outstanding for BMI: 150,547,626
+2025-12-15 15:43:56,277 - INFO - Retrieved share outstanding for BMJ: 104,999,978
+2025-12-15 15:43:56,553 - INFO - Retrieved share outstanding for BMP: 81,860,938
+2025-12-15 15:43:56,853 - INFO - Retrieved share outstanding for BMS: 203,932,652
+2025-12-15 15:43:57,209 - INFO - Retrieved share outstanding for BNA: 31,249,394
+2025-12-15 15:43:57,542 - INFO - Retrieved share outstanding for BOT: 59,246,800
+2025-12-15 15:43:57,842 - INFO - Retrieved share outstanding for BSI: 245,365,943
+2025-12-15 15:43:58,109 - INFO - Retrieved share outstanding for BSR: 5,007,299,686
+2025-12-15 15:43:58,419 - INFO - Retrieved share outstanding for BVB: 640,820,000
+2025-12-15 15:43:58,748 - INFO - Retrieved share outstanding for BVH: 742,322,764
+2025-12-15 15:43:59,026 - INFO - Retrieved share outstanding for BVS: 72,200,145
+2025-12-15 15:43:59,295 - INFO - Retrieved share outstanding for BWE: 219,928,644
+2025-12-15 15:43:59,567 - INFO - Retrieved share outstanding for C47: 36,342,269
+2025-12-15 15:43:59,840 - INFO - Retrieved share outstanding for C4G: 357,300,754
+2025-12-15 15:44:00,124 - INFO - Retrieved share outstanding for C69: 61,799,972
+2025-12-15 15:44:00,388 - INFO - Retrieved share outstanding for CCL: 59,581,418
+2025-12-15 15:44:00,708 - INFO - Retrieved share outstanding for CDC: 52,772,661
+2025-12-15 15:44:00,968 - INFO - Retrieved share outstanding for CEO: 567,416,075
+2025-12-15 15:44:01,238 - INFO - Retrieved share outstanding for CHP: 157,659,998
+2025-12-15 15:44:01,553 - INFO - Retrieved share outstanding for CIG: 51,039,947
+2025-12-15 15:44:01,822 - INFO - Retrieved share outstanding for CII: 625,450,421
+2025-12-15 15:44:02,098 - INFO - Retrieved share outstanding for CKA: 3,286,404
+2025-12-15 15:44:02,415 - INFO - Retrieved share outstanding for CKG: 161,807,526
+2025-12-15 15:44:02,682 - INFO - Retrieved share outstanding for CLL: 34,000,000
+2025-12-15 15:44:02,960 - INFO - Retrieved share outstanding for CLX: 86,600,000
+2025-12-15 15:44:03,226 - INFO - Retrieved share outstanding for CMG: 211,745,107
+2025-12-15 15:44:03,496 - INFO - Retrieved share outstanding for CMS: 25,452,500
+2025-12-15 15:44:03,772 - INFO - Retrieved share outstanding for CMX: 101,898,990
+2025-12-15 15:44:04,028 - INFO - Retrieved share outstanding for CNG: 35,099,298
+2025-12-15 15:44:04,304 - INFO - Retrieved share outstanding for CRC: 68,399,924
+2025-12-15 15:44:04,576 - INFO - Retrieved share outstanding for CRE: 463,678,426
+2025-12-15 15:44:04,856 - INFO - Retrieved share outstanding for CSC: 41,149,264
+2025-12-15 15:44:05,128 - INFO - Retrieved share outstanding for CSM: 103,625,262
+2025-12-15 15:44:05,411 - INFO - Retrieved share outstanding for CST: 42,846,773
+2025-12-15 15:44:05,655 - INFO - Retrieved share outstanding for CSV: 110,499,910
+2025-12-15 15:44:05,912 - INFO - Retrieved share outstanding for CTD: 101,430,014
+2025-12-15 15:44:06,166 - INFO - Retrieved share outstanding for CTF: 95,653,859
+2025-12-15 15:44:06,458 - INFO - Retrieved share outstanding for CTG: 5,369,991,748
+2025-12-15 15:44:06,730 - INFO - Retrieved share outstanding for CTI: 62,999,997
+2025-12-15 15:44:07,012 - INFO - Retrieved share outstanding for CTP: 12,099,992
+2025-12-15 15:44:07,317 - INFO - Retrieved share outstanding for CTR: 114,385,879
+2025-12-15 15:44:07,620 - INFO - Retrieved share outstanding for CTS: 212,693,438
+2025-12-15 15:44:07,908 - INFO - Retrieved share outstanding for CTX: 78,907,276
+2025-12-15 15:44:08,175 - INFO - Retrieved share outstanding for D2D: 30,259,742
+2025-12-15 15:44:08,455 - INFO - Retrieved share outstanding for DAH: 84,200,000
+2025-12-15 15:44:08,729 - INFO - Retrieved share outstanding for DBC: 384,866,667
+2025-12-15 15:44:09,018 - INFO - Retrieved share outstanding for DBD: 94,489,262
+2025-12-15 15:44:09,323 - INFO - Retrieved share outstanding for DC4: 98,235,704
+2025-12-15 15:44:09,615 - INFO - Retrieved share outstanding for DCL: 73,041,030
+2025-12-15 15:44:09,911 - INFO - Retrieved share outstanding for DCM: 529,400,000
+2025-12-15 15:44:10,206 - INFO - Retrieved share outstanding for DDG: 79,839,886
+2025-12-15 15:44:10,477 - INFO - Retrieved share outstanding for DDV: 146,109,900
+2025-12-15 15:44:10,762 - INFO - Retrieved share outstanding for DFF: 80,000,000
+2025-12-15 15:44:11,026 - INFO - Retrieved share outstanding for DGC: 379,778,413
+2025-12-15 15:44:11,310 - INFO - Retrieved share outstanding for DGT: 79,000,000
+2025-12-15 15:44:11,576 - INFO - Retrieved share outstanding for DGW: 221,168,700
+2025-12-15 15:44:11,836 - INFO - Retrieved share outstanding for DHA: 14,726,073
+2025-12-15 15:44:12,091 - INFO - Retrieved share outstanding for DHC: 96,591,206
+2025-12-15 15:44:12,360 - INFO - Retrieved share outstanding for DHG: 130,746,071
+2025-12-15 15:44:12,667 - INFO - Retrieved share outstanding for DHT: 90,574,038
+2025-12-15 15:44:12,998 - INFO - Retrieved share outstanding for DIG: 646,431,191
+2025-12-15 15:44:13,266 - INFO - Retrieved share outstanding for DL1: 116,859,703
+2025-12-15 15:44:13,848 - INFO - Retrieved share outstanding for DLG: 299,309,720
+2025-12-15 15:44:14,178 - INFO - Retrieved share outstanding for DNP: 140,966,036
+2025-12-15 15:44:14,472 - INFO - Retrieved share outstanding for DPG: 100,799,032
+2025-12-15 15:44:14,763 - INFO - Retrieved share outstanding for DPM: 679,925,021
+2025-12-15 15:44:15,057 - INFO - Retrieved share outstanding for DPR: 86,885,932
+2025-12-15 15:44:15,345 - INFO - Retrieved share outstanding for DRC: 154,429,283
+2025-12-15 15:44:15,622 - INFO - Retrieved share outstanding for DRH: 123,707,866
+2025-12-15 15:44:16,180 - INFO - Retrieved share outstanding for DRI: 73,200,000
+2025-12-15 15:44:16,465 - INFO - Retrieved share outstanding for DSC: 274,999,911
+2025-12-15 15:44:16,751 - INFO - Retrieved share outstanding for DSE: 342,600,000
+2025-12-15 15:44:17,028 - INFO - Retrieved share outstanding for DSH: 35,000,000
+2025-12-15 15:44:17,334 - INFO - Retrieved share outstanding for DSN: 12,083,009
+2025-12-15 15:44:17,632 - INFO - Retrieved share outstanding for DTD: 66,686,055
+2025-12-15 15:44:17,908 - INFO - Retrieved share outstanding for DVM: 47,057,787
+2025-12-15 15:44:18,192 - INFO - Retrieved share outstanding for DVN: 237,000,000
+2025-12-15 15:44:18,486 - INFO - Retrieved share outstanding for DVP: 40,000,000
+2025-12-15 15:44:18,756 - INFO - Retrieved share outstanding for DXG: 1,112,384,189
+2025-12-15 15:44:19,042 - INFO - Retrieved share outstanding for DXP: 59,910,133
+2025-12-15 15:44:19,316 - INFO - Retrieved share outstanding for DXS: 579,103,124
+2025-12-15 15:44:19,602 - INFO - Retrieved share outstanding for ECO: 30,000,000
+2025-12-15 15:44:19,883 - INFO - Retrieved share outstanding for EIB: 1,862,720,607
+2025-12-15 15:44:20,169 - INFO - Retrieved share outstanding for ELC: 110,088,903
+2025-12-15 15:44:20,458 - INFO - Retrieved share outstanding for EVE: 41,979,773
+2025-12-15 15:44:20,737 - INFO - Retrieved share outstanding for EVF: 760,565,802
+2025-12-15 15:44:21,022 - INFO - Retrieved share outstanding for EVG: 215,249,836
+2025-12-15 15:44:21,297 - INFO - Retrieved share outstanding for EVS: 164,800,618
+2025-12-15 15:44:21,582 - INFO - Retrieved share outstanding for FCM: 46,226,626
+2025-12-15 15:44:21,844 - INFO - Retrieved share outstanding for FCN: 157,439,005
+2025-12-15 15:44:22,124 - INFO - Retrieved share outstanding for FIR: 70,669,620
+2025-12-15 15:44:22,391 - INFO - Retrieved share outstanding for FIT: 339,933,034
+2025-12-15 15:44:22,673 - INFO - Retrieved share outstanding for FMC: 65,388,889
+2025-12-15 15:44:22,934 - INFO - Retrieved share outstanding for FOC: 18,419,884
+2025-12-15 15:44:23,217 - INFO - Retrieved share outstanding for FOX: 738,763,463
+2025-12-15 15:44:23,501 - INFO - Retrieved share outstanding for FPT: 1,703,507,121
+2025-12-15 15:44:23,748 - INFO - Retrieved share outstanding for FRT: 170,301,785
+2025-12-15 15:44:24,008 - INFO - Retrieved share outstanding for FTS: 346,498,009
+2025-12-15 15:44:24,262 - INFO - Retrieved share outstanding for G36: 103,745,067
+2025-12-15 15:44:24,538 - INFO - Retrieved share outstanding for GAS: 2,412,949,756
+2025-12-15 15:44:24,806 - INFO - Retrieved share outstanding for GDA: 149,098,851
+2025-12-15 15:44:25,092 - INFO - Retrieved share outstanding for GDT: 24,670,891
+2025-12-15 15:44:25,364 - INFO - Retrieved share outstanding for GEE: 365,999,956
+2025-12-15 15:44:25,625 - INFO - Retrieved share outstanding for GEG: 358,308,371
+2025-12-15 15:44:25,897 - INFO - Retrieved share outstanding for GEX: 902,398,948
+2025-12-15 15:44:26,173 - INFO - Retrieved share outstanding for GIL: 101,596,218
+2025-12-15 15:44:26,432 - INFO - Retrieved share outstanding for GKM: 31,434,237
+2025-12-15 15:44:26,715 - INFO - Retrieved share outstanding for GMD: 426,495,109
+2025-12-15 15:44:26,978 - INFO - Retrieved share outstanding for GSP: 67,517,050
+2025-12-15 15:44:27,242 - INFO - Retrieved share outstanding for GVR: 4,000,000,000
+2025-12-15 15:44:27,505 - INFO - Retrieved share outstanding for HAG: 1,267,399,283
+2025-12-15 15:44:27,775 - INFO - Retrieved share outstanding for HAH: 168,861,212
+2025-12-15 15:44:28,046 - INFO - Retrieved share outstanding for HAP: 110,942,302
+2025-12-15 15:44:28,317 - INFO - Retrieved share outstanding for HAR: 95,684,090
+2025-12-15 15:44:28,596 - INFO - Retrieved share outstanding for HAX: 107,439,681
+2025-12-15 15:44:28,874 - INFO - Retrieved share outstanding for HBC: 347,213,270
+2025-12-15 15:44:29,142 - INFO - Retrieved share outstanding for HCM: 1,079,956,671
+2025-12-15 15:44:29,422 - INFO - Retrieved share outstanding for HD6: 15,120,000
+2025-12-15 15:44:29,687 - INFO - Retrieved share outstanding for HDB: 3,859,415,837
+2025-12-15 15:44:29,949 - INFO - Retrieved share outstanding for HDC: 199,754,571
+2025-12-15 15:44:30,205 - INFO - Retrieved share outstanding for HDG: 369,963,035
+2025-12-15 15:44:30,485 - INFO - Retrieved share outstanding for HGM: 12,600,000
+2025-12-15 15:44:30,764 - INFO - Retrieved share outstanding for HHP: 86,554,343
+2025-12-15 15:44:31,047 - INFO - Retrieved share outstanding for HHS: 431,985,968
+2025-12-15 15:44:31,324 - INFO - Retrieved share outstanding for HHV: 497,433,003
+2025-12-15 15:44:31,633 - INFO - Retrieved share outstanding for HII: 73,663,016
+2025-12-15 15:44:31,887 - INFO - Retrieved share outstanding for HLD: 54,999,961
+2025-12-15 15:44:32,163 - INFO - Retrieved share outstanding for HNG: 1,108,553,895
+2025-12-15 15:44:32,443 - INFO - Retrieved share outstanding for HNM: 44,400,000
+2025-12-15 15:44:32,717 - INFO - Retrieved share outstanding for HPG: 7,675,465,855
+2025-12-15 15:44:32,994 - INFO - Retrieved share outstanding for HPX: 304,168,581
+2025-12-15 15:44:33,266 - INFO - Retrieved share outstanding for HQC: 576,599,274
+2025-12-15 15:44:33,519 - INFO - Retrieved share outstanding for HSG: 620,982,309
+2025-12-15 15:44:33,833 - INFO - Retrieved share outstanding for HSL: 38,567,363
+2025-12-15 15:44:34,130 - INFO - Retrieved share outstanding for HT1: 381,589,911
+2025-12-15 15:44:34,412 - INFO - Retrieved share outstanding for HTG: 36,002,708
+2025-12-15 15:44:34,693 - INFO - Retrieved share outstanding for HTI: 24,949,200
+2025-12-15 15:44:34,975 - INFO - Retrieved share outstanding for HTN: 89,116,411
+2025-12-15 15:44:35,252 - INFO - Retrieved share outstanding for HUB: 30,242,878
+2025-12-15 15:44:35,519 - INFO - Retrieved share outstanding for HUT: 1,068,285,581
+2025-12-15 15:44:35,832 - INFO - Retrieved share outstanding for HVA: 13,650,000
+2025-12-15 15:44:36,109 - INFO - Retrieved share outstanding for HVH: 43,489,334
+2025-12-15 15:44:36,365 - INFO - Retrieved share outstanding for HVN: 3,111,498,211
+2025-12-15 15:44:36,715 - INFO - Retrieved share outstanding for HVT: 27,470,046
+2025-12-15 15:44:36,997 - INFO - Retrieved share outstanding for ICN: 30,599,923
+2025-12-15 15:44:37,263 - INFO - Retrieved share outstanding for ICT: 32,185,000
+2025-12-15 15:44:37,530 - INFO - Retrieved share outstanding for IDC: 379,498,823
+2025-12-15 15:44:37,807 - INFO - Retrieved share outstanding for IDI: 273,172,668
+2025-12-15 15:44:38,076 - INFO - Retrieved share outstanding for IDJ: 173,490,193
+2025-12-15 15:44:38,353 - INFO - Retrieved share outstanding for IDV: 41,236,777
+2025-12-15 15:44:38,631 - INFO - Retrieved share outstanding for IJC: 629,580,640
+2025-12-15 15:44:38,911 - INFO - Retrieved share outstanding for IMP: 154,008,962
+2025-12-15 15:44:39,202 - INFO - Retrieved share outstanding for IPA: 213,835,775
+2025-12-15 15:44:39,480 - INFO - Retrieved share outstanding for ITC: 95,935,049
+2025-12-15 15:44:39,749 - INFO - Retrieved share outstanding for ITD: 26,172,807
+2025-12-15 15:44:40,031 - INFO - Retrieved share outstanding for ITQ: 31,843,305
+2025-12-15 15:44:40,301 - INFO - Retrieved share outstanding for IVS: 104,923,336
+2025-12-15 15:44:40,575 - INFO - Retrieved share outstanding for JVC: 112,500,171
+2025-12-15 15:44:40,851 - INFO - Retrieved share outstanding for KBC: 941,754,759
+2025-12-15 15:44:41,170 - INFO - Retrieved share outstanding for KCB: 8,000,000
+2025-12-15 15:44:41,448 - INFO - Retrieved share outstanding for KDC: 289,806,316
+2025-12-15 15:44:41,729 - INFO - Retrieved share outstanding for KDH: 1,122,214,899
+2025-12-15 15:44:41,991 - INFO - Retrieved share outstanding for KHG: 449,435,205
+2025-12-15 15:44:42,267 - INFO - Retrieved share outstanding for KLB: 578,370,526
+2025-12-15 15:44:42,546 - INFO - Retrieved share outstanding for KOS: 216,481,335
+2025-12-15 15:44:42,815 - INFO - Retrieved share outstanding for KSB: 114,443,703
+2025-12-15 15:44:43,078 - INFO - Retrieved share outstanding for KSF: 899,787,308
+2025-12-15 15:44:43,343 - INFO - Retrieved share outstanding for KSV: 200,000,000
+2025-12-15 15:44:43,647 - INFO - Retrieved share outstanding for KVC: 49,500,000
+2025-12-15 15:44:43,925 - INFO - Retrieved share outstanding for L14: 30,859,315
+2025-12-15 15:44:44,194 - INFO - Retrieved share outstanding for L18: 45,739,793
+2025-12-15 15:44:44,484 - INFO - Retrieved share outstanding for L40: 10,800,000
+2025-12-15 15:44:44,773 - INFO - Retrieved share outstanding for LAS: 112,856,400
+2025-12-15 15:44:45,044 - INFO - Retrieved share outstanding for LBM: 40,000,000
+2025-12-15 15:44:45,371 - INFO - Retrieved share outstanding for LCG: 206,602,129
+2025-12-15 15:44:45,646 - INFO - Retrieved share outstanding for LDG: 255,615,849
+2025-12-15 15:44:45,923 - INFO - Retrieved share outstanding for LGL: 51,497,100
+2025-12-15 15:44:46,197 - INFO - Retrieved share outstanding for LHC: 14,400,000
+2025-12-15 15:44:46,452 - INFO - Retrieved share outstanding for LHG: 50,012,010
+2025-12-15 15:44:46,738 - INFO - Retrieved share outstanding for LIC: 90,000,000
+2025-12-15 15:44:47,002 - INFO - Retrieved share outstanding for LIG: 94,220,661
+2025-12-15 15:44:47,265 - INFO - Retrieved share outstanding for LIX: 64,800,000
+2025-12-15 15:44:47,573 - INFO - Retrieved share outstanding for LPB: 2,987,282,100
+2025-12-15 15:44:47,891 - INFO - Retrieved share outstanding for LSG: 90,000,000
+2025-12-15 15:44:48,183 - INFO - Retrieved share outstanding for LSS: 85,741,623
+2025-12-15 15:44:48,466 - INFO - Retrieved share outstanding for LTG: 100,741,465
+2025-12-15 15:44:48,743 - INFO - Retrieved share outstanding for MBB: 8,054,999,909
+2025-12-15 15:44:49,047 - INFO - Retrieved share outstanding for MBG: 120,218,540
+2025-12-15 15:44:49,387 - INFO - Retrieved share outstanding for MBS: 658,696,746
+2025-12-15 15:44:49,661 - INFO - Retrieved share outstanding for MCG: 52,050,000
+2025-12-15 15:44:49,953 - INFO - Retrieved share outstanding for MCH: 1,056,705,358
+2025-12-15 15:44:50,274 - INFO - Retrieved share outstanding for MCM: 110,000,000
+2025-12-15 15:44:50,607 - INFO - Retrieved share outstanding for MFS: 7,062,979
+2025-12-15 15:44:50,908 - INFO - Retrieved share outstanding for MHC: 43,476,198
+2025-12-15 15:44:51,209 - INFO - Retrieved share outstanding for MIG: 211,503,463
+2025-12-15 15:44:51,472 - INFO - Retrieved share outstanding for MLS: 4,000,000
+2025-12-15 15:44:51,764 - INFO - Retrieved share outstanding for MML: 340,316,858
+2025-12-15 15:44:52,047 - INFO - Retrieved share outstanding for MPC: 401,093,000
+2025-12-15 15:44:52,323 - INFO - Retrieved share outstanding for MSB: 3,120,000,000
+2025-12-15 15:44:52,642 - INFO - Retrieved share outstanding for MSH: 112,521,020
+2025-12-15 15:44:52,921 - INFO - Retrieved share outstanding for MSN: 1,520,491,927
+2025-12-15 15:44:53,200 - INFO - Retrieved share outstanding for MSR: 1,099,829,520
+2025-12-15 15:44:53,478 - INFO - Retrieved share outstanding for MST: 113,604,220
+2025-12-15 15:44:53,794 - INFO - Retrieved share outstanding for MTA: 110,113,591
+2025-12-15 15:44:54,100 - INFO - Retrieved share outstanding for MVC: 100,000,000
+2025-12-15 15:44:54,429 - INFO - Retrieved share outstanding for MWG: 1,478,456,763
+2025-12-15 15:44:54,718 - INFO - Retrieved share outstanding for MZG: 116,506,574
+2025-12-15 15:44:55,005 - INFO - Retrieved share outstanding for NAB: 1,715,686,480
+2025-12-15 15:44:55,276 - INFO - Retrieved share outstanding for NAF: 61,181,992
+2025-12-15 15:44:55,573 - INFO - Retrieved share outstanding for NAG: 38,620,233
+2025-12-15 15:44:55,863 - INFO - Retrieved share outstanding for NBB: 100,159,795
+2025-12-15 15:44:56,148 - INFO - Retrieved share outstanding for NBC: 36,999,124
+2025-12-15 15:44:56,415 - INFO - Retrieved share outstanding for NCT: 26,165,732
+2025-12-15 15:44:56,712 - INFO - Retrieved share outstanding for NDN: 71,657,936
+2025-12-15 15:44:56,999 - INFO - Retrieved share outstanding for NED: 40,500,000
+2025-12-15 15:44:57,349 - INFO - Retrieved share outstanding for NHA: 64,788,945
+2025-12-15 15:44:57,693 - INFO - Retrieved share outstanding for NHH: 112,964,000
+2025-12-15 15:44:57,978 - INFO - Retrieved share outstanding for NKG: 447,570,881
+2025-12-15 15:44:58,333 - INFO - Retrieved share outstanding for NLG: 485,194,883
+2025-12-15 15:44:58,629 - INFO - Retrieved share outstanding for NNC: 21,920,000
+2025-12-15 15:44:58,901 - INFO - Retrieved share outstanding for NO1: 24,000,000
+2025-12-15 15:44:59,183 - INFO - Retrieved share outstanding for NRC: 92,597,762
+2025-12-15 15:44:59,452 - INFO - Retrieved share outstanding for NT2: 287,876,029
+2025-12-15 15:44:59,760 - INFO - Retrieved share outstanding for NTC: 23,999,980
+2025-12-15 15:45:00,050 - INFO - Retrieved share outstanding for NTL: 121,979,900
+2025-12-15 15:45:00,355 - INFO - Retrieved share outstanding for NTP: 171,038,220
+2025-12-15 15:45:00,634 - INFO - Retrieved share outstanding for NVB: 1,924,632,751
+2025-12-15 15:45:00,905 - INFO - Retrieved share outstanding for NVL: 2,047,609,764
+2025-12-15 15:45:01,186 - INFO - Retrieved share outstanding for OCB: 2,663,052,284
+2025-12-15 15:45:01,483 - INFO - Retrieved share outstanding for ODE: 10,000,000
+2025-12-15 15:45:01,772 - INFO - Retrieved share outstanding for OGC: 300,000,000
+2025-12-15 15:45:02,062 - INFO - Retrieved share outstanding for OIL: 1,034,229,500
+2025-12-15 15:45:02,351 - INFO - Retrieved share outstanding for OPC: 64,050,892
+2025-12-15 15:45:02,689 - INFO - Retrieved share outstanding for ORS: 335,999,743
+2025-12-15 15:45:02,974 - INFO - Retrieved share outstanding for PAC: 69,707,328
+2025-12-15 15:45:03,273 - INFO - Retrieved share outstanding for PAN: 208,958,750
+2025-12-15 15:45:03,557 - INFO - Retrieved share outstanding for PAT: 25,000,000
+2025-12-15 15:45:03,854 - INFO - Retrieved share outstanding for PC1: 411,285,343
+2025-12-15 15:45:04,128 - INFO - Retrieved share outstanding for PCH: 25,409,893
+2025-12-15 15:45:04,408 - INFO - Retrieved share outstanding for PDR: 979,809,379
+2025-12-15 15:45:04,691 - INFO - Retrieved share outstanding for PET: 106,722,131
+2025-12-15 15:45:04,987 - INFO - Retrieved share outstanding for PFL: 50,000,000
+2025-12-15 15:45:05,292 - INFO - Retrieved share outstanding for PGB: 999,996,424
+2025-12-15 15:45:05,585 - INFO - Retrieved share outstanding for PGV: 1,123,468,046
+2025-12-15 15:45:05,868 - INFO - Retrieved share outstanding for PHC: 50,681,927
+2025-12-15 15:45:06,162 - INFO - Retrieved share outstanding for PHP: 326,960,000
+2025-12-15 15:45:06,445 - INFO - Retrieved share outstanding for PHR: 135,499,198
+2025-12-15 15:45:06,727 - INFO - Retrieved share outstanding for PLC: 80,797,566
+2025-12-15 15:45:07,009 - INFO - Retrieved share outstanding for PLX: 1,270,592,235
+2025-12-15 15:45:07,300 - INFO - Retrieved share outstanding for PMC: 9,332,573
+2025-12-15 15:45:07,617 - INFO - Retrieved share outstanding for PNJ: 341,149,107
+2025-12-15 15:45:07,889 - INFO - Retrieved share outstanding for POM: 278,543,546
+2025-12-15 15:45:08,166 - INFO - Retrieved share outstanding for POW: 3,067,851,796
+2025-12-15 15:45:08,472 - INFO - Retrieved share outstanding for PPC: 320,613,054
+2025-12-15 15:45:08,763 - INFO - Retrieved share outstanding for PPT: 19,644,923
+2025-12-15 15:45:09,053 - INFO - Retrieved share outstanding for PSD: 51,827,894
+2025-12-15 15:45:09,342 - INFO - Retrieved share outstanding for PSI: 59,841,300
+2025-12-15 15:45:09,645 - INFO - Retrieved share outstanding for PSW: 17,000,000
+2025-12-15 15:45:09,924 - INFO - Retrieved share outstanding for PTB: 80,326,083
+2025-12-15 15:45:10,211 - INFO - Retrieved share outstanding for PTL: 100,000,000
+2025-12-15 15:45:10,510 - INFO - Retrieved share outstanding for PV2: 36,868,800
+2025-12-15 15:45:10,800 - INFO - Retrieved share outstanding for PVB: 21,599,998
+2025-12-15 15:45:11,086 - INFO - Retrieved share outstanding for PVC: 81,194,463
+2025-12-15 15:45:11,382 - INFO - Retrieved share outstanding for PVD: 555,880,006
+2025-12-15 15:45:11,671 - INFO - Retrieved share outstanding for PVI: 234,241,867
+2025-12-15 15:45:11,964 - INFO - Retrieved share outstanding for PVP: 103,702,452
+2025-12-15 15:45:12,247 - INFO - Retrieved share outstanding for PVS: 511,420,099
+2025-12-15 15:45:12,530 - INFO - Retrieved share outstanding for PVT: 469,931,235
+2025-12-15 15:45:12,807 - INFO - Retrieved share outstanding for PVX: 399,997,029
+2025-12-15 15:45:13,096 - INFO - Retrieved share outstanding for PXL: 175,997,700
+2025-12-15 15:45:13,396 - INFO - Retrieved share outstanding for QCG: 275,129,141
+2025-12-15 15:45:13,687 - INFO - Retrieved share outstanding for QNS: 367,648,153
+2025-12-15 15:45:14,068 - INFO - Retrieved share outstanding for QTP: 450,000,000
+2025-12-15 15:45:14,427 - INFO - Retrieved share outstanding for RAL: 23,547,419
+2025-12-15 15:45:14,744 - INFO - Retrieved share outstanding for REE: 541,658,139
+2025-12-15 15:45:15,039 - INFO - Retrieved share outstanding for RYG: 45,000,000
+2025-12-15 15:45:15,361 - INFO - Retrieved share outstanding for S99: 104,088,992
+2025-12-15 15:45:15,650 - INFO - Retrieved share outstanding for SAB: 1,282,562,372
+2025-12-15 15:45:15,970 - INFO - Retrieved share outstanding for SAM: 379,960,971
+2025-12-15 15:45:16,241 - INFO - Retrieved share outstanding for SAS: 133,451,910
+2025-12-15 15:45:16,532 - INFO - Retrieved share outstanding for SBG: 49,999,963
+2025-12-15 15:45:16,810 - INFO - Retrieved share outstanding for SBS: 146,607,600
+2025-12-15 15:45:17,098 - INFO - Retrieved share outstanding for SBT: 855,112,589
+2025-12-15 15:45:17,398 - INFO - Retrieved share outstanding for SCG: 85,000,000
+2025-12-15 15:45:17,692 - INFO - Retrieved share outstanding for SCL: 32,407,875
+2025-12-15 15:45:18,034 - INFO - Retrieved share outstanding for SCR: 430,595,036
+2025-12-15 15:45:18,322 - INFO - Retrieved share outstanding for SCS: 102,076,982
+2025-12-15 15:45:18,636 - INFO - Retrieved share outstanding for SEA: 124,990,500
+2025-12-15 15:45:18,944 - INFO - Retrieved share outstanding for SGN: 33,498,591
+2025-12-15 15:45:19,230 - INFO - Retrieved share outstanding for SGP: 216,294,961
+2025-12-15 15:45:19,524 - INFO - Retrieved share outstanding for SGR: 69,874,989
+2025-12-15 15:45:19,801 - INFO - Retrieved share outstanding for SGT: 148,003,208
+2025-12-15 15:45:20,121 - INFO - Retrieved share outstanding for SHB: 4,593,703,838
+2025-12-15 15:45:20,421 - INFO - Retrieved share outstanding for SHI: 169,949,549
+2025-12-15 15:45:20,747 - INFO - Retrieved share outstanding for SHN: 129,607,147
+2025-12-15 15:45:21,036 - INFO - Retrieved share outstanding for SHS: 899,462,220
+2025-12-15 15:45:21,366 - INFO - Retrieved share outstanding for SIP: 242,112,943
+2025-12-15 15:45:21,667 - INFO - Retrieved share outstanding for SJD: 68,998,620
+2025-12-15 15:45:21,956 - INFO - Retrieved share outstanding for SJE: 40,000,000
+2025-12-15 15:45:22,253 - INFO - Retrieved share outstanding for SJS: 297,474,828
+2025-12-15 15:45:22,548 - INFO - Retrieved share outstanding for SKG: 66,497,697
+2025-12-15 15:45:22,839 - INFO - Retrieved share outstanding for SLS: 9,791,945
+2025-12-15 15:45:23,122 - INFO - Retrieved share outstanding for SMB: 29,846,648
+2025-12-15 15:45:23,400 - INFO - Retrieved share outstanding for SMC: 73,606,837
+2025-12-15 15:45:23,693 - INFO - Retrieved share outstanding for SSB: 2,845,000,000
+2025-12-15 15:45:23,991 - INFO - Retrieved share outstanding for SSH: 375,000,000
+2025-12-15 15:45:24,257 - INFO - Retrieved share outstanding for SSI: 2,491,097,752
+2025-12-15 15:45:24,540 - INFO - Retrieved share outstanding for ST8: 25,720,902
+2025-12-15 15:45:24,821 - INFO - Retrieved share outstanding for STB: 1,885,215,716
+2025-12-15 15:45:25,127 - INFO - Retrieved share outstanding for STH: 19,500,000
+2025-12-15 15:45:25,403 - INFO - Retrieved share outstanding for STK: 140,123,130
+2025-12-15 15:45:25,705 - INFO - Retrieved share outstanding for SVN: 21,000,000
+2025-12-15 15:45:25,987 - INFO - Retrieved share outstanding for SZB: 30,000,000
+2025-12-15 15:45:26,262 - INFO - Retrieved share outstanding for SZC: 179,985,863
+2025-12-15 15:45:26,542 - INFO - Retrieved share outstanding for SZL: 27,344,540
+2025-12-15 15:45:26,841 - INFO - Retrieved share outstanding for TAL: 360,000,000
+2025-12-15 15:45:27,129 - INFO - Retrieved share outstanding for TCB: 7,086,240,414
+2025-12-15 15:45:27,406 - INFO - Retrieved share outstanding for TCD: 335,820,641
+2025-12-15 15:45:27,694 - INFO - Retrieved share outstanding for TCH: 912,109,224
+2025-12-15 15:45:27,962 - INFO - Retrieved share outstanding for TCI: 115,620,964
+2025-12-15 15:45:28,258 - INFO - Retrieved share outstanding for TCL: 30,158,436
+2025-12-15 15:45:28,555 - INFO - Retrieved share outstanding for TCM: 112,038,755
+2025-12-15 15:45:28,814 - INFO - Retrieved share outstanding for TCO: 31,320,622
+2025-12-15 15:45:29,084 - INFO - Retrieved share outstanding for TD6: 61,935,202
+2025-12-15 15:45:29,359 - INFO - Retrieved share outstanding for TDC: 127,228,000
+2025-12-15 15:45:29,636 - INFO - Retrieved share outstanding for TDH: 112,652,767
+2025-12-15 15:45:29,912 - INFO - Retrieved share outstanding for TDM: 111,100,000
+2025-12-15 15:45:30,209 - INFO - Retrieved share outstanding for TDP: 88,222,250
+2025-12-15 15:45:30,476 - INFO - Retrieved share outstanding for TEG: 120,806,562
+2025-12-15 15:45:30,725 - INFO - Retrieved share outstanding for THG: 31,129,907
+2025-12-15 15:45:31,001 - INFO - Retrieved share outstanding for TIG: 193,606,205
+2025-12-15 15:45:31,275 - INFO - Retrieved share outstanding for TIP: 65,007,857
+2025-12-15 15:45:31,572 - INFO - Retrieved share outstanding for TL4: 15,333,338
+2025-12-15 15:45:31,837 - INFO - Retrieved share outstanding for TLD: 77,741,356
+2025-12-15 15:45:32,108 - INFO - Retrieved share outstanding for TLG: 96,528,932
+2025-12-15 15:45:32,381 - INFO - Retrieved share outstanding for TLH: 112,320,017
+2025-12-15 15:45:32,672 - INFO - Retrieved share outstanding for TNC: 19,250,000
+2025-12-15 15:45:32,942 - INFO - Retrieved share outstanding for TNG: 128,731,266
+2025-12-15 15:45:33,207 - INFO - Retrieved share outstanding for TNH: 165,751,943
+2025-12-15 15:45:33,692 - INFO - Retrieved share outstanding for TNI: 52,500,000
+2025-12-15 15:45:34,271 - INFO - Retrieved share outstanding for TNT: 51,000,000
+2025-12-15 15:45:34,541 - INFO - Retrieved share outstanding for TOS: 44,999,681
+2025-12-15 15:45:34,810 - INFO - Retrieved share outstanding for TPB: 2,774,046,873
+2025-12-15 15:45:35,071 - INFO - Retrieved share outstanding for TRC: 30,000,000
+2025-12-15 15:45:35,331 - INFO - Retrieved share outstanding for TSC: 196,858,925
+2025-12-15 15:45:35,605 - INFO - Retrieved share outstanding for TTA: 170,057,593
+2025-12-15 15:45:35,887 - INFO - Retrieved share outstanding for TTF: 393,532,487
+2025-12-15 15:45:36,169 - INFO - Retrieved share outstanding for TTH: 37,374,846
+2025-12-15 15:45:36,435 - INFO - Retrieved share outstanding for TTN: 36,727,500
+2025-12-15 15:45:36,710 - INFO - Retrieved share outstanding for TV1: 26,691,319
+2025-12-15 15:45:36,985 - INFO - Retrieved share outstanding for TV2: 67,526,165
+2025-12-15 15:45:37,259 - INFO - Retrieved share outstanding for TVB: 112,097,019
+2025-12-15 15:45:37,535 - INFO - Retrieved share outstanding for TVC: 96,155,570
+2025-12-15 15:45:37,801 - INFO - Retrieved share outstanding for TVN: 678,000,000
+2025-12-15 15:45:38,058 - INFO - Retrieved share outstanding for TVS: 200,393,669
+2025-12-15 15:45:38,343 - INFO - Retrieved share outstanding for VBB: 1,091,972,520
+2025-12-15 15:45:38,625 - INFO - Retrieved share outstanding for VC2: 75,646,351
+2025-12-15 15:45:38,915 - INFO - Retrieved share outstanding for VC3: 136,414,258
+2025-12-15 15:45:39,210 - INFO - Retrieved share outstanding for VC7: 96,090,556
+2025-12-15 15:45:39,486 - INFO - Retrieved share outstanding for VCB: 8,355,675,094
+2025-12-15 15:45:39,746 - INFO - Retrieved share outstanding for VCG: 646,468,336
+2025-12-15 15:45:40,014 - INFO - Retrieved share outstanding for VCI: 722,600,000
+2025-12-15 15:45:40,298 - INFO - Retrieved share outstanding for VCP: 83,789,658
+2025-12-15 15:45:40,594 - INFO - Retrieved share outstanding for VCR: 210,000,000
+2025-12-15 15:45:40,875 - INFO - Retrieved share outstanding for VCS: 160,000,000
+2025-12-15 15:45:41,145 - INFO - Retrieved share outstanding for VDP: 22,083,392
+2025-12-15 15:45:41,412 - INFO - Retrieved share outstanding for VDS: 272,000,000
+2025-12-15 15:45:41,689 - INFO - Retrieved share outstanding for VE9: 12,023,613
+2025-12-15 15:45:41,972 - INFO - Retrieved share outstanding for VEA: 1,328,800,000
+2025-12-15 15:45:42,263 - INFO - Retrieved share outstanding for VEF: 166,601,050
+2025-12-15 15:45:42,563 - INFO - Retrieved share outstanding for VFG: 41,712,614
+2025-12-15 15:45:42,835 - INFO - Retrieved share outstanding for VFS: 139,967,442
+2025-12-15 15:45:43,110 - INFO - Retrieved share outstanding for VGC: 448,350,000
+2025-12-15 15:45:43,380 - INFO - Retrieved share outstanding for VGI: 3,043,811,200
+2025-12-15 15:45:43,663 - INFO - Retrieved share outstanding for VGR: 82,224,959
+2025-12-15 15:45:43,951 - INFO - Retrieved share outstanding for VGS: 61,524,155
+2025-12-15 15:45:44,239 - INFO - Retrieved share outstanding for VGT: 500,000,000
+2025-12-15 15:45:44,542 - INFO - Retrieved share outstanding for VHC: 224,453,159
+2025-12-15 15:45:44,836 - INFO - Retrieved share outstanding for VHE: 33,139,966
+2025-12-15 15:45:45,126 - INFO - Retrieved share outstanding for VHG: 150,000,000
+2025-12-15 15:45:45,390 - INFO - Retrieved share outstanding for VHM: 4,107,412,004
+2025-12-15 15:45:45,678 - INFO - Retrieved share outstanding for VIB: 3,404,005,710
+2025-12-15 15:45:45,946 - INFO - Retrieved share outstanding for VIC: 7,706,031,024
+2025-12-15 15:45:46,234 - INFO - Retrieved share outstanding for VIG: 45,133,300
+2025-12-15 15:45:46,534 - INFO - Retrieved share outstanding for VIP: 68,470,941
+2025-12-15 15:45:46,798 - INFO - Retrieved share outstanding for VIX: 1,531,429,858
+2025-12-15 15:45:47,098 - INFO - Retrieved share outstanding for VJC: 591,611,334
+2025-12-15 15:45:47,383 - INFO - Retrieved share outstanding for VLB: 46,720,560
+2025-12-15 15:45:47,664 - INFO - Retrieved share outstanding for VLC: 212,491,611
+2025-12-15 15:45:47,977 - INFO - Retrieved share outstanding for VMS: 8,999,998
+2025-12-15 15:45:48,276 - INFO - Retrieved share outstanding for VNB: 67,894,960
+2025-12-15 15:45:48,548 - INFO - Retrieved share outstanding for VND: 1,522,299,908
+2025-12-15 15:45:48,841 - INFO - Retrieved share outstanding for VNE: 82,055,233
+2025-12-15 15:45:49,112 - INFO - Retrieved share outstanding for VNM: 2,089,955,445
+2025-12-15 15:45:49,419 - INFO - Retrieved share outstanding for VNS: 67,859,192
+2025-12-15 15:45:49,708 - INFO - Retrieved share outstanding for VNZ: 29,376,974
+2025-12-15 15:45:49,999 - INFO - Retrieved share outstanding for VOC: 121,800,000
+2025-12-15 15:45:50,280 - INFO - Retrieved share outstanding for VOS: 140,000,000
+2025-12-15 15:45:50,558 - INFO - Retrieved share outstanding for VPB: 7,933,923,601
+2025-12-15 15:45:50,844 - INFO - Retrieved share outstanding for VPG: 88,415,751
+2025-12-15 15:45:51,123 - INFO - Retrieved share outstanding for VPH: 95,357,800
+2025-12-15 15:45:51,421 - INFO - Retrieved share outstanding for VPI: 320,049,577
+2025-12-15 15:45:51,702 - INFO - Retrieved share outstanding for VPL: 1,793,300,377
+2025-12-15 15:45:52,000 - INFO - Retrieved share outstanding for VRC: 50,000,000
+2025-12-15 15:45:52,274 - INFO - Retrieved share outstanding for VRE: 2,272,318,410
+2025-12-15 15:45:52,544 - INFO - Retrieved share outstanding for VRG: 25,894,868
+2025-12-15 15:45:52,834 - INFO - Retrieved share outstanding for VSC: 374,370,362
+2025-12-15 15:45:53,134 - INFO - Retrieved share outstanding for VSI: 13,199,997
+2025-12-15 15:45:53,424 - INFO - Retrieved share outstanding for VTD: 24,000,000
+2025-12-15 15:45:53,710 - INFO - Retrieved share outstanding for VTO: 79,866,666
+2025-12-15 15:45:53,962 - INFO - Retrieved share outstanding for VTP: 121,783,042
+2025-12-15 15:45:54,240 - INFO - Retrieved share outstanding for VTR: 65,913,968
+2025-12-15 15:45:54,552 - INFO - Retrieved share outstanding for VTZ: 76,159,833
+2025-12-15 15:45:54,893 - INFO - Retrieved share outstanding for VUA: 33,900,000
+2025-12-15 15:45:55,149 - INFO - Retrieved share outstanding for VVS: 21,525,000
+2025-12-15 15:45:55,417 - INFO - Retrieved share outstanding for WSS: 50,300,000
+2025-12-15 15:45:55,692 - INFO - Retrieved share outstanding for YEG: 191,802,035
+2025-12-15 15:45:55,983 - INFO - Retrieved share outstanding for YTC: 9,548,000
+2025-12-15 15:45:56,093 - INFO - Calculated derived metrics successfully
+2025-12-15 15:45:56,810 - INFO - Saved 1000979 records to /Users/buuphan/Dev/Vietnam_dashboard/DATA/raw/ohlcv/OHLCV_mktcap.parquet
+2025-12-15 15:45:56,818 - INFO - Daily update completed successfully for 2025-12-15
+2025-12-15 15:45:56,846 - INFO - ✅ OHLCV update completed successfully for 2025-12-15!

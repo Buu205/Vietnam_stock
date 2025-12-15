@@ -1,20 +1,42 @@
-# Gói Cơ Bản Các Bộ Tính Toán Tài Chính (Financial Calculators Base Package)
+# Financial Calculators - Vietnam Dashboard
+# Bộ Tính Toán Tài Chính - Bảng Điều Khiển Chứng Khoán Việt Nam
 
-## Tổng Quan (Overview)
+**Version:** 4.0.0
+**Last Updated:** 2025-12-14
+**Status:** ✅ Production Ready
 
-Gói này chứa các bộ tính toán tài chính đã được tái cấu trúc, kế thừa từ `BaseFinancialCalculator` để giảm thiểu việc lặp lại mã nguồn lên đến 60%, tuân theo kiến trúc được định nghĩa trong:
-- `/docs/MASTER_PLAN.md` - Thực hiện Giai đoạn 0.2
-- `/docs/architecture/DATA_STANDARDIZATION.md` - Tái cấu trúc Bộ tính toán Thống nhất
-- `/docs/ARCHITECTURE_SUMMARY.md` - Tổng quan kiến trúc hệ thống
+---
 
-### Tuân Thủ Kiến Trúc (Architecture Compliance)
+## 📋 Mục Lục / Table of Contents
 
-✅ **Không thao tác sys.path** - Sử dụng imports tương đối như khuyến nghị trong kiến trúc tổng quan
-✅ **Mẫu Template Method** - BaseFinancialCalculator triển khai các chức năng chung
-✅ **Tính Toán Đặc Thù Theo Thực Thể** - Mỗi bộ tính toán triển khai các chỉ số chuyên biệt
-✅ **Tích Hợp Metric Registry** - Kiểm tra hợp lệ với metric_registry.json
-✅ **Tích Hợp UnifiedTickerMapper** - Tự động chọn bộ tính toán theo mã chứng khoán
-✅ **Đầu Ra Chuẩn Hóa** - Đặt tên cột và định dạng ngày tháng nhất quán
+1. [Tổng Quan / Overview](#-tổng-quan--overview)
+2. [🚀 QUAN TRỌNG: Cách Chạy Calculators](#-quan-trọng-cách-chạy-calculators)
+3. [Calculators Available](#-calculators-available)
+4. [Output Data](#-output-data)
+5. [Unit Standards v4.0.0](#-unit-standards-v400)
+6. [Architecture Compliance](#-architecture-compliance)
+
+---
+
+## 🎯 Tổng Quan / Overview
+
+Thư mục này chứa các financial calculators để tính toán metrics tài chính cho các loại entity khác nhau trong thị trường chứng khoán Việt Nam.
+
+**Version 4.0.0 Features:**
+- ✅ Unit Standardization (VND storage, decimal ratios)
+- ✅ Formula Registry Integration
+- ✅ Template Method Pattern
+- ✅ Entity-Specific Calculations
+- ✅ Metric Registry Validation
+- ✅ Unified Ticker Mapper Integration
+- ✅ Standardized Output Format
+
+**Calculators:**
+- **BaseFinancialCalculator**: Base class với common functionality
+- **CompanyFinancialCalculator**: Công ty cổ phần thường (386 tickers)
+- **BankFinancialCalculator**: Ngân hàng (24 tickers)
+- **SecurityFinancialCalculator**: Công ty chứng khoán (37 tickers)
+- **InsuranceFinancialCalculator**: Công ty bảo hiểm (6 tickers)
 
 ## Kiến Trúc (Architecture)
 

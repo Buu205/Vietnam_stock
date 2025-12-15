@@ -69,25 +69,58 @@ class SecurityFinancialCalculator(BaseFinancialCalculator):
     def calculate_basic_components(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate basic components for SECURITY entities.
-        
+
         Args:
             df: Pivoted DataFrame with raw metrics
-            
+
         Returns:
             DataFrame with component metrics calculated
         """
         result_df = df.copy()
-        
-        # Basic components (convert to billions VND)
-        result_df['net_profit'] = self.convert_to_billions(df.get('SIS_37', np.nan))
-        result_df['total_revenue'] = self.convert_to_billions(df.get('SIS_1', np.nan))
-        
-        # Balance sheet components
-        result_df['total_assets'] = self.convert_to_billions(df.get('SBS_39', np.nan))
-        result_df['equity'] = self.convert_to_billions(df.get('SBS_65', np.nan))
-        result_df['cash'] = self.convert_to_billions(df.get('SBS_1', np.nan))
-        result_df['liabilities'] = self.convert_to_billions(df.get('SBS_40', np.nan))
-        
+
+        # Basic components (convert to billions VND) - FIXED MAPPING
+        result_df['net_profit'] = self.convert_to_billions(df.get('SIS_201', np.nan))  # NPATMI
+        result_df['total_revenue'] = self.convert_to_billions(df.get('SIS_20', np.nan))  # Total Operating Revenue
+
+        # Balance sheet components - FIXED MAPPING
+        result_df['total_assets'] = self.convert_to_billions(df.get('SBS_270', np.nan))  # Total Assets
+        result_df['equity'] = self.convert_to_billions(df.get('SBS_400', np.nan))  # Total Equity
+        result_df['cash'] = self.convert_to_billions(df.get('SBS_111', np.nan))  # Cash
+        result_df['liabilities'] = self.convert_to_billions(df.get('SBS_300', np.nan))  # Total Liabilities
+
+        # Investment Portfolio components
+        result_df['fvtpl'] = self.convert_to_billions(df.get('SBS_112', np.nan))
+        result_df['htm'] = self.convert_to_billions(df.get('SBS_113', np.nan))
+        result_df['afs'] = self.convert_to_billions(df.get('SBS_115', np.nan))
+        result_df['total_investment'] = (
+            result_df.get('fvtpl', 0) +
+            result_df.get('htm', 0) +
+            result_df.get('afs', 0)
+        )
+
+        # Loan Portfolio
+        result_df['margin_loans'] = self.convert_to_billions(df.get('SBS_114', np.nan))
+
+        # Debt
+        result_df['st_debt'] = self.convert_to_billions(df.get('SBS_311', np.nan))
+        result_df['lt_debt'] = self.convert_to_billions(df.get('SBS_341', np.nan))
+        result_df['total_debt'] = result_df.get('st_debt', 0) + result_df.get('lt_debt', 0)
+
+        # Income components
+        result_df['income_fvtpl'] = self.convert_to_billions(df.get('SIS_1', np.nan))
+        result_df['income_htm'] = self.convert_to_billions(df.get('SIS_2', np.nan))
+        result_df['income_loans'] = self.convert_to_billions(df.get('SIS_3', np.nan))
+        result_df['income_afs'] = self.convert_to_billions(df.get('SIS_4', np.nan))
+
+        # Gross Profit
+        result_df['gross_profit'] = self.convert_to_billions(df.get('SIS_50_1', np.nan))
+        if result_df['gross_profit'].isna().all():
+            # Calculate if not available: Revenue - Operating Expenses
+            result_df['gross_profit'] = (
+                result_df.get('total_revenue', 0) -
+                self.convert_to_billions(df.get('SIS_40', 0))
+            )
+
         return result_df
     
     def calculate_growth_rates(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -126,151 +159,226 @@ class SecurityFinancialCalculator(BaseFinancialCalculator):
     def calculate_profitability(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate profitability ratios for SECURITY entities.
-        
+
         Args:
             df: DataFrame with basic components
-            
+
         Returns:
             DataFrame with profitability ratios calculated
         """
         result_df = df.copy()
-        
+
+        # Calculate 2Q averages for TTM ratios
+        result_df = result_df.sort_values(['SECURITY_CODE', 'REPORT_DATE'])
+
+        # Average Assets (2Q)
+        result_df['assets_avg_2q'] = (
+            result_df.groupby('SECURITY_CODE')['total_assets']
+            .transform(lambda s: s.rolling(window=2, min_periods=1).mean())
+        )
+
+        # Average Equity (2Q)
+        result_df['equity_avg_2q'] = (
+            result_df.groupby('SECURITY_CODE')['equity']
+            .transform(lambda s: s.rolling(window=2, min_periods=1).mean())
+        )
+
+        # TTM Net Profit
+        result_df['net_profit_ttm'] = (
+            result_df.groupby('SECURITY_CODE')['net_profit']
+            .transform(lambda s: s.rolling(window=4, min_periods=1).sum())
+        )
+
         # Get formulas
         calc_roe = formula_registry.get_formula('calculate_roe')
         calc_roa = formula_registry.get_formula('calculate_roa')
-        
-        # ROE = Net Profit / Equity
+
+        # ROAE (TTM) = Net Profit TTM / Equity Avg 2Q
         if calc_roe:
-            result_df['roe'] = df.apply(
-                lambda row: calc_roe(row.get('SIS_37', 0), row.get('SBS_65', 1)),
+            result_df['roae_ttm'] = df.apply(
+                lambda row: calc_roe(row.get('net_profit_ttm', 0) * 1e9, row.get('equity_avg_2q', 1) * 1e9),
                 axis=1
             )
         else:
-            result_df['roe'] = self.safe_divide(
-                numerator=df.get('SIS_37', 0),
-                denominator=df.get('SBS_65', 1),
+            result_df['roae_ttm'] = self.safe_divide(
+                numerator=result_df['net_profit_ttm'],
+                denominator=result_df['equity_avg_2q'],
                 result_nan=True
             ) * 100
-        
-        # ROA = Net Profit / Total Assets
+
+        # ROAA (TTM) = Net Profit TTM / Assets Avg 2Q
         if calc_roa:
-            result_df['roa'] = df.apply(
-                lambda row: calc_roa(row.get('SIS_37', 0), row.get('SBS_39', 1)),
+            result_df['roaa_ttm'] = df.apply(
+                lambda row: calc_roa(row.get('net_profit_ttm', 0) * 1e9, row.get('assets_avg_2q', 1) * 1e9),
                 axis=1
             )
         else:
-            result_df['roa'] = self.safe_divide(
-                numerator=df.get('SIS_37', 0),
-                denominator=df.get('SBS_39', 1),
+            result_df['roaa_ttm'] = self.safe_divide(
+                numerator=result_df['net_profit_ttm'],
+                denominator=result_df['assets_avg_2q'],
                 result_nan=True
             ) * 100
-        
+
         # Profit Margin = Net Profit / Total Revenue
         result_df['profit_margin'] = self.safe_divide(
-            numerator=df.get('SIS_37', 0),
-            denominator=df.get('SIS_1', 1),
+            numerator=result_df['net_profit'],
+            denominator=result_df['total_revenue'],
             result_nan=True
         ) * 100
-        
+
+        # Gross Profit Margin = Gross Profit / Total Revenue
+        result_df['gross_profit_margin'] = self.safe_divide(
+            numerator=result_df.get('gross_profit', 0),
+            denominator=result_df['total_revenue'],
+            result_nan=True
+        ) * 100
+
         return result_df
     
     def calculate_revenue_composition(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate revenue composition for SECURITY entities.
-        
+
         Args:
             df: DataFrame with basic components
-            
+
         Returns:
             DataFrame with revenue composition ratios calculated
         """
         result_df = df.copy()
-        
-        # Proprietary Trading Ratio = Trading Income / Total Revenue
-        result_df['prop_trading_ratio'] = self.safe_divide(
-            numerator=df.get('SIS_2', 0),
-            denominator=df.get('SIS_1', 1),
+
+        # Total Investment Income = FVTPL + HTM + AFS
+        result_df['investment_revenue'] = (
+            result_df.get('income_fvtpl', 0) +
+            result_df.get('income_htm', 0) +
+            result_df.get('income_afs', 0)
+        )
+
+        # Investment Income Ratio = Investment Income / Total Revenue
+        result_df['investment_ratio'] = self.safe_divide(
+            numerator=result_df['investment_revenue'],
+            denominator=result_df['total_revenue'],
             result_nan=True
         ) * 100
-        
+
+        # Margin Lending Ratio = Lending Income / Total Revenue
+        result_df['lending_ratio'] = self.safe_divide(
+            numerator=result_df.get('income_loans', 0),
+            denominator=result_df['total_revenue'],
+            result_nan=True
+        ) * 100
+
         # Brokerage Ratio = Brokerage Income / Total Revenue
         result_df['brokerage_ratio'] = self.safe_divide(
-            numerator=df.get('SIS_10', 0),
-            denominator=df.get('SIS_1', 1),
+            numerator=self.convert_to_billions(df.get('SIS_6', 0)),
+            denominator=result_df['total_revenue'],
             result_nan=True
         ) * 100
-        
-        # Advisory Ratio = Advisory Income / Total Revenue
-        result_df['advisory_ratio'] = self.safe_divide(
-            numerator=df.get('SIS_13', 0),
-            denominator=df.get('SIS_1', 1),
+
+        # IB Revenue = Underwriting + Agency + Advisory
+        ib_revenue = (
+            self.convert_to_billions(df.get('SIS_7_1', 0)) +  # Underwriting
+            self.convert_to_billions(df.get('SIS_7_2', 0)) +  # Agency
+            self.convert_to_billions(df.get('SIS_8', 0)) +    # Investment advisory
+            self.convert_to_billions(df.get('SIS_10', 0))     # Financial advisory
+        )
+
+        result_df['ib_ratio'] = self.safe_divide(
+            numerator=ib_revenue,
+            denominator=result_df['total_revenue'],
             result_nan=True
         ) * 100
-        
-        # Margin Lending Ratio = Lending Income / Total Revenue
-        result_df['margin_lending_ratio'] = self.safe_divide(
-            numerator=df.get('SIS_16', 0),
-            denominator=df.get('SIS_1', 1),
-            result_nan=True
-        ) * 100
-        
+
         return result_df
     
     def calculate_efficiency(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Calculate efficiency ratios for SECURITY entities.
-        
+
         Args:
             df: DataFrame with basic components
-            
+
         Returns:
             DataFrame with efficiency ratios calculated
         """
         result_df = df.copy()
-        
-        # Cost to Income Ratio = Costs / Total Revenue
-        result_df['cost_income'] = self.safe_divide(
-            numerator=df.get('SIS_24', 0),
-            denominator=df.get('SIS_1', 1),
+
+        # Operating Expenses
+        operating_expenses = self.convert_to_billions(df.get('SIS_40', 0))
+
+        # G&A Expenses
+        ga_expenses = self.convert_to_billions(df.get('SIS_62', 0))
+
+        # CIR = (Operating Expenses + G&A) / Total Revenue
+        result_df['cir'] = self.safe_divide(
+            numerator=abs(operating_expenses) + abs(ga_expenses),
+            denominator=result_df['total_revenue'],
             result_nan=True
         ) * 100
-        
-        # Operating Expense Ratio = Opex / Total Revenue
+
+        # Operating Expense Ratio = Operating Expenses / Total Revenue
         result_df['opex_ratio'] = self.safe_divide(
-            numerator=df.get('SIS_27', 0),
-            denominator=df.get('SIS_1', 1),
+            numerator=abs(operating_expenses),
+            denominator=result_df['total_revenue'],
             result_nan=True
         ) * 100
-        
+
+        # G&A Expense Ratio = G&A / Total Revenue
+        result_df['ga_ratio'] = self.safe_divide(
+            numerator=abs(ga_expenses),
+            denominator=result_df['total_revenue'],
+            result_nan=True
+        ) * 100
+
         return result_df
     
     def calculate_risk_metrics(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Calculator implementation for securities companies.
-Bộ tính toán cho các công ty chứng khoán.
-        
+        Calculate risk metrics for SECURITY entities.
+
         Args:
             df: DataFrame with basic components
-            
+
         Returns:
             DataFrame with risk metrics calculated
         """
         result_df = df.copy()
-        
-        # Leverage Ratio = Liabilities / Equity
-        result_df['leverage_ratio'] = self.safe_divide(
-            numerator=df.get('SBS_40', 0),
-            denominator=df.get('SBS_65', 1),
+
+        # Leverage Ratio = Total Assets / Equity (FIXED)
+        result_df['leverage'] = self.safe_divide(
+            numerator=result_df['total_assets'],
+            denominator=result_df['equity'],
             result_nan=True
         )
-        
-        # Liquidity Ratio = Cash / Liabilities
-        result_df['liquid_ratio'] = self.safe_divide(
-            numerator=df.get('SBS_1', 0),
-            denominator=df.get('SBS_41', 1),
+
+        # Loans to Equity Ratio
+        result_df['loans_to_equity'] = self.safe_divide(
+            numerator=result_df.get('margin_loans', 0),
+            denominator=result_df['equity'],
             result_nan=True
         )
-        
+
+        # Investment to Assets Ratio
+        result_df['inv_to_assets'] = self.safe_divide(
+            numerator=result_df.get('total_investment', 0),
+            denominator=result_df['total_assets'],
+            result_nan=True
+        ) * 100
+
+        # Loans to Assets Ratio
+        result_df['loans_to_assets'] = self.safe_divide(
+            numerator=result_df.get('margin_loans', 0),
+            denominator=result_df['total_assets'],
+            result_nan=True
+        ) * 100
+
+        # Liquidity Ratio = Cash / Current Liabilities
+        result_df['liquidity_ratio'] = self.safe_divide(
+            numerator=result_df['cash'],
+            denominator=result_df.get('st_debt', 1),
+            result_nan=True
+        )
+
         return result_df
     
     def calculate_capital_adequacy(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -337,23 +445,33 @@ Bộ tính toán cho các công ty chứng khoán.
         security_cols = [
             # ID columns
             "SECURITY_CODE", "REPORT_DATE", "YEAR", "QUARTER", "FREQ_CODE",
-            
+
             # Basic components
-            "net_profit", "total_revenue",
+            "net_profit", "total_revenue", "gross_profit",
             "total_assets", "equity", "cash", "liabilities",
-            
-            # Profitability
-            "roe", "roa", "profit_margin",
-            
+
+            # Portfolio components
+            "fvtpl", "htm", "afs", "total_investment", "margin_loans",
+            "st_debt", "lt_debt", "total_debt",
+
+            # Income components
+            "income_fvtpl", "income_htm", "income_loans", "income_afs",
+
+            # Profitability (TTM)
+            "roae_ttm", "roaa_ttm", "profit_margin", "gross_profit_margin",
+            "net_profit_ttm", "assets_avg_2q", "equity_avg_2q",
+
             # Revenue composition
-            "prop_trading_ratio", "brokerage_ratio", "advisory_ratio", "margin_lending_ratio",
-            
+            "investment_revenue", "investment_ratio", "lending_ratio",
+            "brokerage_ratio", "ib_ratio",
+
             # Efficiency
-            "cost_income", "opex_ratio",
-            
+            "cir", "opex_ratio", "ga_ratio",
+
             # Risk metrics
-            "leverage_ratio", "liquid_ratio",
-            
+            "leverage", "loans_to_equity", "inv_to_assets",
+            "loans_to_assets", "liquidity_ratio",
+
             # Capital adequacy
             "capital_ratio"
         ]

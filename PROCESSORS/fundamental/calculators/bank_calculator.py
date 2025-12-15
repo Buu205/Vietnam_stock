@@ -73,15 +73,15 @@ class BankFinancialCalculator(BaseFinancialCalculator):
             DataFrame with balance sheet metrics calculated
         """
         result_df = df.copy()
-        
-        # Balance Sheet metrics (convert to billions VND)
-        result_df['total_assets'] = df.get('BBS_100', np.nan) / 1e9
-        result_df['total_liabilities'] = df.get('BBS_300', np.nan) / 1e9
-        result_df['total_equity'] = df.get('BBS_400', np.nan) / 1e9
-        
+
+        # Balance Sheet metrics (stored in VND as per v4.0.0 standard)
+        result_df['total_assets'] = df.get('BBS_100', np.nan)
+        result_df['total_liabilities'] = df.get('BBS_300', np.nan)
+        result_df['total_equity'] = df.get('BBS_400', np.nan)
+
         # Loans and Deposits
-        result_df['customer_loans'] = df.get('BBS_161', np.nan) / 1e9
-        result_df['customer_deposits'] = df.get('BBS_330', np.nan) / 1e9
+        result_df['customer_loans'] = df.get('BBS_161', np.nan)
+        result_df['customer_deposits'] = df.get('BBS_330', np.nan)
         
         return result_df
     
@@ -96,41 +96,41 @@ class BankFinancialCalculator(BaseFinancialCalculator):
             DataFrame with component metrics calculated
         """
         result_df = df.copy()
-        
-        # NPL amount
+
+        # NPL amount (stored in VND)
         npl_num = (
             df.get('BNOT_4_3', 0).fillna(0) +  # Substandard loans
             df.get('BNOT_4_4', 0).fillna(0) +  # Doubtful loans
             df.get('BNOT_4_5', 0).fillna(0)     # Loss loans
         )
-        result_df['npl_amount'] = npl_num / 1e9
-        
+        result_df['npl_amount'] = npl_num
+
         # Net Interest Income (NII)
-        result_df['nii'] = df.get('BIS_3', np.nan) / 1e9
-        
+        result_df['nii'] = df.get('BIS_3', np.nan)
+
         # Total Operating Income (TOI)
-        result_df['toi'] = df.get('BIS_14A', np.nan) / 1e9
-        
+        result_df['toi'] = df.get('BIS_14A', np.nan)
+
         # Non-Interest Income (NOII)
         result_df['noii'] = result_df['toi'] - result_df['nii']
-        
+
         # Operating Expenses (OPEX)
-        result_df['opex'] = df.get('BIS_14', np.nan) / 1e9
-        
+        result_df['opex'] = df.get('BIS_14', np.nan)
+
         # Provision Expense
-        result_df['provision_expense'] = df.get('BIS_16', np.nan) / 1e9
-        
+        result_df['provision_expense'] = df.get('BIS_16', np.nan)
+
         # Profit Before Tax (PBT)
-        result_df['pbt'] = df.get('BIS_17', np.nan) / 1e9
-        
+        result_df['pbt'] = df.get('BIS_17', np.nan)
+
         # NPATMI
-        result_df['npatmi'] = df.get('BIS_22A', np.nan) / 1e9
-        
+        result_df['npatmi'] = df.get('BIS_22A', np.nan)
+
         # Interest Income, Expense, and averages
-        result_df['interest_income'] = df.get('BIS_1', np.nan) / 1e9
-        result_df['interest_expense'] = df.get('BIS_2', np.nan) / 1e9
-        result_df['iea'] = (df.get('BBS_120', 0) + df.get('BBS_130', 0)) / 1e9  # Interest earning assets
-        result_df['ibl'] = df.get('BBS_321', np.nan) / 1e9  # Interest bearing liabilities
+        result_df['interest_income'] = df.get('BIS_1', np.nan)
+        result_df['interest_expense'] = df.get('BIS_2', np.nan)
+        result_df['iea'] = (df.get('BBS_120', 0) + df.get('BBS_130', 0))  # Interest earning assets
+        result_df['ibl'] = df.get('BBS_321', np.nan)  # Interest bearing liabilities
         
         # Calculate 2-quarter averages for averages
         result_df = self._calculate_2q_averages(result_df)
@@ -148,21 +148,21 @@ class BankFinancialCalculator(BaseFinancialCalculator):
             DataFrame with growth metrics calculated
         """
         result_df = df.copy()
-        
-        # Total Credit
+
+        # Total Credit (stored in VND)
         result_df['total_credit'] = (
             result_df.get("BBS_161", 0).fillna(0) +  # Customer loans
             result_df.get("BBS_180", 0).fillna(0) +  # Other credit
             result_df.get("BNOT_5_1_3", 0).fillna(0) +  # Other credit
             result_df.get("BNOT_13_1_1_3", 0).fillna(0) +  # Special credit
             result_df.get("BNOT_13_2_3", 0).fillna(0)    # Other credit
-        ) / 1e9
-        
+        )
+
         # Customer Loans
-        result_df['customer_loan'] = df.get('BBS_161', 0) / 1e9
-        
+        result_df['customer_loan'] = df.get('BBS_161', 0)
+
         # Customer Deposits
-        result_df['customer_deposit'] = df.get('BBS_330', 0) / 1e9
+        result_df['customer_deposit'] = df.get('BBS_330', 0)
         
         return result_df
     
@@ -214,10 +214,10 @@ class BankFinancialCalculator(BaseFinancialCalculator):
         result_df = df.copy()
         result_df = result_df.sort_values(["SECURITY_CODE", "REPORT_DATE"])
         
-        # TTM for BIS_22A (NPATMI)
+        # TTM for BIS_22A (NPATMI) - stored in VND
         result_df["bis22a_ttm"] = (
             result_df.groupby("SECURITY_CODE")["BIS_22A"]
-            .transform(lambda s: s.rolling(window=4, min_periods=1).sum()) / 1e9
+            .transform(lambda s: s.rolling(window=4, min_periods=1).sum())
         )
         
         # Get formulas
@@ -245,43 +245,45 @@ class BankFinancialCalculator(BaseFinancialCalculator):
         # These are simple ratios, using safe_divide manually for now or use generic ratio from registry if available?
         # Keeping existing logic for simple ratios where registry doesn't have exact match or it's just A/B.
         
+        # Ratios stored as decimals (0.03 for 3%) per v4.0.0 standard
         result_df["asset_yield_q"] = self.safe_divide(
-            numerator=result_df["BIS_1"] / 1e9,
+            numerator=result_df["BIS_1"],
             denominator=result_df["avg_iea_2q"],
             result_nan=True
-        ) * 100
-        
+        )
+
         result_df["funding_cost_q"] = self.safe_divide(
-            numerator=result_df["BIS_2"] / 1e9,
+            numerator=result_df["BIS_2"],
             denominator=result_df["avg_ibl_2q"],
             result_nan=True
-        ) * 100
-        
+        )
+
         if calc_nim:
             result_df["nim_q"] = result_df.apply(
-                lambda row: calc_nim(row["BIS_3"] / 1e9, row["avg_iea_2q"]),
+                lambda row: calc_nim(row["BIS_3"], row["avg_iea_2q"]),
                 axis=1
             )
         else:
              result_df["nim_q"] = self.safe_divide(
-                numerator=result_df["BIS_3"] / 1e9,
+                numerator=result_df["BIS_3"],
                 denominator=result_df["avg_iea_2q"],
                 result_nan=True
-            ) * 100
-        
-        # Loan Yield
-        result_df["loan_base"] = (result_df.get("BBS_160", 0) + result_df.get("BBS_180", 0)) / 1e9
+            )
+
+        # Loan Yield (stored in VND)
+        result_df["loan_base"] = (result_df.get("BBS_160", 0) + result_df.get("BBS_180", 0))
         result_df = result_df.sort_values(["SECURITY_CODE", "REPORT_DATE"])
         result_df["loan_base_avg_2q"] = (
             result_df.groupby("SECURITY_CODE")["loan_base"]
             .transform(self._avg_two_quarters)
         )
         
+        # Loan yield stored as decimal per v4.0.0 standard
         result_df["loan_yield_q"] = self.safe_divide(
-            numerator=result_df.get("BNOT_31_1", 0) / 1e9,
+            numerator=result_df.get("BNOT_31_1", 0),
             denominator=result_df["loan_base_avg_2q"],
             result_nan=True
-        ) * 100
+        )
         
         return result_df
     
@@ -317,31 +319,32 @@ class BankFinancialCalculator(BaseFinancialCalculator):
             result_df.get("BNOT_26_3", 0)     # Term deposits
         )
         casa_den = result_df.get("BNOT_26", 0)
+        # Ratios stored as decimals per v4.0.0 standard
         result_df["casa_ratio"] = self.safe_divide(
             numerator=casa_num,
             denominator=casa_den,
             result_nan=True
-        ) * 100
-        
+        )
+
         # Cost to Income Ratio (CIR)
         result_df["cir"] = self.safe_divide(
             numerator=result_df.get("BIS_14", 0),
             denominator=result_df.get("BIS_14A", 0),
             result_nan=True
-        ) * 100
-        
+        )
+
         # NII/TOI and NOII/TOI ratios
         result_df["nii_toi"] = self.safe_divide(
             numerator=result_df["nii"],
             denominator=result_df["toi"],
             result_nan=True
-        ) * 100
-        
+        )
+
         result_df["noii_toi"] = self.safe_divide(
             numerator=result_df["toi"] - result_df["nii"],
             denominator=result_df["toi"],
             result_nan=True
-        ) * 100
+        )
         
         return result_df
     
@@ -357,65 +360,66 @@ class BankFinancialCalculator(BaseFinancialCalculator):
         """
         result_df = df.copy()
         
+        # All ratios stored as decimals per v4.0.0 standard
         # LDR Pure
         result_df["ldr_pure"] = self.safe_divide(
             numerator=result_df.get("BBS_161", 0),
             denominator=result_df.get("BBS_330", 0) + result_df.get("BBS_370", 0),
             result_nan=True
-        ) * 100
-        
+        )
+
         # LDR Regulated (estimated)
         reg_den = (
-            result_df.get("BBS_322", 0) + 
-            result_df.get("BBS_330", 0) - 
-            result_df.get("BNOT_26_5", 0) - 
-            result_df.get("BNOT_26_3", 0) + 
+            result_df.get("BBS_322", 0) +
+            result_df.get("BBS_330", 0) -
+            result_df.get("BNOT_26_5", 0) -
+            result_df.get("BNOT_26_3", 0) +
             result_df.get("BBS_370", 0)
         )
         result_df["ldr_regulated_estimated"] = self.safe_divide(
             numerator=result_df.get("BBS_161", 0) - result_df.get("BNOT_7_5", 0),
             denominator=reg_den,
             result_nan=True
-        ) * 100
-        
+        )
+
         # Debt Group 2 Ratio
         result_df["debt_group2_ratio"] = self.safe_divide(
             numerator=result_df.get("BNOT_4_2", 0),
             denominator=result_df.get("BNOT_4", 0),
             result_nan=True
-        ) * 100
-        
+        )
+
         # NPL Ratio
         npl_num = (
-            result_df.get("BNOT_4_3", 0) + 
-            result_df.get("BNOT_4_4", 0) + 
+            result_df.get("BNOT_4_3", 0) +
+            result_df.get("BNOT_4_4", 0) +
             result_df.get("BNOT_4_5", 0)
         )
         result_df["npl_ratio"] = self.safe_divide(
             numerator=npl_num,
             denominator=result_df.get("BNOT_4", 0),
             result_nan=True
-        ) * 100
-        
+        )
+
         # Group 2 to Total Ratio
         grp_2_5 = (
-            result_df.get("BNOT_4_2", 0) + 
-            result_df.get("BNOT_4_3", 0) + 
-            result_df.get("BNOT_4_4", 0) + 
+            result_df.get("BNOT_4_2", 0) +
+            result_df.get("BNOT_4_3", 0) +
+            result_df.get("BNOT_4_4", 0) +
             result_df.get("BNOT_4_5", 0)
         )
         result_df["group2_to_total_ratio"] = self.safe_divide(
             numerator=grp_2_5,
             denominator=result_df.get("BNOT_4", 0),
             result_nan=True
-        ) * 100
-        
+        )
+
         # Loan Loss Coverage Ratio (LLCR)
         result_df["llcr"] = self.safe_divide(
             numerator=result_df.get("BBS_169", 0),
             denominator=npl_num,
             result_nan=True
-        ) * 100
+        )
         
         return result_df
     
@@ -443,14 +447,14 @@ class BankFinancialCalculator(BaseFinancialCalculator):
             result_nan=True
         )
         
-        # EPS (TTM)
+        # EPS (TTM) - stored in VND per share
         result_df["bis22a_ttm"] = (
             result_df.groupby("SECURITY_CODE")["BIS_22A"]
-            .transform(lambda s: s.rolling(window=4, min_periods=1).sum()) / 1e9
+            .transform(lambda s: s.rolling(window=4, min_periods=1).sum())
         )
-        
+
         result_df["eps_ttm"] = self.safe_divide(
-            numerator=result_df["bis22a_ttm"] * 1e9,
+            numerator=result_df["bis22a_ttm"],
             denominator=shares,
             result_nan=True
         )
@@ -475,15 +479,15 @@ class BankFinancialCalculator(BaseFinancialCalculator):
         # Fill forward equity for averaging
         df["BBS_500_ffill"] = df.groupby("SECURITY_CODE")["BBS_500"].ffill()
         
-        # Calculate averages
+        # Calculate averages (stored in VND)
         df["equity_avg_2q"] = (
             df.groupby("SECURITY_CODE")["BBS_500_ffill"]
-            .transform(lambda s: s.rolling(window=2, min_periods=1).mean()) / 1e9
+            .transform(lambda s: s.rolling(window=2, min_periods=1).mean())
         )
-        
+
         df["assets_avg_2q"] = (
             df.groupby("SECURITY_CODE")["BBS_100"]
-            .transform(lambda s: s.rolling(window=2, min_periods=2).mean()) / 1e9
+            .transform(lambda s: s.rolling(window=2, min_periods=2).mean())
         )
         
         df["avg_iea_2q"] = (

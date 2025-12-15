@@ -1,0 +1,67 @@
+{
+  "fa_weights": {
+    "growth": 0.3,
+    "profitability": 0.3,
+    "efficiency": 0.2,
+    "financial_health": 0.2
+  },
+  "ta_weights": {
+    "valuation": 0.4,
+    "momentum": 0.4,
+    "breadth": 0.2
+  },
+  "composite_weights": {
+    "fundamental": 0.6,
+    "technical": 0.4
+  },
+  "sector_overrides": {
+    "Banking": {
+      "composite_weights": {
+        "fundamental": 0.7,
+        "technical": 0.3
+      },
+      "fa_weights": {
+        "growth": 0.25,
+        "profitability": 0.35,
+        "efficiency": 0.15,
+        "financial_health": 0.25
+      }
+    },
+    "Technology": {
+      "composite_weights": {
+        "fundamental": 0.5,
+        "technical": 0.5
+      },
+      "fa_weights": {
+        "growth": 0.5,
+        "profitability": 0.3,
+        "efficiency": 0.1,
+        "financial_health": 0.1
+      }
+    },
+    "Real Estate": {
+      "ta_weights": {
+        "valuation": 0.5,
+        "momentum": 0.3,
+        "breadth": 0.2
+      }
+    }
+  },
+  "display": {
+    "default_timeframe": "latest",
+    "chart_height": 500,
+    "chart_colors": [
+      "#1f77b4",
+      "#ff7f0e",
+      "#2ca02c",
+      "#d62728"
+    ],
+    "show_data_labels": true,
+    "animation_duration": 1000
+  },
+  "analysis": {
+    "top_performers_count": 5,
+    "risk_threshold": 50,
+    "min_companies_per_sector": 3
+  }
+}

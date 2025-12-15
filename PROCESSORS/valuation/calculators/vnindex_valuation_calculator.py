@@ -33,31 +33,37 @@ except ImportError:
 # Import Metric Loader
 from PROCESSORS.valuation.formulas.metric_mapper import MetricRegistryLoader
 
+# Import SectorRegistry for sector processing
+from config.registries import SectorRegistry
+
 warnings.filterwarnings('ignore')
 logger = logging.getLogger(__name__)
 
 class VNIndexValuationCalculator:
     def __init__(self):
         self.base_path = PROJECT_ROOT
-        
+
         # Paths
         self.METADATA_PATH = self.base_path / 'config' / 'metadata' / 'ticker_details.json' # Updated to JSON
         self.ohlcv_path = self.base_path / 'DATA' / 'raw' / 'ohlcv' / 'OHLCV_mktcap.parquet'
         self.output_path = self.base_path / 'DATA' / 'processed' / 'valuation' / 'vnindex'
-        
+
         self.date_formatter = DateFormatter()
         self.mapper = MetricRegistryLoader()
-        
+
+        # Sector Registry
+        self.sector_reg = SectorRegistry()
+
         # Caches
         self.fundamental_data = None
         self.ohlcv_data = None
         self.metadata = None
         self.symbol_entity_types = {}
-        
+
         # Processed State
-        self.financial_data = None 
-        self.daily_market_data = None 
-        
+        self.financial_data = None
+        self.daily_market_data = None
+
         # Initialize Metadata
         self.metadata = self.load_metadata() 
 
@@ -399,15 +405,118 @@ class VNIndexValuationCalculator:
             final_df = final_df.sort_values(['scope', 'date'])
         
         return final_df
-        
-        # 4. Combine
-        final_df = pd.concat([pe_agg, pb_agg], axis=1)
-        final_df = final_df.reset_index() # make date a column
-            
-        # Formatting
-        final_df = final_df[['date', 'index_pe', 'index_pb', 'total_mc_pe', 'total_earnings', 'total_equity']]
-        
-        logger.info(f"✅ Calculation Complete. Records: {len(final_df)}")
+
+    def process_all_scopes_with_sectors(
+        self,
+        exclude_list: list = None,
+        include_sectors: bool = True,
+        start_date: datetime = None,
+        end_date: datetime = None
+    ) -> pd.DataFrame:
+        """
+        Run valuation for VNINDEX, VNINDEX_EXCLUDE, BSC_INDEX, and ALL SECTORS.
+
+        This is the unified method that combines market-wide and sector-level valuations.
+
+        Args:
+            exclude_list: Symbols to exclude from VNINDEX_EXCLUDE (default: VIC, VHM, VRE, MSN)
+            include_sectors: If True, calculate PE/PB for all 19 sectors
+            start_date: Start date for incremental update
+            end_date: End date for incremental update
+
+        Returns:
+            Combined DataFrame with columns:
+            [date, scope, scope_type, pe_ttm, pb, pe_fwd_2025, pe_fwd_2026,
+             total_mc_pe, total_mc_pb, total_earnings, total_equity]
+
+            scope_type values:
+            - 'MARKET' for VNINDEX, VNINDEX_EXCLUDE, BSC_INDEX
+            - 'SECTOR' for sector scopes
+
+        Examples:
+            date       | scope              | scope_type | pe_ttm | pb
+            -----------|--------------------|-----------:|-------:|----
+            2024-12-15 | VNINDEX            | MARKET     | 15.2   | 2.1
+            2024-12-15 | VNINDEX_EXCLUDE    | MARKET     | 17.3   | 2.3
+            2024-12-15 | BSC_INDEX          | MARKET     | 14.5   | 2.0
+            2024-12-15 | SECTOR:Banking     | SECTOR     | 8.2    | 1.3
+            2024-12-15 | SECTOR:RealEstate  | SECTOR     | 22.1   | 2.8
+        """
+        logger.info("=" * 80)
+        logger.info("🚀 PROCESSING ALL SCOPES (MARKET + SECTORS)")
+        logger.info("=" * 80)
+
+        results = []
+
+        # STEP 1: Process market scopes (VNINDEX, VNINDEX_EXCLUDE, BSC_INDEX)
+        logger.info("\n[1/2] Processing market scopes...")
+        market_df = self.process_all_scopes(
+            exclude_list=exclude_list,
+            start_date=start_date,
+            end_date=end_date
+        )
+
+        if not market_df.empty:
+            market_df['scope_type'] = 'MARKET'
+            results.append(market_df)
+            logger.info(f"  ✅ Market scopes: {market_df['scope'].nunique()} scopes, {len(market_df)} records")
+
+        # STEP 2: Process all sectors
+        if include_sectors:
+            logger.info("\n[2/2] Processing sector scopes...")
+            sectors = self.sector_reg.get_all_sectors()
+            logger.info(f"  Found {len(sectors)} sectors")
+
+            forecast_df = self.load_bsc_forecast_data()
+            sector_results = []
+
+            for i, sector in enumerate(sectors, 1):
+                # Get tickers for this sector
+                tickers = self.sector_reg.get_tickers_by_sector(sector)
+                if not tickers:
+                    logger.warning(f"  ⚠️  Sector {sector} has no tickers")
+                    continue
+
+                logger.info(f"  ({i}/{len(sectors)}) Processing sector: {sector} ({len(tickers)} tickers)")
+
+                # Calculate valuation for this sector
+                sector_df = self.calculate_scope_valuation(
+                    scope_name=f"SECTOR:{sector}",
+                    subset_symbols=tickers,
+                    bsc_forecast_df=forecast_df,
+                    start_date=start_date,
+                    end_date=end_date
+                )
+
+                if not sector_df.empty:
+                    sector_results.append(sector_df)
+
+            if sector_results:
+                sector_combined = pd.concat(sector_results, ignore_index=True)
+                sector_combined['scope_type'] = 'SECTOR'
+                results.append(sector_combined)
+                logger.info(f"  ✅ Sector scopes: {len(sectors)} sectors, {len(sector_combined)} records")
+        else:
+            logger.info("\n[2/2] Skipping sector processing (include_sectors=False)")
+
+        # STEP 3: Combine all results
+        if not results:
+            logger.warning("⚠️  No results generated!")
+            return pd.DataFrame()
+
+        final_df = pd.concat(results, ignore_index=True)
+        final_df = final_df.sort_values(['scope_type', 'scope', 'date'])
+
+        logger.info("\n" + "=" * 80)
+        logger.info("✅ PROCESSING COMPLETE")
+        logger.info("=" * 80)
+        logger.info(f"\nTotal records: {len(final_df)}")
+        logger.info(f"Market scopes: {len(final_df[final_df['scope_type']=='MARKET'])}")
+        logger.info(f"Sector scopes: {len(final_df[final_df['scope_type']=='SECTOR'])}")
+        logger.info(f"Date range: {final_df['date'].min()} to {final_df['date'].max()}")
+        logger.info(f"Unique scopes: {final_df['scope'].nunique()}")
+        logger.info("=" * 80)
+
         return final_df
 
     def save_results(self, df: pd.DataFrame, filename: str):
