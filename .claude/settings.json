@@ -2,55 +2,55 @@
   "plugins": [
     {
       "source": "local",
-      "path": "./plugins/frontend-design"
+      "path": "./.claude/plugins/frontend-design"
     },
     {
       "source": "local",
-      "path": "./plugins/feature-dev"
+      "path": "./.claude/plugins/feature-dev"
     },
     {
       "source": "local",
-      "path": "./plugins/commit-commands"
+      "path": "./.claude/plugins/commit-commands"
     },
     {
       "source": "local",
-      "path": "./plugins/code-review"
+      "path": "./.claude/plugins/code-review"
     },
     {
       "source": "local",
-      "path": "./plugins/agent-sdk-dev"
+      "path": "./.claude/plugins/agent-sdk-dev"
     },
     {
       "source": "local",
-      "path": "./plugins/claude-opus-4-5-migration"
+      "path": "./.claude/plugins/claude-opus-4-5-migration"
     },
     {
       "source": "local",
-      "path": "./plugins/explanatory-output-style"
+      "path": "./.claude/plugins/explanatory-output-style"
     },
     {
       "source": "local",
-      "path": "./plugins/hookify"
+      "path": "./.claude/plugins/hookify"
     },
     {
       "source": "local",
-      "path": "./plugins/plugin-dev"
+      "path": "./.claude/plugins/plugin-dev"
     },
     {
       "source": "local",
-      "path": "./plugins/pr-review-toolkit"
+      "path": "./.claude/plugins/pr-review-toolkit"
     },
     {
       "source": "local",
-      "path": "./plugins/ralph-wiggum"
+      "path": "./.claude/plugins/ralph-wiggum"
     },
     {
       "source": "local",
-      "path": "./plugins/security-guidance"
+      "path": "./.claude/plugins/security-guidance"
     },
     {
       "source": "local",
-      "path": "./plugins/learning-output-style"
+      "path": "./.claude/plugins/learning-output-style"
     }
   ]
 }
