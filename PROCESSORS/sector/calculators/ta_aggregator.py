@@ -155,12 +155,17 @@ class TAAggregator(BaseAggregator):
         # Add metadata
         sector_val_df['calculation_date'] = pd.Timestamp.now()
 
+        # Add placeholder percentile columns (will be calculated with historical data)
+        sector_val_df['pe_percentile_5y'] = np.nan
+        sector_val_df['pb_percentile_5y'] = np.nan
+
         # Select final columns
         final_cols = [
             'sector_code', 'date', 'sector_pe', 'sector_pb', 'sector_market_cap',
-            'ticker_count', 'avg_price', 'volume',
+            'ticker_count', 'avg_price', 'total_volume',  # Changed from 'volume' to 'total_volume'
             'total_earnings_ttm', 'total_equity',
             'pe_fwd_2025', 'pe_fwd_2026',  # Include forward PE if available
+            'pe_percentile_5y', 'pb_percentile_5y',  # Percentile columns (placeholder for now)
             'calculation_date'
         ]
 
@@ -214,7 +219,7 @@ class TAAggregator(BaseAggregator):
         agg_metrics = ohlcv_df.groupby(['sector_code', 'date']).agg(
             ticker_count=('symbol', 'nunique'),
             avg_price=('close', 'mean'),
-            volume=('volume', 'sum')
+            total_volume=('volume', 'sum')  # Renamed to total_volume to match scorer expectation
         ).reset_index()
 
         # Merge with sector valuation data
@@ -227,7 +232,7 @@ class TAAggregator(BaseAggregator):
         # Fill missing values
         sector_val_df['ticker_count'] = sector_val_df['ticker_count'].fillna(0).astype(int)
         sector_val_df['avg_price'] = sector_val_df['avg_price'].fillna(0)
-        sector_val_df['volume'] = sector_val_df['volume'].fillna(0)
+        sector_val_df['total_volume'] = sector_val_df['total_volume'].fillna(0)
 
         return sector_val_df
 

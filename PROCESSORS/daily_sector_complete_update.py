@@ -121,8 +121,6 @@ class DailySectorCompleteUpdater:
         # Determine date range
         if target_date is None:
             end_date = self.get_latest_trading_date().strftime('%Y-%m-%d')
-            # For TA (daily), just get latest date
-            # For FA (quarterly), we might want more range or skip
             start_date = end_date
         else:
             start_date = target_date
@@ -130,19 +128,79 @@ class DailySectorCompleteUpdater:
 
         logger.info(f"\nTarget date: {end_date}")
 
-        # Run pipeline
-        if skip_fa:
-            logger.info("Skipping FA aggregation (--skip-fa flag)")
-            # TODO: Implement TA-only update
-            results = self.sector_processor.run_full_pipeline(
-                start_date=start_date,
-                end_date=end_date
-            )
+        # For daily updates, skip FA (quarterly data only)
+        # FA should only run when new quarterly reports are available
+        logger.info("\n⚠️  FA aggregation skipped for daily updates (quarterly data only)")
+        logger.info("   Run full FA update manually when new quarterly reports available")
+
+        # Run TA aggregation only
+        logger.info("\n" + "=" * 80)
+        logger.info("[STEP 1/3] TECHNICAL/VALUATION ANALYSIS AGGREGATION")
+        logger.info("=" * 80)
+
+        ta_metrics = self.sector_processor.ta_aggregator.aggregate_sector_valuation_v2(
+            start_date=start_date,
+            end_date=end_date
+        )
+
+        if ta_metrics.empty:
+            raise ValueError("TA aggregation returned no data!")
+
+        logger.info(f"\n✅ TA Aggregation complete: {len(ta_metrics)} records")
+
+        # Load existing FA metrics for scoring
+        fa_path = self.sector_output / "sector_fundamental_metrics.parquet"
+        if fa_path.exists():
+            logger.info("\n" + "=" * 80)
+            logger.info("[STEP 2/3] LOADING EXISTING FA METRICS")
+            logger.info("=" * 80)
+            fa_metrics = pd.read_parquet(fa_path)
+            logger.info(f"✅ Loaded {len(fa_metrics)} FA records from file")
         else:
-            results = self.sector_processor.run_full_pipeline(
-                start_date=start_date,
-                end_date=end_date
+            logger.warning("⚠️  No existing FA metrics found, skipping FA scoring")
+            fa_metrics = pd.DataFrame()
+
+        # Run scoring and signals
+        results = {
+            'fa_metrics': fa_metrics,
+            'ta_metrics': ta_metrics
+        }
+
+        if not fa_metrics.empty:
+            logger.info("\n" + "=" * 80)
+            logger.info("[STEP 3/3] SCORING & SIGNAL GENERATION")
+            logger.info("=" * 80)
+
+            # FA scoring
+            fa_scores = self.sector_processor.fa_scorer.score_sector_fundamentals(fa_metrics)
+            results['fa_scores'] = fa_scores
+
+            # TA scoring
+            ta_scores = self.sector_processor.ta_scorer.score_sector_valuation(ta_metrics)
+            results['ta_scores'] = ta_scores
+
+            # Signal generation
+            combined_scores = self.sector_processor.signal_generator.generate_signals(
+                fa_scored_df=fa_scores,
+                ta_scored_df=ta_scores
             )
+            results['combined_scores'] = combined_scores
+
+            # Save TA metrics and combined scores
+            ta_output = self.sector_output / "sector_valuation_metrics.parquet"
+            ta_metrics.to_parquet(ta_output, index=False)
+            logger.info(f"\n✅ Saved TA metrics: {ta_output}")
+
+            scores_output = self.sector_output / "sector_combined_scores.parquet"
+            combined_scores.to_parquet(scores_output, index=False)
+            logger.info(f"✅ Saved combined scores: {scores_output}")
+        else:
+            logger.warning("⚠️  Skipping scoring due to missing FA metrics")
+
+            # Save TA metrics only
+            ta_output = self.sector_output / "sector_valuation_metrics.parquet"
+            ta_metrics.to_parquet(ta_output, index=False)
+            logger.info(f"\n✅ Saved TA metrics: {ta_output}")
 
         return results
 
@@ -240,9 +298,10 @@ class DailySectorCompleteUpdater:
                 print(f"   TA Metrics:       {len(ta)} records, {ta['sector_code'].nunique()} sectors")
                 print(f"                     Date range: {ta['date'].min()} to {ta['date'].max()}")
 
-            if 'combined_scores' in sector_results:
+            if 'combined_scores' in sector_results and not sector_results['combined_scores'].empty:
                 scores = sector_results['combined_scores']
-                print(f"   Combined Scores:  {len(scores)} records, {scores['sector_code'].nunique()} sectors")
+                sector_col = 'sector_code' if 'sector_code' in scores.columns else 'sector'
+                print(f"   Combined Scores:  {len(scores)} records, {scores[sector_col].nunique()} sectors")
 
                 # Signal distribution
                 if 'signal' in scores.columns:
