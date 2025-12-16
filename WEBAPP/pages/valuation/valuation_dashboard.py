@@ -171,15 +171,15 @@ with tab_sector:
 
             # Add current value marker
             if data['current'] and not pd.isna(data['current']):
-                # Color based on status
+                # Color based on status - Financial Editorial Palette (muted, not neon)
                 status_colors = {
-                    "Very Cheap": "#00D4AA",
-                    "Cheap": "#7FFFD4",
-                    "Fair": "#FFD666",
-                    "Expensive": "#FF9F43",
-                    "Very Expensive": "#FF6B6B"
+                    "Very Cheap": "#3A6264",   # Teal Dark
+                    "Cheap": "#4A7C7E",        # Muted Teal
+                    "Fair": "#D4AF37",         # Champagne Gold
+                    "Expensive": "#B45454",    # Muted Red
+                    "Very Expensive": "#8B3A3A" # Dark Red
                 }
-                marker_color = status_colors.get(data['status'], '#A95C68')
+                marker_color = status_colors.get(data['status'], '#78716C')
 
                 fig_candle.add_trace(go.Scatter(
                     x=[data['symbol']],
@@ -266,47 +266,45 @@ with tab_sector:
             expensive_count = len([d for d in candle_data if d['status'] in ['Expensive', 'Very Expensive']])
             total_count = len(candle_data)
 
-            # Premium table CSS + HTML
+            # Premium table CSS + HTML - Financial Editorial Design
             table_css = """
             <style>
-            @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap');
 
             .valuation-table-container {
-                background: linear-gradient(180deg, rgba(10, 15, 28, 0.95) 0%, rgba(16, 24, 40, 0.98) 100%);
-                border: 1px solid rgba(41, 92, 169, 0.3);
-                border-radius: 16px;
+                background: linear-gradient(180deg, #1A1A1A 0%, #242424 100%);
+                border: 1px solid rgba(212, 175, 55, 0.2);
+                border-radius: 8px;
                 padding: 0;
                 overflow: hidden;
-                box-shadow:
-                    0 4px 24px rgba(0, 0, 0, 0.4),
-                    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             }
 
             .table-header-section {
-                background: linear-gradient(135deg, rgba(41, 92, 169, 0.15) 0%, rgba(0, 155, 135, 0.08) 100%);
-                padding: 20px 24px;
-                border-bottom: 1px solid rgba(41, 92, 169, 0.2);
+                background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(74, 124, 126, 0.05) 100%);
+                padding: 24px 28px;
+                border-bottom: 1px solid rgba(212, 175, 55, 0.15);
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
             }
 
             .table-title {
-                font-family: 'DM Sans', sans-serif;
-                font-size: 18px;
+                font-family: 'Playfair Display', Georgia, serif;
+                font-size: 20px;
                 font-weight: 600;
-                color: #F0F4F8;
-                letter-spacing: -0.02em;
+                color: #F5F5F4;
+                letter-spacing: -0.01em;
                 margin: 0;
             }
 
             .table-subtitle {
                 font-family: 'JetBrains Mono', monospace;
                 font-size: 11px;
-                color: #718096;
+                color: #78716C;
                 text-transform: uppercase;
                 letter-spacing: 0.1em;
-                margin-top: 4px;
+                margin-top: 6px;
             }
 
             .summary-badges {
@@ -318,29 +316,29 @@ with tab_sector:
                 display: flex;
                 align-items: center;
                 gap: 6px;
-                padding: 6px 12px;
-                border-radius: 20px;
+                padding: 6px 14px;
+                border-radius: 4px;
                 font-family: 'JetBrains Mono', monospace;
-                font-size: 12px;
+                font-size: 11px;
                 font-weight: 500;
             }
 
             .badge-cheap {
-                background: rgba(0, 212, 170, 0.15);
-                color: #00D4AA;
-                border: 1px solid rgba(0, 212, 170, 0.3);
+                background: rgba(74, 124, 126, 0.15);
+                color: #4A7C7E;
+                border: 1px solid rgba(74, 124, 126, 0.3);
             }
 
             .badge-fair {
-                background: rgba(255, 193, 50, 0.15);
-                color: #FFC132;
-                border: 1px solid rgba(255, 193, 50, 0.3);
+                background: rgba(212, 175, 55, 0.12);
+                color: #D4AF37;
+                border: 1px solid rgba(212, 175, 55, 0.3);
             }
 
             .badge-expensive {
-                background: rgba(239, 68, 68, 0.15);
-                color: #EF4444;
-                border: 1px solid rgba(239, 68, 68, 0.3);
+                background: rgba(180, 84, 84, 0.12);
+                color: #B45454;
+                border: 1px solid rgba(180, 84, 84, 0.3);
             }
 
             .valuation-table {
@@ -350,30 +348,30 @@ with tab_sector:
             }
 
             .valuation-table thead tr {
-                background: rgba(41, 92, 169, 0.08);
+                background: rgba(74, 124, 126, 0.06);
             }
 
             .valuation-table th {
                 font-family: 'JetBrains Mono', monospace;
                 font-size: 10px;
                 font-weight: 600;
-                color: #718096;
+                color: #78716C;
                 text-transform: uppercase;
                 letter-spacing: 0.12em;
                 padding: 14px 16px;
                 text-align: left;
-                border-bottom: 1px solid rgba(41, 92, 169, 0.15);
+                border-bottom: 1px solid rgba(212, 175, 55, 0.1);
             }
 
-            .valuation-table th:first-child { padding-left: 24px; }
-            .valuation-table th:last-child { padding-right: 24px; text-align: right; }
+            .valuation-table th:first-child { padding-left: 28px; }
+            .valuation-table th:last-child { padding-right: 28px; text-align: right; }
 
             .valuation-table tbody tr {
                 transition: all 0.2s ease;
             }
 
             .valuation-table tbody tr:hover {
-                background: rgba(41, 92, 169, 0.08);
+                background: rgba(212, 175, 55, 0.05);
             }
 
             .valuation-table tbody tr:nth-child(even) {
@@ -383,24 +381,25 @@ with tab_sector:
             .valuation-table td {
                 font-family: 'JetBrains Mono', monospace;
                 font-size: 13px;
-                color: #E2E8F0;
-                padding: 12px 16px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+                color: #E7E5E4;
+                padding: 14px 16px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.02);
                 vertical-align: middle;
             }
 
-            .valuation-table td:first-child { padding-left: 24px; }
-            .valuation-table td:last-child { padding-right: 24px; }
+            .valuation-table td:first-child { padding-left: 28px; }
+            .valuation-table td:last-child { padding-right: 28px; }
 
             .ticker-cell {
+                font-family: 'Playfair Display', Georgia, serif;
                 font-weight: 600;
-                color: #FFFFFF;
+                color: #FAFAF9;
                 font-size: 14px;
             }
 
             .value-cell {
                 font-weight: 500;
-                color: #A0AEC0;
+                color: #A8A29E;
             }
 
             .percentile-cell {
@@ -411,7 +410,7 @@ with tab_sector:
 
             .percentile-bar-bg {
                 flex: 1;
-                height: 6px;
+                height: 5px;
                 background: rgba(255, 255, 255, 0.06);
                 border-radius: 3px;
                 overflow: hidden;
@@ -424,9 +423,10 @@ with tab_sector:
                 transition: width 0.5s ease;
             }
 
-            .pct-cheap { background: linear-gradient(90deg, #00D4AA, #00B894); }
-            .pct-fair { background: linear-gradient(90deg, #FFC132, #FFD666); }
-            .pct-expensive { background: linear-gradient(90deg, #FF6B6B, #EF4444); }
+            /* Financial Editorial colors - muted, sophisticated */
+            .pct-cheap { background: linear-gradient(90deg, #4A7C7E, #5F9A9C); }
+            .pct-fair { background: linear-gradient(90deg, #D4AF37, #E5C158); }
+            .pct-expensive { background: linear-gradient(90deg, #B45454, #8B3A3A); }
 
             .percentile-value {
                 min-width: 40px;
@@ -439,51 +439,51 @@ with tab_sector:
                 align-items: center;
                 gap: 6px;
                 padding: 5px 12px;
-                border-radius: 6px;
-                font-size: 11px;
+                border-radius: 4px;
+                font-size: 10px;
                 font-weight: 600;
                 text-transform: uppercase;
-                letter-spacing: 0.05em;
+                letter-spacing: 0.08em;
                 float: right;
             }
 
             .status-very-cheap {
-                background: rgba(0, 212, 170, 0.15);
-                color: #00D4AA;
-                border: 1px solid rgba(0, 212, 170, 0.25);
+                background: rgba(58, 98, 100, 0.2);
+                color: #3A6264;
+                border: 1px solid rgba(58, 98, 100, 0.35);
             }
 
             .status-cheap {
-                background: rgba(127, 255, 212, 0.12);
-                color: #7FFFD4;
-                border: 1px solid rgba(127, 255, 212, 0.2);
+                background: rgba(74, 124, 126, 0.15);
+                color: #4A7C7E;
+                border: 1px solid rgba(74, 124, 126, 0.3);
             }
 
             .status-fair {
-                background: rgba(255, 193, 50, 0.12);
-                color: #FFC132;
-                border: 1px solid rgba(255, 193, 50, 0.2);
+                background: rgba(212, 175, 55, 0.12);
+                color: #D4AF37;
+                border: 1px solid rgba(212, 175, 55, 0.25);
             }
 
             .status-expensive {
-                background: rgba(255, 159, 67, 0.12);
-                color: #FF9F43;
-                border: 1px solid rgba(255, 159, 67, 0.2);
+                background: rgba(180, 84, 84, 0.12);
+                color: #B45454;
+                border: 1px solid rgba(180, 84, 84, 0.25);
             }
 
             .status-very-expensive {
-                background: rgba(239, 68, 68, 0.15);
-                color: #EF4444;
-                border: 1px solid rgba(239, 68, 68, 0.25);
+                background: rgba(139, 58, 58, 0.15);
+                color: #8B3A3A;
+                border: 1px solid rgba(139, 58, 58, 0.3);
             }
 
             .table-footer {
-                padding: 16px 24px;
-                background: rgba(0, 0, 0, 0.2);
-                border-top: 1px solid rgba(255, 255, 255, 0.03);
+                padding: 18px 28px;
+                background: rgba(0, 0, 0, 0.15);
+                border-top: 1px solid rgba(212, 175, 55, 0.08);
                 font-family: 'JetBrains Mono', monospace;
-                font-size: 11px;
-                color: #718096;
+                font-size: 10px;
+                color: #78716C;
                 display: flex;
                 justify-content: space-between;
             }
@@ -630,19 +630,20 @@ with tab_individual:
         std_val = ticker_stats['std']
         current_val = ticker_stats['current']
 
-        # High-contrast colors for dark background
-        CHART_GOLD = '#FFD700'      # Bright gold - very visible
-        CHART_CYAN = '#00FFFF'      # Cyan - stands out on dark
-        CHART_ORANGE = '#FF8C00'    # Orange - high contrast
-        BRAND_GOLD = '#FFC132'
+        # Financial Editorial colors - muted, sophisticated (not neon)
+        MUTED_TEAL = '#4A7C7E'       # Primary metric color
+        CHAMPAGNE_GOLD = '#D4AF37'  # Accent/highlight color
+        MUTED_BLUE = '#5B7FA3'      # Alternative metric
+        MUTED_WARM = '#B8962E'      # Gold dark variant
 
-        # Color based on metric - using high-contrast colors
+        # Color based on metric - using editorial palette
         metric_colors = {
-            'PE': CHART_GOLD,       # Gold for PE
-            'PB': CHART_CYAN,       # Cyan for PB
-            'EV_EBITDA': CHART_ORANGE # Orange for EV/EBITDA
+            'PE': MUTED_TEAL,        # Teal for PE
+            'PB': MUTED_BLUE,        # Blue for PB
+            'PS': MUTED_WARM,        # Warm gold for PS
+            'EV_EBITDA': '#7A9AB8'   # Light blue for EV/EBITDA
         }
-        line_color = metric_colors.get(selected_metric, CHART_GOLD)
+        line_color = metric_colors.get(selected_metric, MUTED_TEAL)
 
         # Check for data gaps/NaN - warn user if significant
         nan_count = ticker_data[value_col].isna().sum()
@@ -663,7 +664,7 @@ with tab_individual:
         minus_1sd = mean_val - std_val
         minus_2sd = max(0, mean_val - 2 * std_val)  # Ensure not negative
 
-        # Add ±2 SD band (outer, lighter)
+        # Add ±2 SD band (outer, extremely subtle - editorial lithograph style)
         fig.add_trace(go.Scatter(
             x=ticker_data['date'],
             y=[plus_2sd] * len(ticker_data),
@@ -678,13 +679,13 @@ with tab_individual:
             mode='lines',
             line=dict(width=0),
             fill='tonexty',
-            fillcolor='rgba(255, 140, 0, 0.08)',  # Orange very light
+            fillcolor='rgba(74, 124, 126, 0.05)',  # Teal extremely subtle
             name='±2 SD',
             showlegend=False,
             hoverinfo='skip'
         ))
 
-        # Add ±1 SD band (inner, darker)
+        # Add ±1 SD band (inner, subtle - like hatched pattern effect)
         fig.add_trace(go.Scatter(
             x=ticker_data['date'],
             y=[plus_1sd] * len(ticker_data),
@@ -699,7 +700,7 @@ with tab_individual:
             mode='lines',
             line=dict(width=0),
             fill='tonexty',
-            fillcolor='rgba(255, 215, 0, 0.12)',  # Gold light
+            fillcolor='rgba(212, 175, 55, 0.06)',  # Champagne Gold very subtle
             name='±1 SD',
             showlegend=False,
             hoverinfo='skip'
@@ -715,98 +716,100 @@ with tab_individual:
             hovertemplate=f'<b>{selected_metric_display}</b>: %{{y:.2f}}x<br>Date: %{{x|%Y-%m-%d}}<extra></extra>'
         ))
 
-        # Mean line (solid black)
+        # Mean line - Champagne Gold (premium accent)
         fig.add_trace(go.Scatter(
             x=[ticker_data['date'].min(), ticker_data['date'].max()],
             y=[mean_val, mean_val],
             mode='lines',
             name=f'Mean ({mean_val:.2f}x)',
-            line=dict(color='#FFFFFF', width=2, dash='solid')
+            line=dict(color=CHAMPAGNE_GOLD, width=2, dash='solid')
         ))
 
-        # +1 SD line
+        # +1 SD line - Muted red (not neon)
         fig.add_trace(go.Scatter(
             x=[ticker_data['date'].min(), ticker_data['date'].max()],
             y=[plus_1sd, plus_1sd],
             mode='lines',
             name=f'+1 SD ({plus_1sd:.2f}x)',
-            line=dict(color='#E53E3E', width=1.5, dash='dash')
+            line=dict(color='#B45454', width=1.5, dash='dash')
         ))
 
-        # -1 SD line
+        # -1 SD line - Muted teal
         fig.add_trace(go.Scatter(
             x=[ticker_data['date'].min(), ticker_data['date'].max()],
             y=[minus_1sd, minus_1sd],
             mode='lines',
             name=f'-1 SD ({minus_1sd:.2f}x)',
-            line=dict(color='#10B981', width=1.5, dash='dash')
+            line=dict(color='#4A7C7E', width=1.5, dash='dash')
         ))
 
-        # +2 SD line
+        # +2 SD line - Lighter muted red
         fig.add_trace(go.Scatter(
             x=[ticker_data['date'].min(), ticker_data['date'].max()],
             y=[plus_2sd, plus_2sd],
             mode='lines',
             name=f'+2 SD ({plus_2sd:.2f}x)',
-            line=dict(color='#FF6B6B', width=1, dash='dot')
+            line=dict(color='#8B3A3A', width=1, dash='dot')
         ))
 
-        # -2 SD line
+        # -2 SD line - Teal dark
         fig.add_trace(go.Scatter(
             x=[ticker_data['date'].min(), ticker_data['date'].max()],
             y=[minus_2sd, minus_2sd],
             mode='lines',
             name=f'-2 SD ({minus_2sd:.2f}x)',
-            line=dict(color='#34D399', width=1, dash='dot')
+            line=dict(color='#3A6264', width=1, dash='dot')
         ))
 
-        # Current value marker - prominent gold marker
+        # Current value marker - Champagne Gold (premium accent)
         fig.add_trace(go.Scatter(
             x=[ticker_data['date'].max()],
             y=[current_val],
             mode='markers+text',
-            marker=dict(size=14, color=BRAND_GOLD, symbol='circle', line=dict(width=2, color='#FFFFFF')),
+            marker=dict(size=12, color=CHAMPAGNE_GOLD, symbol='circle', line=dict(width=2, color='#FAFAF9')),
             text=[f'{current_val:.2f}x'],
             textposition='top right',
-            textfont=dict(size=12, color=BRAND_GOLD, family='IBM Plex Mono'),
+            textfont=dict(size=11, color=CHAMPAGNE_GOLD, family='JetBrains Mono'),
             name='Current',
             showlegend=False,
             hovertemplate=f'<b>Current</b>: {current_val:.2f}x<extra></extra>'
         ))
 
-        # Layout for large chart - 600px height for prominence
+        # Layout for large chart - Financial Editorial style
         fig.update_layout(
             height=600,
             autosize=True,
-            margin=dict(l=60, r=30, t=60, b=60),
+            margin=dict(l=60, r=40, t=60, b=60),
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(family='IBM Plex Mono, monospace', size=11, color='#A0AEC0'),
+            font=dict(family='JetBrains Mono, monospace', size=11, color='#A8A29E'),
             hovermode='x unified',
             hoverlabel=dict(
-                bgcolor='#101820',
-                bordercolor='#009B87',
-                font=dict(family='IBM Plex Mono', size=12, color='#F0F4F8')
+                bgcolor='#242424',
+                bordercolor=CHAMPAGNE_GOLD,
+                font=dict(family='JetBrains Mono', size=12, color='#F5F5F4')
             ),
             xaxis=dict(
                 type='date',
                 tickformat='%b %Y',  # Format: Jan 2024
                 dtick='M6',  # Tick every 6 months
                 tickangle=-45,
-                gridcolor='rgba(160, 174, 192, 0.08)',
-                zerolinecolor='rgba(160, 174, 192, 0.15)',
-                tickfont=dict(size=9, color='#A0AEC0'),
-                linecolor='rgba(160, 174, 192, 0.1)',
-                title=dict(text='', font=dict(size=11, color='#718096')),
+                gridcolor='rgba(168, 162, 158, 0.05)',  # Extremely faint dotted grid
+                griddash='dot',
+                zerolinecolor='rgba(168, 162, 158, 0.08)',
+                tickfont=dict(size=9, color='#78716C', family='JetBrains Mono'),
+                linecolor='rgba(168, 162, 158, 0.08)',
+                title=dict(text='', font=dict(size=11, color='#78716C')),
                 showgrid=True,
                 rangeslider=dict(visible=False),
             ),
             yaxis=dict(
-                title=dict(text=f'{selected_metric_display} Ratio', font=dict(size=12, color='#A0AEC0')),
-                gridcolor='rgba(160, 174, 192, 0.08)',
-                zerolinecolor='rgba(160, 174, 192, 0.15)',
-                tickfont=dict(size=10, color='#A0AEC0'),
-                linecolor='rgba(160, 174, 192, 0.1)',
+                title=dict(text=f'{selected_metric_display} Ratio', font=dict(size=12, color='#A8A29E', family='DM Sans')),
+                gridcolor='rgba(168, 162, 158, 0.05)',
+                griddash='dot',
+                zerolinecolor='rgba(168, 162, 158, 0.08)',
+                tickfont=dict(size=10, color='#78716C', family='JetBrains Mono'),
+                linecolor='rgba(168, 162, 158, 0.08)',
             ),
             legend=dict(
                 orientation="h",
@@ -814,7 +817,7 @@ with tab_individual:
                 y=1.02,
                 xanchor="center",
                 x=0.5,
-                font=dict(color='#FFFFFF', size=10),
+                font=dict(color='#E7E5E4', size=10, family='DM Sans'),
                 bgcolor='rgba(0,0,0,0)',
                 bordercolor='rgba(0,0,0,0)'
             )
@@ -832,56 +835,56 @@ with tab_individual:
         percentile = ticker_stats.get('percentile', 0)
         z_score = ticker_stats.get('z_score', 0)
 
-        # Status based on percentile
+        # Status based on percentile - Editorial colors (muted, not neon)
         if percentile <= 25:
             status = "Cheap"
-            status_color = '#009B87'
-            status_icon = "🟢"
+            status_color = '#4A7C7E'  # Muted Teal
+            status_icon = "▼"
         elif percentile <= 75:
             status = "Fair"
-            status_color = '#FFC132'
-            status_icon = "🟡"
+            status_color = '#D4AF37'  # Champagne Gold
+            status_icon = "●"
         else:
             status = "Expensive"
-            status_color = '#E53E3E'
-            status_icon = "🔴"
+            status_color = '#B45454'  # Muted Red
+            status_icon = "▲"
 
         # Layout: KPI Cards (1/3) + Histogram (2/3)
         col_kpi, col_hist = st.columns([1, 2])
 
         with col_kpi:
-            # Compact single-column metrics with smaller text
+            # Compact single-column metrics - Financial Editorial style
             st.markdown(f"""
-            <div style="font-size: 0.75rem; color: #718096; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Key Stats</div>
-            <div style="display: grid; gap: 0.5rem;">
-                <div style="background: rgba(16,24,32,0.8); padding: 0.6rem; border-radius: 8px; border-left: 3px solid {status_color};">
-                    <div style="font-size: 0.65rem; color: #718096; text-transform: uppercase;">Current</div>
-                    <div style="font-size: 1.1rem; color: #FFFFFF; font-weight: 600;">{current:.2f}x</div>
-                    <div style="font-size: 0.7rem; color: {status_color};">P{percentile:.0f}% {status_icon} {status}</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #78716C; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.75rem;">Key Statistics</div>
+            <div style="display: grid; gap: 0.6rem;">
+                <div style="background: linear-gradient(135deg, #242424 0%, #2E2E2E 100%); padding: 0.8rem; border-radius: 6px; border-left: 3px solid {status_color};">
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: #78716C; text-transform: uppercase; letter-spacing: 0.1em;">Current</div>
+                    <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.2rem; color: #FAFAF9; font-weight: 600;">{current:.2f}x</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: {status_color};">P{percentile:.0f}% {status_icon} {status}</div>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem;">
-                    <div style="background: rgba(16,24,32,0.6); padding: 0.5rem; border-radius: 6px;">
-                        <div style="font-size: 0.6rem; color: #718096;">Mean</div>
-                        <div style="font-size: 0.9rem; color: #E2E8F0;">{mean_val:.2f}x</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div style="background: #242424; padding: 0.6rem; border-radius: 4px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: #78716C; text-transform: uppercase;">Mean</div>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #E7E5E4;">{mean_val:.2f}x</div>
                     </div>
-                    <div style="background: rgba(16,24,32,0.6); padding: 0.5rem; border-radius: 6px;">
-                        <div style="font-size: 0.6rem; color: #718096;">Z-Score</div>
-                        <div style="font-size: 0.9rem; color: #E2E8F0;">{z_score:+.2f}</div>
+                    <div style="background: #242424; padding: 0.6rem; border-radius: 4px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: #78716C; text-transform: uppercase;">Z-Score</div>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #E7E5E4;">{z_score:+.2f}</div>
                     </div>
-                    <div style="background: rgba(16,24,32,0.6); padding: 0.5rem; border-radius: 6px;">
-                        <div style="font-size: 0.6rem; color: #10B981;">-1 SD</div>
-                        <div style="font-size: 0.9rem; color: #E2E8F0;">{minus_1sd:.2f}x</div>
+                    <div style="background: #242424; padding: 0.6rem; border-radius: 4px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: #4A7C7E;">-1 SD</div>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #E7E5E4;">{minus_1sd:.2f}x</div>
                     </div>
-                    <div style="background: rgba(16,24,32,0.6); padding: 0.5rem; border-radius: 6px;">
-                        <div style="font-size: 0.6rem; color: #E53E3E;">+1 SD</div>
-                        <div style="font-size: 0.9rem; color: #E2E8F0;">{plus_1sd:.2f}x</div>
+                    <div style="background: #242424; padding: 0.6rem; border-radius: 4px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: #B45454;">+1 SD</div>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #E7E5E4;">{plus_1sd:.2f}x</div>
                     </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
         with col_hist:
-            # Large histogram showing distribution with current position
+            # Large histogram - Financial Editorial style
             fig_hist = go.Figure()
 
             # Create histogram from ticker data
@@ -890,44 +893,44 @@ with tab_individual:
             fig_hist.add_trace(go.Histogram(
                 x=values,
                 nbinsx=25,
-                marker_color='rgba(0, 155, 135, 0.7)',
-                marker_line_color='#009B87',
+                marker_color='rgba(74, 124, 126, 0.6)',  # Muted Teal
+                marker_line_color='#4A7C7E',
                 marker_line_width=1,
                 name='Distribution',
                 hovertemplate='Value: %{x:.2f}x<br>Count: %{y}<extra></extra>'
             ))
 
-            # Add ±1 SD shaded region
+            # Add ±1 SD shaded region - subtle
             fig_hist.add_vrect(
                 x0=minus_1sd, x1=plus_1sd,
-                fillcolor='rgba(0, 155, 135, 0.1)',
+                fillcolor='rgba(212, 175, 55, 0.06)',  # Champagne Gold very subtle
                 line_width=0,
                 annotation_text="±1 SD",
                 annotation_position="top left",
                 annotation_font_size=9,
-                annotation_font_color='#718096'
+                annotation_font_color='#78716C'
             )
 
             # Add current value line (prominent)
             fig_hist.add_vline(
                 x=current_val,
                 line_color=status_color,
-                line_width=3,
+                line_width=2.5,
                 annotation_text=f"Now: {current_val:.1f}x",
                 annotation_position="top right",
                 annotation_font_color=status_color,
-                annotation_font_size=11
+                annotation_font_size=10
             )
 
-            # Add mean line
+            # Add mean line - Champagne Gold
             fig_hist.add_vline(
                 x=mean_val,
-                line_color='#FFFFFF',
+                line_color=CHAMPAGNE_GOLD,
                 line_width=2,
                 line_dash='dash',
                 annotation_text=f"Mean: {mean_val:.1f}x",
                 annotation_position="bottom right",
-                annotation_font_color='#A0AEC0',
+                annotation_font_color='#A8A29E',
                 annotation_font_size=10
             )
 
@@ -938,18 +941,20 @@ with tab_individual:
                 plot_bgcolor='rgba(0,0,0,0)',
                 showlegend=False,
                 xaxis=dict(
-                    title=dict(text=selected_metric_display, font=dict(size=10, color='#718096')),
-                    gridcolor='rgba(160, 174, 192, 0.1)',
-                    tickfont=dict(size=9, color='#A0AEC0')
+                    title=dict(text=selected_metric_display, font=dict(size=10, color='#78716C', family='DM Sans')),
+                    gridcolor='rgba(168, 162, 158, 0.06)',
+                    griddash='dot',
+                    tickfont=dict(size=9, color='#78716C', family='JetBrains Mono')
                 ),
                 yaxis=dict(
-                    title=dict(text='Frequency', font=dict(size=10, color='#718096')),
-                    gridcolor='rgba(160, 174, 192, 0.1)',
-                    tickfont=dict(size=9, color='#A0AEC0')
+                    title=dict(text='Frequency', font=dict(size=10, color='#78716C', family='DM Sans')),
+                    gridcolor='rgba(168, 162, 158, 0.06)',
+                    griddash='dot',
+                    tickfont=dict(size=9, color='#78716C', family='JetBrains Mono')
                 ),
                 title=dict(
-                    text=f'{selected_metric_display} Historical Distribution',
-                    font=dict(size=12, color='#E2E8F0'),
+                    text=f'{selected_metric_display} Distribution',
+                    font=dict(size=13, color='#E7E5E4', family='Playfair Display'),
                     x=0.5
                 )
             )
