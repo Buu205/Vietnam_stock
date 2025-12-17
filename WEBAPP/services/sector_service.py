@@ -31,7 +31,9 @@ class SectorService:
             project_root = current_file.parents[2]
             data_root = project_root / "DATA"
 
+        self.data_root = data_root
         self.data_path = data_root / "processed" / "valuation"
+        self.sector_data_path = data_root / "processed" / "sector"
         self.project_root = current_file.parents[2] if data_root is None else data_root.parent
 
         # Try to load sector registry
@@ -48,30 +50,63 @@ class SectorService:
 
     def get_sector_valuation(self, date: Optional[str] = None, sectors_only: bool = False) -> pd.DataFrame:
         """
-        Get PE/PB valuation for all sectors.
+        Get PE/PB valuation for all sectors and market indices.
 
         Args:
             date: Specific date (YYYY-MM-DD), defaults to latest
             sectors_only: If True, only return sector scopes (exclude VNINDEX, BSC_INDEX)
 
         Returns:
-            DataFrame with valuation per sector
+            DataFrame with valuation per sector/index
         """
-        # Try new file with sectors first
-        parquet_file = self.data_path / "vnindex" / "vnindex_valuation_with_sectors.parquet"
+        all_dfs = []
 
-        if not parquet_file.exists():
-            # Fallback to old file
-            parquet_file = self.data_path / "vnindex" / "vnindex_valuation_refined.parquet"
+        # Load sector data from sector_valuation_metrics.parquet
+        sector_file = self.sector_data_path / "sector_valuation_metrics.parquet"
 
-        if not parquet_file.exists():
+        if sector_file.exists():
+            sector_df = pd.read_parquet(sector_file)
+
+            # Add SECTOR: prefix to sector_code for dashboard compatibility
+            if 'sector_code' in sector_df.columns:
+                sector_df['sector_code'] = 'SECTOR:' + sector_df['sector_code'].astype(str)
+
+            # Map columns to expected format
+            column_mapping = {
+                'sector_code': 'scope',
+                'sector_pe': 'pe_ttm',
+                'sector_pb': 'pb',
+                'sector_ps': 'ps',
+                'sector_ev_ebitda': 'ev_ebitda',
+                'sector_market_cap': 'market_cap'
+            }
+            sector_df = sector_df.rename(columns=column_mapping)
+
+            if 'date' in sector_df.columns:
+                sector_df['date'] = pd.to_datetime(sector_df['date'])
+
+            all_dfs.append(sector_df)
+
+        # Load market index data from vnindex files (VNINDEX, BSC_INDEX, VNINDEX_EXCLUDE)
+        if not sectors_only:
+            vnindex_file = self.data_path / "vnindex" / "vnindex_valuation_refined.parquet"
+
+            if vnindex_file.exists():
+                vnindex_df = pd.read_parquet(vnindex_file)
+
+                if 'date' in vnindex_df.columns:
+                    vnindex_df['date'] = pd.to_datetime(vnindex_df['date'])
+
+                all_dfs.append(vnindex_df)
+
+        # Merge all dataframes
+        if not all_dfs:
             return pd.DataFrame()
 
-        df = pd.read_parquet(parquet_file)
+        df = pd.concat(all_dfs, ignore_index=True)
 
+        # Filter by date
         if 'date' in df.columns:
-            df['date'] = pd.to_datetime(df['date'])
-
             if date:
                 df = df[df['date'] == date]
             else:
@@ -81,9 +116,6 @@ class SectorService:
         # Filter sectors only if requested
         if sectors_only and 'scope' in df.columns:
             df = df[df['scope'].str.startswith('SECTOR:')]
-            # Clean up scope names (remove SECTOR: prefix)
-            df = df.copy()
-            df['scope'] = df['scope'].str.replace('SECTOR:', '', regex=False)
 
         # Sort by PE
         if 'pe_ttm' in df.columns:
@@ -99,7 +131,14 @@ class SectorService:
             except Exception:
                 pass
 
-        # Fallback: get from valuation data
+        # Get from sector_valuation_metrics.parquet (canonical source)
+        sector_file = self.sector_data_path / "sector_valuation_metrics.parquet"
+
+        if sector_file.exists():
+            df = pd.read_parquet(sector_file, columns=['sector_code'])
+            return sorted(df['sector_code'].unique().tolist())
+
+        # Fallback: get from vnindex valuation data
         parquet_file = self.data_path / "vnindex" / "vnindex_valuation_refined.parquet"
 
         if not parquet_file.exists():
@@ -236,43 +275,68 @@ class SectorService:
         limit: Optional[int] = 252
     ) -> pd.DataFrame:
         """
-        Get historical valuation for a specific sector.
+        Get historical valuation for a specific sector or market index.
 
         Args:
-            sector: Sector name (Vietnamese, e.g., "Ngân hàng")
+            sector: Sector name (Vietnamese, e.g., "Ngân hàng") or market index (VNINDEX, BSC_INDEX)
             limit: Number of days (default 252 = 1 year)
 
         Returns:
             DataFrame with historical PE/PB
         """
-        # Try new file with sectors first
-        parquet_file = self.data_path / "vnindex" / "vnindex_valuation_with_sectors.parquet"
+        # Check if this is a market index
+        market_indices = ['VNINDEX', 'VNINDEX_EXCLUDE', 'BSC_INDEX']
 
-        if not parquet_file.exists():
-            # Fallback to old file
-            parquet_file = self.data_path / "vnindex" / "vnindex_valuation_refined.parquet"
+        if sector in market_indices:
+            # Load from vnindex file for market indices
+            vnindex_file = self.data_path / "vnindex" / "vnindex_valuation_refined.parquet"
 
-        if not parquet_file.exists():
-            return pd.DataFrame()
+            if not vnindex_file.exists():
+                return pd.DataFrame()
 
-        df = pd.read_parquet(parquet_file)
+            df = pd.read_parquet(vnindex_file)
 
-        if 'scope' in df.columns:
-            # Try with SECTOR: prefix first
-            scope_name = f"SECTOR:{sector}"
-            sector_df = df[df['scope'] == scope_name].copy()
+            if 'scope' in df.columns:
+                df = df[df['scope'] == sector].copy()
 
-            # If empty, try without prefix (for backward compatibility)
-            if sector_df.empty:
-                sector_df = df[df['scope'] == sector].copy()
+            if 'date' in df.columns:
+                df['date'] = pd.to_datetime(df['date'])
+                df = df.sort_values('date')
 
-            df = sector_df
+            if limit:
+                df = df.tail(limit)
 
-        if 'date' in df.columns:
-            df['date'] = pd.to_datetime(df['date'])
-            df = df.sort_values('date')
+            return df
 
-        if limit:
-            df = df.tail(limit)
+        # For sectors: Load from sector_valuation_metrics.parquet
+        sector_file = self.sector_data_path / "sector_valuation_metrics.parquet"
 
-        return df
+        if sector_file.exists():
+            df = pd.read_parquet(sector_file)
+
+            # Filter by sector (handle both with and without SECTOR: prefix)
+            if 'sector_code' in df.columns:
+                clean_sector = sector.replace('SECTOR:', '')
+                df = df[df['sector_code'] == clean_sector].copy()
+
+            # Map columns to expected format
+            column_mapping = {
+                'sector_code': 'scope',
+                'sector_pe': 'pe_ttm',
+                'sector_pb': 'pb',
+                'sector_ps': 'ps',
+                'sector_ev_ebitda': 'ev_ebitda',
+                'sector_market_cap': 'market_cap'
+            }
+            df = df.rename(columns=column_mapping)
+
+            if 'date' in df.columns:
+                df['date'] = pd.to_datetime(df['date'])
+                df = df.sort_values('date')
+
+            if limit:
+                df = df.tail(limit)
+
+            return df
+
+        return pd.DataFrame()
