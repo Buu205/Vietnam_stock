@@ -49,12 +49,20 @@ except FileNotFoundError as e:
     st.error(f"Error: {e}")
     st.stop()
 
-# Ticker selector
+# Ticker selector - check for Quick Search pre-selection
 st.sidebar.markdown("### Stock")
+default_ticker = st.session_state.get('quick_search_ticker', None)
+if default_ticker and default_ticker in available_tickers:
+    default_index = available_tickers.index(default_ticker)
+    # Clear the quick search after using it
+    st.session_state['quick_search_ticker'] = None
+else:
+    default_index = 0
+
 ticker = st.sidebar.selectbox(
     "Select Stock",
     options=available_tickers,
-    index=0,
+    index=default_index,
     label_visibility="collapsed"
 )
 

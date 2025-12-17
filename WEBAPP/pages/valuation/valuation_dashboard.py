@@ -111,10 +111,20 @@ else:
 
 # Ticker selector (for Individual Analysis tab)
 st.sidebar.markdown(f"### Ticker ({len(available_tickers)} available)")
+
+# Check for Quick Search pre-selection
+quick_search_ticker = st.session_state.get('quick_search_ticker', None)
+if quick_search_ticker and quick_search_ticker in available_tickers:
+    default_ticker_index = available_tickers.index(quick_search_ticker)
+    # Clear after using
+    st.session_state['quick_search_ticker'] = None
+else:
+    default_ticker_index = 0 if available_tickers else None
+
 selected_ticker = st.sidebar.selectbox(
     "Select Ticker",
     options=available_tickers,
-    index=0 if available_tickers else None,
+    index=default_ticker_index,
     label_visibility="collapsed",
     help="Choose a ticker for individual analysis"
 )
@@ -146,6 +156,14 @@ with tab_sector:
         return service.get_industry_candle_data(industry, metric, start_year)
 
     candle_data = load_industry_candle_data(selected_industry, selected_metric, start_year)
+
+    # Warning for metrics with limited data availability (e.g., EV/EBITDA not for banks)
+    if not candle_data:
+        if selected_metric == 'EV_EBITDA' and selected_industry == 'Ngân hàng':
+            st.info("⚠️ **EV/EBITDA** is not applicable for banks. Banks use different profitability metrics (NII, NIM, etc.).")
+            st.info("Try **P/E Ratio**, **P/B Ratio**, or **P/S Ratio** for bank valuation analysis.")
+        else:
+            st.warning(f"No **{selected_metric_display}** data available for {selected_industry} sector.")
 
     if candle_data:
         # Create candlestick chart
@@ -976,6 +994,11 @@ with tab_individual:
 
     else:
         st.info(f"No {selected_metric_display} data available for {active_ticker}")
+        # Special message for EV/EBITDA on banks
+        if selected_metric == 'EV_EBITDA':
+            ticker_industry = service.get_ticker_industry(active_ticker)
+            if ticker_industry == 'Ngân hàng':
+                st.info("⚠️ **EV/EBITDA** is not applicable for banks. Try **P/E**, **P/B**, or **P/S** instead.")
 
 # Footer
 st.markdown("---")

@@ -90,6 +90,7 @@ def show_data_integrity_report():
         ("Technical (TA)", "DATA/processed/technical/basic_data.parquet", "date", "symbol"),
         ("PE Ratio", "DATA/processed/valuation/pe/historical/historical_pe.parquet", "date", "symbol"),
         ("PB Ratio", "DATA/processed/valuation/pb/historical/historical_pb.parquet", "date", "symbol"),
+        ("P/S Ratio", "DATA/processed/valuation/ps/historical/historical_ps.parquet", "date", "symbol"),
         ("EV/EBITDA", "DATA/processed/valuation/ev_ebitda/historical/historical_ev_ebitda.parquet", "date", "symbol"),
         ("VN-Index Val", "DATA/processed/valuation/vnindex/vnindex_valuation_refined.parquet", "date", None),
         ("Macro/Commodity", "DATA/processed/macro_commodity/macro_commodity_unified.parquet", "date", None),
@@ -219,6 +220,7 @@ def check_output_files(step_key: str) -> Dict[str, any]:
             files_to_check = [
                 data_dir / "processed" / "valuation" / "pe" / "historical" / "historical_pe.parquet",
                 data_dir / "processed" / "valuation" / "pb" / "historical" / "historical_pb.parquet",
+                data_dir / "processed" / "valuation" / "ps" / "historical" / "historical_ps.parquet",
                 data_dir / "processed" / "valuation" / "ev_ebitda" / "historical" / "historical_ev_ebitda.parquet",
                 data_dir / "processed" / "valuation" / "vnindex" / "vnindex_valuation_refined.parquet",
             ]

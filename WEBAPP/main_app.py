@@ -80,6 +80,68 @@ forecast_page = st.Page(
 )
 
 # ============================================================================
+# SIDEBAR - QUICK TICKER SEARCH (Compact)
+# ============================================================================
+with st.sidebar:
+    # Load available tickers for autocomplete
+    @st.cache_data(ttl=3600)
+    def load_all_tickers():
+        """Load all available tickers from valuation data."""
+        import pandas as pd
+        try:
+            pe_file = Path(__file__).resolve().parent.parent / "DATA" / "processed" / "valuation" / "pe" / "historical" / "historical_pe.parquet"
+            if pe_file.exists():
+                df = pd.read_parquet(pe_file, columns=['symbol'])
+                return sorted(df['symbol'].unique().tolist())
+        except:
+            pass
+        return []
+
+    all_tickers = load_all_tickers()
+
+    # Compact search input
+    search_ticker = st.text_input(
+        "🔍 Quick Search",
+        placeholder="Enter ticker...",
+        key="global_ticker_search",
+        help="Type a ticker symbol"
+    ).upper().strip()
+
+    if search_ticker:
+        matches = [t for t in all_tickers if search_ticker in t]
+        if matches:
+            if len(matches) == 1 or search_ticker in matches:
+                selected = search_ticker if search_ticker in matches else matches[0]
+                st.session_state['quick_search_ticker'] = selected
+            else:
+                selected = st.selectbox(
+                    "Select",
+                    matches[:15],
+                    key="search_select",
+                    label_visibility="collapsed"
+                )
+                if selected:
+                    st.session_state['quick_search_ticker'] = selected
+        else:
+            st.caption(f"❌ '{search_ticker}' not found")
+
+    # Compact navigation buttons if ticker selected
+    if st.session_state.get('quick_search_ticker'):
+        ticker = st.session_state['quick_search_ticker']
+        st.success(f"**{ticker}**", icon="✅")
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("🏢", key="nav_company", help="Company", use_container_width=True):
+                st.switch_page("pages/company/company_dashboard.py")
+            if st.button("💰", key="nav_valuation", help="Valuation", use_container_width=True):
+                st.switch_page("pages/valuation/valuation_dashboard.py")
+        with c2:
+            if st.button("🏦", key="nav_bank", help="Bank", use_container_width=True):
+                st.switch_page("pages/bank/bank_dashboard.py")
+            if st.button("📉", key="nav_technical", help="Technical", use_container_width=True):
+                st.switch_page("pages/technical/technical_dashboard.py")
+
+# ============================================================================
 # NAVIGATION
 # ============================================================================
 pg = st.navigation({

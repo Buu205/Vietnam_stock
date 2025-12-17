@@ -56,7 +56,7 @@ except Exception as e:
 
 # Metric selector
 st.sidebar.markdown("### Valuation Metric")
-metric_options = ["PE TTM", "PB"]
+metric_options = ["PE TTM", "PB", "P/S Ratio", "EV/EBITDA"]
 selected_metric = st.sidebar.selectbox(
     "Primary Metric",
     options=metric_options,
@@ -65,7 +65,7 @@ selected_metric = st.sidebar.selectbox(
 )
 
 # Map to column names
-metric_map = {"PE TTM": "pe_ttm", "PB": "pb"}
+metric_map = {"PE TTM": "pe_ttm", "PB": "pb", "P/S Ratio": "ps", "EV/EBITDA": "ev_ebitda"}
 primary_metric = metric_map[selected_metric]
 
 # Time range selector - selectbox with default 3Y
@@ -354,9 +354,14 @@ with tab_distribution:
         st.markdown(f"### {selected_metric} Historical Trend - Market Indices")
         st.markdown("*Line chart showing historical valuation trends for all market indices.*")
 
+        # Warning for metrics not available for market indices
+        if primary_metric in ['ps', 'ev_ebitda']:
+            st.warning(f"⚠️ **{selected_metric}** is not available for Market Indices. Market indices only have PE and PB data. Please select a Sector to view {selected_metric}.")
+            st.info("Switch to **📊 Sectors** tab above to view P/S Ratio and EV/EBITDA distribution by sector.")
+
         target_scopes = index_scopes if index_scopes else []
 
-        if target_scopes:
+        if target_scopes and primary_metric not in ['ps', 'ev_ebitda']:
             fig_line = go.Figure()
             line_colors = [CHART_COLORS['primary'], CHART_COLORS['secondary'], CHART_COLORS['tertiary']]
             all_stats = []
@@ -689,36 +694,42 @@ with tab_individual:
 
     # Individual scope analysis (Market Index or Sector)
     if selected_scope:
-        history = load_sector_history(selected_scope, days)
-        fig, stats = create_individual_chart(selected_scope, history, primary_metric, selected_metric, chart_height=500)
-
-        if fig:
-            st.plotly_chart(fig, use_container_width=True)
-
-            # Current position analysis
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.metric("Current", f"{stats['current']:.2f}x")
-            with col2:
-                st.metric("Median", f"{stats['median']:.2f}x")
-            with col3:
-                st.metric("Z-Score", f"{stats['z_score']:+.2f}σ")
-            with col4:
-                st.metric("Percentile", f"{stats['percentile']:.0f}%")
-
-            # Valuation assessment
-            if stats['z_score'] < -1:
-                assessment = "🟢 **Significantly Undervalued** - More than 1σ below mean"
-            elif stats['z_score'] < 0:
-                assessment = "🟢 **Undervalued** - Below historical mean"
-            elif stats['z_score'] < 1:
-                assessment = "🟡 **Fair Value** - Near historical mean"
-            else:
-                assessment = "🔴 **Expensive** - More than 1σ above mean"
-
-            st.markdown(f"**Assessment**: {assessment}")
+        # Check if Market Index with PS/EV-EBITDA selected
+        is_market_index = scope_group == "Market Indices" or selected_scope in market_indices
+        if is_market_index and primary_metric in ['ps', 'ev_ebitda']:
+            st.warning(f"⚠️ **{selected_metric}** is not available for Market Indices. Market indices only have PE and PB data.")
+            st.info("Select **Sectors** group and choose a sector to view P/S Ratio and EV/EBITDA analysis.")
         else:
-            st.warning(f"Not enough valid data for {selected_scope}")
+            history = load_sector_history(selected_scope, days)
+            fig, stats = create_individual_chart(selected_scope, history, primary_metric, selected_metric, chart_height=500)
+
+            if fig:
+                st.plotly_chart(fig, use_container_width=True)
+
+                # Current position analysis
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("Current", f"{stats['current']:.2f}x")
+                with col2:
+                    st.metric("Median", f"{stats['median']:.2f}x")
+                with col3:
+                    st.metric("Z-Score", f"{stats['z_score']:+.2f}σ")
+                with col4:
+                    st.metric("Percentile", f"{stats['percentile']:.0f}%")
+
+                # Valuation assessment
+                if stats['z_score'] < -1:
+                    assessment = "🟢 **Significantly Undervalued** - More than 1σ below mean"
+                elif stats['z_score'] < 0:
+                    assessment = "🟢 **Undervalued** - Below historical mean"
+                elif stats['z_score'] < 1:
+                    assessment = "🟡 **Fair Value** - Near historical mean"
+                else:
+                    assessment = "🔴 **Expensive** - More than 1σ above mean"
+
+                st.markdown(f"**Assessment**: {assessment}")
+            else:
+                st.warning(f"Not enough valid data for {selected_scope}")
 
 # ============================================================================
 # TAB 3: MACRO DATA

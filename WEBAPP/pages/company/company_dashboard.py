@@ -70,11 +70,19 @@ except FileNotFoundError as e:
     st.info("Run: `python3 PROCESSORS/fundamental/calculators/run_company_calculator.py`")
     st.stop()
 
-# Ticker selector
+# Ticker selector - check for Quick Search pre-selection
+default_ticker = st.session_state.get('quick_search_ticker', None)
+if default_ticker and default_ticker in available_tickers:
+    default_index = available_tickers.index(default_ticker)
+    # Clear the quick search after using it
+    st.session_state['quick_search_ticker'] = None
+else:
+    default_index = 0 if available_tickers else None
+
 ticker = st.sidebar.selectbox(
     "Select Company",
     options=available_tickers,
-    index=0 if available_tickers else None,
+    index=default_index,
     help="Choose a company to analyze"
 )
 

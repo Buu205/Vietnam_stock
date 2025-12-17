@@ -313,16 +313,15 @@ class HistoricalEVEBITDACalculator:
         if df.empty:
             logger.warning("No data to save")
             return
-        
-        df = self.date_formatter.standardize_all_date_columns(df.copy())
+
         self.output_path.mkdir(parents=True, exist_ok=True)
-        
+
         if filename is None:
-            filename = f"ev_ebitda_historical_{datetime.now().strftime('%Y%m%d_%H%M%S')}.parquet"
-        
+            filename = "historical_ev_ebitda.parquet"
+
         output_file = self.output_path / filename
         df.to_parquet(output_file, index=False)
-        logger.info(f"Saved {len(df)} records to {output_file}")
+        logger.info(f"💾 Saved {len(df):,} records to {output_file}")
 
 def main():
     """Hàm chạy kiểm thử tính năng (Test function)"""

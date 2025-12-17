@@ -110,9 +110,64 @@ def get_page_style() -> str:
         min-height: 100vh;
     }
 
+    /* ========== CRITICAL: REMOVE TOP WHITESPACE ========== */
     .block-container {
-        padding: 2.5rem 4rem 5rem 4rem !important;
+        padding: 0.5rem 2.5rem 2rem 2.5rem !important;
         max-width: 1800px;
+        margin-top: 0 !important;
+    }
+
+    /* Force remove ALL Streamlit header elements */
+    header[data-testid="stHeader"],
+    .stAppHeader,
+    header.stAppHeader {
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        visibility: hidden !important;
+        overflow: hidden !important;
+    }
+
+    /* Hide deploy button and view app bar */
+    .stDeployButton,
+    [data-testid="stStatusWidget"],
+    .viewerBadge_container__r5tak,
+    .styles_viewerBadge__CvC9N {
+        display: none !important;
+    }
+
+    footer,
+    .stAppViewBlockContainer > footer {
+        display: none !important;
+    }
+
+    /* Main content area - zero top margin */
+    .main .block-container,
+    .stApp > .main > .block-container {
+        padding-top: 0.75rem !important;
+        margin-top: 0 !important;
+    }
+
+    /* Remove app toolbar spacing */
+    .stApp > header + div,
+    .stMain > div:first-child {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* Ensure content starts immediately */
+    [data-testid="stAppViewContainer"],
+    .appview-container {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* Sidebar content - tighter spacing */
+    [data-testid="stSidebarContent"] {
+        padding-top: 0.5rem !important;
     }
 
     * {
@@ -128,9 +183,9 @@ def get_page_style() -> str:
         letter-spacing: -0.025em;
     }
 
-    /* Page Title - Brand Gradient */
+    /* Page Title - Brand Gradient (Compact) */
     h1 {
-        font-size: 2.75rem !important;
+        font-size: 2.25rem !important;
         font-weight: 700 !important;
         color: var(--text-white) !important;
         background: linear-gradient(135deg,
@@ -141,19 +196,21 @@ def get_page_style() -> str:
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        margin-bottom: 0.25rem !important;
+        margin: 0 0 0.15rem 0 !important;
+        padding: 0 !important;
+        line-height: 1.2 !important;
         text-shadow: 0 0 60px rgba(0, 155, 135, 0.3);
     }
 
-    /* Section Headers - Uppercase Terminal Style */
+    /* Section Headers - Uppercase Terminal Style (Compact) */
     h3 {
-        font-size: 0.85rem !important;
+        font-size: 0.8rem !important;
         font-weight: 600 !important;
         color: var(--text-bright) !important;
         text-transform: uppercase;
-        letter-spacing: 0.12em;
-        margin-bottom: 1.25rem !important;
-        padding-bottom: 0.75rem;
+        letter-spacing: 0.1em;
+        margin: 0.75rem 0 0.75rem 0 !important;
+        padding-bottom: 0.5rem;
         border-bottom: 1px solid var(--border-subtle);
         position: relative;
     }
@@ -163,7 +220,7 @@ def get_page_style() -> str:
         position: absolute;
         bottom: -1px;
         left: 0;
-        width: 40px;
+        width: 32px;
         height: 2px;
         background: var(--brand-teal);
     }
@@ -173,11 +230,13 @@ def get_page_style() -> str:
         color: var(--text-primary);
     }
 
-    /* Subtitle Enhancement */
+    /* Subtitle Enhancement - Compact */
     .stMarkdown p:first-child {
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         color: var(--text-secondary);
         font-weight: 400;
+        margin: 0 0 0.5rem 0 !important;
+        line-height: 1.4 !important;
     }
 
     /* Strong text - Gold accent */
@@ -765,7 +824,7 @@ def get_page_style() -> str:
     }
 
     /* ============================================================
-       HORIZONTAL RULE - GRADIENT FADE
+       HORIZONTAL RULE - GRADIENT FADE (Compact)
        ============================================================ */
     hr {
         border: none;
@@ -777,7 +836,7 @@ def get_page_style() -> str:
             var(--border-medium) 80%,
             transparent 100%
         );
-        margin: 2.5rem 0;
+        margin: 0.75rem 0 1rem 0;
         opacity: 0.5;
     }
 

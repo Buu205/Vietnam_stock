@@ -14,6 +14,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from PROCESSORS.valuation.calculators.historical_pe_calculator import HistoricalPECalculator
 from PROCESSORS.valuation.calculators.historical_pb_calculator import HistoricalPBCalculator
 from PROCESSORS.valuation.calculators.historical_ev_ebitda_calculator import HistoricalEVEBITDACalculator
+from PROCESSORS.valuation.calculators.historical_ps_calculator import HistoricalPSCalculator
 from PROCESSORS.valuation.calculators.vnindex_valuation_calculator import VNIndexValuationCalculator
 # Note: Sector valuation is now handled by PROCESSORS/sector/run_sector_analysis.py --ta-only
 
@@ -128,6 +129,7 @@ def print_summary():
     files_to_check = [
         ("PE", data_path / "pe" / "historical" / "historical_pe.parquet"),
         ("PB", data_path / "pb" / "historical" / "historical_pb.parquet"),
+        ("P/S", data_path / "ps" / "historical" / "historical_ps.parquet"),
         ("EV/EBITDA", data_path / "ev_ebitda" / "historical" / "historical_ev_ebitda.parquet"),
         ("VNINDEX", data_path / "vnindex" / "vnindex_valuation_refined.parquet"),
     ]
@@ -150,23 +152,27 @@ def run_daily_update():
     start_time = datetime.now()
     logger.info("🚀 STARTING DAILY VALUATION UPDATE script")
     logger.info(f"   Time: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
-    logger.info("   Updating: Individual stock PE/PB/EV_EBITDA + VNINDEX valuation")
+    logger.info("   Updating: Individual stock PE/PB/P/S/EV_EBITDA + VNINDEX valuation")
     logger.info("")
 
     # 1. Historical PE
-    logger.info("\n--- 1/4 Historical PE ---")
+    logger.info("\n--- 1/5 Historical PE ---")
     update_calculator(HistoricalPECalculator, 'historical_pe.parquet', 'calculate_multiple_symbols_pe_timeseries')
 
     # 2. Historical PB
-    logger.info("\n--- 2/4 Historical PB ---")
+    logger.info("\n--- 2/5 Historical PB ---")
     update_calculator(HistoricalPBCalculator, 'historical_pb.parquet', 'calculate_multiple_symbols_pb_timeseries')
 
-    # 3. Historical EV/EBITDA
-    logger.info("\n--- 3/4 Historical EV/EBITDA ---")
+    # 3. Historical P/S
+    logger.info("\n--- 3/5 Historical P/S ---")
+    update_calculator(HistoricalPSCalculator, 'historical_ps.parquet', 'calculate_ps_timeseries')
+
+    # 4. Historical EV/EBITDA
+    logger.info("\n--- 4/5 Historical EV/EBITDA ---")
     update_calculator(HistoricalEVEBITDACalculator, 'historical_ev_ebitda.parquet', 'calculate_multiple_symbols_ev_ebitda_timeseries')
 
-    # 4. VNINDEX Valuation
-    logger.info("\n--- 4/4 VNINDEX Valuation ---")
+    # 5. VNINDEX Valuation
+    logger.info("\n--- 5/5 VNINDEX Valuation ---")
     update_calculator(VNIndexValuationCalculator, 'vnindex_valuation_refined.parquet', 'process_all_scopes', scope_logic='VNINDEX')
 
     # Print summary
