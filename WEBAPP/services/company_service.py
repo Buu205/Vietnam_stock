@@ -38,8 +38,8 @@ COLUMN_GROUPS = {
     'cash_flow': [
         'symbol', 'report_date', 'year', 'quarter', 'freq_code',
         'operating_cf', 'investment_cf', 'financing_cf', 'capex',
-        'depreciation', 'fcf', 'fcfe',
-        'delta_working_capital', 'delta_net_borrowing', 'operating_cf_ttm'
+        'depreciation', 'fcf', 'fcff', 'fcfe',
+        'delta_working_capital', 'delta_wc', 'delta_net_borrowing', 'operating_cf_ttm'
     ],
     'ratios': [
         'symbol', 'report_date', 'year', 'quarter', 'freq_code',
@@ -65,7 +65,9 @@ class CompanyService:
             project_root = current_file.parents[2]  # Go up to project root
             data_root = project_root / "DATA"
 
+        self.data_root = data_root
         self.data_path = data_root / "processed" / "fundamental" / "company"
+        self._master_symbols = None
 
         # Check if path exists
         if not self.data_path.exists():
@@ -73,6 +75,31 @@ class CompanyService:
                 f"Company data path not found: {self.data_path}\n"
                 f"Please ensure DATA/processed/fundamental/company/ exists."
             )
+
+    def _load_master_symbols(self) -> List[str]:
+        """Load master symbols filtered list for COMPANY entity."""
+        if self._master_symbols is not None:
+            return self._master_symbols
+
+        import json
+
+        # Try config/metadata first, then DATA/metadata
+        project_root = self.data_root.parent
+        locations = [
+            project_root / "config" / "metadata" / "master_symbols.json",
+            self.data_root / "metadata" / "master_symbols.json",
+        ]
+
+        for master_file in locations:
+            if master_file.exists():
+                with open(master_file) as f:
+                    data = json.load(f)
+                # Get COMPANY symbols only
+                self._master_symbols = data.get('symbols_by_entity', {}).get('COMPANY', [])
+                return self._master_symbols
+
+        self._master_symbols = []
+        return self._master_symbols
 
     def get_financial_data(
         self,
@@ -162,7 +189,7 @@ class CompanyService:
 
     def get_available_tickers(self) -> List[str]:
         """
-        Get list of available company tickers.
+        Get list of available company tickers (filtered by master_symbols for liquidity).
 
         Returns:
             Sorted list of ticker symbols
@@ -178,7 +205,15 @@ class CompanyService:
             return []
 
         df = pd.read_parquet(parquet_file, columns=['symbol'])
-        return sorted(df['symbol'].unique().tolist())
+        all_tickers = set(df['symbol'].unique().tolist())
+
+        # Filter by master symbols (liquid tickers only)
+        master_symbols = self._load_master_symbols()
+        if master_symbols:
+            filtered = [t for t in master_symbols if t in all_tickers]
+            return sorted(filtered)
+
+        return sorted(all_tickers)
 
     def get_peer_comparison(self, ticker: str) -> pd.DataFrame:
         """

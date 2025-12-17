@@ -41,7 +41,7 @@ class MetricRegistryLoader:
         },
         'total_equity': {
             'COMPANY': {'priority': ['CBS_400', 'CBS_270'], 'search': {'name_vi': 'VỐN CHỦ SỞ HỮU'}},
-            'BANK':    {'priority': ['BBS_500'], 'search': {'name_vi': 'VỐN VÀ CÁC QUỸ'}}, 
+            'BANK':    {'priority': ['BBS_501', 'BBS_500'], 'search': {'name_vi': 'VỐN VÀ CÁC QUỸ'}},  # BBS_501 has more data
             'INSURANCE': {'priority': ['IBS_400']},
             'SECURITY': {'priority': ['SBS_400']}
         },

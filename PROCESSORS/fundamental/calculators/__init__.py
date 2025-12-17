@@ -1,59 +1,49 @@
 """
-Financial Calculators Base Package / Gói Cơ Bản Các Bộ Tính Toán Tài Chính
-======================================================================
+Financial Calculators Package
+=============================
 
-This package contains all refactored financial calculators that inherit
-from BaseFinancialCalculator to reduce code duplication.
-Gói này chứa tất cả các bộ tính toán tài chính đã được tái cấu trúc,
-kế thừa từ BaseFinancialCalculator để giảm thiểu lặp lại mã nguồn.
+Unified calculator system for all entity types (Company, Bank, Insurance, Security).
 
-Calculators / Các Bộ Tính Toán:
-- BaseFinancialCalculator: Base class with shared functionality (Lớp cơ sở với chức năng chia sẻ)
-- CompanyFinancialCalculator: Calculator for COMPANY entities (Bộ tính toán cho DOANH NGHIỆP)
-- BankFinancialCalculator: Calculator for BANK entities (Bộ tính toán cho NGÂN HÀNG)
-- InsuranceFinancialCalculator: Calculator for INSURANCE entities (Bộ tính toán cho BẢO HIỂM)
-- SecurityFinancialCalculator: Calculator for SECURITY entities (Bộ tính toán cho CHỨNG KHOÁN)
+Main Entry Point:
+    python3 PROCESSORS/fundamental/calculators/run_all_calculators.py
 
-Usage / Hướng Dẫn Sử Dụng:
-    from PROCESSORS.fundamental.calculators import (
-        BaseFinancialCalculator,
-        CompanyFinancialCalculator,
-        BankFinancialCalculator,
-        InsuranceFinancialCalculator,
-        SecurityFinancialCalculator,
-        UnifiedTickerMapper
-    )
-    
-    # Auto-select calculator by ticker
-    mapper = UnifiedTickerMapper()
-    ticker = "ACB"
-    entity_type = mapper.get_entity_type(ticker)  # "BANK"
-    
-    # Select calculator
-    calculators = {
-        "COMPANY": CompanyFinancialCalculator,
-        "BANK": BankFinancialCalculator,
-        "INSURANCE": InsuranceFinancialCalculator,
-        "SECURITY": SecurityFinancialCalculator
-    }
-    
-    calculator_class = calculators[entity_type]
-    calculator = calculator_class(data_path)
-    
-    # Calculate metrics
-    results = calculator.calculate_all_metrics(ticker)
+Usage:
+    # Run all calculators
+    python3 PROCESSORS/fundamental/calculators/run_all_calculators.py
+
+    # Run specific entity
+    python3 PROCESSORS/fundamental/calculators/run_all_calculators.py --entity bank
+    python3 PROCESSORS/fundamental/calculators/run_all_calculators.py --entity company
+    python3 PROCESSORS/fundamental/calculators/run_all_calculators.py --entity insurance
+    python3 PROCESSORS/fundamental/calculators/run_all_calculators.py --entity security
+
+Output Files:
+    - DATA/processed/fundamental/company/company_financial_metrics.parquet
+    - DATA/processed/fundamental/bank/bank_financial_metrics.parquet
+    - DATA/processed/fundamental/insurance/insurance_financial_metrics.parquet
+    - DATA/processed/fundamental/security/security_financial_metrics.parquet
+
+Key Formulas (Bank):
+    - LDR Pure = BBS_161 / BBS_330 * 100
+    - LDR Regulated = (BBS_160 + BNOT_13_1_1_3) / (BBS_330 + BBS_360) * 100
+    - CASA Ratio = (BNOT_26_1 + BNOT_26_3 + BNOT_26_5) / BNOT_26 * 100
+    - NPL = BNOT_4_3 + BNOT_4_4 + BNOT_4_5
+    - LLCR = abs(BBS_169) / NPL * 100
 """
 
-from .base_financial_calculator import BaseFinancialCalculator
-from .company_calculator import CompanyFinancialCalculator
-from .bank_calculator import BankFinancialCalculator
-from .insurance_calculator import InsuranceFinancialCalculator
-from .security_calculator import SecurityFinancialCalculator
+# Import from unified calculator
+from .run_all_calculators import (
+    EntityCalculator,
+    CompanyCalculator,
+    BankCalculator,
+    InsuranceCalculator,
+    SecurityCalculator,
+)
 
 __all__ = [
-    'BaseFinancialCalculator',
-    'CompanyFinancialCalculator',
-    'BankFinancialCalculator',
-    'InsuranceFinancialCalculator',
-    'SecurityFinancialCalculator'
+    'EntityCalculator',
+    'CompanyCalculator',
+    'BankCalculator',
+    'InsuranceCalculator',
+    'SecurityCalculator',
 ]

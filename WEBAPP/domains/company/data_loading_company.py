@@ -2,6 +2,7 @@
 
 Wrapper cho core.data_loading với đường dẫn cố định cho Company.
 Updated: 2025-11-11 - Using centralized DataPaths configuration
+Updated: 2025-12-17 - Use SymbolLoader for liquid tickers
 """
 
 from __future__ import annotations
@@ -11,6 +12,7 @@ from typing import Dict, List
 import pandas as pd
 from WEBAPP.core.data_loading import load_symbol_list, load_valuation_generic
 from WEBAPP.core.data_paths import DataPaths, get_fundamental_path, get_valuation_path
+from WEBAPP.core.symbol_loader import SymbolLoader
 from pathlib import Path
 import streamlit as st
 from WEBAPP.core.formatters import format_valuation_df, format_value
@@ -24,12 +26,21 @@ FUND_PATH = str(get_fundamental_path('company'))
 
 
 def get_company_symbols() -> List[str]:
-    fund_file = Path(FUND_PATH)
-    if not fund_file.exists():
-        # Graceful handling on Streamlit Cloud if file missing
-        st.warning("Company fundamentals file is missing. Please ensure it exists at DATA/processed/fundamental/company/company_financial_metrics.parquet")
-        return []
-    return load_symbol_list(FUND_PATH)
+    """
+    Get list of liquid company symbols from master_symbols.json.
+    Returns 261 companies with >1B VND/day trading value.
+    """
+    try:
+        loader = SymbolLoader()
+        return loader.get_symbols_by_entity('COMPANY')
+    except Exception as e:
+        print(f"Error loading company symbols from SymbolLoader: {e}")
+        # Fallback to parquet if SymbolLoader fails
+        fund_file = Path(FUND_PATH)
+        if not fund_file.exists():
+            st.warning("Company fundamentals file is missing. Please ensure it exists at DATA/processed/fundamental/company/company_financial_metrics.parquet")
+            return []
+        return load_symbol_list(FUND_PATH)
 
 
 def load_company_valuation(symbol: str, start_year: int = None) -> Dict[str, pd.DataFrame]:

@@ -54,7 +54,7 @@ AVAILABLE_METRICS = {
     "Provision/Loan": {"col": "provision_to_loan", "unit": "%", "description": "Provision to Loan"},
     # Growth
     "Credit Growth": {"col": "credit_growth_ytd", "unit": "%", "description": "Credit Growth YTD"},
-    "Deposit Growth": {"col": "deposit_growth_ytd", "unit": "%", "description": "Deposit Growth YTD"},
+    "Deposit Growth": {"col": "customer_deposit_growth_ytd", "unit": "%", "description": "Deposit Growth YTD"},
     "Loan Growth": {"col": "loan_growth_ytd", "unit": "%", "description": "Loan Growth YTD"},
     "NII Growth": {"col": "nii_growth_yoy", "unit": "%", "description": "NII Growth YoY"},
     "NPATMI Growth": {"col": "npatmi_growth_yoy", "unit": "%", "description": "Profit Growth YoY"},
@@ -487,7 +487,7 @@ with tab_tables:
 
     # === Size Table ===
     with tab_size:
-        st.markdown("### Size Metrics (Quy mô)")
+        st.markdown("### Size Metrics")
         size_metrics = {
             'Total Assets': ('total_assets', 'billions'),
             'Total Credit': ('total_credit', 'billions'),
@@ -515,16 +515,16 @@ with tab_tables:
 
     # === Income Statement Table ===
     with tab_income:
-        st.markdown("### Income Statement (Kết quả kinh doanh)")
+        st.markdown("### Income Statement")
         income_metrics = {
-            'NII (Thu nhập lãi thuần)': ('nii', 'billions'),
-            'TOI (Tổng thu nhập HĐ)': ('toi', 'billions'),
-            'NOII (Thu nhập phi lãi)': ('noii', 'billions'),
-            'OPEX (Chi phí hoạt động)': ('opex', 'billions'),
-            'PPOP (LN trước dự phòng)': ('ppop', 'billions'),
-            'Provision (Chi phí DP)': ('provision_expense', 'billions'),
-            'PBT (LN trước thuế)': ('pbt', 'billions'),
-            'NPATMI (LNST CĐCTM)': ('npatmi', 'billions'),
+            'NII': ('nii', 'billions'),
+            'TOI': ('toi', 'billions'),
+            'NOII': ('noii', 'billions'),
+            'OPEX': ('opex', 'billions'),
+            'PPOP': ('ppop', 'billions'),
+            'Provision': ('provision_expense', 'billions'),
+            'PBT': ('pbt', 'billions'),
+            'NPATMI': ('npatmi', 'billions'),
         }
 
         table_data = []
@@ -544,8 +544,8 @@ with tab_tables:
 
     # === Growth Table ===
     with tab_growth:
-        st.markdown("### Growth Metrics (Tăng trưởng)")
-        st.markdown("**YoY = Year-over-Year (so cùng kỳ) | YTD = Year-to-Date (so đầu năm)**")
+        st.markdown("### Growth Metrics")
+        st.markdown("**YoY = Year-over-Year | YTD = Year-to-Date**")
 
         growth_metrics = {
             'NII Growth (YoY)': ('nii_growth_yoy', 'percent'),
@@ -578,7 +578,7 @@ with tab_tables:
 
     # === Asset Quality Table ===
     with tab_quality:
-        st.markdown("### Asset Quality (Chất lượng tài sản)")
+        st.markdown("### Asset Quality")
 
         quality_metrics = {
             'Group 2 Ratio (%)': ('debt_group2_ratio', 'percent'),

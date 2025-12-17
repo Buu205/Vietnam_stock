@@ -2,6 +2,8 @@
 
 Đọc các file parquet technical: moving averages, RSI, MACD, Bollinger, breadth,
 rotation, signals…
+
+Updated: 2025-12-17 - Use SymbolLoader for liquid tickers
 """
 
 from __future__ import annotations
@@ -11,6 +13,7 @@ import duckdb
 import pandas as pd
 from WEBAPP.core.formatters import format_value, format_df_column
 from WEBAPP.core.utils import get_data_path
+from WEBAPP.core.symbol_loader import SymbolLoader
 
 # Import streamlit for caching (optional, only if available)
 try:
@@ -43,9 +46,19 @@ def get_connection() -> duckdb.DuckDBPyConnection:
 
 
 def get_technical_symbols() -> List[str]:
-    conn = get_connection()
-    df = conn.execute(f"SELECT DISTINCT symbol FROM read_parquet('{str(OHLCV_BASIC)}') ORDER BY symbol").fetchdf()
-    return df['symbol'].tolist()
+    """
+    Get list of liquid symbols from master_symbols.json.
+    Returns 315 symbols with >1B VND/day trading value.
+    """
+    try:
+        loader = SymbolLoader()
+        return loader.get_all_symbols()
+    except Exception as e:
+        print(f"Error loading symbols from SymbolLoader: {e}")
+        # Fallback to parquet if SymbolLoader fails
+        conn = get_connection()
+        df = conn.execute(f"SELECT DISTINCT symbol FROM read_parquet('{str(OHLCV_BASIC)}') ORDER BY symbol").fetchdf()
+        return df['symbol'].tolist()
 
 
 def load_rsi(symbol: str) -> pd.DataFrame:

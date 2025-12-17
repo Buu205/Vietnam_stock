@@ -73,12 +73,18 @@ technical_page = st.Page(
     icon="📉"
 )
 
+forecast_page = st.Page(
+    str(pages_dir / "forecast" / "forecast_dashboard.py"),
+    title="BSC Forecast",
+    icon="🎯"
+)
+
 # ============================================================================
 # NAVIGATION
 # ============================================================================
 pg = st.navigation({
     "Fundamental": [company_page, bank_page, security_page],
-    "Analysis": [sector_page, valuation_page, technical_page]
+    "Analysis": [sector_page, valuation_page, technical_page, forecast_page]
 })
 
 # ============================================================================

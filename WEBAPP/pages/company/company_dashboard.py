@@ -182,7 +182,7 @@ with tab_charts:
     chart_df = df.copy()
     value_cols = ['net_revenue', 'gross_profit', 'ebit', 'ebitda', 'npatmi',
                   'total_assets', 'total_liabilities', 'total_equity',
-                  'operating_cf', 'investment_cf', 'financing_cf', 'fcf', 'fcfe',
+                  'operating_cf', 'investment_cf', 'financing_cf', 'fcf', 'fcff', 'fcfe',
                   'sga', 'net_finance_income']
     for col in value_cols:
         if col in chart_df.columns:
@@ -437,6 +437,15 @@ with tab_charts:
                 marker=dict(size=8, symbol='circle')
             ))
 
+        # FCFF line (dotted)
+        if 'fcff' in chart_df.columns:
+            fig.add_trace(go.Scatter(
+                x=chart_df['period_label'], y=chart_df['fcff'],
+                name='FCFF', mode='lines+markers',
+                line=dict(color='#00D4AA', width=2, dash='dot'),
+                marker=dict(size=6, symbol='square')
+            ))
+
         # FCFE line (dashed)
         if 'fcfe' in chart_df.columns:
             fig.add_trace(go.Scatter(
@@ -469,7 +478,7 @@ with tab_charts:
                 marker=dict(size=8),
                 text=[f"{v:.1f}%" if pd.notna(v) else "" for v in chart_df['depreciation_rate']],
                 textposition='top center',
-                textfont=dict(size=10, color='#718096')
+                textfont=dict(size=10, color='#94A3B8')
             ))
             layout = get_chart_layout(height=300)
             layout['yaxis']['title'] = "Depreciation Rate (%)"
@@ -487,7 +496,7 @@ with tab_charts:
                 marker=dict(size=8),
                 text=[f"{v:.2f}%" if pd.notna(v) else "" for v in chart_df['cip_rate']],
                 textposition='top center',
-                textfont=dict(size=10, color='#718096')
+                textfont=dict(size=10, color='#94A3B8')
             ))
             layout = get_chart_layout(height=300)
             layout['yaxis']['title'] = "CIP Rate (%)"

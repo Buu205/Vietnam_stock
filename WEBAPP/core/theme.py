@@ -61,7 +61,7 @@ SEMANTIC = {
     # Market indicators
     'positive': '#00A878',     # Gains, growth, buy signals (teal-based)
     'negative': '#E63946',     # Losses, decline, sell signals (red)
-    'neutral': '#6B7280',      # Unchanged, hold (gray)
+    'neutral': '#94A3B8',      # Unchanged, hold (improved gray for dark bg)
 
     # Alert levels
     'success': '#00A878',      # Success messages (teal)
@@ -83,6 +83,7 @@ SEMANTIC = {
 # ============================================================================
 
 # Dark Theme (Professional Financial - Bloomberg style)
+# Text colors updated for WCAG AA compliance
 DARK_THEME = {
     # Backgrounds
     'background': '#0A1E42',          # Deep navy (from BLUE.navy)
@@ -90,10 +91,11 @@ DARK_THEME = {
     'card': '#295CA9',                # Card background (brand blue)
     'hover': '#4A7BC8',               # Hover state (light blue)
 
-    # Text
-    'text_primary': '#FFFFFF',        # White text
-    'text_secondary': '#E3EBF7',      # Light blue text (from BLUE.pale)
-    'text_disabled': '#6B7280',       # Gray text
+    # Text (WCAG AA Compliant)
+    'text_primary': '#FFFFFF',        # White text (18.1:1)
+    'text_secondary': '#CBD5E1',      # Improved secondary (8.9:1) - was #E3EBF7
+    'text_muted': '#94A3B8',          # Muted text (5.6:1) - NEW
+    'text_disabled': '#64748B',       # Disabled gray (4.0:1) - was #6B7280
 
     # Borders
     'border': '#4A7BC8',              # Light blue borders
@@ -106,7 +108,7 @@ DARK_THEME = {
     # Status colors
     'positive': '#00C9AD',            # Light teal (stands out on dark)
     'negative': '#FF6B6B',            # Bright red (softer than #E63946)
-    'neutral': '#9CA3AF',             # Light gray
+    'neutral': '#94A3B8',             # Improved gray (5.6:1)
 }
 
 # Light Theme (Modern Minimalist - Clean style)

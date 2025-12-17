@@ -56,7 +56,8 @@ class OHLCVDailyUpdater:
         if output_path is None:
             output_path = str(Path(PROJECT_ROOT) / "DATA" / "raw" / "ohlcv" / "OHLCV_mktcap.parquet")
         if symbols_file is None:
-            symbols_file = str(Path(PROJECT_ROOT) / "DATA" / "raw" / "metadata" / "all_tickers.csv")
+            # Use master_symbols.json as primary source
+            symbols_file = str(Path(PROJECT_ROOT) / "DATA" / "metadata" / "master_symbols.json")
         
         self.output_path = Path(output_path)
         self.symbols_file = Path(symbols_file)
@@ -75,7 +76,7 @@ class OHLCVDailyUpdater:
         return "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkdYdExONzViZlZQakdvNERWdjV4QkRITHpnSSIsImtpZCI6IkdYdExONzViZlZQakdvNERWdjV4QkRITHpnSSJ9.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmZpcmVhbnQudm4iLCJhdWQiOiJodHRwczovL2FjY291bnRzLmZpcmVhbnQudm4vcmVzb3VyY2VzIiwiZXhwIjoyMDU1ODI4OTU5LCJuYmYiOjE3NTU4Mjg5NTksImNsaWVudF9pZCI6ImZpcmVhbnQudHJhZGVzdGF0aW9uIiwic2NvcGUiOlsib3BlbmlkIiwicHJvZmlsZSIsInJvbGVzIiwiZW1haWwiLCJhY2NvdW50cy1yZWFkIiwiYWNjb3VudHMtd3JpdGUiLCJvcmRlcnMtcmVhZCIsIm9yZGVycy13cml0ZSIsImNvbXBhbmllcy1yZWFkIiwiaW5kaXZpZHVhbHMtcmVhZCIsImZpbmFuY2UtcmVhZCIsInBvc3RzLXdyaXRlIiwicG9zdHMtcmVhZCIsInN5bWJvbHMtcmVhZCIsInVzZXItZGF0YS1yZWFkIiwidXNlci1kYXRhLXdyaXRlIiwidXNlcnMtcmVhZCIsInNlYXJjaCIsImFjYWRlbXktcmVhZCIsImFjYWRlbXktd3JpdGUiLCJibG9nLXJlYWQiLCJpbnZlc3RvcGVkaWEtcmVhZCJdLCJzdWIiOiJlMmE1OTFkNC04MmRlLTQ1MmYtYWMyNC0yNGIyZWE3OWZhOTIiLCJhdXRoX3RpbWUiOjE3NTU4Mjg5NTksImlkcCI6Imlkc3J2IiwibmFtZSI6ImJ1dXF1b2NwaGFuQGdtYWlsLmNvbSIsInNlY3VyaXR5X3N0YW1wIjoiYWZkZTBmNGEtMTY0ZS00ZDBmLWI4MjktOWM5MDgwODRhYzFiIiwianRpIjoiZWY1NWVlNmZkZGJkNWFjNmJkOTFjMGIwY2Q0OWVhZDMiLCJhbXIiOlsicGFzc3dvcmQiXX0.iLfhUQ-cVscclfz5loa7ly6svFTJlqVGaIabU4YdX_FmY9xReArIrRquTHMlXSRXvqRxkhRVCtktsWZjLuzS-X3JcepX-HS_pdcIpN779j7l-_6QMDZil1J6GjCvd1Q4vWz8Wc8IMzozKVeAMTdFe6LcFxFECDD4Bd2vlSexmdGke5zYgzJ4FaYm8DCNgcPg20_hbec1_mV592DKMQf2kOzrMIJza4JZEuKrTdL2Cns4negHcE3EYQzIjTEoqeY3yevsC3ieqyIEp2galb6Zb0I4hfjg0_32_JyOLhm0M3HFWu9TzIoGOOIoP608lbDadC28Fw7HDRdd9j6fBkOvKw"
     
     def _load_symbols(self) -> List[str]:
-        """Load danh sách symbols từ file CSV hoặc JSON."""
+        """Load danh sách symbols từ master_symbols.json hoặc CSV."""
         try:
             if self.symbols_file.exists():
                 # Check file extension
@@ -83,13 +84,25 @@ class OHLCVDailyUpdater:
                     try:
                         with open(self.symbols_file, 'r', encoding='utf-8') as f:
                             data = json.load(f)
-                        # JSON được coi là dict với keys là symbols
+
+                        # Support master_symbols.json format
                         if isinstance(data, dict):
-                            symbols = list(data.keys())
+                            if 'all_symbols' in data:
+                                # New master_symbols.json format
+                                symbols = data['all_symbols']
+                                logger.info(f"Loaded master_symbols.json: {len(symbols)} symbols")
+                            elif 'tickers' in data:
+                                # liquid_tickers.json format
+                                symbols = []
+                                for entity_tickers in data['tickers'].values():
+                                    symbols.extend(entity_tickers)
+                            else:
+                                # Legacy format: dict keys are symbols
+                                symbols = list(data.keys())
                         else:
-                            # Fallback nếu JSON là list
+                            # JSON is a list
                             symbols = data
-                        
+
                         # Clean symbols
                         symbols = [str(s).upper().strip() for s in symbols]
                     except Exception as e:
@@ -106,18 +119,18 @@ class OHLCVDailyUpdater:
                         # Fallback: lấy cột đầu tiên
                         symbols = df.iloc[:, 0].str.upper().str.strip().tolist()
             else:
-                # Danh sách symbols mặc định
+                # Danh sách symbols mặc định (top 30 liquid)
                 symbols = [
                     'VCB', 'ACB', 'TCB', 'BID', 'CTG', 'MBB', 'VPB', 'HDB', 'STB', 'TPB',
                     'VIC', 'VHM', 'VRE', 'VGC', 'VNM', 'MSN', 'HPG', 'POW', 'GAS', 'PLX',
                     'FPT', 'CMG', 'VJC', 'SSI', 'HCM', 'VCI', 'SHS', 'VND', 'CTS', 'BSI'
                 ]
                 logger.warning(f"Symbols file not found ({self.symbols_file}), using default list: {len(symbols)} symbols")
-            
+
             # Loại bỏ duplicates và sort
             symbols = sorted(list(set(symbols)))
             return symbols
-            
+
         except Exception as e:
             logger.error(f"Error loading symbols: {e}")
             return ['VCB', 'ACB', 'TCB', 'BID', 'CTG']  # Fallback minimal list

@@ -937,11 +937,11 @@ class ValuationService:
             results.append({
                 'symbol': ticker,
                 'current': current,
-                'p5': p5,
+                'min': clean_data.min(),
                 'p25': clean_data.quantile(0.25),
                 'median': clean_data.quantile(0.50),
                 'p75': clean_data.quantile(0.75),
-                'p95': p95,
+                'max': clean_data.max(),
                 'percentile': percentile,
                 'status': status
             })

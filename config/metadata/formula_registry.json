@@ -65,6 +65,37 @@
         "SECURITY"
       ]
     },
+    "net_margin": {
+      "name_vi": "Biên lợi nhuận ròng",
+      "name_en": "Net Profit Margin",
+      "formula": "(net_profit / net_revenue) * 100",
+      "formula_description": "Net Profit / Net Revenue * 100",
+      "unit": "%",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_62",
+          "CIS_10"
+        ],
+        "BANK": [
+          "BIS_22A",
+          "BBS_1"
+        ],
+        "INSURANCE": [
+          "IIS_60",
+          "IIS_1"
+        ],
+        "SECURITY": [
+          "SIS_60",
+          "SBS_1"
+        ]
+      },
+      "entity_types": [
+        "COMPANY",
+        "BANK",
+        "INSURANCE",
+        "SECURITY"
+      ]
+    },
     "gross_margin": {
       "name_vi": "Biên lợi nhuận gộp",
       "name_en": "Gross Profit Margin",
@@ -79,37 +110,6 @@
       },
       "entity_types": [
         "COMPANY"
-      ]
-    },
-    "net_margin": {
-      "name_vi": "Biên lợi nhuận ròng",
-      "name_en": "Net Profit Margin",
-      "formula": "(net_profit / net_revenue) * 100",
-      "formula_description": "Net Profit / Net Revenue * 100",
-      "unit": "%",
-      "dependencies": {
-        "COMPANY": [
-          "CIS_62",
-          "CIS_10"
-        ],
-        "BANK": [
-          "BIS_22A",
-          "BIS_1"
-        ],
-        "INSURANCE": [
-          "IIS_60",
-          "IIS_01"
-        ],
-        "SECURITY": [
-          "SIS_60",
-          "SIS_10"
-        ]
-      },
-      "entity_types": [
-        "COMPANY",
-        "BANK",
-        "INSURANCE",
-        "SECURITY"
       ]
     },
     "eps": {
@@ -142,6 +142,559 @@
         "INSURANCE",
         "SECURITY"
       ]
+    },
+    "ebit": {
+      "name_vi": "Lợi nhuận trước thuế và lãi vay",
+      "name_en": "Earnings Before Interest and Taxes",
+      "formula": "gross_profit + sga",
+      "formula_description": "Gross Profit + SG&A",
+      "unit": "VND",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_20",
+          "CIS_50"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "ebitda": {
+      "name_vi": "Lợi nhuận trước thuế, lãi vay và khấu hao",
+      "name_en": "EBITDA",
+      "formula": "ebit + depreciation",
+      "formula_description": "EBIT + Depreciation",
+      "unit": "VND",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_20",
+          "CIS_50",
+          "CIS_51"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "working_capital": {
+      "name_vi": "Vốn lưu động ròng",
+      "name_en": "Working Capital",
+      "formula": "current_assets - current_liabilities",
+      "formula_description": "Current Assets - Current Liabilities",
+      "unit": "VND",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_110",
+          "CBS_270"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "net_debt": {
+      "name_vi": "Nợ ròng",
+      "name_en": "Net Debt",
+      "formula": "(st_debt + lt_debt) - cash",
+      "formula_description": "Short-term Debt + Long-term Debt - Cash",
+      "unit": "VND",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_120",
+          "CBS_400",
+          "CBS_270"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "net_revenue_ttm": {
+      "name_vi": "Doanh thu 12 tháng",
+      "name_en": "Trailing Twelve Months Revenue",
+      "formula": "sum of last 4 quarters",
+      "unit": "VND",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_10"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "npatmi_ttm": {
+      "name_vi": "Lợi nhuận ròng 12 tháng",
+      "name_en": "Trailing Twelve Months Net Profit",
+      "formula": "sum of last 4 quarters",
+      "unit": "VND",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_62"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "operating_cf_ttm": {
+      "name_vi": "Dòng tiền từ hoạt động kinh doanh 12 tháng",
+      "name_en": "Trailing Twelve Months Operating Cash Flow",
+      "formula": "sum of last 4 quarters",
+      "unit": "VND",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_50"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "net_revenue_yoy_growth": {
+      "name_vi": "Tăng trưởng doanh thu YoY",
+      "name_en": "Year-over-Year Revenue Growth",
+      "formula": "(current_year_revenue - previous_year_revenue) / abs(previous_year_revenue) * 100",
+      "unit": "%",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_10"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "npatmi_yoy_growth": {
+      "name_vi": "Tăng trưởng lợi nhuận YoY",
+      "name_en": "Year-over-Year Net Profit Growth",
+      "formula": "(current_year_npatmi - previous_year_npatmi) / abs(previous_year_npatmi) * 100",
+      "unit": "%",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_62"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "roe_yoy_growth": {
+      "name_vi": "Tăng trưởng ROE YoY",
+      "name_en": "Year-over-Year ROE Growth",
+      "formula": "(current_year_roe - previous_year_roe) / abs(previous_year_roe) * 100",
+      "unit": "%",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_62",
+          "CBS_270"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "roe_delta_qoq": {
+      "name_vi": "Thay đổi ROE quý-so-với-quý",
+      "name_en": "Quarter-over-Quarter ROE Delta",
+      "formula": "current_quarter_roe - previous_quarter_roe",
+      "unit": "percentage points",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_62",
+          "CBS_270"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "net_revenue_b": {
+      "name_vi": "Doanh thu (tỷ VND)",
+      "name_en": "Net Revenue (billions VND)",
+      "formula": "net_revenue / 1e9",
+      "unit": "billions VND",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_10"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "npatmi_b": {
+      "name_vi": "Lợi nhuận (tỷ VND)",
+      "name_en": "Net Profit (billions VND)",
+      "formula": "npatmi / 1e9",
+      "unit": "billions VND",
+      "dependencies": {
+        "COMPANY": [
+          "CIS_62"
+        ]
+      },
+      "entity_types": [
+        "COMPANY"
+      ]
+    },
+    "nim": {
+      "name_vi": "Tỷ lệ lãi thuần ròng",
+      "name_en": "Net Interest Margin",
+      "formula": "(interest_income - interest_expense) / total_assets",
+      "formula_description": "Net Interest Income / Total Assets",
+      "unit": "%",
+      "dependencies": {
+        "BANK": [
+          "BIS_1",
+          "BIS_120",
+          "BBS_330"
+        ]
+      },
+      "entity_types": [
+        "BANK"
+      ]
+    },
+    "nii": {
+      "name_vi": "Thu nhập lãi thuần khác",
+      "name_en": "Net Other Interest Income",
+      "formula": "toi - nii",
+      "formula_description": "Total Operating Income - Net Interest Income",
+      "unit": "VND",
+      "dependencies": {
+        "BANK": [
+          "BIS_1",
+          "BIS_120",
+          "BBS_330"
+        ]
+      },
+      "entity_types": [
+        "BANK"
+      ]
+    },
+    "toi": {
+      "name_vi": "Tổng thu nhập",
+      "name_en": "Total Operating Income",
+      "formula": "interest_income + nii",
+      "formula_description": "Total Operating Income",
+      "unit": "VND",
+      "dependencies": {
+        "BANK": [
+          "BIS_1",
+          "BIS_120",
+          "BBS_330"
+        ]
+      },
+      "entity_types": [
+        "BANK"
+      ]
+    },
+    "npl_ratio": {
+      "name_vi": "Tỷ lệ nợ xấu",
+      "name_en": "Non-Performing Loan Ratio",
+      "formula": "(npl_amount / total_loan) * 100",
+      "formula_description": "Non-Performing Loans / Total Loans",
+      "unit": "%",
+      "dependencies": {
+        "BANK": [
+          "BNOT_31_1",
+          "BBS_161"
+        ]
+      },
+      "entity_types": [
+        "BANK"
+      ]
+    },
+    "casa_ratio": {
+      "name_vi": "Tỷ lệ CASA",
+      "name_en": "Current Account Savings Account Ratio",
+      "formula": "(customer_deposit / total_loan) * 100",
+      "formula_description": "Current Account Savings Account / Total Loans",
+      "unit": "%",
+      "dependencies": {
+        "BANK": [
+          "BBS_161",
+          "BBS_330",
+          "BBS_370"
+        ]
+      },
+      "entity_types": [
+        "BANK"
+      ]
+    },
+    "roea_ttm": {
+      "name_vi": "ROE trung bình 12 tháng",
+      "name_en": "Return on Equity (TTM)",
+      "formula": "(net_profit_ttm / equity_avg_2q) * 100",
+      "unit": "%",
+      "dependencies": {
+        "BANK": [
+          "BIS_22A",
+          "BBS_400"
+        ]
+      },
+      "entity_types": [
+        "BANK"
+      ]
+    },
+    "roaa_ttm": {
+      "name_vi": "ROA trung bình 12 tháng",
+      "name_en": "Return on Assets (TTM)",
+      "formula": "(net_profit_ttm / assets_avg_2q) * 100",
+      "unit": "%",
+      "dependencies": {
+        "BANK": [
+          "BIS_22A",
+          "BBS_100"
+        ]
+      },
+      "entity_types": [
+        "BANK"
+      ]
+    },
+    "eps_ttm": {
+      "name_vi": "EPS trung bình 12 tháng",
+      "name_en": "Earnings Per Share (TTM)",
+      "formula": "(net_profit_ttm * 1e9) / (common_shares * 10000)",
+      "unit": "VND",
+      "dependencies": {
+        "BANK": [
+          "BIS_22A",
+          "BBS_411"
+        ]
+      },
+      "entity_types": [
+        "BANK"
+      ]
+    },
+    "combined_ratio": {
+      "name_vi": "Tỷ lệ kết hợp",
+      "name_en": "Combined Ratio",
+      "formula": "loss_ratio + expense_ratio",
+      "formula_description": "Loss Ratio + Expense Ratio",
+      "unit": "%",
+      "dependencies": {
+        "INSURANCE": [
+          "IIS_3",
+          "IIS_1"
+        ]
+      },
+      "entity_types": [
+        "INSURANCE"
+      ]
+    },
+    "loss_ratio": {
+      "name_vi": "Tỷ lệ tổn thất",
+      "name_en": "Loss Ratio",
+      "formula": "claims_paid / premiums_earned",
+      "formula_description": "Claims Paid / Premiums Earned",
+      "unit": "%",
+      "dependencies": {
+        "INSURANCE": [
+          "IIS_3",
+          "IIS_1"
+        ]
+      },
+      "entity_types": [
+        "INSURANCE"
+      ]
+    },
+    "expense_ratio": {
+      "name_vi": "Tỷ lệ chi phí",
+      "name_en": "Expense Ratio",
+      "formula": "underwriting_expense / premiums_earned",
+      "formula_description": "Underwriting Expense / Premiums Earned",
+      "unit": "%",
+      "dependencies": {
+        "INSURANCE": [
+          "IIS_3",
+          "IIS_1"
+        ]
+      },
+      "entity_types": [
+        "INSURANCE"
+      ]
+    },
+    "investment_yield": {
+      "name_vi": "Tỷ suất sinh lời từ đầu tư",
+      "name_en": "Investment Yield",
+      "formula": "(investment_income / investments) * 100",
+      "unit": "%",
+      "dependencies": {
+        "INSURANCE": [
+          "IIS_8",
+          "IBS_8"
+        ]
+      },
+      "entity_types": [
+        "INSURANCE"
+      ]
+    },
+    "solvency_ratio": {
+      "name_vi": "Tỷ lệ khả năng thanh toán",
+      "name_en": "Solvency Ratio",
+      "formula": "(total_equity / total_assets) * 100",
+      "unit": "%",
+      "dependencies": {
+        "INSURANCE": [
+          "IBS_270"
+        ]
+      },
+      "entity_types": [
+        "INSURANCE"
+      ]
+    },
+    "proprietary_ratio": {
+      "name_vi": "Tỷ lệ giao dịch tự doanh",
+      "name_en": "Proprietary Trading Ratio",
+      "formula": "(proprietary_trading_income / total_revenue) * 100",
+      "unit": "%",
+      "dependencies": {
+        "SECURITY": [
+          "SIS_7",
+          "SIS_1"
+        ]
+      },
+      "entity_types": [
+        "SECURITY"
+      ]
+    },
+    "margin_lending_ratio": {
+      "name_vi": "Tỷ lệ cho vay ký quỹ",
+      "name_en": "Margin Lending Ratio",
+      "formula": "(margin_lending_income / total_revenue) * 100",
+      "unit": "%",
+      "dependencies": {
+        "SECURITY": [
+          "SIS_7",
+          "SIS_1"
+        ]
+      },
+      "entity_types": [
+        "SECURITY"
+      ]
+    },
+    "bvps": {
+      "name_vi": "Giá trị sổ sách trên mỗi cổ phiếu",
+      "name_en": "Book Value Per Share",
+      "formula": "total_equity / common_shares",
+      "unit": "VND",
+      "dependencies": {
+        "SECURITY": [
+          "SBS_270"
+        ]
+      },
+      "entity_types": [
+        "SECURITY"
+      ]
     }
+  },
+  "roa": {
+    "name_vi": "Tỷ suất sinh lời trên tổng tài sản",
+    "name_en": "Return on Assets",
+    "formula": "(net_profit / total_assets) * 100",
+    "formula_description": "Net Profit / Total Assets * 100",
+    "unit": "%",
+    "dependencies": {
+      "COMPANY": [
+        "CIS_62",
+        "CBS_100"
+      ],
+      "BANK": [
+        "BIS_22A",
+        "BBS_100"
+      ],
+      "INSURANCE": [
+        "IIS_60",
+        "IBS_100"
+      ],
+      "SECURITY": [
+        "SIS_60",
+        "SBS_100"
+      ]
+    },
+    "entity_types": [
+      "COMPANY",
+      "BANK",
+      "INSURANCE",
+      "SECURITY"
+    ]
+  },
+  "gross_margin": {
+    "name_vi": "Biên lợi nhuận gộp",
+    "name_en": "Gross Profit Margin",
+    "formula": "(gross_profit / net_revenue) * 100",
+    "formula_description": "Gross Profit / Net Revenue * 100",
+    "unit": "%",
+    "dependencies": {
+      "COMPANY": [
+        "CIS_20",
+        "CIS_10"
+      ]
+    },
+    "entity_types": [
+      "COMPANY"
+    ]
+  },
+  "net_margin": {
+    "name_vi": "Biên lợi nhuận ròng",
+    "name_en": "Net Profit Margin",
+    "formula": "(net_profit / net_revenue) * 100",
+    "formula_description": "Net Profit / Net Revenue * 100",
+    "unit": "%",
+    "dependencies": {
+      "COMPANY": [
+        "CIS_62",
+        "CIS_10"
+      ],
+      "BANK": [
+        "BIS_22A",
+        "BIS_1"
+      ],
+      "INSURANCE": [
+        "IIS_60",
+        "IIS_01"
+      ],
+      "SECURITY": [
+        "SIS_60",
+        "SIS_10"
+      ]
+    },
+    "entity_types": [
+      "COMPANY",
+      "BANK",
+      "INSURANCE",
+      "SECURITY"
+    ]
+  },
+  "eps": {
+    "name_vi": "Lãi cơ bản trên cổ phiếu",
+    "name_en": "Earnings Per Share",
+    "formula": "(net_profit * 1e9) / (common_shares / 10000)",
+    "formula_description": "Net Profit / Common Shares Outstanding",
+    "unit": "VND",
+    "dependencies": {
+      "COMPANY": [
+        "CIS_62",
+        "CBS_411A"
+      ],
+      "BANK": [
+        "BIS_22A",
+        "BBS_411"
+      ],
+      "INSURANCE": [
+        "IIS_60",
+        "IBS_411"
+      ],
+      "SECURITY": [
+        "SIS_60",
+        "SBS_411"
+      ]
+    },
+    "entity_types": [
+      "COMPANY",
+      "BANK",
+      "INSURANCE",
+      "SECURITY"
+    ]
   }
 }

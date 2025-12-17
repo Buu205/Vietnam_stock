@@ -1,3 +1,12 @@
+"""
+Financial Metrics Loader
+========================
+
+Unified service for loading financial metrics for Streamlit dashboards.
+Uses SymbolLoader for liquid tickers (315 symbols with >1B VND/day trading value).
+
+Updated: 2025-12-17 - Use SymbolLoader instead of SectorRegistry for symbol lists
+"""
 
 import logging
 import pandas as pd
@@ -6,7 +15,8 @@ import streamlit as st
 from typing import Dict, Any, Optional, List
 from pathlib import Path
 
-# Project imports
+# Project imports - Use SymbolLoader for symbol lists
+from WEBAPP.core.symbol_loader import SymbolLoader
 from config.registries.sector_lookup import SectorRegistry
 from config.registries.metric_lookup import MetricRegistry
 from WEBAPP.core.data_paths import (
@@ -20,18 +30,20 @@ class FinancialMetricsLoader:
     """
     Unified service for loading financial metrics for Streamlit dashboards.
     Automates entity type detection and data path resolution.
+    Uses SymbolLoader for liquid tickers (315 symbols).
     """
-    
+
     _instance = None
-    
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(FinancialMetricsLoader, cls).__new__(cls)
             cls._instance._initialize()
         return cls._instance
-    
+
     def _initialize(self):
-        self.sector_registry = SectorRegistry()
+        self.symbol_loader = SymbolLoader()  # For symbol lists
+        self.sector_registry = SectorRegistry()  # For ticker info lookup only
         self.metric_registry = MetricRegistry()
         self._duckdb_conn = duckdb.connect() # Persist connection if needed, or create per request
         
@@ -112,8 +124,17 @@ class FinancialMetricsLoader:
         return self.metric_registry.get_metric(metric_code)
     
     def get_all_symbols(self, entity_type: str = None) -> List[str]:
-        """Get all symbols, optionally filtered by entity type"""
+        """
+        Get all liquid symbols (315 symbols with >1B VND/day trading value).
+        Optionally filtered by entity type.
+
+        Args:
+            entity_type: 'COMPANY', 'BANK', 'SECURITY', 'INSURANCE' or None for all
+
+        Returns:
+            List of liquid symbols
+        """
         if entity_type:
-            return self.sector_registry.get_tickers_by_entity_type(entity_type)
+            return self.symbol_loader.get_symbols_by_entity(entity_type.upper())
         else:
-            return self.sector_registry.get_all_tickers()
+            return self.symbol_loader.get_all_symbols()

@@ -2,15 +2,18 @@
 
 Cung cấp API load dữ liệu chuẩn (DuckDB/Parquet), có cache và lọc outlier
 mặc định. Domain có thể kế thừa/ghi đè ở thư mục `domains/`.
+
+Updated: 2025-12-17 - Added get_all_symbols() using SymbolLoader
 """
 
 from __future__ import annotations
 import duckdb
 import pandas as pd
-from typing import Dict, List
+from typing import Dict, List, Optional
 from WEBAPP.core.constants import OUTLIERS_DEFAULT
 from WEBAPP.core.utils import clip_outliers
 from WEBAPP.core.formatters import format_valuation_df, format_value
+from WEBAPP.core.symbol_loader import SymbolLoader
 
 
 def get_connection() -> duckdb.DuckDBPyConnection:
@@ -21,8 +24,26 @@ def get_connection() -> duckdb.DuckDBPyConnection:
     return duckdb.connect()
 
 
+def get_all_symbols(entity_type: Optional[str] = None) -> List[str]:
+    """
+    Get list of liquid symbols from master_symbols.json.
+    Returns 315 symbols with >1B VND/day trading value.
+
+    Args:
+        entity_type: 'COMPANY', 'BANK', 'SECURITY', 'INSURANCE' or None for all
+
+    Returns:
+        List of liquid symbols
+    """
+    loader = SymbolLoader()
+    if entity_type:
+        return loader.get_symbols_by_entity(entity_type.upper())
+    return loader.get_all_symbols()
+
+
 def load_symbol_list(path: str) -> List[str]:
     """Load danh sách symbol duy nhất từ file parquet.
+    NOTE: Consider using get_all_symbols() instead for liquid tickers only.
 
     Args:
         path: absolute path đến parquet symbols nguồn.

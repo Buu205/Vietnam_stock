@@ -150,12 +150,13 @@ class DataPaths:
             >>> DataPaths.valuation('pe')
             Path('.../DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet')
         """
+        # Updated 2025-12-16 to match new canonical paths
         metric_map = {
-            'pe': 'valuation/pe/pe_historical_all_symbols_final.parquet',
-            'pb': 'valuation/pb/pb_historical_all_symbols_final.parquet',
-            'ev_ebitda': 'valuation/ev_ebitda/ev_ebitda_historical_all_symbols_final.parquet',
-            'vnindex_pe': 'valuation/vnindex_pe_historical_final.parquet',
-            'sector_pe': 'valuation/sector_pe/sector_pe_historical_final.parquet'
+            'pe': 'valuation/pe/historical/historical_pe.parquet',
+            'pb': 'valuation/pb/historical/historical_pb.parquet',
+            'ev_ebitda': 'valuation/ev_ebitda/historical/historical_ev_ebitda.parquet',
+            'vnindex_pe': 'valuation/vnindex/vnindex_valuation_refined.parquet',
+            'sector_pe': 'sector/sector_valuation_metrics.parquet'
         }
         
         if metric not in metric_map:

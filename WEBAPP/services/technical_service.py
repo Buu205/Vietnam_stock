@@ -3,12 +3,15 @@ Technical Service - Data Loading Layer
 ======================================
 
 Service for loading technical indicators data from parquet files.
+Uses SymbolLoader for liquid tickers (315 symbols with >1B VND/day trading value).
 
 Usage:
     from WEBAPP.services.technical_service import TechnicalService
 
     service = TechnicalService()
     df = service.get_technical_data("VNM", limit=100)
+
+Updated: 2025-12-17 - Use SymbolLoader for symbol lists
 """
 
 import pandas as pd
@@ -38,6 +41,9 @@ class TechnicalService:
                 f"Technical data path not found: {self.data_path}\n"
                 f"Please ensure DATA/processed/technical/ exists."
             )
+
+        # Initialize SymbolLoader
+        self._symbol_loader = None
 
     def get_technical_data(
         self,
@@ -94,15 +100,33 @@ class TechnicalService:
         df = self.get_technical_data(ticker, limit=1)
         return df.iloc[-1].to_dict() if not df.empty else {}
 
-    def get_available_tickers(self) -> List[str]:
-        """Get list of available tickers with technical data."""
-        parquet_file = self.data_path / "basic_data.parquet"
+    def get_available_tickers(self, entity_type: Optional[str] = None) -> List[str]:
+        """
+        Get list of liquid tickers from master_symbols.json.
+        Returns 315 symbols with >1B VND/day trading value.
 
-        if not parquet_file.exists():
-            return []
+        Args:
+            entity_type: 'COMPANY', 'BANK', 'SECURITY', 'INSURANCE' or None for all
 
-        df = pd.read_parquet(parquet_file, columns=['symbol'])
-        return sorted(df['symbol'].unique().tolist())
+        Returns:
+            List of liquid symbols
+        """
+        try:
+            if self._symbol_loader is None:
+                from WEBAPP.core.symbol_loader import SymbolLoader
+                self._symbol_loader = SymbolLoader()
+
+            if entity_type:
+                return self._symbol_loader.get_symbols_by_entity(entity_type.upper())
+            return self._symbol_loader.get_all_symbols()
+        except Exception as e:
+            print(f"Warning: Could not load SymbolLoader - {e}")
+            # Fallback to parquet if SymbolLoader fails
+            parquet_file = self.data_path / "basic_data.parquet"
+            if not parquet_file.exists():
+                return []
+            df = pd.read_parquet(parquet_file, columns=['symbol'])
+            return sorted(df['symbol'].unique().tolist())
 
     def get_market_breadth(self) -> pd.DataFrame:
         """Get market breadth data."""
