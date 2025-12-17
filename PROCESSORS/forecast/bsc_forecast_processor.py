@@ -302,7 +302,7 @@ class BSCForecastProcessor:
         all_data = []
         entity_files = {
             'company': ('company_financial_metrics.parquet', 'net_revenue'),
-            'bank': ('bank_financial_metrics.parquet', 'total_operating_income'),
+            'bank': ('bank_financial_metrics.parquet', 'toi'),  # Total Operating Income (BSC uses TOI as REV for banks)
             'insurance': ('insurance_financial_metrics.parquet', 'total_revenue'),
             'security': ('security_financial_metrics.parquet', 'total_revenue'),
         }
@@ -399,7 +399,7 @@ class BSCForecastProcessor:
         all_data = []
         entity_files = {
             'company': ('company_financial_metrics.parquet', 'net_revenue'),
-            'bank': ('bank_financial_metrics.parquet', 'total_operating_income'),
+            'bank': ('bank_financial_metrics.parquet', 'toi'),  # Total Operating Income (BSC uses TOI as REV for banks)
             'insurance': ('insurance_financial_metrics.parquet', 'total_revenue'),
             'security': ('security_financial_metrics.parquet', 'total_revenue'),
         }
@@ -611,10 +611,17 @@ class BSCForecastProcessor:
             'market_cap': 'sum',
             'npatmi_2025f': 'sum',
             'npatmi_2026f': 'sum',
+            'rev_2025f': 'sum',
+            'rev_2026f': 'sum',
             'total_equity': 'sum',
             'upside_pct': 'mean',
             'roe_2025f': 'mean',
             'roe_2026f': 'mean',
+            # Growth metrics - average across stocks in sector
+            'rev_growth_yoy_2025': 'mean',
+            'rev_growth_yoy_2026': 'mean',
+            'npatmi_growth_yoy_2025': 'mean',
+            'npatmi_growth_yoy_2026': 'mean',
         }).reset_index()
 
         sector_agg = sector_agg.rename(columns={
@@ -622,10 +629,16 @@ class BSCForecastProcessor:
             'market_cap': 'total_market_cap',
             'npatmi_2025f': 'total_npatmi_2025f',
             'npatmi_2026f': 'total_npatmi_2026f',
+            'rev_2025f': 'total_rev_2025f',
+            'rev_2026f': 'total_rev_2026f',
             'total_equity': 'total_equity_ttm',
             'upside_pct': 'avg_upside_pct',
             'roe_2025f': 'avg_roe_2025f',
             'roe_2026f': 'avg_roe_2026f',
+            'rev_growth_yoy_2025': 'avg_rev_growth_2025',
+            'rev_growth_yoy_2026': 'avg_rev_growth_2026',
+            'npatmi_growth_yoy_2025': 'avg_npatmi_growth_2025',
+            'npatmi_growth_yoy_2026': 'avg_npatmi_growth_2026',
         })
 
         # Calculate forward equity
@@ -649,9 +662,12 @@ class BSCForecastProcessor:
         # Select and order columns
         output_cols = [
             'bsc_sector', 'vn_sector', 'symbol_count',
-            'total_market_cap', 'total_npatmi_2025f', 'total_npatmi_2026f',
+            'total_market_cap', 'total_rev_2025f', 'total_rev_2026f',
+            'total_npatmi_2025f', 'total_npatmi_2026f',
             'total_equity_2025f', 'total_equity_2026f',
             'pe_fwd_2025', 'pe_fwd_2026', 'pb_fwd_2025', 'pb_fwd_2026',
+            'avg_rev_growth_2025', 'avg_rev_growth_2026',
+            'avg_npatmi_growth_2025', 'avg_npatmi_growth_2026',
             'avg_upside_pct', 'avg_roe_2025f', 'avg_roe_2026f', 'updated_at'
         ]
 

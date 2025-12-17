@@ -17,6 +17,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import sys
 from pathlib import Path
+from io import BytesIO
 
 project_root = Path(__file__).resolve().parents[3]
 if str(project_root) not in sys.path:
@@ -381,16 +382,22 @@ with tab1:
 
             st.markdown(render_styled_table(formatted_earnings, highlight_first_col=True), unsafe_allow_html=True)
 
-        # Download button
+        # Download button - Excel format
         st.markdown("---")
         all_cols = [c for c in df.columns if c != 'updated_at']
         raw_download = filtered_df[all_cols].copy()
-        csv = raw_download.to_csv(index=False).encode('utf-8')
+
+        # Create Excel file in memory
+        excel_buffer = BytesIO()
+        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+            raw_download.to_excel(writer, index=False, sheet_name='Individual Stocks')
+        excel_data = excel_buffer.getvalue()
+
         st.download_button(
-            "Download Full Individual Stocks Data (CSV)",
-            csv,
-            "bsc_forecast_individual.csv",
-            "text/csv",
+            "📥 Download Full Individual Stocks Data (Excel)",
+            excel_data,
+            "bsc_forecast_individual.xlsx",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             use_container_width=True
         )
     else:
@@ -405,21 +412,64 @@ with tab2:
     st.markdown("*PE/PB Forward 2025-2026 aggregated by BSC sector classification*")
 
     if not sector_df.empty:
-        # Create display dataframe
-        sector_display = pd.DataFrame()
-        sector_display['Sector'] = sector_df['bsc_sector']
-        sector_display['VN Sector'] = sector_df['vn_sector']
-        sector_display['Stocks'] = sector_df['symbol_count'].astype(int)
-        sector_display['Mkt Cap'] = sector_df['total_market_cap'].apply(format_market_cap)
-        sector_display['PE 25F'] = sector_df['pe_fwd_2025'].apply(lambda x: format_number(x, 1, 'x'))
-        sector_display['PE 26F'] = sector_df['pe_fwd_2026'].apply(lambda x: format_number(x, 1, 'x'))
-        sector_display['PB 25F'] = sector_df['pb_fwd_2025'].apply(lambda x: format_number(x, 2, 'x'))
-        sector_display['PB 26F'] = sector_df['pb_fwd_2026'].apply(lambda x: format_number(x, 2, 'x'))
-        sector_display['Avg Upside'] = sector_df['avg_upside_pct'].apply(format_upside)
-        sector_display['Avg ROE 25F'] = sector_df['avg_roe_2025f'].apply(lambda x: format_number(x * 100 if pd.notna(x) else None, 1, '%'))
+        # Sub-tabs for different views of sector data
+        sector_tab1, sector_tab2 = st.tabs(["Valuation View", "Growth View"])
 
-        # Render styled table
-        st.markdown(render_styled_table(sector_display, highlight_first_col=True), unsafe_allow_html=True)
+        with sector_tab1:
+            st.markdown("#### PE/PB Forward by Sector")
+            # Create display dataframe - Valuation focus
+            sector_display = pd.DataFrame()
+            sector_display['Sector'] = sector_df['bsc_sector']
+            sector_display['VN Sector'] = sector_df['vn_sector']
+            sector_display['Stocks'] = sector_df['symbol_count'].astype(int)
+            sector_display['Mkt Cap'] = sector_df['total_market_cap'].apply(format_market_cap)
+            sector_display['PE 25F'] = sector_df['pe_fwd_2025'].apply(lambda x: format_number(x, 1, 'x'))
+            sector_display['PE 26F'] = sector_df['pe_fwd_2026'].apply(lambda x: format_number(x, 1, 'x'))
+            sector_display['PB 25F'] = sector_df['pb_fwd_2025'].apply(lambda x: format_number(x, 2, 'x'))
+            sector_display['PB 26F'] = sector_df['pb_fwd_2026'].apply(lambda x: format_number(x, 2, 'x'))
+            sector_display['Avg Upside'] = sector_df['avg_upside_pct'].apply(format_upside)
+            sector_display['Avg ROE 25F'] = sector_df['avg_roe_2025f'].apply(lambda x: format_number(x * 100 if pd.notna(x) else None, 1, '%'))
+
+            # Render styled table
+            st.markdown(render_styled_table(sector_display, highlight_first_col=True), unsafe_allow_html=True)
+
+        with sector_tab2:
+            st.markdown("#### Revenue & Profit Growth by Sector (YoY)")
+            st.markdown("*Tăng trưởng doanh thu và LNST trung bình theo ngành, chỉ tính các mã BSC coverage*")
+
+            # Create display dataframe - Growth focus
+            sector_growth = pd.DataFrame()
+            sector_growth['Sector'] = sector_df['bsc_sector']
+            sector_growth['VN Sector'] = sector_df['vn_sector']
+            sector_growth['Stocks'] = sector_df['symbol_count'].astype(int)
+            sector_growth['Mkt Cap'] = sector_df['total_market_cap'].apply(format_market_cap)
+
+            # Revenue growth columns
+            if 'avg_rev_growth_2025' in sector_df.columns:
+                sector_growth['Rev Gr 25F'] = sector_df['avg_rev_growth_2025'].apply(format_growth)
+            if 'avg_rev_growth_2026' in sector_df.columns:
+                sector_growth['Rev Gr 26F'] = sector_df['avg_rev_growth_2026'].apply(format_growth)
+
+            # Profit growth columns
+            if 'avg_npatmi_growth_2025' in sector_df.columns:
+                sector_growth['Profit Gr 25F'] = sector_df['avg_npatmi_growth_2025'].apply(format_growth)
+            if 'avg_npatmi_growth_2026' in sector_df.columns:
+                sector_growth['Profit Gr 26F'] = sector_df['avg_npatmi_growth_2026'].apply(format_growth)
+
+            sector_growth['Avg ROE 25F'] = sector_df['avg_roe_2025f'].apply(lambda x: format_number(x * 100 if pd.notna(x) else None, 1, '%'))
+            sector_growth['Avg Upside'] = sector_df['avg_upside_pct'].apply(format_upside)
+
+            # Render styled table
+            st.markdown(render_styled_table(sector_growth, highlight_first_col=True), unsafe_allow_html=True)
+
+            # Legend
+            st.markdown("""
+            **Giải thích:**
+            - **Rev Gr 25F**: Tăng trưởng doanh thu 2024 → 2025 (forecast)
+            - **Rev Gr 26F**: Tăng trưởng doanh thu 2025F → 2026F
+            - **Profit Gr 25F**: Tăng trưởng LNST 2024 → 2025 (forecast)
+            - **Profit Gr 26F**: Tăng trưởng LNST 2025F → 2026F
+            """)
 
         # Summary metrics
         st.markdown("---")
@@ -439,13 +489,17 @@ with tab2:
         with col4:
             st.metric("Median PB 25F", f"{avg_pb:.2f}x" if pd.notna(avg_pb) else "N/A")
 
-        # Download button
-        csv = sector_df.to_csv(index=False).encode('utf-8')
+        # Download button - Excel format
+        excel_buffer = BytesIO()
+        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+            sector_df.to_excel(writer, index=False, sheet_name='Sector Valuation')
+        excel_data = excel_buffer.getvalue()
+
         st.download_button(
-            "Download Sector Valuation Data (CSV)",
-            csv,
-            "bsc_forecast_sector.csv",
-            "text/csv",
+            "📥 Download Sector Valuation Data (Excel)",
+            excel_data,
+            "bsc_forecast_sector.xlsx",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             use_container_width=True
         )
     else:
@@ -562,14 +616,20 @@ with tab3:
         fig.update_layout(**layout)
         st.plotly_chart(fig, use_container_width=True)
 
-        # Download
-        csv = achievement_df[['symbol', 'bsc_sector', 'rev_2025f', 'rev_ytd_2025', 'rev_achievement_pct',
-                             'npatmi_2025f', 'npatmi_ytd_2025', 'npatmi_achievement_pct', 'rating']].to_csv(index=False).encode('utf-8')
+        # Download - Excel format
+        achievement_download = achievement_df[['symbol', 'bsc_sector', 'rev_2025f', 'rev_ytd_2025', 'rev_achievement_pct',
+                             'npatmi_2025f', 'npatmi_ytd_2025', 'npatmi_achievement_pct', 'rating']].copy()
+
+        excel_buffer = BytesIO()
+        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+            achievement_download.to_excel(writer, index=False, sheet_name='9M Achievement')
+        excel_data = excel_buffer.getvalue()
+
         st.download_button(
-            "Download 9M Achievement Data (CSV)",
-            csv,
-            "bsc_forecast_9m_achievement.csv",
-            "text/csv",
+            "📥 Download 9M Achievement Data (Excel)",
+            excel_data,
+            "bsc_forecast_9m_achievement.xlsx",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             use_container_width=True
         )
     else:
