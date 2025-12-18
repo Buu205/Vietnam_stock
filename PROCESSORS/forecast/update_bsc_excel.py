@@ -14,13 +14,39 @@ Updated: 2025-12-17
 """
 
 import sys
+import os
 from pathlib import Path
+from datetime import datetime
 
-# Add project root to path
+# Add project root to path - works from any directory
 project_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(project_root))
 
+# Change to project root to ensure relative paths work
+os.chdir(project_root)
+
+import pandas as pd
 from PROCESSORS.forecast.bsc_forecast_processor import BSCForecastProcessor
+
+
+def verify_update(parquet_path: Path, symbol: str = "HDB") -> dict:
+    """Verify the parquet was updated correctly."""
+    if not parquet_path.exists():
+        return {"error": "Parquet file not found"}
+
+    df = pd.read_parquet(parquet_path)
+    row = df[df['symbol'] == symbol]
+
+    if len(row) == 0:
+        return {"error": f"{symbol} not found in parquet"}
+
+    return {
+        "symbol": symbol,
+        "target_price": row['target_price'].values[0],
+        "current_price": row['current_price'].values[0],
+        "updated_at": str(row['updated_at'].values[0]),
+        "file_mtime": datetime.fromtimestamp(parquet_path.stat().st_mtime).isoformat()
+    }
 
 
 def main():
@@ -29,26 +55,62 @@ def main():
     print("BSC Forecast Excel Re-read")
     print("=" * 60)
     print()
+    print(f"Project Root: {project_root}")
+    print(f"Working Dir:  {os.getcwd()}")
+    print()
 
     # Check if Excel file exists
     excel_path = project_root / "DATA" / "processed" / "forecast" / "BSC Forecast.xlsx"
+    parquet_path = project_root / "DATA" / "processed" / "forecast" / "bsc" / "bsc_individual.parquet"
+
     if not excel_path.exists():
         print(f"ERROR: Excel file not found at {excel_path}")
         print("Please ensure the BSC Forecast Excel file exists.")
         sys.exit(1)
 
+    # Show BEFORE state
+    print("=" * 60)
+    print("BEFORE UPDATE")
+    print("=" * 60)
+    before = verify_update(parquet_path)
+    if "error" not in before:
+        print(f"  HDB Target Price: {before['target_price']:,.0f}")
+        print(f"  Last Updated: {before['updated_at']}")
+    else:
+        print(f"  {before['error']}")
+    print()
+
     print(f"Excel file: {excel_path}")
+    print(f"Excel mtime: {datetime.fromtimestamp(excel_path.stat().st_mtime).isoformat()}")
     print()
 
     # Run processor
-    processor = BSCForecastProcessor(project_root)
-    result = processor.run(generate_readme=True)
+    try:
+        processor = BSCForecastProcessor(project_root)
+        result = processor.run(generate_readme=True)
+    except Exception as e:
+        print(f"ERROR: Failed to run processor: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
     # Print summary
     individual = result['individual']
     sector = result['sector']
 
     print()
+    print("=" * 60)
+    print("AFTER UPDATE")
+    print("=" * 60)
+    after = verify_update(parquet_path)
+    if "error" not in after:
+        print(f"  HDB Target Price: {after['target_price']:,.0f}")
+        print(f"  Updated At: {after['updated_at']}")
+        print(f"  File mtime: {after['file_mtime']}")
+    else:
+        print(f"  {after['error']}")
+    print()
+
     print("=" * 60)
     print("SUMMARY")
     print("=" * 60)
@@ -89,9 +151,8 @@ def main():
     print(f"  - DATA/processed/forecast/bsc/bsc_combined.parquet")
     print(f"  - DATA/processed/forecast/bsc/README.md")
     print()
-    print("Done!")
+    print("✅ Done!")
 
 
 if __name__ == "__main__":
-    import pandas as pd
     main()

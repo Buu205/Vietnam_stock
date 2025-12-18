@@ -17,7 +17,15 @@ Run:
 """
 
 import streamlit as st
+import sys
 from pathlib import Path
+
+# Add project root to path for imports
+project_root = Path(__file__).resolve().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from WEBAPP.core.styles import get_page_style
 
 # ============================================================================
 # PAGE CONFIG - Must be first Streamlit command
@@ -28,6 +36,11 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# ============================================================================
+# INJECT GLOBAL STYLES (includes floating sidebar toggle)
+# ============================================================================
+st.markdown(get_page_style(), unsafe_allow_html=True)
 
 # ============================================================================
 # DEFINE PAGES using st.Page

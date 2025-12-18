@@ -42,27 +42,8 @@ class BSCForecastProcessor:
     - Sector aggregates
     """
 
-    # BSC sector to Vietnamese sector mapping
-    BSC_TO_VN_SECTOR = {
-        'Bank': 'Ngân hàng',
-        'Broker': 'Dịch vụ tài chính',
-        'Const': 'Xây dựng và Vật liệu',
-        'IP': 'Hàng & Dịch vụ Công nghiệp',
-        'Material': 'Tài nguyên Cơ bản',
-        'RE': 'Bất động sản',
-        'Auto': 'Ô tô và phụ tùng',
-        'Chemicals': 'Hóa chất',
-        'Fertilizer': 'Hóa chất',  # Fertilizer maps to Chemicals
-        'O&G': 'Dầu khí',
-        'Utilities': 'Điện, nước & xăng dầu khí đốt',
-        'Aviation': 'Hàng & Dịch vụ Công nghiệp',
-        'Fishery': 'Thực phẩm và đồ uống',
-        'Tyre': 'Ô tô và phụ tùng',
-        'Logistics': 'Hàng & Dịch vụ Công nghiệp',
-        'Retail': 'Bán lẻ',
-        'Tech': 'Công nghệ Thông tin',
-        'Textile': 'Hàng cá nhân & Gia dụng',
-    }
+    # Sector classification now uses ICB L2 Vietnamese sectors directly from ticker_details.json
+    # No more BSC sector mapping - use vn_sector (ICB L2) as the primary sector key
 
     def __init__(self, project_root: Optional[Path] = None):
         """
@@ -556,23 +537,18 @@ class BSCForecastProcessor:
         df['rev_achievement_pct'] = df['rev_ytd_2025'] / df['rev_2025f']
         df['npatmi_achievement_pct'] = df['npatmi_ytd_2025'] / df['npatmi_2025f']
 
-        # Add sector info from ticker_details
-        df['vn_sector'] = df['symbol'].apply(
+        # Add sector info from ticker_details (ICB L2 standard)
+        df['sector'] = df['symbol'].apply(
             lambda x: self.ticker_details.get(x, {}).get('sector', 'Unknown')
         )
         df['entity_type'] = df['symbol'].apply(
             lambda x: self.ticker_details.get(x, {}).get('entity', 'COMPANY')
         )
 
-        # Add BSC sector mapping (based on ticker to BSC sector lookup)
-        # For now, use vn_sector reverse mapping
-        vn_to_bsc = {v: k for k, v in self.BSC_TO_VN_SECTOR.items()}
-        df['bsc_sector'] = df['vn_sector'].apply(lambda x: vn_to_bsc.get(x, 'Other'))
-
         # Add timestamp
         df['updated_at'] = datetime.now()
 
-        # Select and order columns
+        # Select and order columns - using 'sector' (ICB L2) as primary sector key
         output_cols = [
             'symbol', 'target_price', 'current_price', 'upside_pct', 'rating',
             'rev_2025f', 'rev_2026f', 'npatmi_2025f', 'npatmi_2026f',
@@ -583,7 +559,7 @@ class BSCForecastProcessor:
             'rev_achievement_pct', 'npatmi_achievement_pct',
             'market_cap', 'total_equity',
             'pe_fwd_2025', 'pe_fwd_2026', 'pb_fwd_2025', 'pb_fwd_2026',
-            'bsc_sector', 'vn_sector', 'entity_type', 'updated_at'
+            'sector', 'entity_type', 'updated_at'
         ]
 
         # Ensure all columns exist
@@ -599,14 +575,14 @@ class BSCForecastProcessor:
 
     def calculate_sector_aggregates(self, individual_df: pd.DataFrame, excel_sector_df: pd.DataFrame) -> pd.DataFrame:
         """
-        Calculate BSC sector aggregates with PE/PB FWD.
+        Calculate sector aggregates with PE/PB FWD using ICB L2 sector classification.
 
-        Uses Excel sector data as base and calculates PE/PB FWD.
+        Groups stocks by ICB L2 sector (Vietnamese standard) and calculates PE/PB FWD.
         """
         logger.info("Calculating sector aggregates...")
 
-        # Group individual stocks by BSC sector
-        sector_agg = individual_df.groupby('bsc_sector').agg({
+        # Group individual stocks by ICB L2 sector (Vietnamese standard)
+        sector_agg = individual_df.groupby('sector').agg({
             'symbol': 'count',
             'market_cap': 'sum',
             'npatmi_2025f': 'sum',
@@ -651,17 +627,12 @@ class BSCForecastProcessor:
         sector_agg['pb_fwd_2025'] = sector_agg['total_market_cap'] / sector_agg['total_equity_2025f']
         sector_agg['pb_fwd_2026'] = sector_agg['total_market_cap'] / sector_agg['total_equity_2026f']
 
-        # Add VN sector mapping
-        sector_agg['vn_sector'] = sector_agg['bsc_sector'].apply(
-            lambda x: self.BSC_TO_VN_SECTOR.get(x, x)
-        )
-
         # Add timestamp
         sector_agg['updated_at'] = datetime.now()
 
-        # Select and order columns
+        # Select and order columns - using 'sector' (ICB L2) as primary key
         output_cols = [
-            'bsc_sector', 'vn_sector', 'symbol_count',
+            'sector', 'symbol_count',
             'total_market_cap', 'total_rev_2025f', 'total_rev_2026f',
             'total_npatmi_2025f', 'total_npatmi_2026f',
             'total_equity_2025f', 'total_equity_2026f',
@@ -685,25 +656,12 @@ class BSCForecastProcessor:
         """
         Merge individual data with sector metrics.
 
-        Adds sector-level PE/PB FWD to each stock for comparison.
+        Simplified version - just returns individual data without sector PE/PB columns.
         """
         logger.info("Creating combined data...")
 
-        # Select sector columns to merge
-        sector_cols = sector_df[['bsc_sector', 'pe_fwd_2025', 'pe_fwd_2026', 'pb_fwd_2025', 'pb_fwd_2026']].copy()
-        sector_cols = sector_cols.rename(columns={
-            'pe_fwd_2025': 'sector_pe_fwd_2025',
-            'pe_fwd_2026': 'sector_pe_fwd_2026',
-            'pb_fwd_2025': 'sector_pb_fwd_2025',
-            'pb_fwd_2026': 'sector_pb_fwd_2026',
-        })
-
-        # Merge
-        combined = individual_df.merge(sector_cols, on='bsc_sector', how='left')
-
-        # Calculate premium/discount vs sector
-        combined['pe_premium_2025'] = (combined['pe_fwd_2025'] / combined['sector_pe_fwd_2025']) - 1
-        combined['pe_premium_2026'] = (combined['pe_fwd_2026'] / combined['sector_pe_fwd_2026']) - 1
+        # Simply return individual data (no sector PE FWD columns as requested)
+        combined = individual_df.copy()
 
         logger.info(f"Created combined data for {len(combined)} stocks")
 
@@ -991,7 +949,7 @@ def main():
 
     print(f"\nSectors: {len(sector)}")
     print("\nSector PE/PB FWD 2025:")
-    print(sector[['bsc_sector', 'pe_fwd_2025', 'pb_fwd_2025']].to_string())
+    print(sector[['sector', 'pe_fwd_2025', 'pb_fwd_2025']].to_string())
 
 
 if __name__ == "__main__":

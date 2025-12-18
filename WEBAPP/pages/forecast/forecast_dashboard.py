@@ -180,8 +180,8 @@ sort_options = {
     "PE FWD 2025 (High to Low)": ("pe_fwd_2025", False),
     "Market Cap (High to Low)": ("market_cap", False),
     "Market Cap (Low to High)": ("market_cap", True),
-    "Sector (A-Z)": ("bsc_sector", True),
-    "Sector (Z-A)": ("bsc_sector", False),
+    "Sector (A-Z)": ("sector", True),
+    "Sector (Z-A)": ("sector", False),
     "Profit Growth 26F (High to Low)": ("npatmi_growth_yoy_2026", False),
     "Revenue 25F (High to Low)": ("rev_2025f", False),
 }
@@ -312,7 +312,7 @@ with tab1:
         filtered_df = filtered_df[filtered_df['rating'].isin(rating_filter)]
 
     if sector_filter != 'All':
-        filtered_df = filtered_df[filtered_df['bsc_sector'] == sector_filter]
+        filtered_df = filtered_df[filtered_df['sector'] == sector_filter]
 
     # Apply sorting
     sort_col, sort_asc = sort_options[sort_by]
@@ -331,7 +331,7 @@ with tab1:
             display_cols = [
                 'symbol', 'target_price', 'current_price', 'upside_pct', 'rating',
                 'pe_fwd_2025', 'pe_fwd_2026', 'pb_fwd_2025', 'pb_fwd_2026',
-                'roe_2025f', 'bsc_sector', 'market_cap'
+                'roe_2025f', 'sector', 'market_cap'
             ]
 
             display_cols = [c for c in display_cols if c in filtered_df.columns]
@@ -348,7 +348,7 @@ with tab1:
             formatted_df['PB 25F'] = display_df['pb_fwd_2025'].apply(lambda x: format_number(x, 2, 'x'))
             formatted_df['PB 26F'] = display_df['pb_fwd_2026'].apply(lambda x: format_number(x, 2, 'x'))
             formatted_df['ROE 25F'] = display_df['roe_2025f'].apply(lambda x: format_number(x * 100 if pd.notna(x) else None, 1, '%'))
-            formatted_df['Sector'] = display_df['bsc_sector']
+            formatted_df['Sector'] = display_df['sector']
             formatted_df['Mkt Cap'] = display_df['market_cap'].apply(format_market_cap)
 
             st.markdown(render_styled_table(formatted_df, highlight_first_col=True), unsafe_allow_html=True)
@@ -357,7 +357,7 @@ with tab1:
             st.markdown("#### Earnings Forecast 2025-2026")
             # Create display dataframe - Earnings focus
             earnings_cols = [
-                'symbol', 'bsc_sector', 'rev_2025f', 'rev_2026f', 'rev_growth_yoy_2026',
+                'symbol', 'sector', 'rev_2025f', 'rev_2026f', 'rev_growth_yoy_2026',
                 'npatmi_2025f', 'npatmi_2026f', 'npatmi_growth_yoy_2026',
                 'roe_2025f', 'roe_2026f', 'rating'
             ]
@@ -367,7 +367,7 @@ with tab1:
 
             formatted_earnings = pd.DataFrame()
             formatted_earnings['Symbol'] = earnings_df['symbol']
-            formatted_earnings['Sector'] = earnings_df['bsc_sector']
+            formatted_earnings['Sector'] = earnings_df['sector']
             formatted_earnings['Rev 25F'] = earnings_df['rev_2025f'].apply(format_billions)
             formatted_earnings['Rev 26F'] = earnings_df['rev_2026f'].apply(format_billions)
             if 'rev_growth_yoy_2026' in earnings_df.columns:
@@ -409,7 +409,7 @@ with tab1:
 # ============================================================================
 with tab2:
     st.markdown("### Sector Forward Valuation")
-    st.markdown("*PE/PB Forward 2025-2026 aggregated by BSC sector classification*")
+    st.markdown("*PE/PB Forward 2025-2026 aggregated by ICB L2 sector classification*")
 
     if not sector_df.empty:
         # Sub-tabs for different views of sector data
@@ -419,8 +419,7 @@ with tab2:
             st.markdown("#### PE/PB Forward by Sector")
             # Create display dataframe - Valuation focus
             sector_display = pd.DataFrame()
-            sector_display['Sector'] = sector_df['bsc_sector']
-            sector_display['VN Sector'] = sector_df['vn_sector']
+            sector_display['Sector'] = sector_df['sector']
             sector_display['Stocks'] = sector_df['symbol_count'].astype(int)
             sector_display['Mkt Cap'] = sector_df['total_market_cap'].apply(format_market_cap)
             sector_display['PE 25F'] = sector_df['pe_fwd_2025'].apply(lambda x: format_number(x, 1, 'x'))
@@ -439,8 +438,7 @@ with tab2:
 
             # Create display dataframe - Growth focus
             sector_growth = pd.DataFrame()
-            sector_growth['Sector'] = sector_df['bsc_sector']
-            sector_growth['VN Sector'] = sector_df['vn_sector']
+            sector_growth['Sector'] = sector_df['sector']
             sector_growth['Stocks'] = sector_df['symbol_count'].astype(int)
             sector_growth['Mkt Cap'] = sector_df['total_market_cap'].apply(format_market_cap)
 
@@ -561,12 +559,12 @@ with tab3:
         elif ach_sort == "Revenue Achievement (High to Low)":
             achievement_df = achievement_df.sort_values('rev_achievement_pct', ascending=False)
         else:
-            achievement_df = achievement_df.sort_values(['bsc_sector', 'npatmi_achievement_pct'], ascending=[True, False])
+            achievement_df = achievement_df.sort_values(['sector', 'npatmi_achievement_pct'], ascending=[True, False])
 
         # Create achievement display table
         ach_display = pd.DataFrame()
         ach_display['Symbol'] = achievement_df['symbol']
-        ach_display['Sector'] = achievement_df['bsc_sector']
+        ach_display['Sector'] = achievement_df['sector']
         ach_display['Rev 25F'] = achievement_df['rev_2025f'].apply(format_billions)
         ach_display['Rev 9M'] = achievement_df['rev_ytd_2025'].apply(format_billions)
         ach_display['Rev %'] = achievement_df['rev_achievement_pct'].apply(format_achievement)
@@ -617,7 +615,7 @@ with tab3:
         st.plotly_chart(fig, use_container_width=True)
 
         # Download - Excel format
-        achievement_download = achievement_df[['symbol', 'bsc_sector', 'rev_2025f', 'rev_ytd_2025', 'rev_achievement_pct',
+        achievement_download = achievement_df[['symbol', 'sector', 'rev_2025f', 'rev_ytd_2025', 'rev_achievement_pct',
                              'npatmi_2025f', 'npatmi_ytd_2025', 'npatmi_achievement_pct', 'rating']].copy()
 
         excel_buffer = BytesIO()
@@ -644,11 +642,262 @@ with tab4:
 
     chart_type = st.radio(
         "Select Chart",
-        options=["PE FWD by Sector", "Rating Distribution", "Upside vs PE"],
+        options=["PE TTM vs FWD", "PB TTM vs FWD", "Sector Opportunity", "PE FWD by Sector", "Rating Distribution", "Upside vs PE"],
         horizontal=True
     )
 
-    if chart_type == "PE FWD by Sector":
+    # -------------------------------------------------------------------------
+    # CHART 1: PE TTM vs Forward - Compare current valuation vs forward
+    # -------------------------------------------------------------------------
+    if chart_type == "PE TTM vs FWD":
+        st.markdown("### PE TTM vs Forward 2025 by Sector")
+        st.markdown("*So sánh định giá hiện tại (TTM) vs dự báo (Forward) - chỉ tính các mã BSC coverage*")
+
+        # Load sector data with PE TTM
+        sector_pe_df = service.get_sector_with_pe_pb_ttm()
+
+        if not sector_pe_df.empty and 'sector_pe_ttm' in sector_pe_df.columns:
+            # Filter valid data
+            chart_df = sector_pe_df[
+                (sector_pe_df['pe_fwd_2025'].notna()) &
+                (sector_pe_df['sector_pe_ttm'].notna()) &
+                (sector_pe_df['sector_pe_ttm'] > 0) &
+                (sector_pe_df['sector_pe_ttm'] < 100)  # Remove outliers
+            ].copy()
+
+            if not chart_df.empty:
+                # Sort by PE TTM
+                chart_df = chart_df.sort_values('sector_pe_ttm')
+
+                fig = go.Figure()
+
+                # PE TTM bars
+                fig.add_trace(go.Bar(
+                    x=chart_df['sector'],
+                    y=chart_df['sector_pe_ttm'],
+                    name='PE TTM',
+                    marker_color='#FFC132',  # Gold for TTM
+                    hovertemplate='<b>%{x}</b><br>PE TTM: %{y:.1f}x<extra></extra>'
+                ))
+
+                # PE FWD 2025 bars
+                fig.add_trace(go.Bar(
+                    x=chart_df['sector'],
+                    y=chart_df['pe_fwd_2025'],
+                    name='PE FWD 2025',
+                    marker_color=CHART_COLORS['primary'],
+                    hovertemplate='<b>%{x}</b><br>PE FWD 2025: %{y:.1f}x<extra></extra>'
+                ))
+
+                # PE FWD 2026 bars
+                fig.add_trace(go.Bar(
+                    x=chart_df['sector'],
+                    y=chart_df['pe_fwd_2026'],
+                    name='PE FWD 2026',
+                    marker_color=CHART_COLORS['secondary'],
+                    hovertemplate='<b>%{x}</b><br>PE FWD 2026: %{y:.1f}x<extra></extra>'
+                ))
+
+                layout = get_chart_layout(height=500)
+                layout['barmode'] = 'group'
+                layout['showlegend'] = True
+                layout['legend'] = dict(
+                    orientation='h',
+                    yanchor='bottom',
+                    y=1.02,
+                    xanchor='center',
+                    x=0.5,
+                    font=dict(size=12, color='#E8E8E8')
+                )
+                layout['yaxis']['title'] = 'PE Ratio'
+                layout['xaxis']['tickangle'] = -45
+
+                fig.update_layout(**layout)
+                st.plotly_chart(fig, use_container_width=True)
+
+                # Legend explanation
+                st.markdown("""
+                **Giải thích:**
+                - **PE TTM** (vàng): Định giá hiện tại dựa trên lợi nhuận 12 tháng gần nhất
+                - **PE FWD 2025** (xanh): Định giá dự báo dựa trên LNST 2025F của BSC
+                - **PE FWD 2026** (xanh nhạt): Định giá dự báo dựa trên LNST 2026F của BSC
+
+                → **Ngành hấp dẫn**: PE FWD < PE TTM (dự báo tăng trưởng tốt → PE giảm)
+                """)
+            else:
+                st.info("Không có đủ dữ liệu PE TTM cho các ngành BSC coverage.")
+        else:
+            st.info("Không có dữ liệu PE TTM. Vui lòng chạy daily valuation pipeline.")
+
+    # -------------------------------------------------------------------------
+    # CHART 1.5: PB TTM vs Forward - Compare current book value valuation vs forward
+    # -------------------------------------------------------------------------
+    elif chart_type == "PB TTM vs FWD":
+        st.markdown("### PB TTM vs Forward 2025 by Sector")
+        st.markdown("*So sánh định giá theo giá trị sổ sách hiện tại (TTM) vs dự báo (Forward)*")
+
+        # Load sector data with PB TTM
+        sector_pb_df = service.get_sector_with_pe_pb_ttm()
+
+        if not sector_pb_df.empty and 'sector_pb_ttm' in sector_pb_df.columns:
+            # Filter valid data
+            chart_df = sector_pb_df[
+                (sector_pb_df['pb_fwd_2025'].notna()) &
+                (sector_pb_df['sector_pb_ttm'].notna()) &
+                (sector_pb_df['sector_pb_ttm'] > 0) &
+                (sector_pb_df['sector_pb_ttm'] < 20)  # Remove outliers
+            ].copy()
+
+            if not chart_df.empty:
+                # Sort by PB TTM
+                chart_df = chart_df.sort_values('sector_pb_ttm')
+
+                fig = go.Figure()
+
+                # PB TTM bars
+                fig.add_trace(go.Bar(
+                    x=chart_df['sector'],
+                    y=chart_df['sector_pb_ttm'],
+                    name='PB TTM',
+                    marker_color='#FFC132',  # Gold for TTM
+                    hovertemplate='<b>%{x}</b><br>PB TTM: %{y:.2f}x<extra></extra>'
+                ))
+
+                # PB FWD 2025 bars
+                fig.add_trace(go.Bar(
+                    x=chart_df['sector'],
+                    y=chart_df['pb_fwd_2025'],
+                    name='PB FWD 2025',
+                    marker_color=CHART_COLORS['primary'],
+                    hovertemplate='<b>%{x}</b><br>PB FWD 2025: %{y:.2f}x<extra></extra>'
+                ))
+
+                # PB FWD 2026 bars
+                fig.add_trace(go.Bar(
+                    x=chart_df['sector'],
+                    y=chart_df['pb_fwd_2026'],
+                    name='PB FWD 2026',
+                    marker_color=CHART_COLORS['secondary'],
+                    hovertemplate='<b>%{x}</b><br>PB FWD 2026: %{y:.2f}x<extra></extra>'
+                ))
+
+                layout = get_chart_layout(height=500)
+                layout['barmode'] = 'group'
+                layout['showlegend'] = True
+                layout['legend'] = dict(
+                    orientation='h',
+                    yanchor='bottom',
+                    y=1.02,
+                    xanchor='center',
+                    x=0.5,
+                    font=dict(size=12, color='#E8E8E8')
+                )
+                layout['yaxis']['title'] = 'PB Ratio'
+                layout['xaxis']['tickangle'] = -45
+
+                fig.update_layout(**layout)
+                st.plotly_chart(fig, use_container_width=True)
+
+                # Legend explanation
+                st.markdown("""
+                **Giải thích:**
+                - **PB TTM** (vàng): Định giá theo giá trị sổ sách hiện tại
+                - **PB FWD 2025** (xanh): Định giá dự báo theo VCSH dự kiến 2025 (VCSH + LNST 2025F)
+                - **PB FWD 2026** (xanh nhạt): Định giá dự báo theo VCSH dự kiến 2026
+
+                → **Ngành hấp dẫn**: PB FWD < PB TTM (giá trị sổ sách tăng nhanh hơn giá)
+                """)
+            else:
+                st.info("Không có đủ dữ liệu PB TTM cho các ngành BSC coverage.")
+        else:
+            st.info("Không có dữ liệu PB TTM. Vui lòng chạy daily valuation pipeline.")
+
+    # -------------------------------------------------------------------------
+    # CHART 2: Sector Opportunity Score - Combined ranking
+    # -------------------------------------------------------------------------
+    elif chart_type == "Sector Opportunity":
+        st.markdown("### Sector Opportunity Score")
+        st.markdown("*Điểm cơ hội đầu tư theo ngành - kết hợp Upside, Growth, Valuation*")
+
+        # Load opportunity scores
+        opp_df = service.get_sector_opportunity_score()
+
+        if not opp_df.empty and 'opportunity_score' in opp_df.columns:
+            # Create stacked bar for score components
+            fig = go.Figure()
+
+            # Color palette for score components
+            component_colors = {
+                'upside_score': '#00C9AD',      # Teal - Upside
+                'growth_score': '#7C3AED',      # Purple - Growth
+                'discount_score': '#FFC132',    # Gold - Valuation Discount
+                'pe_level_score': '#3B82F6',    # Blue - PE Level
+            }
+
+            component_labels = {
+                'upside_score': 'Upside (30%)',
+                'growth_score': 'Growth (25%)',
+                'discount_score': 'Discount vs TTM (25%)',
+                'pe_level_score': 'Low PE (20%)',
+            }
+
+            # Add bars for each component
+            for component, color in component_colors.items():
+                if component in opp_df.columns:
+                    fig.add_trace(go.Bar(
+                        x=opp_df['sector'],
+                        y=opp_df[component],
+                        name=component_labels.get(component, component),
+                        marker_color=color,
+                        opacity=0.8,
+                        hovertemplate=f'<b>%{{x}}</b><br>{component_labels.get(component, component)}: %{{y:.1f}}<extra></extra>'
+                    ))
+
+            layout = get_chart_layout(height=500)
+            layout['barmode'] = 'stack'
+            layout['showlegend'] = True
+            layout['legend'] = dict(
+                orientation='h',
+                yanchor='bottom',
+                y=1.02,
+                xanchor='center',
+                x=0.5,
+                font=dict(size=11, color='#E8E8E8')
+            )
+            layout['yaxis']['title'] = 'Opportunity Score (0-100)'
+            layout['xaxis']['tickangle'] = -45
+
+            fig.update_layout(**layout)
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Show ranking table
+            st.markdown("### Sector Ranking")
+
+            rank_display = pd.DataFrame()
+            rank_display['Rank'] = opp_df['rank'].astype(int)
+            rank_display['Sector'] = opp_df['sector']
+            rank_display['Score'] = opp_df['opportunity_score'].apply(lambda x: f"{x:.1f}")
+            rank_display['Avg Upside'] = opp_df['avg_upside_pct'].apply(format_upside)
+            rank_display['Profit Gr'] = opp_df['avg_npatmi_growth_2025'].apply(format_growth) if 'avg_npatmi_growth_2025' in opp_df.columns else 'N/A'
+            rank_display['PE Discount'] = opp_df['pe_discount_pct'].apply(lambda x: f"{x:+.1f}%" if pd.notna(x) else 'N/A')
+            rank_display['PE FWD 25'] = opp_df['pe_fwd_2025'].apply(lambda x: f"{x:.1f}x" if pd.notna(x) else 'N/A')
+
+            st.markdown(render_styled_table(rank_display, highlight_first_col=True), unsafe_allow_html=True)
+
+            # Legend
+            st.markdown("""
+            **Giải thích Score Components:**
+            - **Upside (30%)**: Avg upside % của các mã trong ngành → cao = tốt
+            - **Growth (25%)**: Tăng trưởng LNST 2025F vs 2024 → cao = tốt
+            - **Discount vs TTM (25%)**: PE FWD < PE TTM → dương = hấp dẫn (discount)
+            - **Low PE (20%)**: PE FWD 2025 thấp → tốt
+
+            **PE Discount**: Dương = PE Forward thấp hơn PE TTM (ngành được kỳ vọng tăng trưởng)
+            """)
+        else:
+            st.info("Không có dữ liệu opportunity score.")
+
+    elif chart_type == "PE FWD by Sector":
         st.markdown("### PE Forward 2025-2026 by Sector")
 
         if not sector_df.empty:
@@ -659,7 +908,7 @@ with tab4:
 
             # PE 2025 bars
             fig.add_trace(go.Bar(
-                x=chart_df['bsc_sector'],
+                x=chart_df['sector'],
                 y=chart_df['pe_fwd_2025'],
                 name='PE FWD 2025',
                 marker_color=CHART_COLORS['primary'],
@@ -668,7 +917,7 @@ with tab4:
 
             # PE 2026 bars
             fig.add_trace(go.Bar(
-                x=chart_df['bsc_sector'],
+                x=chart_df['sector'],
                 y=chart_df['pe_fwd_2026'],
                 name='PE FWD 2026',
                 marker_color=CHART_COLORS['secondary'],

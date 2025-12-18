@@ -117,28 +117,24 @@ def get_page_style() -> str:
         margin-top: 0 !important;
     }
 
-    /* Force remove ALL Streamlit header elements */
-    header[data-testid="stHeader"],
-    .stAppHeader,
-    header.stAppHeader {
-        display: none !important;
-        height: 0 !important;
-        min-height: 0 !important;
-        max-height: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        visibility: hidden !important;
-        overflow: hidden !important;
+    /* ========== HEADER - Keep visible for sidebar toggle ========== */
+    /* Don't hide header completely - it contains sidebar toggle button */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        /* Keep height so sidebar button is visible */
     }
 
-    /* Hide deploy button and view app bar */
+    /* Hide only decorative elements, NOT sidebar controls */
     .stDeployButton,
     [data-testid="stStatusWidget"],
+    [data-testid="stToolbar"] > div:not(:first-child),
     .viewerBadge_container__r5tak,
-    .styles_viewerBadge__CvC9N {
+    .styles_viewerBadge__CvC9N,
+    [data-testid="stDecoration"] {
         display: none !important;
     }
 
+    /* Hide footer */
     footer,
     .stAppViewBlockContainer > footer {
         display: none !important;
@@ -366,15 +362,27 @@ def get_page_style() -> str:
         background: var(--bg-elevated) !important;
         border: 1px solid var(--border-medium) !important;
         border-radius: 6px;
-        color: var(--text-primary);
+        color: #FFFFFF !important;
         font-size: 13px !important;
         min-height: 36px !important;
+    }
+
+    /* Sidebar text input - WHITE text for visibility */
+    [data-testid="stSidebar"] .stTextInput input,
+    [data-testid="stSidebar"] .stTextInput input::placeholder {
+        color: #FFFFFF !important;
+        opacity: 1 !important;
+    }
+
+    [data-testid="stSidebar"] .stTextInput input::placeholder {
+        color: #94A3B8 !important;
     }
 
     /* Sidebar selectbox text */
     [data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] span,
     [data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {
         font-size: 13px !important;
+        color: #FFFFFF !important;
     }
 
     /* Sidebar labels */
@@ -687,6 +695,15 @@ def get_page_style() -> str:
         position: absolute !important;
         right: 5px !important;
         top: 5px !important;
+    }
+
+    /* Plotly Legend - WHITE text for visibility */
+    .stPlotlyChart .legend text,
+    .stPlotlyChart .legendtext,
+    .stPlotlyChart g.legend text,
+    .stPlotlyChart .legend .legendtext {
+        fill: #FFFFFF !important;
+        color: #FFFFFF !important;
     }
 
     /* ============================================================
@@ -1052,7 +1069,7 @@ def get_page_style() -> str:
             font-size: 1.5rem !important;
         }
     }
-</style>
+
 """
 
 
@@ -1107,7 +1124,7 @@ def get_chart_layout(title: str = "", height: int = 400) -> dict:
             'fixedrange': False,  # Allow zoom/pan
         },
         'legend': {
-            'font': {'size': 11, 'color': '#E2E8F0'},  # Primary text for readability
+            'font': {'size': 11, 'color': '#FFFFFF'},  # White for max visibility
             'bgcolor': 'rgba(0,0,0,0)',
             'bordercolor': 'rgba(0,0,0,0)',
         },
@@ -1127,7 +1144,7 @@ def get_chart_layout(title: str = "", height: int = 400) -> dict:
 CHART_TEXT_COLORS = {
     'title': '#CBD5E1',       # 8.9:1 contrast - Chart titles
     'axis_label': '#94A3B8',  # 5.6:1 contrast - Axis tick labels
-    'legend': '#E2E8F0',      # 12.8:1 contrast - Legend text
+    'legend': '#FFFFFF',      # White for max visibility
     'annotation': '#94A3B8',  # 5.6:1 contrast - Chart annotations
     'tooltip': '#F0F4F8',     # 15.2:1 contrast - Tooltip text
     'grid': 'rgba(148, 163, 184, 0.12)',  # Grid lines

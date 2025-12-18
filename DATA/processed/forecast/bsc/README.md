@@ -3,15 +3,15 @@
 ## Overview
 Dữ liệu dự báo BSC Research đã xử lý, bao gồm PE/PB forward và các metrics tính toán.
 
-**Last Updated:** 2025-12-17 16:45:38
+**Last Updated:** 2025-12-18 10:08:20
 **Source:** BSC Research Forecast Excel
-**Symbols:** 92 mã | **Sectors:** 15 ngành
+**Symbols:** 93 mã | **Sectors:** 15 ngành
 
 ---
 
 ## Files
 
-### 1. bsc_individual.parquet (92 rows)
+### 1. bsc_individual.parquet (93 rows)
 Individual stock forecast với calculated metrics.
 
 | Column | Type | Description |
@@ -72,7 +72,7 @@ Sector aggregation với PE/PB forward 2025-2026.
 | avg_roe_2026f | float | ROE trung bình 2026 (%) |
 | updated_at | datetime | Thời gian cập nhật |
 
-### 3. bsc_combined.parquet (92 rows)
+### 3. bsc_combined.parquet (93 rows)
 Individual + sector metrics merged.
 
 Bao gồm tất cả columns từ bsc_individual.parquet + thêm:
