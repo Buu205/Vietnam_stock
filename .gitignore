@@ -76,6 +76,22 @@ DATA/raw/macro/*.parquet
 DATA/processed/**/*.parquet
 DATA/processed/**/*.csv
 
+# EXCEPTIONS: Essential processed files for dashboard deployment
+# These files are required for the Streamlit dashboard to function
+!DATA/processed/forecast/bsc/*.parquet
+!DATA/processed/fundamental/company/*.parquet
+!DATA/processed/fundamental/bank/*.parquet
+!DATA/processed/fundamental/insurance/*.parquet
+!DATA/processed/fundamental/security/*.parquet
+!DATA/processed/fundamental/*_full.parquet
+!DATA/processed/valuation/**/*.parquet
+!DATA/processed/technical/*.parquet
+!DATA/processed/technical/**/*.parquet
+!DATA/processed/sector/*.parquet
+!DATA/processed/macro_commodity/*.parquet
+!DATA/processed/market_indices/*.parquet
+!DATA/processed/stock_valuation/*.parquet
+
 # But keep Python files
 !DATA/processed/**/*.py
 !DATA/processed/**/__init__.py
