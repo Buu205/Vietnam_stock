@@ -977,20 +977,46 @@ with tab_individual:
 
             st.plotly_chart(fig_hist, width='stretch', config={'displayModeBar': False})
 
-        # Download Excel button for individual ticker
+        # Download Excel buttons
         st.markdown("---")
         from io import BytesIO
-        buffer_ticker = BytesIO()
-        with pd.ExcelWriter(buffer_ticker, engine='openpyxl') as writer:
-            ticker_data.to_excel(writer, index=False, sheet_name=f'{active_ticker}_{selected_metric}')
-        excel_ticker = buffer_ticker.getvalue()
-        st.download_button(
-            label="📥 Download Excel",
-            data=excel_ticker,
-            file_name=f"valuation_{active_ticker}_{selected_metric}.xlsx",
-            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            help=f"Download {active_ticker} {selected_metric_display} historical data"
-        )
+
+        col_dl1, col_dl2 = st.columns(2)
+
+        with col_dl1:
+            # Download single ticker data
+            buffer_ticker = BytesIO()
+            with pd.ExcelWriter(buffer_ticker, engine='openpyxl') as writer:
+                ticker_data.to_excel(writer, index=False, sheet_name=f'{active_ticker}_{selected_metric}')
+            excel_ticker = buffer_ticker.getvalue()
+            st.download_button(
+                label=f"📥 Download {active_ticker}",
+                data=excel_ticker,
+                file_name=f"valuation_{active_ticker}_{selected_metric}.xlsx",
+                mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                help=f"Download {active_ticker} {selected_metric_display} historical data"
+            )
+
+        with col_dl2:
+            # Download full sector data
+            @st.cache_data(ttl=3600)
+            def get_sector_full_data(industry: str, metric: str, start_year: int):
+                return service.get_industry_full_data(industry, metric, start_year)
+
+            sector_full_data = get_sector_full_data(selected_industry, selected_metric, start_year)
+
+            if not sector_full_data.empty:
+                buffer_sector = BytesIO()
+                with pd.ExcelWriter(buffer_sector, engine='openpyxl') as writer:
+                    sector_full_data.to_excel(writer, index=False, sheet_name=f'{selected_industry}_{selected_metric}')
+                excel_sector = buffer_sector.getvalue()
+                st.download_button(
+                    label=f"📥 Download Full {selected_industry}",
+                    data=excel_sector,
+                    file_name=f"valuation_{selected_industry}_{selected_metric}_full.xlsx",
+                    mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    help=f"Download all {len(sector_full_data['symbol'].unique())} tickers in {selected_industry} sector"
+                )
 
     else:
         st.info(f"No {selected_metric_display} data available for {active_ticker}")

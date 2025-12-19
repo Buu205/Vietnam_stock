@@ -3,7 +3,7 @@
 ## Overview
 Dữ liệu dự báo BSC Research đã xử lý, bao gồm PE/PB forward và các metrics tính toán.
 
-**Last Updated:** 2025-12-18 10:08:20
+**Last Updated:** 2025-12-19 16:25:46
 **Source:** BSC Research Forecast Excel
 **Symbols:** 93 mã | **Sectors:** 15 ngành
 
@@ -45,8 +45,7 @@ Individual stock forecast với calculated metrics.
 | pe_fwd_2026 | float | PE forward 2026 |
 | pb_fwd_2025 | float | PB forward 2025 |
 | pb_fwd_2026 | float | PB forward 2026 |
-| bsc_sector | str | Ngành theo BSC |
-| vn_sector | str | Ngành chuẩn hóa (ticker_details.json) |
+| sector | str | Ngành ICB L2 (ticker_details.json) |
 | entity_type | str | Loại DN: BANK/COMPANY/SECURITY/INSURANCE |
 | updated_at | datetime | Thời gian cập nhật |
 
@@ -55,8 +54,7 @@ Sector aggregation với PE/PB forward 2025-2026.
 
 | Column | Type | Description |
 |--------|------|-------------|
-| bsc_sector | str | Ngành theo BSC (Bank, Broker, etc.) |
-| vn_sector | str | Ngành chuẩn hóa |
+| sector | str | Ngành ICB L2 |
 | symbol_count | int | Số mã trong ngành |
 | total_market_cap | float | Tổng vốn hóa (tỷ VND) |
 | total_npatmi_2025f | float | Tổng LNST forecast 2025 (tỷ VND) |
@@ -163,30 +161,6 @@ strong_buys = df[df['rating'] == 'STRONG BUY']
 sectors = pd.read_parquet("DATA/processed/forecast/bsc/bsc_sector_valuation.parquet")
 
 # Compare PE FWD by sector
-print(sectors[['bsc_sector', 'pe_fwd_2025', 'pe_fwd_2026']].sort_values('pe_fwd_2025'))
+print(sectors[['sector', 'pe_fwd_2025', 'pe_fwd_2026']].sort_values('pe_fwd_2025'))
 ```
 
----
-
-## BSC Sector Mapping
-
-| BSC Sector | VN Sector |
-|------------|-----------|
-| Bank | Ngân hàng |
-| Broker | Dịch vụ tài chính |
-| Const | Xây dựng và Vật liệu |
-| IP | Hàng & Dịch vụ Công nghiệp |
-| Material | Tài nguyên Cơ bản |
-| RE | Bất động sản |
-| Auto | Ô tô và phụ tùng |
-| Chemicals | Hóa chất |
-| Fertilizer | Hóa chất |
-| O&G | Dầu khí |
-| Utilities | Điện, nước & xăng dầu khí đốt |
-| Aviation | Hàng & Dịch vụ Công nghiệp |
-| Fishery | Thực phẩm và đồ uống |
-| Tyre | Ô tô và phụ tùng |
-| Logistics | Hàng & Dịch vụ Công nghiệp |
-| Retail | Bán lẻ |
-| Tech | Công nghệ Thông tin |
-| Textile | Hàng cá nhân & Gia dụng |

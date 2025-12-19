@@ -728,6 +728,71 @@ with tab_individual:
                     assessment = "🔴 **Expensive** - More than 1σ above mean"
 
                 st.markdown(f"**Assessment**: {assessment}")
+
+                # Download buttons for Individual Analysis
+                st.markdown("---")
+                st.markdown("### Export Data")
+
+                col_dl1, col_dl2 = st.columns(2)
+
+                with col_dl1:
+                    # Download current scope data
+                    if not history.empty:
+                        export_df = history.copy()
+                        export_df['scope'] = selected_scope
+                        # Select relevant columns
+                        export_cols = ['date', 'scope']
+                        for col in ['pe_ttm', 'pb', 'ps', 'ev_ebitda', 'pe_fwd_2025', 'pe_fwd_2026', 'pb_fwd_2025', 'pb_fwd_2026']:
+                            if col in export_df.columns:
+                                export_cols.append(col)
+                        export_df = export_df[[c for c in export_cols if c in export_df.columns]]
+
+                        excel_buffer = BytesIO()
+                        export_df.to_excel(excel_buffer, index=False, engine='openpyxl')
+                        excel_buffer.seek(0)
+                        st.download_button(
+                            f"📥 Download {selected_scope}",
+                            excel_buffer,
+                            f"sector_{selected_scope}_{primary_metric}_{days}d.xlsx",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True,
+                            key="download_individual_scope"
+                        )
+
+                with col_dl2:
+                    # Download ALL sectors/indices data
+                    all_scopes_to_export = sector_scopes if scope_group == "Sectors" else index_scopes
+                    if all_scopes_to_export:
+                        all_data_list = []
+                        for scope in all_scopes_to_export:
+                            hist = load_sector_history(scope, days)
+                            if not hist.empty:
+                                hist_copy = hist.copy()
+                                hist_copy['scope'] = scope
+                                export_cols = ['date', 'scope']
+                                for col in ['pe_ttm', 'pb', 'ps', 'ev_ebitda', 'pe_fwd_2025', 'pe_fwd_2026', 'pb_fwd_2025', 'pb_fwd_2026']:
+                                    if col in hist_copy.columns:
+                                        export_cols.append(col)
+                                all_data_list.append(hist_copy[[c for c in export_cols if c in hist_copy.columns]])
+
+                        if all_data_list:
+                            full_df = pd.concat(all_data_list, ignore_index=True)
+                            full_df = full_df.sort_values(['date', 'scope'])
+
+                            excel_buffer_full = BytesIO()
+                            full_df.to_excel(excel_buffer_full, index=False, engine='openpyxl')
+                            excel_buffer_full.seek(0)
+
+                            group_label = "Sectors" if scope_group == "Sectors" else "Indices"
+                            st.download_button(
+                                f"📥 Download All {group_label}",
+                                excel_buffer_full,
+                                f"all_{group_label.lower()}_{primary_metric}_{days}d.xlsx",
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                use_container_width=True,
+                                key="download_all_scopes"
+                            )
+                            st.caption(f"Contains {len(full_df)} rows for {len(all_scopes_to_export)} {group_label.lower()}")
             else:
                 st.warning(f"Not enough valid data for {selected_scope}")
 

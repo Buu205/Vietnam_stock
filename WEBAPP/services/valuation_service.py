@@ -947,3 +947,58 @@ class ValuationService:
             })
 
         return sorted(results, key=lambda x: x['percentile'])
+
+    def get_industry_full_data(
+        self,
+        industry_sector: str,
+        metric: str = 'PE',
+        start_year: int = 2018
+    ) -> pd.DataFrame:
+        """
+        Get full historical data for all tickers in an industry sector.
+
+        Args:
+            industry_sector: Industry sector name (e.g., 'Ngân hàng', 'Tất cả')
+            metric: 'PE', 'PB', 'PS', or 'EV_EBITDA'
+            start_year: Start year
+
+        Returns:
+            DataFrame with full historical data for all tickers in sector
+        """
+        # Get tickers in this industry
+        if industry_sector == "Tất cả":
+            tickers = self.get_all_tickers()
+        else:
+            tickers = self.get_tickers_by_industry(industry_sector)
+
+        if not tickers:
+            return pd.DataFrame()
+
+        # Remove excluded tickers
+        tickers = [t for t in tickers if t not in self.EXCLUDED_TICKERS]
+
+        # Load metric data
+        if metric not in self.METRIC_CONFIG:
+            return pd.DataFrame()
+
+        config = self.METRIC_CONFIG[metric]
+        loader_method = getattr(self, config['data_loader'])
+        df = loader_method()
+
+        if df.empty:
+            return pd.DataFrame()
+
+        start_date = pd.Timestamp(f"{start_year}-01-01")
+        df = df[df['date'] >= start_date].copy()
+
+        # Filter to only tickers in this industry
+        df = df[df['symbol'].isin(tickers)]
+
+        # Add industry info
+        if SECTOR_REGISTRY is not None:
+            df['industry'] = df['symbol'].apply(
+                lambda x: SECTOR_REGISTRY.get_ticker(x).get('sector', 'Unknown')
+                if SECTOR_REGISTRY.get_ticker(x) else 'Unknown'
+            )
+
+        return df.sort_values(['symbol', 'date'])

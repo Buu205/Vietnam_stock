@@ -136,13 +136,14 @@ def main():
 
     print("Sector PE/PB Forward 2025:")
     print("-" * 60)
-    print(f"{'Sector':<15} {'PE FWD 2025':>12} {'PE FWD 2026':>12} {'PB FWD 2025':>12}")
+    print(f"{'Sector':<25} {'PE FWD 2025':>12} {'PE FWD 2026':>12} {'PB FWD 2025':>12}")
     print("-" * 60)
     for _, row in sector.sort_values('pe_fwd_2025').iterrows():
         pe_25 = f"{row['pe_fwd_2025']:.1f}" if not pd.isna(row['pe_fwd_2025']) else "N/A"
         pe_26 = f"{row['pe_fwd_2026']:.1f}" if not pd.isna(row['pe_fwd_2026']) else "N/A"
         pb_25 = f"{row['pb_fwd_2025']:.2f}" if not pd.isna(row['pb_fwd_2025']) else "N/A"
-        print(f"{row['bsc_sector']:<15} {pe_25:>12} {pe_26:>12} {pb_25:>12}")
+        sector_name = row['sector']
+        print(f"{sector_name:<25} {pe_25:>12} {pe_26:>12} {pb_25:>12}")
     print()
 
     print("Output files generated:")
