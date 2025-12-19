@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "bsc": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["-m", "bsc_mcp.server"],
+      "cwd": "/Users/buuphan/Dev/Vietnam_dashboard/MCP_SERVER",
+      "env": {
+        "PYTHONPATH": "/Users/buuphan/Dev/Vietnam_dashboard:/Users/buuphan/Dev/Vietnam_dashboard/MCP_SERVER",
+        "DATA_ROOT": "/Users/buuphan/Dev/Vietnam_dashboard/DATA"
+      }
+    }
+  }
+}

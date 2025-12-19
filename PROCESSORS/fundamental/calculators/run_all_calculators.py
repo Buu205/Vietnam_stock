@@ -234,6 +234,13 @@ class CompanyCalculator(EntityCalculator):
     def calculate_derived_metrics(self, df: pd.DataFrame) -> pd.DataFrame:
         """Calculate company-specific derived metrics."""
 
+        # RECALCULATE Gross Profit from net_revenue + cogs (cogs is negative)
+        # This fixes data quality issues from SSI/VNDirect where CIS_20 may be incorrect
+        # (e.g., DGW Q4 2022/2023 had gross_profit > net_revenue which is mathematically impossible)
+        net_revenue = df.get('net_revenue', pd.Series([0]*len(df))).fillna(0)
+        cogs = df.get('cogs', pd.Series([0]*len(df))).fillna(0)
+        df['gross_profit'] = net_revenue + cogs  # cogs is negative, so this is net_revenue - |cogs|
+
         # SG&A (selling and admin are typically negative)
         selling = df.get('selling_expense', pd.Series([0]*len(df))).fillna(0)
         admin = df.get('admin_expense', pd.Series([0]*len(df))).fillna(0)
