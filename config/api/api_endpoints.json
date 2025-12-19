@@ -1,0 +1,51 @@
+{
+  "simplize": {
+    "base_url": "https://api2.simplize.vn",
+    "endpoints": {
+      "price_chart": "/api/historical/prices/chart",
+      "ohlcv": "/api/historical/prices/ohlcv"
+    },
+    "rate_limit_per_minute": 30,
+    "timeout_seconds": 20,
+    "max_retries": 3,
+    "requires_auth": true,
+    "description": "Simplize API for rubber, milk WMP, gov bonds"
+  },
+  "wichart": {
+    "base_url": "https://api.wichart.vn",
+    "endpoints": {
+      "commodity": "/vietnambiz/vi-mo?key=hang_hoa&name={name}",
+      "macro": "/vietnambiz/vi-mo?name={name}",
+      "exchange_rates": "/vietnambiz/vi-mo?name=dhtg",
+      "interest_rates": "/vietnambiz/vi-mo?name=lslnh",
+      "deposit_rates": "/vietnambiz/vi-mo?name=lshd"
+    },
+    "rate_limit_per_minute": 60,
+    "timeout_seconds": 15,
+    "max_retries": 3,
+    "requires_auth": false,
+    "description": "WiChart API for FX, interest rates, steel, PVC"
+  },
+  "fireant": {
+    "base_url": "https://restv2.fireant.vn",
+    "endpoints": {
+      "fundamental": "/symbols/{symbol}/fundamental",
+      "quote": "/symbols/{symbol}/quote",
+      "historical": "/symbols/{symbol}/historical-quotes"
+    },
+    "rate_limit_per_minute": 120,
+    "timeout_seconds": 30,
+    "max_retries": 3,
+    "requires_auth": true,
+    "description": "Fireant API for share outstanding, quotes"
+  },
+  "vnstock": {
+    "base_url": "local",
+    "endpoints": {},
+    "rate_limit_per_minute": 60,
+    "timeout_seconds": 30,
+    "max_retries": 3,
+    "requires_auth": false,
+    "description": "VNStock library wrapper (local package)"
+  }
+}

@@ -51,6 +51,9 @@ logs/
 .env.local
 .env.*.local
 
+# API credentials (contains sensitive tokens)
+config/api/api_credentials.json
+
 # Jupyter Notebook
 .ipynb_checkpoints/
 
