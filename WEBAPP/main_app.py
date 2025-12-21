@@ -49,47 +49,48 @@ st.markdown(get_page_style(), unsafe_allow_html=True)
 pages_dir = Path(__file__).resolve().parent / "pages"
 
 # Create page objects with absolute paths
+# Using Material Icons (SVG) for professional, consistent sizing
 company_page = st.Page(
     str(pages_dir / "company" / "company_dashboard.py"),
     title="Company Analysis",
-    icon="🏢",
+    icon=":material/business:",
     default=True
 )
 
 bank_page = st.Page(
     str(pages_dir / "bank" / "bank_dashboard.py"),
     title="Bank Analysis",
-    icon="🏦"
+    icon=":material/account_balance:"
 )
 
 security_page = st.Page(
     str(pages_dir / "security" / "security_dashboard.py"),
     title="Security Analysis",
-    icon="📈"
+    icon=":material/show_chart:"
 )
 
 sector_page = st.Page(
     str(pages_dir / "sector" / "sector_dashboard.py"),
     title="Sector Overview",
-    icon="🌐"
+    icon=":material/pie_chart:"
 )
 
 valuation_page = st.Page(
     str(pages_dir / "valuation" / "valuation_dashboard.py"),
-    title="Valuation",
-    icon="💰"
+    title="Valuation (→Sector)",
+    icon=":material/attach_money:"
 )
 
 technical_page = st.Page(
     str(pages_dir / "technical" / "technical_dashboard.py"),
     title="Technical Analysis",
-    icon="📉"
+    icon=":material/trending_up:"
 )
 
 forecast_page = st.Page(
     str(pages_dir / "forecast" / "forecast_dashboard.py"),
     title="BSC Forecast",
-    icon="🎯"
+    icon=":material/track_changes:"
 )
 
 # ============================================================================

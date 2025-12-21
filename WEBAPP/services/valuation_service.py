@@ -29,6 +29,13 @@ try:
 except Exception:
     SECTOR_REGISTRY = None
 
+# Import centralized config for outlier limits and status calculation
+from WEBAPP.core.valuation_config import (
+    OUTLIER_LIMITS,
+    get_percentile_status,
+    filter_outliers
+)
+
 
 class ValuationService:
     """Service layer for Valuation data (PE, PB, EV/EBITDA)."""
@@ -43,28 +50,15 @@ class ValuationService:
         'L14', 'L18', 'L43', 'L44', 'L61', 'L62',
     ]
 
-    # Rules for outlier detection in charts
+    # Use centralized outlier rules from valuation_config
+    # Alias for backward compatibility
     OUTLIER_RULES = {
-        'PE': {
-            'max_value': 100,           # PE > 100 is likely data error
-            'min_value': 0,             # PE must be positive
-            'multiplier_limit': 5,      # Max 5x median
-        },
-        'PB': {
-            'max_value': 20,            # PB > 20 is extreme
-            'min_value': 0,             # PB must be positive
-            'multiplier_limit': 4,      # Max 4x median
-        },
-        'PS': {
-            'max_value': 30,            # P/S > 30 is extreme
-            'min_value': 0,             # P/S must be positive
-            'multiplier_limit': 4,      # Max 4x median
-        },
-        'EV_EBITDA': {
-            'max_value': 50,            # EV/EBITDA > 50 is extreme
-            'min_value': 0,             # Must be positive
-            'multiplier_limit': 4,      # Max 4x median
+        k: {
+            'max_value': v['max'],
+            'min_value': v['min'],
+            'multiplier_limit': v['multiplier']
         }
+        for k, v in OUTLIER_LIMITS.items()
     }
 
     def __init__(self, data_root: Optional[Path] = None):

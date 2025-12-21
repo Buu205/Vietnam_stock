@@ -24,10 +24,20 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from WEBAPP.services.forecast_service import ForecastService
+from WEBAPP.services.valuation_service import ValuationService
 from WEBAPP.core.styles import (
     get_page_style, get_chart_layout, get_table_style,
     render_styled_table, CHART_COLORS, BAR_COLORS
 )
+# Import from unified valuation charts component
+from WEBAPP.components.charts.valuation_charts import (
+    valuation_box_with_markers,
+    render_marker_legend
+)
+# Import chart schema and config
+from WEBAPP.core.chart_schema import get_chart_config, get_y_range, CHART_SCHEMA
+from WEBAPP.core.valuation_config import format_ratio, format_percent, format_change, filter_outliers
+from WEBAPP.components.tables.table_builders import forward_matrix_table
 
 # Rating color mapping
 RATING_COLORS = {
@@ -215,7 +225,7 @@ with col4:
 st.markdown("---")
 
 # Tabs
-tab1, tab2, tab3, tab4 = st.tabs(["Individual Stocks", "Sector Valuation", "9M Achievement", "Charts"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Individual Stocks", "Sector Valuation", "9M Achievement", "Charts", "Forward Matrix"])
 
 
 def format_rating_badge(rating: str) -> str:
@@ -642,14 +652,100 @@ with tab4:
 
     chart_type = st.radio(
         "Select Chart",
-        options=["PE TTM vs FWD", "PB TTM vs FWD", "Sector Opportunity", "PE FWD by Sector", "Rating Distribution", "Upside vs PE"],
+        options=["Valuation Matrix", "PE TTM vs FWD", "PB TTM vs FWD", "Sector Opportunity", "PE FWD by Sector", "Rating Distribution", "Upside vs PE"],
         horizontal=True
     )
 
     # -------------------------------------------------------------------------
+    # CHART 0: Valuation Matrix - Box plot with TTM vs Forward markers
+    # -------------------------------------------------------------------------
+    if chart_type == "Valuation Matrix":
+        st.markdown("### PE Valuation Matrix: Historical Distribution vs Forward")
+        st.markdown("*Box plot thể hiện phân phối PE lịch sử (P25-P75) với markers PE TTM và PE Forward*")
+
+        # Sector selector for valuation matrix
+        val_service = ValuationService()
+        industry_sectors = val_service.get_industry_sectors()
+
+        # Filter to sectors that have BSC coverage
+        bsc_sectors = service.get_sectors_list()
+        available_sectors = [s for s in industry_sectors if s in bsc_sectors]
+
+        if available_sectors:
+            selected_sector = st.selectbox(
+                "Chọn ngành",
+                options=available_sectors,
+                index=available_sectors.index("Ngân hàng") if "Ngân hàng" in available_sectors else 0,
+                key="valuation_matrix_sector"
+            )
+
+            # Metric selector
+            metric_options = {"PE": "PE", "PB": "PB"}
+            selected_metric = st.radio(
+                "Chọn chỉ số",
+                options=list(metric_options.keys()),
+                horizontal=True,
+                key="valuation_matrix_metric"
+            )
+
+            # Get historical distribution stats
+            stats_data = val_service.get_industry_candle_data(selected_sector, metric=selected_metric)
+
+            # Get forward values from BSC (both 2025 and 2026)
+            bsc_df = service.get_individual_stocks()
+            if not bsc_df.empty:
+                if selected_metric == "PE":
+                    forward_data = dict(zip(bsc_df['symbol'], bsc_df['pe_fwd_2025']))
+                    forward_2026_data = dict(zip(bsc_df['symbol'], bsc_df['pe_fwd_2026']))
+                else:
+                    forward_data = dict(zip(bsc_df['symbol'], bsc_df['pb_fwd_2025']))
+                    forward_2026_data = dict(zip(bsc_df['symbol'], bsc_df['pb_fwd_2026']))
+            else:
+                forward_data = {}
+                forward_2026_data = {}
+
+            if stats_data:
+                # Build the valuation box chart with dual forward markers
+                fig = valuation_box_with_markers(
+                    stats_data=stats_data,
+                    pe_forward_data=forward_data,
+                    pe_forward_2026_data=forward_2026_data,
+                    title=f'{selected_sector}: {selected_metric} Historical Distribution vs Forward 2025-2026',
+                    metric_label=selected_metric,
+                    height=550
+                )
+                st.plotly_chart(fig, use_container_width=True)
+
+                # Legend explanation
+                st.markdown(f"""
+                **Cách đọc chart:**
+                - **Box (màu)**: Phân phối {selected_metric} lịch sử P25-P75 (IQR)
+                - **Whiskers**: Phạm vi P5-P95 (loại trừ outliers)
+                - **● Circle**: {selected_metric} Trailing hiện tại (TTM)
+                - **◇ Diamond (amber)**: {selected_metric} Forward 2025 (dự báo BSC)
+                - **◆ Diamond (purple)**: {selected_metric} Forward 2026 (dự báo BSC)
+
+                **Phân loại:**
+                - 🟢 **Very Cheap** (< P10): Định giá rất thấp so với lịch sử
+                - 🟩 **Cheap** (P10-P25): Định giá thấp
+                - 🟡 **Fair** (P25-P75): Định giá hợp lý
+                - 🟠 **Expensive** (P75-P90): Định giá cao
+                - 🔴 **Very Expensive** (> P90): Định giá rất cao
+
+                **Giải thích:**
+                - Nếu ◇/◆ (Forward) thấp hơn ● (TTM) → Dự báo tăng trưởng tốt, {selected_metric} giảm
+                - Nếu ◇/◆ cao hơn ● → Dự báo tăng trưởng yếu hoặc giá đã phản ánh kỳ vọng
+                - Xu hướng 2025→2026: Nếu ◆ thấp hơn ◇ → Tăng trưởng tiếp tục cải thiện
+                """)
+            else:
+                st.info(f"Không có dữ liệu {selected_metric} lịch sử cho ngành {selected_sector}.")
+        else:
+            st.warning("Không có ngành nào có đủ dữ liệu BSC coverage.")
+
+    # -------------------------------------------------------------------------
     # CHART 1: PE TTM vs Forward - Compare current valuation vs forward
     # -------------------------------------------------------------------------
-    if chart_type == "PE TTM vs FWD":
+    elif chart_type == "PE TTM vs FWD":
         st.markdown("### PE TTM vs Forward 2025 by Sector")
         st.markdown("*So sánh định giá hiện tại (TTM) vs dự báo (Forward) - chỉ tính các mã BSC coverage*")
 
@@ -1037,6 +1133,172 @@ with tab4:
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("Not enough valid data for scatter plot.")
+
+
+# ============================================================================
+# TAB 5: FORWARD VALUATION MATRIX
+# ============================================================================
+with tab5:
+    st.markdown("### Forward Valuation Matrix: TTM vs 2025F vs 2026F")
+    st.markdown("*Compare current trailing (TTM) valuations against BSC forward forecasts for 2025-2026*")
+
+    # Metric selector
+    matrix_metric = st.radio(
+        "Select Metric",
+        options=["PE", "PB"],
+        horizontal=True,
+        key="matrix_metric"
+    )
+
+    # Load combined BSC data with TTM values
+    combined_df = service.get_combined_data()
+
+    if not combined_df.empty:
+        # Get TTM valuation data
+        val_service = ValuationService()
+
+        if matrix_metric == "PE":
+            # Load PE TTM
+            pe_ttm_path = project_root / "DATA" / "processed" / "valuation" / "pe" / "historical" / "historical_pe.parquet"
+            if pe_ttm_path.exists():
+                pe_hist = pd.read_parquet(pe_ttm_path)
+                # Get latest date
+                latest_date = pe_hist['date'].max()
+                pe_latest = pe_hist[pe_hist['date'] == latest_date][['symbol', 'pe_ratio']].copy()
+                pe_latest = pe_latest.rename(columns={'pe_ratio': 'pe_ttm'})
+
+                # Merge with combined data
+                matrix_df = combined_df.merge(pe_latest, on='symbol', how='left')
+
+                # Filter to stocks with all required data
+                matrix_df = matrix_df[
+                    matrix_df['pe_ttm'].notna() &
+                    matrix_df['pe_fwd_2025'].notna() &
+                    matrix_df['pe_fwd_2026'].notna()
+                ].copy()
+
+                if not matrix_df.empty:
+                    # Calculate deltas
+                    matrix_df['delta_2025'] = ((matrix_df['pe_fwd_2025'] - matrix_df['pe_ttm']) / matrix_df['pe_ttm']) * 100
+                    matrix_df['delta_2026'] = ((matrix_df['pe_fwd_2026'] - matrix_df['pe_ttm']) / matrix_df['pe_ttm']) * 100
+
+                    # Sort by delta 2025 (most attractive = largest negative delta)
+                    matrix_df = matrix_df.sort_values('delta_2025')
+
+                    # Display formatted table
+                    display_df = pd.DataFrame()
+                    display_df['Symbol'] = matrix_df['symbol']
+                    display_df['Sector'] = matrix_df['sector']
+                    display_df['PE TTM'] = matrix_df['pe_ttm'].apply(lambda x: format_ratio(x, 1))
+                    display_df['PE 2025F'] = matrix_df['pe_fwd_2025'].apply(lambda x: format_ratio(x, 1))
+                    display_df['PE 2026F'] = matrix_df['pe_fwd_2026'].apply(lambda x: format_ratio(x, 1))
+                    display_df['Δ 2025'] = matrix_df['delta_2025'].apply(format_change)
+                    display_df['Δ 2026'] = matrix_df['delta_2026'].apply(format_change)
+
+                    # Add status based on delta
+                    def get_status(delta):
+                        if delta < -20:
+                            return '<span class="upside-positive">Strong Growth</span>'
+                        elif delta < -10:
+                            return '<span class="upside-positive">Good Growth</span>'
+                        elif delta < 0:
+                            return '<span style="color: #FFD666;">Moderate Growth</span>'
+                        elif delta < 10:
+                            return '<span style="color: #F97316;">Weak Growth</span>'
+                        else:
+                            return '<span class="upside-negative">Declining</span>'
+
+                    display_df['Status'] = matrix_df['delta_2025'].apply(get_status)
+
+                    st.markdown(render_styled_table(display_df, highlight_first_col=True), unsafe_allow_html=True)
+
+                    # Explanation
+                    st.markdown("---")
+                    st.markdown("""
+                    **How to Read:**
+                    - **Negative Delta** (green): Forward PE < TTM PE → Strong earnings growth expected
+                    - **Positive Delta** (red): Forward PE > TTM PE → Earnings growth slowing or negative
+
+                    **Example:**
+                    - If PE TTM = 10x and PE 2025F = 8x → Delta = -20% → Earnings expected to grow ~25%
+                    - If PE TTM = 10x and PE 2025F = 12x → Delta = +20% → Earnings expected to decline ~17%
+
+                    **Best Opportunities:** Stocks with largest negative deltas (PE FWD << PE TTM)
+                    """)
+                else:
+                    st.info("No stocks with complete PE data (TTM + 2025F + 2026F)")
+            else:
+                st.warning("PE TTM data not available. Please run daily valuation pipeline.")
+
+        else:  # PB
+            # Load PB TTM
+            pb_ttm_path = project_root / "DATA" / "processed" / "valuation" / "pb" / "historical" / "historical_pb.parquet"
+            if pb_ttm_path.exists():
+                pb_hist = pd.read_parquet(pb_ttm_path)
+                latest_date = pb_hist['date'].max()
+                pb_latest = pb_hist[pb_hist['date'] == latest_date][['symbol', 'pb_ratio']].copy()
+                pb_latest = pb_latest.rename(columns={'pb_ratio': 'pb_ttm'})
+
+                # Merge with combined data
+                matrix_df = combined_df.merge(pb_latest, on='symbol', how='left')
+
+                # Filter to stocks with all required data
+                matrix_df = matrix_df[
+                    matrix_df['pb_ttm'].notna() &
+                    matrix_df['pb_fwd_2025'].notna() &
+                    matrix_df['pb_fwd_2026'].notna()
+                ].copy()
+
+                if not matrix_df.empty:
+                    # Calculate deltas
+                    matrix_df['delta_2025'] = ((matrix_df['pb_fwd_2025'] - matrix_df['pb_ttm']) / matrix_df['pb_ttm']) * 100
+                    matrix_df['delta_2026'] = ((matrix_df['pb_fwd_2026'] - matrix_df['pb_ttm']) / matrix_df['pb_ttm']) * 100
+
+                    # Sort by delta 2025
+                    matrix_df = matrix_df.sort_values('delta_2025')
+
+                    # Display formatted table
+                    display_df = pd.DataFrame()
+                    display_df['Symbol'] = matrix_df['symbol']
+                    display_df['Sector'] = matrix_df['sector']
+                    display_df['PB TTM'] = matrix_df['pb_ttm'].apply(lambda x: format_ratio(x, 2))
+                    display_df['PB 2025F'] = matrix_df['pb_fwd_2025'].apply(lambda x: format_ratio(x, 2))
+                    display_df['PB 2026F'] = matrix_df['pb_fwd_2026'].apply(lambda x: format_ratio(x, 2))
+                    display_df['Δ 2025'] = matrix_df['delta_2025'].apply(format_change)
+                    display_df['Δ 2026'] = matrix_df['delta_2026'].apply(format_change)
+
+                    # Add status
+                    def get_pb_status(delta):
+                        if delta < -15:
+                            return '<span class="upside-positive">Strong ROE Growth</span>'
+                        elif delta < -5:
+                            return '<span class="upside-positive">Good ROE Growth</span>'
+                        elif delta < 0:
+                            return '<span style="color: #FFD666;">Moderate Growth</span>'
+                        elif delta < 5:
+                            return '<span style="color: #F97316;">Weak Growth</span>'
+                        else:
+                            return '<span class="upside-negative">Declining ROE</span>'
+
+                    display_df['Status'] = matrix_df['delta_2025'].apply(get_pb_status)
+
+                    st.markdown(render_styled_table(display_df, highlight_first_col=True), unsafe_allow_html=True)
+
+                    # Explanation
+                    st.markdown("---")
+                    st.markdown("""
+                    **How to Read PB Matrix:**
+                    - **Negative Delta**: Forward PB < TTM PB → Book value growing faster than price
+                    - **Positive Delta**: Forward PB > TTM PB → Book value growth slower than price
+
+                    **Best Opportunities:** Stocks with negative deltas (strong equity/ROE growth expected)
+                    """)
+                else:
+                    st.info("No stocks with complete PB data (TTM + 2025F + 2026F)")
+            else:
+                st.warning("PB TTM data not available. Please run daily valuation pipeline.")
+    else:
+        st.info("No BSC combined data available.")
 
 # Footer
 st.markdown("---")

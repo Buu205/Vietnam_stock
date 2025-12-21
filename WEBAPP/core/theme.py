@@ -1,176 +1,178 @@
 """
-Theme Configuration - Company Brand Colors
-==========================================
+Theme Configuration - Crypto Terminal Dark Mode
+================================================
 
-Official company colors + extended palette for financial dashboard.
+Modern fintech/crypto dashboard with glassmorphism effects.
+Optimized for OLED displays and trading interfaces.
 
-Brand Colors:
-- Primary Blue: #295CA9 (R:41 G:92 B:169)
-- Accent Teal: #009B87 (R:0 G:155 B:135)
-- Warning Gold: #FFC132 (R:255 G:193 B:50)
+Design Direction:
+- Dark mode fintech/crypto aesthetic
+- Glassmorphism cards with blur effects
+- Trading terminal color scheme
+- Space Grotesk + DM Sans typography
 
-Created: 2025-12-15
+Updated: 2025-12-21
 """
 
 # ============================================================================
-# BRAND COLORS (Official Company Palette)
+# CRYPTO TERMINAL COLOR PALETTE
 # ============================================================================
 
-BRAND = {
-    'primary': '#295CA9',      # Company Blue
-    'accent': '#009B87',       # Company Teal
-    'warning': '#FFC132',      # Company Gold
+# Primary accent colors (Fintech/Crypto style)
+PURPLE = {
+    'primary': '#8B5CF6',      # Electric Purple (main CTA)
+    'dark': '#7C3AED',         # Darker purple (hover states)
+    'light': '#A78BFA',        # Lighter purple (highlights)
+    'pale': '#C4B5FD',         # Very light purple (text accents)
+    'glow': 'rgba(139, 92, 246, 0.4)',  # Glow effect
+}
+
+CYAN = {
+    'primary': '#06B6D4',      # Cyan (secondary actions)
+    'dark': '#0891B2',         # Darker cyan
+    'light': '#22D3EE',        # Lighter cyan (highlights)
+    'pale': '#A5F3FC',         # Very light cyan
+    'glow': 'rgba(6, 182, 212, 0.4)',   # Glow effect
+}
+
+AMBER = {
+    'primary': '#F59E0B',      # Amber Gold (highlights, warnings)
+    'dark': '#D97706',         # Darker amber
+    'light': '#FBBF24',        # Lighter amber
+    'pale': '#FDE68A',         # Very light amber
 }
 
 # ============================================================================
-# EXTENDED PALETTE (Based on Brand Colors)
-# ============================================================================
-
-# Primary Blue Family (Based on #295CA9)
-BLUE = {
-    'primary': '#295CA9',      # Main brand blue
-    'dark': '#1E4580',         # Darker blue (hover states, emphasis)
-    'light': '#4A7BC8',        # Lighter blue (backgrounds, subtle elements)
-    'pale': '#E3EBF7',         # Very light blue (cards, sections)
-    'navy': '#0A1E42',         # Deep navy (dark theme background)
-}
-
-# Teal/Green Family (Based on #009B87)
-TEAL = {
-    'primary': '#009B87',      # Main brand teal
-    'dark': '#007766',         # Darker teal (positive metrics)
-    'light': '#00C9AD',        # Lighter teal (highlights)
-    'pale': '#E0F5F2',         # Very light teal (success backgrounds)
-    'success': '#00A878',      # Success messages
-}
-
-# Gold/Orange Family (Based on #FFC132)
-GOLD = {
-    'primary': '#FFC132',      # Main brand gold
-    'dark': '#E6A000',         # Darker gold (warnings)
-    'light': '#FFD366',        # Lighter gold (highlights)
-    'pale': '#FFF8E6',         # Very light gold (warning backgrounds)
-    'amber': '#FFB000',        # Amber warning
-}
-
-# ============================================================================
-# SEMANTIC COLORS (Financial Dashboard)
+# SEMANTIC COLORS (Trading Terminal)
 # ============================================================================
 
 SEMANTIC = {
-    # Market indicators
-    'positive': '#00A878',     # Gains, growth, buy signals (teal-based)
-    'negative': '#E63946',     # Losses, decline, sell signals (red)
-    'neutral': '#94A3B8',      # Unchanged, hold (improved gray for dark bg)
+    # Market indicators (Trading colors)
+    'positive': '#10B981',     # Emerald Green (bullish, gains)
+    'negative': '#EF4444',     # Red (bearish, losses)
+    'neutral': '#6B7280',      # Gray (unchanged, hold)
 
     # Alert levels
-    'success': '#00A878',      # Success messages (teal)
-    'warning': '#FFC132',      # Warnings (brand gold)
-    'error': '#E63946',        # Errors, critical (red)
-    'info': '#295CA9',         # Information (brand blue)
+    'success': '#10B981',      # Emerald (success messages)
+    'warning': '#F59E0B',      # Amber (warnings)
+    'error': '#EF4444',        # Red (errors, critical)
+    'info': '#8B5CF6',         # Purple (information)
 
-    # Chart colors
-    'revenue': '#009B87',      # Revenue (brand teal)
-    'profit': '#00C9AD',       # Profit (light teal)
-    'expense': '#E63946',      # Expenses (red)
-    'asset': '#295CA9',        # Assets (brand blue)
-    'liability': '#FFC132',    # Liabilities (brand gold)
-    'equity': '#4A7BC8',       # Equity (light blue)
+    # Chart colors (Trading terminal)
+    'bullish': '#10B981',      # Green (up candles)
+    'bearish': '#EF4444',      # Red (down candles)
+    'volume': '#8B5CF6',       # Purple (volume bars)
+    'primary_line': '#06B6D4', # Cyan (main trend line)
+    'secondary_line': '#F59E0B', # Amber (comparison line)
+    'area_fill': '#8B5CF6',    # Purple (area charts)
 }
 
 # ============================================================================
-# THEME CONFIGURATIONS
+# DARK THEME (Crypto Terminal - OLED Optimized)
 # ============================================================================
 
-# Dark Theme (Professional Financial - Bloomberg style)
-# Text colors updated for WCAG AA compliance
 DARK_THEME = {
-    # Backgrounds
-    'background': '#0A1E42',          # Deep navy (from BLUE.navy)
-    'surface': '#1E4580',             # Dark blue surface (from BLUE.dark)
-    'card': '#295CA9',                # Card background (brand blue)
-    'hover': '#4A7BC8',               # Hover state (light blue)
+    # Backgrounds (Deep purple-black for OLED)
+    'background': '#0F0B1E',          # Deep purple-black (OLED friendly)
+    'surface': '#1A1625',             # Card surface
+    'elevated': '#252033',            # Elevated cards
+    'hover': '#2D2640',               # Hover state
 
     # Text (WCAG AA Compliant)
-    'text_primary': '#FFFFFF',        # White text (18.1:1)
-    'text_secondary': '#CBD5E1',      # Improved secondary (8.9:1) - was #E3EBF7
-    'text_muted': '#94A3B8',          # Muted text (5.6:1) - NEW
-    'text_disabled': '#64748B',       # Disabled gray (4.0:1) - was #6B7280
+    'text_primary': '#F8FAFC',        # White text
+    'text_secondary': '#94A3B8',      # Muted gray
+    'text_accent': '#C4B5FD',         # Purple tint
+    'text_disabled': '#475569',       # Disabled gray
 
     # Borders
-    'border': '#4A7BC8',              # Light blue borders
-    'divider': '#1E4580',             # Dark blue dividers
+    'border': 'rgba(255, 255, 255, 0.08)',   # Subtle glass border
+    'border_hover': 'rgba(139, 92, 246, 0.3)', # Purple glow border
+    'divider': 'rgba(255, 255, 255, 0.05)',  # Subtle dividers
 
     # Accents
-    'accent_primary': '#009B87',      # Teal accent (brand)
-    'accent_secondary': '#FFC132',    # Gold accent (brand)
+    'accent_primary': '#8B5CF6',      # Electric Purple
+    'accent_secondary': '#06B6D4',    # Cyan
+    'accent_tertiary': '#F59E0B',     # Amber
 
     # Status colors
-    'positive': '#00C9AD',            # Light teal (stands out on dark)
-    'negative': '#FF6B6B',            # Bright red (softer than #E63946)
-    'neutral': '#94A3B8',             # Improved gray (5.6:1)
+    'positive': '#10B981',            # Emerald green
+    'negative': '#EF4444',            # Red
+    'neutral': '#6B7280',             # Gray
 }
 
-# Light Theme (Modern Minimalist - Clean style)
-LIGHT_THEME = {
-    # Backgrounds
-    'background': '#FFFFFF',          # Pure white
-    'surface': '#F8FAFC',             # Off-white
-    'card': '#FFFFFF',                # White cards
-    'hover': '#E3EBF7',               # Light blue hover (from BLUE.pale)
+# ============================================================================
+# GLASSMORPHISM EFFECTS
+# ============================================================================
 
-    # Text
-    'text_primary': '#0A1E42',        # Deep navy text (from BLUE.navy)
-    'text_secondary': '#1E4580',      # Dark blue text (from BLUE.dark)
-    'text_disabled': '#9CA3AF',       # Gray text
+GLASS = {
+    # Card backgrounds
+    'bg_subtle': 'rgba(255, 255, 255, 0.03)',
+    'bg_medium': 'rgba(255, 255, 255, 0.05)',
+    'bg_strong': 'rgba(255, 255, 255, 0.08)',
 
     # Borders
-    'border': '#E3EBF7',              # Light blue borders
-    'divider': '#F1F5F9',             # Very light gray dividers
+    'border': 'rgba(255, 255, 255, 0.08)',
+    'border_hover': 'rgba(139, 92, 246, 0.3)',
 
-    # Accents
-    'accent_primary': '#295CA9',      # Brand blue accent
-    'accent_secondary': '#009B87',    # Teal accent
+    # Blur
+    'blur': 'blur(12px)',
+    'blur_strong': 'blur(20px)',
 
-    # Status colors
-    'positive': '#00A878',            # Teal green
-    'negative': '#E63946',            # Red
-    'neutral': '#6B7280',             # Gray
+    # Shadows
+    'shadow': '0 8px 32px rgba(0, 0, 0, 0.3)',
+    'shadow_hover': '0 8px 32px rgba(139, 92, 246, 0.15)',
+    'shadow_glow': '0 0 15px rgba(139, 92, 246, 0.4)',
+
+    # Inner highlight
+    'inner_highlight': 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+    'inner_highlight_hover': 'inset 0 1px 0 rgba(255, 255, 255, 0.08)',
 }
 
 # ============================================================================
 # CHART COLOR PALETTES
 # ============================================================================
 
-# Main chart palette (categorical data)
+# Main chart palette (categorical data - Fintech style)
 CHART_PALETTE = [
-    '#295CA9',  # Brand Blue
-    '#009B87',  # Brand Teal
-    '#FFC132',  # Brand Gold
-    '#4A7BC8',  # Light Blue
-    '#00C9AD',  # Light Teal
-    '#FFD366',  # Light Gold
-    '#1E4580',  # Dark Blue
-    '#007766',  # Dark Teal
+    '#8B5CF6',  # Electric Purple
+    '#06B6D4',  # Cyan
+    '#F59E0B',  # Amber
+    '#10B981',  # Emerald
+    '#EC4899',  # Pink
+    '#3B82F6',  # Blue
+    '#A78BFA',  # Light Purple
+    '#22D3EE',  # Light Cyan
 ]
+
+# Trading chart colors
+TRADING_COLORS = {
+    'bullish': '#10B981',         # Green candles
+    'bearish': '#EF4444',         # Red candles
+    'volume_up': 'rgba(16, 185, 129, 0.4)',   # Green volume
+    'volume_down': 'rgba(239, 68, 68, 0.4)',  # Red volume
+    'ma_20': '#8B5CF6',           # MA 20 line
+    'ma_50': '#06B6D4',           # MA 50 line
+    'ma_200': '#F59E0B',          # MA 200 line
+    'grid': 'rgba(255, 255, 255, 0.05)',      # Grid lines
+}
 
 # Sequential palette (heatmaps, gradients)
 SEQUENTIAL = {
-    'blue': ['#E3EBF7', '#4A7BC8', '#295CA9', '#1E4580', '#0A1E42'],
-    'teal': ['#E0F5F2', '#00C9AD', '#009B87', '#007766', '#005544'],
-    'gold': ['#FFF8E6', '#FFD366', '#FFC132', '#E6A000', '#CC8F00'],
+    'purple': ['#1E1B4B', '#4C1D95', '#6D28D9', '#8B5CF6', '#A78BFA', '#C4B5FD'],
+    'cyan': ['#083344', '#155E75', '#0891B2', '#06B6D4', '#22D3EE', '#67E8F9'],
+    'emerald': ['#022C22', '#064E3B', '#047857', '#10B981', '#34D399', '#6EE7B7'],
 }
 
-# Diverging palette (comparing positive/negative)
+# Diverging palette (positive/negative comparison)
 DIVERGING = {
-    'teal_red': [
-        '#007766',  # Dark teal (very positive)
-        '#009B87',  # Teal (positive)
-        '#00C9AD',  # Light teal (slightly positive)
-        '#F1F5F9',  # Neutral gray
-        '#FFB4AB',  # Light red (slightly negative)
-        '#E63946',  # Red (negative)
-        '#C62828',  # Dark red (very negative)
+    'green_red': [
+        '#047857',  # Dark green (very positive)
+        '#10B981',  # Emerald (positive)
+        '#34D399',  # Light green (slightly positive)
+        '#374151',  # Neutral gray
+        '#FCA5A5',  # Light red (slightly negative)
+        '#EF4444',  # Red (negative)
+        '#B91C1C',  # Dark red (very negative)
     ]
 }
 
@@ -179,35 +181,39 @@ DIVERGING = {
 # ============================================================================
 
 GRADIENTS = {
-    # Brand gradient (blue → teal)
-    'primary': 'linear-gradient(135deg, #295CA9 0%, #009B87 100%)',
+    # Primary gradient (purple → cyan)
+    'primary': 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
 
-    # Success gradient (light teal → dark teal)
-    'success': 'linear-gradient(135deg, #00C9AD 0%, #007766 100%)',
+    # Accent gradient (cyan → emerald)
+    'accent': 'linear-gradient(135deg, #06B6D4 0%, #10B981 100%)',
 
-    # Warning gradient (light gold → dark gold)
-    'warning': 'linear-gradient(135deg, #FFD366 0%, #E6A000 100%)',
+    # Warning gradient (amber)
+    'warning': 'linear-gradient(135deg, #FBBF24 0%, #D97706 100%)',
 
-    # Dark background gradient
-    'dark_bg': 'linear-gradient(180deg, #0A1E42 0%, #1E4580 100%)',
+    # Dark background gradient (deep purple)
+    'dark_bg': 'linear-gradient(180deg, #0F0B1E 0%, #1A1625 100%)',
 
-    # Card gradient (subtle blue)
-    'card': 'linear-gradient(135deg, #295CA9 0%, #4A7BC8 100%)',
+    # Neon glow gradient
+    'neon_purple': 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%)',
+
+    # Card gradient (glass effect)
+    'glass_card': 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
 }
 
 # ============================================================================
-# TYPOGRAPHY
+# TYPOGRAPHY (Tech Terminal Style)
 # ============================================================================
 
 TYPOGRAPHY = {
-    # Font families
-    'heading': '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    'body': '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    'mono': '"JetBrains Mono", "Fira Code", "Courier New", monospace',
+    # Font families (Space Grotesk + DM Sans + JetBrains Mono)
+    'display': '"Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+    'heading': '"Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+    'body': '"DM Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif',
+    'mono': '"JetBrains Mono", "SF Mono", "Fira Code", monospace',
 
     # Font sizes
-    'h1': '32px',
-    'h2': '28px',
+    'h1': '36px',
+    'h2': '30px',
     'h3': '24px',
     'h4': '20px',
     'h5': '18px',
@@ -241,18 +247,21 @@ SPACING = {
 
 RADIUS = {
     'none': '0',
-    'sm': '4px',
-    'md': '8px',
-    'lg': '12px',
-    'xl': '16px',
+    'sm': '6px',
+    'md': '12px',
+    'lg': '16px',
+    'xl': '20px',
+    '2xl': '24px',
     'full': '9999px',
 }
 
 SHADOWS = {
-    'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    'md': '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-    'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-    'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+    'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.2)',
+    'md': '0 4px 6px -1px rgba(0, 0, 0, 0.3)',
+    'lg': '0 10px 15px -3px rgba(0, 0, 0, 0.4)',
+    'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
+    'glow_purple': '0 0 20px rgba(139, 92, 246, 0.3)',
+    'glow_cyan': '0 0 20px rgba(6, 182, 212, 0.3)',
 }
 
 # ============================================================================
@@ -260,13 +269,13 @@ SHADOWS = {
 # ============================================================================
 
 COMPONENTS = {
-    # Cards
+    # Cards (Glassmorphism)
     'card_padding': SPACING['lg'],
     'card_radius': RADIUS['lg'],
 
     # Metrics
-    'metric_card_height': '120px',
-    'metric_card_padding': SPACING['md'],
+    'metric_card_height': '140px',
+    'metric_card_padding': SPACING['lg'],
 
     # Charts
     'chart_height_sm': '300px',
@@ -276,10 +285,24 @@ COMPONENTS = {
 
     # Tables
     'table_max_height': '600px',
-    'table_row_height': '48px',
+    'table_row_height': '52px',
 
     # Sidebar
     'sidebar_width': '280px',
+}
+
+# ============================================================================
+# Z-INDEX SCALE
+# ============================================================================
+
+Z_INDEX = {
+    'base': 1,
+    'dropdown': 100,
+    'sticky': 150,
+    'modal': 200,
+    'popover': 250,
+    'toast': 300,
+    'tooltip': 400,
 }
 
 # ============================================================================
@@ -289,14 +312,15 @@ COMPONENTS = {
 def get_theme(mode='dark'):
     """
     Get theme configuration.
+    Note: Only dark theme is available for crypto terminal design.
 
     Args:
-        mode: 'dark' or 'light'
+        mode: 'dark' (light mode not supported in this theme)
 
     Returns:
         Theme dictionary
     """
-    return DARK_THEME if mode == 'dark' else LIGHT_THEME
+    return DARK_THEME
 
 
 def get_chart_color(index, palette='default'):
@@ -305,13 +329,16 @@ def get_chart_color(index, palette='default'):
 
     Args:
         index: Color index (0-based)
-        palette: 'default' or 'sequential_blue' etc.
+        palette: 'default', 'trading', or 'sequential_purple' etc.
 
     Returns:
         Hex color code
     """
     if palette == 'default':
         return CHART_PALETTE[index % len(CHART_PALETTE)]
+    elif palette == 'trading':
+        keys = list(TRADING_COLORS.keys())
+        return TRADING_COLORS[keys[index % len(keys)]]
     elif palette.startswith('sequential_'):
         color_key = palette.replace('sequential_', '')
         return SEQUENTIAL[color_key][index % len(SEQUENTIAL[color_key])]
@@ -324,7 +351,7 @@ def get_semantic_color(metric_type, value=None):
     Get semantic color based on metric type and value.
 
     Args:
-        metric_type: 'growth', 'change', 'ratio', etc.
+        metric_type: 'growth', 'change', 'ratio', 'bullish', 'bearish', etc.
         value: Numeric value (optional, for conditional coloring)
 
     Returns:
@@ -333,13 +360,45 @@ def get_semantic_color(metric_type, value=None):
     if value is None:
         return SEMANTIC['neutral']
 
-    if metric_type in ['growth', 'change', 'delta']:
+    if metric_type in ['growth', 'change', 'delta', 'pnl']:
         return SEMANTIC['positive'] if value >= 0 else SEMANTIC['negative']
+    elif metric_type in ['bullish', 'buy']:
+        return SEMANTIC['bullish']
+    elif metric_type in ['bearish', 'sell']:
+        return SEMANTIC['bearish']
     elif metric_type == 'ratio':
-        # For ratios, green if good range, red if bad
-        return SEMANTIC['neutral']  # Default, override in specific use cases
+        return SEMANTIC['neutral']
     else:
         return SEMANTIC['info']
+
+
+def get_glass_style(variant='default'):
+    """
+    Get glassmorphism CSS properties.
+
+    Args:
+        variant: 'default', 'hover', 'elevated'
+
+    Returns:
+        Dictionary of CSS properties
+    """
+    base = {
+        'background': GLASS['bg_subtle'],
+        'backdrop_filter': GLASS['blur'],
+        'border': f"1px solid {GLASS['border']}",
+        'border_radius': RADIUS['lg'],
+        'box_shadow': f"{GLASS['shadow']}, {GLASS['inner_highlight']}",
+    }
+
+    if variant == 'hover':
+        base['background'] = GLASS['bg_medium']
+        base['border'] = f"1px solid {GLASS['border_hover']}"
+        base['box_shadow'] = f"{GLASS['shadow_hover']}, {GLASS['inner_highlight_hover']}"
+    elif variant == 'elevated':
+        base['background'] = GLASS['bg_strong']
+        base['backdrop_filter'] = GLASS['blur_strong']
+
+    return base
 
 
 # ============================================================================
@@ -348,10 +407,10 @@ def get_semantic_color(metric_type, value=None):
 
 def generate_css_variables(theme='dark'):
     """
-    Generate CSS variables for the theme.
+    Generate CSS variables for the Crypto Terminal theme.
 
     Args:
-        theme: 'dark' or 'light'
+        theme: 'dark' (only dark mode supported)
 
     Returns:
         CSS string with variables
@@ -364,22 +423,35 @@ def generate_css_variables(theme='dark'):
     for key, value in theme_config.items():
         css += f"  --{key.replace('_', '-')}: {value};\n"
 
-    # Brand colors
-    for key, value in BRAND.items():
-        css += f"  --brand-{key}: {value};\n"
+    # Purple palette
+    for key, value in PURPLE.items():
+        css += f"  --purple-{key}: {value};\n"
+
+    # Cyan palette
+    for key, value in CYAN.items():
+        css += f"  --cyan-{key}: {value};\n"
 
     # Semantic colors
     for key, value in SEMANTIC.items():
         css += f"  --semantic-{key.replace('_', '-')}: {value};\n"
+
+    # Glass effects
+    for key, value in GLASS.items():
+        css += f"  --glass-{key.replace('_', '-')}: {value};\n"
 
     # Spacing
     for key, value in SPACING.items():
         css += f"  --spacing-{key}: {value};\n"
 
     # Typography
+    css += f"  --font-display: {TYPOGRAPHY['display']};\n"
     css += f"  --font-heading: {TYPOGRAPHY['heading']};\n"
     css += f"  --font-body: {TYPOGRAPHY['body']};\n"
     css += f"  --font-mono: {TYPOGRAPHY['mono']};\n"
+
+    # Z-index
+    for key, value in Z_INDEX.items():
+        css += f"  --z-{key}: {value};\n"
 
     css += "}\n"
 
@@ -394,5 +466,6 @@ if __name__ == '__main__':
     # Test color functions
     print(f"\nChart color 0: {get_chart_color(0)}")
     print(f"Chart color 1: {get_chart_color(1)}")
-    print(f"Positive change color: {get_semantic_color('change', 5.2)}")
-    print(f"Negative change color: {get_semantic_color('change', -3.1)}")
+    print(f"Bullish color: {get_semantic_color('bullish', 1)}")
+    print(f"Bearish color: {get_semantic_color('bearish', -1)}")
+    print(f"\nGlass style: {get_glass_style('default')}")

@@ -52,75 +52,61 @@ def get_data_path(relative_path: str = "") -> Path:
 
 
 def load_custom_css():
-    """Load custom CSS for Nunito font and styling.
-    
-    Call this function at the beginning of each page to apply custom styling.
+    """DEPRECATED: Custom CSS is now handled by core/styles.py.
+
+    This function is kept for backward compatibility but does nothing.
+    Use get_page_style() from WEBAPP.core.styles instead.
     """
-    css_file = Path(__file__).parent.parent / "assets" / "custom_style.css"
-    
-    if css_file.exists():
-        with open(css_file, "r", encoding="utf-8") as f:
-            css_content = f.read()
-            st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
-    else:
-        # Fallback inline CSS if file doesn't exist
-        st.markdown("""
-        <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
-        
-        html, body, [class*="css"] {
-            font-family: 'Nunito', sans-serif !important;
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Nunito', sans-serif !important;
-            font-weight: 700 !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+    # No-op - styling is now centralized in styles.py
+    pass
 
 
 def get_plotly_font_config():
-    """Get Plotly font configuration for Nunito font.
-    
+    """Get Plotly font configuration for Inter font (dark theme).
+
     Returns:
         dict: Font configuration to be used in fig.update_layout()
-    
+
     Usage:
         fig.update_layout(**get_plotly_font_config())
     """
     return {
         'font': {
-            'family': 'Nunito, sans-serif',
-            'size': 14,
-            'color': '#262730'
+            'family': 'JetBrains Mono, monospace',
+            'size': 11,
+            'color': '#CBD5E1'
         },
         'title_font': {
-            'family': 'Nunito, sans-serif',
-            'size': 18,
-            'color': '#295CA9'
+            'family': 'Inter, sans-serif',
+            'size': 15,
+            'color': '#CBD5E1'
         },
         'hoverlabel': {
             'font': {
-                'family': 'Nunito, sans-serif',
-                'size': 13
-            }
-        }
+                'family': 'JetBrains Mono, monospace',
+                'size': 12,
+                'color': '#F0F4F8'
+            },
+            'bgcolor': '#101820',
+            'bordercolor': '#009B87'
+        },
+        'paper_bgcolor': 'rgba(0,0,0,0)',
+        'plot_bgcolor': 'rgba(0,0,0,0)'
     }
 
 
 def get_pyecharts_font_config():
-    """Get PyEcharts text style configuration for Nunito font.
-    
+    """Get PyEcharts text style configuration for Inter font.
+
     Returns:
         dict: Text style configuration for PyEcharts charts
-    
+
     Usage:
         textstyle_opts = opts.TextStyleOpts(**get_pyecharts_font_config())
     """
     return {
-        'font_family': 'Nunito, sans-serif',
-        'font_size': 14
+        'font_family': 'Inter, sans-serif',
+        'font_size': 12
     }
 
 

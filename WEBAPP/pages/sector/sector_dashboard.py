@@ -33,6 +33,19 @@ from WEBAPP.core.styles import (
     CHART_COLORS, BAR_COLORS, DISTRIBUTION_COLORS, ASSESSMENT_COLORS, BAND_COLORS,
     render_styled_table, get_table_style
 )
+# Import centralized valuation config and chart components
+from WEBAPP.core.valuation_config import (
+    OUTLIER_LIMITS, STATUS_COLORS, CHART_COLORS as VAL_CHART_COLORS,
+    format_ratio, format_percent, format_zscore,
+    get_status_color, get_percentile_status, filter_outliers
+)
+from WEBAPP.components.charts.valuation_charts import (
+    distribution_candlestick,
+    line_with_statistical_bands,
+    histogram_with_stats,
+    render_status_legend
+)
+from WEBAPP.core.chart_schema import get_chart_config, get_y_range, CHART_SCHEMA
 
 # Note: st.set_page_config is handled by main_app.py
 
@@ -155,13 +168,212 @@ st.markdown("---")
 # ============================================================================
 # TABS
 # ============================================================================
-tab_distribution, tab_individual, tab_macro, tab_commodity, tab_tables = st.tabs([
+tab_vnindex, tab_distribution, tab_individual, tab_macro, tab_commodity, tab_tables = st.tabs([
+    "📊 VNIndex Analysis",
     "🕯️ All Sectors Distribution",
     "📈 Individual Analysis",
     "📊 Macro",
     "🛢️ Commodity",
     "📋 Data"
 ])
+
+# ============================================================================
+# TAB 0: VNINDEX ANALYSIS
+# ============================================================================
+with tab_vnindex:
+    st.markdown("### VNIndex Valuation Metrics")
+    st.markdown("*Comparing three market index variants: VNINDEX (full market), VNINDEX_EXCLUDE (excluding VIC/VHM/VPB), BSC_INDEX*")
+
+    # Load vnindex data
+    @st.cache_data(ttl=3600)
+    def load_vnindex_data():
+        vnindex_file = service.data_path / "vnindex" / "vnindex_valuation_refined.parquet"
+        if vnindex_file.exists():
+            df = pd.read_parquet(vnindex_file)
+            df['date'] = pd.to_datetime(df['date'])
+            return df
+        return pd.DataFrame()
+
+    vnindex_df = load_vnindex_data()
+
+    if not vnindex_df.empty:
+        # Get latest values for 3 variants
+        latest_vnindex = vnindex_df[vnindex_df['scope'] == 'VNINDEX'].sort_values('date').iloc[-1] if len(vnindex_df[vnindex_df['scope'] == 'VNINDEX']) > 0 else None
+        latest_vnindex_exclude = vnindex_df[vnindex_df['scope'] == 'VNINDEX_EXCLUDE'].sort_values('date').iloc[-1] if len(vnindex_df[vnindex_df['scope'] == 'VNINDEX_EXCLUDE']) > 0 else None
+        latest_bsc = vnindex_df[vnindex_df['scope'] == 'BSC_INDEX'].sort_values('date').iloc[-1] if len(vnindex_df[vnindex_df['scope'] == 'BSC_INDEX']) > 0 else None
+
+        # Metric Cards (3 variants)
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            if latest_vnindex is not None:
+                st.markdown("#### VNINDEX")
+                pe_val = latest_vnindex.get('pe_ttm')
+                pb_val = latest_vnindex.get('pb')
+                st.metric("PE TTM", f"{pe_val:.2f}x" if pd.notna(pe_val) else "—")
+                st.metric("P/B", f"{pb_val:.2f}x" if pd.notna(pb_val) else "—")
+
+        with col2:
+            if latest_vnindex_exclude is not None:
+                st.markdown("#### VNINDEX_EXCLUDE")
+                pe_val = latest_vnindex_exclude.get('pe_ttm')
+                pb_val = latest_vnindex_exclude.get('pb')
+                st.metric("PE TTM", f"{pe_val:.2f}x" if pd.notna(pe_val) else "—")
+                st.metric("P/B", f"{pb_val:.2f}x" if pd.notna(pb_val) else "—")
+
+        with col3:
+            if latest_bsc is not None:
+                st.markdown("#### BSC_INDEX")
+                pe_fwd_2025 = latest_bsc.get('pe_fwd_2025')
+                pe_fwd_2026 = latest_bsc.get('pe_fwd_2026')
+                st.metric("PE Fwd 2025", f"{pe_fwd_2025:.2f}x" if pd.notna(pe_fwd_2025) else "—")
+                st.metric("PE Fwd 2026", f"{pe_fwd_2026:.2f}x" if pd.notna(pe_fwd_2026) else "—")
+
+        st.markdown("---")
+
+        # Candlestick distribution chart (3 variants comparison)
+        st.markdown(f"### {selected_metric} Distribution: 3 Market Index Variants")
+        st.markdown("*Candlestick: Min-Max (whiskers), P25-P75 (body). Colored dot = current value.*")
+
+        # Build candlestick data for 3 variants
+        candle_data = []
+        for scope in ['VNINDEX', 'VNINDEX_EXCLUDE', 'BSC_INDEX']:
+            scope_data = vnindex_df[vnindex_df['scope'] == scope].copy()
+
+            if scope_data.empty or primary_metric not in scope_data.columns:
+                continue
+
+            metric_vals = scope_data[primary_metric].dropna()
+
+            # Filter by time range
+            scope_data = scope_data.sort_values('date')
+            if days_distribution < len(scope_data):
+                scope_data = scope_data.tail(days_distribution)
+                metric_vals = scope_data[primary_metric].dropna()
+
+            if len(metric_vals) < 20:
+                continue
+
+            # Get current value
+            current_val = metric_vals.iloc[-1] if len(metric_vals) > 0 else None
+
+            # Filter outliers
+            metric_key = primary_metric.upper().replace('_TTM', '').replace('_', '')
+            clean_data = filter_outliers(metric_vals, metric_key)
+
+            if len(clean_data) < 20:
+                continue
+
+            p_min = clean_data.min()
+            p25 = clean_data.quantile(0.25)
+            p50 = clean_data.quantile(0.50)
+            p75 = clean_data.quantile(0.75)
+            p_max = clean_data.max()
+
+            percentile = np.sum(clean_data <= current_val) / len(clean_data) * 100 if current_val else 50
+
+            candle_data.append({
+                'symbol': scope,
+                'current': current_val,
+                'min': p_min,
+                'p25': p25,
+                'median': p50,
+                'p75': p75,
+                'max': p_max,
+                'percentile': percentile
+            })
+
+        if candle_data:
+            # Get y_range from schema
+            metric_type = primary_metric.upper().replace('_TTM', '').replace('_', '')
+            y_range = get_y_range(metric_type)
+
+            fig_candle = distribution_candlestick(
+                candle_data,
+                metric_label=selected_metric,
+                height=get_chart_config('candlestick_distribution').height,
+                y_range=y_range,
+                title=f"{selected_metric} Distribution: Market Indices"
+            )
+            st.plotly_chart(fig_candle, use_container_width=True, config={'displayModeBar': False})
+
+            # Legend
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.markdown("🟢 **Undervalued** (< P25)")
+            with col2:
+                st.markdown("🟡 **Fair Value** (P25-P75)")
+            with col3:
+                st.markdown("🔴 **Expensive** (> P75)")
+        else:
+            st.warning("Not enough data for candlestick distribution")
+
+        st.markdown("---")
+
+        # Individual index selector + line chart with bands
+        st.markdown(f"### {selected_metric} Historical Trend (Individual Index)")
+
+        selected_index = st.selectbox(
+            "Select Index",
+            options=['VNINDEX', 'VNINDEX_EXCLUDE', 'BSC_INDEX'],
+            index=0,
+            key='vnindex_selector'
+        )
+
+        if selected_index and primary_metric not in ['ps', 'ev_ebitda']:
+            index_history = vnindex_df[vnindex_df['scope'] == selected_index].copy()
+
+            # Filter by time range
+            index_history = index_history.sort_values('date')
+            if days < len(index_history):
+                index_history = index_history.tail(days)
+
+            if not index_history.empty and primary_metric in index_history.columns:
+                # Create line chart with bands + histogram side-by-side
+                col_line, col_hist = st.columns([0.7, 0.3])
+
+                with col_line:
+                    fig_line, stats_line = line_with_statistical_bands(
+                        index_history,
+                        date_col='date',
+                        value_col=primary_metric,
+                        metric_label=selected_metric,
+                        height=get_chart_config('line_with_bands').height,
+                        title=f"{selected_index} - {selected_metric}"
+                    )
+                    st.plotly_chart(fig_line, use_container_width=True)
+
+                with col_hist:
+                    # Histogram
+                    metric_data = index_history[primary_metric].dropna()
+                    current_val = metric_data.iloc[-1] if len(metric_data) > 0 else None
+
+                    fig_hist = histogram_with_stats(
+                        metric_data,
+                        metric_label=selected_metric,
+                        height=get_chart_config('line_with_bands').height,
+                        current_value=current_val,
+                        title="Distribution"
+                    )
+                    st.plotly_chart(fig_hist, use_container_width=True)
+
+                # Stats cards
+                if stats_line:
+                    col1, col2, col3, col4 = st.columns(4)
+                    with col1:
+                        st.metric("Current", format_ratio(stats_line.get('current')))
+                    with col2:
+                        st.metric("Median", format_ratio(stats_line.get('median')))
+                    with col3:
+                        st.metric("Z-Score", format_zscore(stats_line.get('z_score')))
+                    with col4:
+                        st.metric("Percentile", format_percent(stats_line.get('percentile')))
+            else:
+                st.warning(f"No {selected_metric} data available for {selected_index}")
+        elif primary_metric in ['ps', 'ev_ebitda']:
+            st.warning(f"⚠️ **{selected_metric}** is not available for Market Indices. Only PE and PB are tracked.")
+    else:
+        st.warning("VNIndex data not available. Please run the daily valuation pipeline.")
 
 # ============================================================================
 # TAB 1: ALL SECTORS DISTRIBUTION (Candlestick)
@@ -209,11 +421,10 @@ with tab_distribution:
                     if current_val is None or pd.isna(current_val) or current_val <= 0:
                         continue
 
-                # Filter outliers
-                if primary_metric == 'pe_ttm':
-                    clean_data = metric_data[(metric_data > 0) & (metric_data <= 100)]
-                else:
-                    clean_data = metric_data[(metric_data >= 0) & (metric_data <= 100)]
+                # Filter outliers using centralized config
+                metric_key = primary_metric.upper().replace('_TTM', '').replace('_', '')
+                limits = OUTLIER_LIMITS.get(metric_key, {'min': 0, 'max': 100})
+                clean_data = metric_data[(metric_data > limits['min']) & (metric_data <= limits['max'])]
 
                 if len(clean_data) < 20:
                     continue
@@ -285,7 +496,9 @@ with tab_distribution:
                     ))
 
             if valid_items:
-                layout = get_chart_layout(height=500)
+                # Use chart_schema for configuration
+                chart_config = get_chart_config('candlestick_distribution')
+                layout = get_chart_layout(height=chart_config.height)
                 layout['xaxis'] = dict(
                     categoryorder='array',
                     categoryarray=valid_items,
@@ -298,10 +511,10 @@ with tab_distribution:
                 layout['yaxis']['fixedrange'] = True
                 layout['dragmode'] = False
 
-                if primary_metric == 'pb':
-                    layout['yaxis']['range'] = [0, 8]
-                elif primary_metric == 'pe_ttm':
-                    layout['yaxis']['range'] = [0, 50]
+                # Use get_y_range from chart_schema
+                metric_type = primary_metric.upper().replace('_TTM', '').replace('_', '')
+                y_range = get_y_range(metric_type)
+                layout['yaxis']['range'] = list(y_range)
 
                 fig_candle.update_layout(**layout)
 
@@ -374,13 +587,11 @@ with tab_distribution:
 
                 metric_data = history[primary_metric].dropna()
 
-                # Filter outliers
-                if primary_metric == 'pe_ttm':
-                    metric_data = metric_data[(metric_data > 0) & (metric_data <= 100)]
-                    plot_df = history[(history[primary_metric] > 0) & (history[primary_metric] <= 100)]
-                else:
-                    metric_data = metric_data[(metric_data >= 0) & (metric_data <= 100)]
-                    plot_df = history[(history[primary_metric] >= 0) & (history[primary_metric] <= 100)]
+                # Filter outliers using centralized config
+                metric_key = primary_metric.upper().replace('_TTM', '').replace('_', '')
+                limits = OUTLIER_LIMITS.get(metric_key, {'min': 0, 'max': 100})
+                metric_data = metric_data[(metric_data > limits['min']) & (metric_data <= limits['max'])]
+                plot_df = history[(history[primary_metric] > limits['min']) & (history[primary_metric] <= limits['max'])]
 
                 if len(metric_data) < 20:
                     continue
@@ -433,8 +644,9 @@ with tab_distribution:
                 else:
                     y_min, y_max = 0, 100
 
-                # Larger chart height for main focus
-                layout = get_chart_layout(height=600)
+                # Use chart_schema for height
+                chart_config = get_chart_config('line_with_bands')
+                layout = get_chart_layout(height=chart_config.height + 200)  # +200 for larger focus
                 layout['yaxis']['title'] = selected_metric
                 layout['yaxis']['range'] = [y_min, y_max]
                 layout['showlegend'] = True
@@ -592,18 +804,20 @@ with tab_individual:
                 st.warning("No sectors available")
 
     # Helper function to create individual chart with bands
-    def create_individual_chart(scope_name, history_df, metric_col, metric_label, chart_height=400):
+    def create_individual_chart(scope_name, history_df, metric_col, metric_label, chart_height=None):
         """Create line chart with statistical bands for a single scope"""
         if history_df.empty or metric_col not in history_df.columns:
             return None, None
 
+        # Use chart_schema default height if not provided
+        if chart_height is None:
+            chart_height = get_chart_config('line_with_bands').height
+
         metric_data = history_df[metric_col].dropna()
 
-        # Filter outliers
-        if metric_col == 'pe_ttm':
-            metric_data = metric_data[(metric_data > 0) & (metric_data <= 100)]
-        else:
-            metric_data = metric_data[(metric_data >= 0) & (metric_data <= 100)]
+        # Filter outliers using centralized filter_outliers function
+        metric_key = metric_col.upper().replace('_TTM', '').replace('_', '')
+        metric_data = filter_outliers(metric_data, metric_key)
 
         if len(metric_data) < 20:
             return None, None
@@ -614,10 +828,8 @@ with tab_individual:
         mean_val = metric_data.mean()
 
         # Filter history for plotting
-        if metric_col == 'pe_ttm':
-            plot_df = history_df[(history_df[metric_col] > 0) & (history_df[metric_col] <= 100)]
-        else:
-            plot_df = history_df[(history_df[metric_col] >= 0) & (history_df[metric_col] <= 100)]
+        limits = OUTLIER_LIMITS.get(metric_key, {'min': 0, 'max': 100})
+        plot_df = history_df[(history_df[metric_col] > limits['min']) & (history_df[metric_col] <= limits['max'])]
 
         plus_1sd = mean_val + std_val
         plus_2sd = mean_val + 2 * std_val
@@ -701,11 +913,37 @@ with tab_individual:
             st.info("Select **Sectors** group and choose a sector to view P/S Ratio and EV/EBITDA analysis.")
         else:
             history = load_sector_history(selected_scope, days)
-            fig, stats = create_individual_chart(selected_scope, history, primary_metric, selected_metric, chart_height=500)
 
-            if fig:
-                st.plotly_chart(fig, use_container_width=True)
+            # Create line chart with bands + histogram side-by-side
+            col_line, col_hist = st.columns([0.7, 0.3])
 
+            with col_line:
+                fig, stats = create_individual_chart(selected_scope, history, primary_metric, selected_metric, chart_height=500)
+                if fig:
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    st.warning(f"Not enough valid data for {selected_scope}")
+
+            with col_hist:
+                # Histogram distribution
+                if not history.empty and primary_metric in history.columns:
+                    metric_data = history[primary_metric].dropna()
+                    # Filter outliers
+                    metric_key = primary_metric.upper().replace('_TTM', '').replace('_', '')
+                    clean_data = filter_outliers(metric_data, metric_key)
+
+                    if len(clean_data) >= 10:
+                        current_val = metric_data.iloc[-1] if len(metric_data) > 0 else None
+                        fig_hist = histogram_with_stats(
+                            clean_data,
+                            metric_label=selected_metric,
+                            height=500,
+                            current_value=current_val,
+                            title="Distribution"
+                        )
+                        st.plotly_chart(fig_hist, use_container_width=True)
+
+            if fig and stats:
                 # Current position analysis
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
@@ -793,8 +1031,6 @@ with tab_individual:
                                 key="download_all_scopes"
                             )
                             st.caption(f"Contains {len(full_df)} rows for {len(all_scopes_to_export)} {group_label.lower()}")
-            else:
-                st.warning(f"Not enough valid data for {selected_scope}")
 
 # ============================================================================
 # TAB 3: MACRO DATA

@@ -31,23 +31,43 @@ class PlotlyChartBuilder:
 
     Design Principles:
     1. All charts responsive (use_container_width=True)
-    2. Consistent color palette
+    2. Consistent color palette (Brand-aligned)
     3. Vietnamese labels support
     4. Auto-formatting (numbers, dates, percentages)
     5. Built-in error handling
+    6. Accessibility patterns for colorblind users
     """
 
-    # Color palette (matching design system)
+    # Color palette (Crypto Terminal - matching theme.py)
     COLORS = {
-        'primary': '#1E40AF',      # Deep blue
-        'secondary': '#10B981',    # Green
-        'accent': '#F59E0B',       # Amber
-        'danger': '#EF4444',       # Red
+        'primary': '#8B5CF6',      # Electric Purple - MAIN
+        'secondary': '#06B6D4',    # Cyan
+        'accent': '#F59E0B',       # Amber Gold
+        'positive': '#10B981',     # Emerald Green (bullish)
+        'negative': '#EF4444',     # Red (bearish)
+        'neutral': '#6B7280',      # Gray
+        'danger': '#EF4444',       # Red (alias)
+        'bullish': '#10B981',      # Trading green
+        'bearish': '#EF4444',      # Trading red
         'chart': [
-            '#1E40AF', '#10B981', '#F59E0B', '#EF4444',
-            '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'
+            '#8B5CF6',  # Electric Purple (Primary)
+            '#06B6D4',  # Cyan
+            '#F59E0B',  # Amber
+            '#10B981',  # Emerald
+            '#EC4899',  # Pink
+            '#3B82F6',  # Blue
+            '#A78BFA',  # Purple Light
+            '#22D3EE',  # Cyan Light
         ]
     }
+
+    # Pattern shapes for accessibility (colorblind users)
+    PATTERNS = ['', '/', '\\', 'x', '-', '|', '+', '.']
+
+    @staticmethod
+    def get_pattern(index: int) -> str:
+        """Get pattern shape for series index (accessibility)."""
+        return PlotlyChartBuilder.PATTERNS[index % len(PlotlyChartBuilder.PATTERNS)]
 
     @staticmethod
     def line_chart(
@@ -108,13 +128,19 @@ class PlotlyChartBuilder:
                 ))
 
             fig.update_layout(
-                title=title,
+                title=dict(text=title, font=dict(family='Space Grotesk, sans-serif', size=16, color='#C4B5FD')),
                 xaxis_title=x_col.title(),
                 yaxis_title=y_axis_title,
                 height=height,
                 hovermode='x unified',
                 showlegend=show_legend,
-                template='plotly_white'
+                template='plotly_dark',
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(family='JetBrains Mono, monospace', color='#94A3B8'),
+                xaxis=dict(gridcolor='rgba(255, 255, 255, 0.05)'),
+                yaxis=dict(gridcolor='rgba(255, 255, 255, 0.05)'),
+                hoverlabel=dict(bgcolor='#1A1625', bordercolor='#8B5CF6', font=dict(color='#F8FAFC'))
             )
 
             return fig
@@ -181,11 +207,16 @@ class PlotlyChartBuilder:
             ])
 
             fig.update_layout(
-                title=title,
+                title=dict(text=title, font=dict(family='Space Grotesk, sans-serif', size=16, color='#C4B5FD')),
                 xaxis_title=x_col.title(),
                 yaxis_title=y_col.title(),
                 height=height,
-                template='plotly_white'
+                template='plotly_dark',
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(family='JetBrains Mono, monospace', color='#94A3B8'),
+                xaxis=dict(gridcolor='rgba(255, 255, 255, 0.05)'),
+                yaxis=dict(gridcolor='rgba(255, 255, 255, 0.05)')
             )
 
             return fig
@@ -284,16 +315,21 @@ class PlotlyChartBuilder:
 
             # Update layout
             fig.update_layout(
-                title=title,
+                title=dict(text=title, font=dict(family='Space Grotesk, sans-serif', size=16, color='#C4B5FD')),
                 xaxis_title=x_col.title(),
                 height=height,
                 hovermode='x unified',
-                template='plotly_white'
+                template='plotly_dark',
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(family='JetBrains Mono, monospace', color='#94A3B8'),
+                xaxis=dict(gridcolor='rgba(255, 255, 255, 0.05)'),
+                yaxis=dict(gridcolor='rgba(255, 255, 255, 0.05)')
             )
 
             # Set y-axes titles
-            fig.update_yaxes(title_text=bar_name, secondary_y=False)
-            fig.update_yaxes(title_text=line_name, secondary_y=True)
+            fig.update_yaxes(title_text=bar_name, secondary_y=False, gridcolor='rgba(255, 255, 255, 0.05)')
+            fig.update_yaxes(title_text=line_name, secondary_y=True, gridcolor='rgba(255, 255, 255, 0.05)')
 
             return fig
 
@@ -353,12 +389,17 @@ class PlotlyChartBuilder:
             )])
 
             fig.update_layout(
-                title=title,
+                title=dict(text=title, font=dict(family='Space Grotesk, sans-serif', size=16, color='#C4B5FD')),
                 yaxis_title='Value',
                 xaxis_title='Date',
                 height=height,
                 xaxis_rangeslider_visible=show_rangeslider,
-                template='plotly_white'
+                template='plotly_dark',
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(family='JetBrains Mono, monospace', color='#94A3B8'),
+                xaxis=dict(gridcolor='rgba(255, 255, 255, 0.05)'),
+                yaxis=dict(gridcolor='rgba(255, 255, 255, 0.05)')
             )
 
             return fig
@@ -424,11 +465,14 @@ class PlotlyChartBuilder:
             ))
 
             fig.update_layout(
-                title=title,
+                title=dict(text=title, font=dict(family='Space Grotesk, sans-serif', size=16, color='#C4B5FD')),
                 xaxis_title=x_label,
                 yaxis_title=y_label,
                 height=height,
-                template='plotly_white'
+                template='plotly_dark',
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(family='JetBrains Mono, monospace', color='#94A3B8')
             )
 
             return fig
@@ -534,12 +578,17 @@ class PlotlyChartBuilder:
             ))
 
             fig.update_layout(
-                title=title,
+                title=dict(text=title, font=dict(family='Space Grotesk, sans-serif', size=16, color='#C4B5FD')),
                 xaxis_title='Date',
                 yaxis_title=y_col.title(),
                 height=height,
                 hovermode='x unified',
-                template='plotly_white'
+                template='plotly_dark',
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(family='JetBrains Mono, monospace', color='#94A3B8'),
+                xaxis=dict(gridcolor='rgba(255, 255, 255, 0.05)'),
+                yaxis=dict(gridcolor='rgba(255, 255, 255, 0.05)')
             )
 
             return fig
@@ -595,10 +644,15 @@ class PlotlyChartBuilder:
             ))
 
             fig.update_layout(
-                title=title,
+                title=dict(text=title, font=dict(family='Space Grotesk, sans-serif', size=16, color='#C4B5FD')),
                 showlegend=True,
                 height=height,
-                template='plotly_white'
+                template='plotly_dark',
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(family='JetBrains Mono, monospace', color='#94A3B8'),
+                xaxis=dict(gridcolor='rgba(255, 255, 255, 0.05)'),
+                yaxis=dict(gridcolor='rgba(255, 255, 255, 0.05)')
             )
 
             return fig
@@ -645,3 +699,264 @@ def pe_candlestick_chart(df: pd.DataFrame, symbol: str) -> go.Figure:
         df=df,
         title=f'PE Ratio Candlestick - {symbol}'
     )
+
+
+def valuation_box_with_markers(
+    stats_data: list,
+    pe_forward_data: dict = None,
+    title: str = "PE Distribution: Trailing vs Forward",
+    metric_label: str = "PE",
+    height: int = 500,
+    show_legend: bool = True
+) -> go.Figure:
+    """
+    Build valuation box chart with trailing (circle) and forward (diamond) markers.
+
+    Visual representation (candlestick-style):
+        - Body (thick bar): P25-P75 (IQR) range
+        - Whiskers (thin line): P5-P95 range
+        - Circle (●): PE Trailing (current value)
+        - Diamond (◆): PE Forward (BSC forecast)
+
+    Args:
+        stats_data: List of dicts from ValuationService.get_industry_candle_data()
+                   Each dict: {symbol, current, p25, median, p75, p5, p95, percentile, status}
+        pe_forward_data: Dict mapping symbol -> pe_forward value (e.g., from BSC forecast)
+                        Example: {'ACB': 8.5, 'VCB': 12.3, ...}
+        title: Chart title
+        metric_label: Label for metric (PE, PB, etc.)
+        height: Chart height in pixels
+        show_legend: Show legend
+
+    Returns:
+        Plotly Figure with box + markers
+
+    Example:
+        >>> from WEBAPP.services.valuation_service import ValuationService
+        >>> from WEBAPP.services.forecast_service import ForecastService
+        >>>
+        >>> val_svc = ValuationService()
+        >>> forecast_svc = ForecastService()
+        >>>
+        >>> # Get historical distribution stats
+        >>> stats = val_svc.get_industry_candle_data('Ngân hàng', metric='PE')
+        >>>
+        >>> # Get forward PE from BSC
+        >>> bsc_df = forecast_svc.get_individual_stocks()
+        >>> pe_fwd = dict(zip(bsc_df['symbol'], bsc_df['pe_fwd_2025']))
+        >>>
+        >>> fig = valuation_box_with_markers(stats, pe_fwd, title='Bank PE: TTM vs 2025F')
+        >>> st.plotly_chart(fig, use_container_width=True)
+    """
+    if not stats_data:
+        fig = go.Figure()
+        fig.add_annotation(
+            text="No data available",
+            xref="paper", yref="paper",
+            x=0.5, y=0.5, showarrow=False,
+            font=dict(size=14, color='#94A3B8')
+        )
+        return fig
+
+    if pe_forward_data is None:
+        pe_forward_data = {}
+
+    # Sort by current PE (trailing)
+    stats_data = sorted(stats_data, key=lambda x: x.get('current', 0))
+
+    # Extract data for plotting
+    symbols = [d['symbol'] for d in stats_data]
+    p25_vals = [d.get('p25', 0) for d in stats_data]
+    p75_vals = [d.get('p75', 0) for d in stats_data]
+    p5_vals = [d.get('p5', d.get('min', 0)) for d in stats_data]
+    p95_vals = [d.get('p95', d.get('max', 0)) for d in stats_data]
+    median_vals = [d.get('median', 0) for d in stats_data]
+    current_vals = [d.get('current', 0) for d in stats_data]
+    statuses = [d.get('status', 'Fair') for d in stats_data]
+
+    # Get forward PE values (only for symbols that have forecast)
+    forward_vals = [pe_forward_data.get(s) for s in symbols]
+
+    # Color mapping for status
+    status_colors = {
+        'Very Cheap': '#00D4AA',
+        'Cheap': '#7FFFD4',
+        'Fair': '#FFD666',
+        'Expensive': '#FF9F43',
+        'Very Expensive': '#FF6B6B'
+    }
+
+    fig = go.Figure()
+
+    # Use candlestick-style rendering for box plots
+    # Candlestick: open=P25, close=P75, low=P5, high=P95
+    # Color based on status (not price direction)
+
+    # Create candlestick data for distribution boxes
+    candle_data = []
+    for i, symbol in enumerate(symbols):
+        candle_data.append({
+            'x': symbol,
+            'open': p25_vals[i],
+            'high': p95_vals[i],
+            'low': p5_vals[i],
+            'close': p75_vals[i],
+            'color': status_colors.get(statuses[i], '#6B7280')
+        })
+
+    # Add candlestick trace for distribution boxes
+    # Use scatter with error bars to simulate candlestick
+    # Whiskers (P5-P95)
+    fig.add_trace(go.Scatter(
+        x=symbols,
+        y=[(p5 + p95) / 2 for p5, p95 in zip(p5_vals, p95_vals)],
+        mode='markers',
+        marker=dict(size=0.1, color='rgba(0,0,0,0)'),
+        error_y=dict(
+            type='data',
+            symmetric=False,
+            array=[(p95 - (p5 + p95) / 2) for p5, p95 in zip(p5_vals, p95_vals)],
+            arrayminus=[((p5 + p95) / 2 - p5) for p5, p95 in zip(p5_vals, p95_vals)],
+            color='rgba(148, 163, 184, 0.5)',
+            thickness=1.5,
+            width=4
+        ),
+        showlegend=False,
+        hoverinfo='skip'
+    ))
+
+    # Box body (P25-P75) - use bar chart
+    box_colors = [status_colors.get(s, '#6B7280') for s in statuses]
+    fig.add_trace(go.Bar(
+        x=symbols,
+        y=[p75 - p25 for p25, p75 in zip(p25_vals, p75_vals)],
+        base=p25_vals,
+        marker=dict(
+            color=box_colors,
+            opacity=0.6,
+            line=dict(color=box_colors, width=1)
+        ),
+        width=0.6,
+        name='P25-P75 Range',
+        showlegend=True,
+        hovertemplate='<b>%{x}</b><br>' +
+                      'P25: %{base:.1f}x<br>' +
+                      'P75: %{customdata:.1f}x<br>' +
+                      '<extra></extra>',
+        customdata=p75_vals
+    ))
+
+    # Median line within box
+    fig.add_trace(go.Scatter(
+        x=symbols,
+        y=median_vals,
+        mode='markers',
+        marker=dict(
+            symbol='line-ew',
+            size=12,
+            line=dict(width=2, color='white')
+        ),
+        showlegend=False,
+        hoverinfo='skip'
+    ))
+
+    # Add trailing PE markers (circle)
+    trailing_colors = [status_colors.get(s, '#6B7280') for s in statuses]
+    fig.add_trace(go.Scatter(
+        x=symbols,
+        y=current_vals,
+        mode='markers',
+        name=f'{metric_label} Trailing (TTM)',
+        marker=dict(
+            symbol='circle',
+            size=14,
+            color=trailing_colors,
+            line=dict(color='white', width=2)
+        ),
+        hovertemplate='<b>%{x}</b><br>' +
+                      f'{metric_label} TTM: ' + '%{y:.1f}x<br>' +
+                      '<extra></extra>'
+    ))
+
+    # Add forward PE markers (diamond) - only for stocks with forecast
+    forward_x = []
+    forward_y = []
+    forward_hover = []
+    for i, (sym, fwd) in enumerate(zip(symbols, forward_vals)):
+        if fwd is not None and fwd > 0:
+            forward_x.append(sym)
+            forward_y.append(fwd)
+            trailing = current_vals[i]
+            change_pct = ((fwd - trailing) / trailing * 100) if trailing > 0 else 0
+            forward_hover.append(f'{fwd:.1f}x ({change_pct:+.1f}%)')
+
+    if forward_x:
+        fig.add_trace(go.Scatter(
+            x=forward_x,
+            y=forward_y,
+            mode='markers',
+            name=f'{metric_label} Forward (2025F)',
+            marker=dict(
+                symbol='diamond',
+                size=12,
+                color='#F59E0B',  # Amber for forward
+                line=dict(color='white', width=1.5)
+            ),
+            hovertemplate='<b>%{x}</b><br>' +
+                          f'{metric_label} 2025F: ' + '%{customdata}<br>' +
+                          '<extra></extra>',
+            customdata=forward_hover
+        ))
+
+    # Add median reference line
+    overall_median = sum(median_vals) / len(median_vals) if median_vals else 0
+    fig.add_hline(
+        y=overall_median,
+        line_dash="dot",
+        line_color="gray",
+        opacity=0.5,
+        annotation_text=f"Sector Median: {overall_median:.1f}x",
+        annotation_position="top right",
+        annotation_font=dict(size=10, color='#94A3B8')
+    )
+
+    # Layout
+    fig.update_layout(
+        title=dict(
+            text=title,
+            font=dict(family='Space Grotesk, sans-serif', size=16, color='#C4B5FD')
+        ),
+        xaxis_title='Symbol',
+        yaxis_title=f'{metric_label} Ratio',
+        height=height,
+        showlegend=show_legend,
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1,
+            font=dict(size=10)
+        ),
+        barmode='overlay',
+        template='plotly_dark',
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(family='JetBrains Mono, monospace', color='#94A3B8'),
+        xaxis=dict(
+            gridcolor='rgba(255, 255, 255, 0.05)',
+            tickangle=-45,
+            tickfont=dict(size=9)
+        ),
+        yaxis=dict(
+            gridcolor='rgba(255, 255, 255, 0.05)',
+            zeroline=False
+        ),
+        hoverlabel=dict(
+            bgcolor='#1A1625',
+            bordercolor='#8B5CF6',
+            font=dict(color='#F8FAFC')
+        )
+    )
+
+    return fig
