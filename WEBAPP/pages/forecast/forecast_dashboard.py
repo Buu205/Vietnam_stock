@@ -652,7 +652,7 @@ with tab4:
 
     chart_type = st.radio(
         "Select Chart",
-        options=["Valuation Matrix", "PE TTM vs FWD", "PB TTM vs FWD", "Sector Opportunity", "PE FWD by Sector", "Rating Distribution", "Upside vs PE"],
+        options=["Valuation Matrix", "PE vs FWD", "PB TTM vs FWD", "Sector Opportunity", "PE FWD by Sector", "Rating Distribution", "Upside vs PE"],
         horizontal=True
     )
 
@@ -661,7 +661,7 @@ with tab4:
     # -------------------------------------------------------------------------
     if chart_type == "Valuation Matrix":
         st.markdown("### PE Valuation Matrix: Historical Distribution vs Forward")
-        st.markdown("*Box plot thể hiện phân phối PE lịch sử (P25-P75) với markers PE TTM và PE Forward*")
+        st.markdown("*Box plot thể hiện phân phối PE lịch sử (P25-P75) với markers PE và PE Forward*")
 
         # Sector selector for valuation matrix
         val_service = ValuationService()
@@ -743,13 +743,13 @@ with tab4:
             st.warning("Không có ngành nào có đủ dữ liệu BSC coverage.")
 
     # -------------------------------------------------------------------------
-    # CHART 1: PE TTM vs Forward - Compare current valuation vs forward
+    # CHART 1: PE vs Forward - Compare current valuation vs forward
     # -------------------------------------------------------------------------
-    elif chart_type == "PE TTM vs FWD":
-        st.markdown("### PE TTM vs Forward 2025 by Sector")
+    elif chart_type == "PE vs FWD":
+        st.markdown("### PE vs Forward 2025 by Sector")
         st.markdown("*So sánh định giá hiện tại (TTM) vs dự báo (Forward) - chỉ tính các mã BSC coverage*")
 
-        # Load sector data with PE TTM
+        # Load sector data with PE
         sector_pe_df = service.get_sector_with_pe_pb_ttm()
 
         if not sector_pe_df.empty and 'sector_pe_ttm' in sector_pe_df.columns:
@@ -762,18 +762,18 @@ with tab4:
             ].copy()
 
             if not chart_df.empty:
-                # Sort by PE TTM
+                # Sort by PE
                 chart_df = chart_df.sort_values('sector_pe_ttm')
 
                 fig = go.Figure()
 
-                # PE TTM bars
+                # PE bars
                 fig.add_trace(go.Bar(
                     x=chart_df['sector'],
                     y=chart_df['sector_pe_ttm'],
-                    name='PE TTM',
+                    name='PE',
                     marker_color='#FFC132',  # Gold for TTM
-                    hovertemplate='<b>%{x}</b><br>PE TTM: %{y:.1f}x<extra></extra>'
+                    hovertemplate='<b>%{x}</b><br>PE: %{y:.1f}x<extra></extra>'
                 ))
 
                 # PE FWD 2025 bars
@@ -814,16 +814,16 @@ with tab4:
                 # Legend explanation
                 st.markdown("""
                 **Giải thích:**
-                - **PE TTM** (vàng): Định giá hiện tại dựa trên lợi nhuận 12 tháng gần nhất
+                - **PE** (vàng): Định giá hiện tại dựa trên lợi nhuận 12 tháng gần nhất
                 - **PE FWD 2025** (xanh): Định giá dự báo dựa trên LNST 2025F của BSC
                 - **PE FWD 2026** (xanh nhạt): Định giá dự báo dựa trên LNST 2026F của BSC
 
-                → **Ngành hấp dẫn**: PE FWD < PE TTM (dự báo tăng trưởng tốt → PE giảm)
+                → **Ngành hấp dẫn**: PE FWD < PE (dự báo tăng trưởng tốt → PE giảm)
                 """)
             else:
-                st.info("Không có đủ dữ liệu PE TTM cho các ngành BSC coverage.")
+                st.info("Không có đủ dữ liệu PE cho các ngành BSC coverage.")
         else:
-            st.info("Không có dữ liệu PE TTM. Vui lòng chạy daily valuation pipeline.")
+            st.info("Không có dữ liệu PE. Vui lòng chạy daily valuation pipeline.")
 
     # -------------------------------------------------------------------------
     # CHART 1.5: PB TTM vs Forward - Compare current book value valuation vs forward
@@ -985,10 +985,10 @@ with tab4:
             **Giải thích Score Components:**
             - **Upside (30%)**: Avg upside % của các mã trong ngành → cao = tốt
             - **Growth (25%)**: Tăng trưởng LNST 2025F vs 2024 → cao = tốt
-            - **Discount vs TTM (25%)**: PE FWD < PE TTM → dương = hấp dẫn (discount)
+            - **Discount vs TTM (25%)**: PE FWD < PE → dương = hấp dẫn (discount)
             - **Low PE (20%)**: PE FWD 2025 thấp → tốt
 
-            **PE Discount**: Dương = PE Forward thấp hơn PE TTM (ngành được kỳ vọng tăng trưởng)
+            **PE Discount**: Dương = PE Forward thấp hơn PE (ngành được kỳ vọng tăng trưởng)
             """)
         else:
             st.info("Không có dữ liệu opportunity score.")
@@ -1158,7 +1158,7 @@ with tab5:
         val_service = ValuationService()
 
         if matrix_metric == "PE":
-            # Load PE TTM
+            # Load PE
             pe_ttm_path = project_root / "DATA" / "processed" / "valuation" / "pe" / "historical" / "historical_pe.parquet"
             if pe_ttm_path.exists():
                 pe_hist = pd.read_parquet(pe_ttm_path)
@@ -1189,7 +1189,7 @@ with tab5:
                     display_df = pd.DataFrame()
                     display_df['Symbol'] = matrix_df['symbol']
                     display_df['Sector'] = matrix_df['sector']
-                    display_df['PE TTM'] = matrix_df['pe_ttm'].apply(lambda x: format_ratio(x, 1))
+                    display_df['PE'] = matrix_df['pe_ttm'].apply(lambda x: format_ratio(x, 1))
                     display_df['PE 2025F'] = matrix_df['pe_fwd_2025'].apply(lambda x: format_ratio(x, 1))
                     display_df['PE 2026F'] = matrix_df['pe_fwd_2026'].apply(lambda x: format_ratio(x, 1))
                     display_df['Δ 2025'] = matrix_df['delta_2025'].apply(format_change)
@@ -1220,15 +1220,15 @@ with tab5:
                     - **Positive Delta** (red): Forward PE > TTM PE → Earnings growth slowing or negative
 
                     **Example:**
-                    - If PE TTM = 10x and PE 2025F = 8x → Delta = -20% → Earnings expected to grow ~25%
-                    - If PE TTM = 10x and PE 2025F = 12x → Delta = +20% → Earnings expected to decline ~17%
+                    - If PE = 10x and PE 2025F = 8x → Delta = -20% → Earnings expected to grow ~25%
+                    - If PE = 10x and PE 2025F = 12x → Delta = +20% → Earnings expected to decline ~17%
 
-                    **Best Opportunities:** Stocks with largest negative deltas (PE FWD << PE TTM)
+                    **Best Opportunities:** Stocks with largest negative deltas (PE FWD << PE)
                     """)
                 else:
                     st.info("No stocks with complete PE data (TTM + 2025F + 2026F)")
             else:
-                st.warning("PE TTM data not available. Please run daily valuation pipeline.")
+                st.warning("PE data not available. Please run daily valuation pipeline.")
 
         else:  # PB
             # Load PB TTM

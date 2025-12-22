@@ -541,7 +541,7 @@ class ForecastDataLoaderCSV:
         pe_pb_data = {}
         
         try:
-            # Load PE TTM data
+            # Load PE data
             pe_path = Path(get_data_path('DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet'))
             if pe_path.exists():
                 pe_df = pd.read_parquet(pe_path)

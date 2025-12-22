@@ -227,7 +227,7 @@ def stock_valuation_table(
     column_labels = {
         'symbol': 'Symbol',
         'ticker': 'Ticker',
-        'pe_ttm': 'PE TTM',
+        'pe_ttm': 'PE',
         'pb': 'P/B',
         'ps': 'P/S',
         'ev_ebitda': 'EV/EBITDA',
@@ -291,7 +291,7 @@ def forward_matrix_table(
     Generate HTML table for TTM vs Forward valuation comparison.
 
     Creates matrix table:
-    | Symbol | PE TTM | PE 2025F | PE 2026F | Delta 2025 | Delta 2026 | Status |
+    | Symbol | PE | PE 2025F | PE 2026F | Delta 2025 | Delta 2026 | Status |
 
     Args:
         df: DataFrame with columns: symbol, pe_ttm, pe_fwd_2025, pe_fwd_2026, pb, pb_fwd_2025, pb_fwd_2026

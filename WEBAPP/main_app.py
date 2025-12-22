@@ -34,7 +34,7 @@ st.set_page_config(
     page_title="VN Finance Dashboard",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"  # Chart-first: maximize viewport
 )
 
 # ============================================================================
@@ -71,14 +71,20 @@ security_page = st.Page(
 
 sector_page = st.Page(
     str(pages_dir / "sector" / "sector_dashboard.py"),
-    title="Sector Overview",
+    title="Valuation",
     icon=":material/pie_chart:"
 )
 
 valuation_page = st.Page(
     str(pages_dir / "valuation" / "valuation_dashboard.py"),
-    title="Valuation (→Sector)",
+    title="Sector",
     icon=":material/attach_money:"
+)
+
+fx_commodities_page = st.Page(
+    str(pages_dir / "fx_commodities" / "fx_commodities_dashboard.py"),
+    title="FX & Commodities",
+    icon=":material/currency_exchange:"
 )
 
 technical_page = st.Page(
@@ -160,7 +166,7 @@ with st.sidebar:
 # ============================================================================
 pg = st.navigation({
     "Fundamental": [company_page, bank_page, security_page],
-    "Analysis": [sector_page, valuation_page, technical_page, forecast_page]
+    "Analysis": [sector_page, technical_page, forecast_page, fx_commodities_page]
 })
 
 # ============================================================================

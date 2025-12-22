@@ -486,7 +486,7 @@ def line_with_statistical_bands(
         df: DataFrame with date and value columns
         date_col: Name of date column
         value_col: Name of value column (e.g., 'pe_ttm', 'pb')
-        metric_label: Display label (e.g., "PE TTM", "P/B")
+        metric_label: Display label (e.g., "PE", "P/B")
         height: Chart height in pixels
         title: Optional chart title
         show_2sd: Show ±2σ band (default True)
@@ -612,7 +612,7 @@ def line_with_statistical_bands(
         hovertemplate=f'<b>Date</b>: %{{x}}<br><b>{metric_label}</b>: %{{y:.2f}}x<extra></extra>'
     ))
 
-    # Median line
+    # Median line - annotation on LEFT to keep right side clear for latest data
     fig.add_hline(
         y=median_val,
         line=dict(color=CHART_COLORS['median_line'], width=2, dash='solid'),
@@ -621,7 +621,7 @@ def line_with_statistical_bands(
             font=dict(color=CHART_COLORS['median_line'], size=10),
             bgcolor='rgba(16, 24, 32, 0.9)',
             borderpad=3,
-            xanchor='right'
+            xanchor='left'
         )
     )
 
@@ -672,11 +672,13 @@ def line_with_statistical_bands(
     })
     layout['showlegend'] = False
 
-    # Add right padding for latest data visibility
+    # Add right padding for latest data visibility (~5% of date range)
     if not plot_df.empty:
+        first_date = plot_df[date_col].min()
         last_date = plot_df[date_col].max()
-        padding_days = max(10, len(plot_df) // 50)  # ~2% padding
-        layout['xaxis']['range'] = [plot_df[date_col].min(), last_date + timedelta(days=padding_days)]
+        date_range_days = (last_date - first_date).days
+        padding_days = max(30, int(date_range_days * 0.05))  # 5% padding, min 30 days
+        layout['xaxis']['range'] = [first_date, last_date + timedelta(days=padding_days)]
 
     fig.update_layout(**layout)
 
@@ -772,13 +774,21 @@ def histogram_with_stats(
 
     fig = go.Figure()
 
+    # Get colors from config (support both old and new schema)
+    colors = config.colors if hasattr(config, 'colors') else {}
+    bar_color = colors.get('bar', '#8B5CF6')
+    bar_opacity = colors.get('bar_opacity', 0.7)
+    mean_line_color = colors.get('mean_line', '#F59E0B')
+    sd_line_color = colors.get('std_line', '#06B6D4')
+    current_marker_color = colors.get('current_marker', '#22C55E')
+
     # Histogram bars
     fig.add_trace(go.Histogram(
         x=filtered_data,
         nbinsx=bins,
         marker=dict(
-            color=config.bar_color,
-            opacity=config.bar_opacity,
+            color=bar_color,
+            opacity=bar_opacity,
             line=dict(color='rgba(255,255,255,0.3)', width=0.5)
         ),
         hovertemplate=f'{metric_label}: %{{x:.2f}}x<br>Count: %{{y}}<extra></extra>',
@@ -793,10 +803,10 @@ def histogram_with_stats(
         # Mean line
         fig.add_vline(
             x=mean_val,
-            line=dict(color=config.mean_line_color, width=2, dash='dash'),
+            line=dict(color=mean_line_color, width=2, dash='dash'),
             annotation=dict(
                 text=f'μ: {mean_val:.1f}x',
-                font=dict(color=config.mean_line_color, size=10),
+                font=dict(color=mean_line_color, size=10),
                 bgcolor='rgba(16, 24, 32, 0.9)',
                 borderpad=3,
                 yanchor='bottom'
@@ -806,10 +816,10 @@ def histogram_with_stats(
         # +1σ line
         fig.add_vline(
             x=plus_1sd,
-            line=dict(color=config.sd_line_color, width=1.5, dash='dot'),
+            line=dict(color=sd_line_color, width=1.5, dash='dot'),
             annotation=dict(
                 text=f'+1σ',
-                font=dict(color=config.sd_line_color, size=9),
+                font=dict(color=sd_line_color, size=9),
                 yanchor='bottom'
             )
         )
@@ -818,10 +828,10 @@ def histogram_with_stats(
         if minus_1sd > 0:
             fig.add_vline(
                 x=minus_1sd,
-                line=dict(color=config.sd_line_color, width=1.5, dash='dot'),
+                line=dict(color=sd_line_color, width=1.5, dash='dot'),
                 annotation=dict(
                     text=f'-1σ',
-                    font=dict(color=config.sd_line_color, size=9),
+                    font=dict(color=sd_line_color, size=9),
                     yanchor='bottom'
                 )
             )
@@ -840,7 +850,8 @@ def histogram_with_stats(
             )
 
     # Current value marker
-    if current_value is not None and config.show_current_marker:
+    show_current = getattr(config, 'show_current_marker', True)
+    if current_value is not None and show_current:
         # Calculate z-score for current value
         z_score = (current_value - mean_val) / std_val if std_val > 0 else 0
 
@@ -851,7 +862,7 @@ def histogram_with_stats(
             marker=dict(
                 symbol='triangle-down',
                 size=15,
-                color=config.current_marker_color,
+                color=current_marker_color,
                 line=dict(color='white', width=1.5)
             ),
             name='Current',
@@ -876,10 +887,12 @@ def histogram_with_stats(
     layout['showlegend'] = False
     layout['bargap'] = 0.05
 
-    # Apply y_range from schema
-    y_range = get_y_range(metric_type)
-    if y_range:
-        layout['xaxis']['range'] = list(y_range)
+    # Auto-scale x-axis based on actual data distribution with padding
+    data_min = filtered_data.min()
+    data_max = filtered_data.max()
+    data_range = data_max - data_min
+    padding = data_range * 0.1  # 10% padding on each side
+    layout['xaxis']['range'] = [max(0, data_min - padding), data_max + padding]
 
     fig.update_layout(**layout)
 

@@ -21,6 +21,7 @@ import sys
 from pathlib import Path
 from datetime import timedelta
 from io import BytesIO
+import html
 
 project_root = Path(__file__).resolve().parents[3]
 if str(project_root) not in sys.path:
@@ -31,13 +32,13 @@ from WEBAPP.services.macro_commodity_loader import MacroCommodityLoader
 from WEBAPP.core.styles import (
     get_page_style, get_chart_layout,
     CHART_COLORS, BAR_COLORS, DISTRIBUTION_COLORS, ASSESSMENT_COLORS, BAND_COLORS,
-    render_styled_table, get_table_style
+    render_styled_table, get_table_style, render_valuation_legend, render_valuation_assessment
 )
 # Import centralized valuation config and chart components
 from WEBAPP.core.valuation_config import (
     OUTLIER_LIMITS, STATUS_COLORS, CHART_COLORS as VAL_CHART_COLORS,
     format_ratio, format_percent, format_zscore,
-    get_status_color, get_percentile_status, filter_outliers
+    get_status_color, get_percentile_status, get_status_label, render_status_badge, filter_outliers
 )
 from WEBAPP.components.charts.valuation_charts import (
     distribution_candlestick,
@@ -46,6 +47,7 @@ from WEBAPP.components.charts.valuation_charts import (
     render_status_legend
 )
 from WEBAPP.core.chart_schema import get_chart_config, get_y_range, CHART_SCHEMA
+from WEBAPP.components.filters.global_filter_bar import render_global_filters
 
 # Note: st.set_page_config is handled by main_app.py
 
@@ -56,48 +58,36 @@ st.markdown(get_table_style(), unsafe_allow_html=True)
 # Header
 st.title("Sector Analysis")
 st.markdown("**Real-time sector valuation comparison across Vietnamese equity markets**")
-st.markdown("---")
 
-# Sidebar
-st.sidebar.markdown("## Filters")
+# ============================================================================
+# GLOBAL FILTER BAR (Horizontal, replaces sidebar filters)
+# ============================================================================
+st.markdown('<div class="filter-bar-container">', unsafe_allow_html=True)
+filters = render_global_filters(
+    show_metric=True,
+    show_time_range=True,
+    show_refresh=True,
+    key_prefix="sector"
+)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Extract filter values
+selected_metric = filters.get('metric', "PE")
+primary_metric = filters.get('metric_col', "pe_ttm")
+days = filters.get('days', 756)
+days_distribution = 2000  # Always use ALL for distribution
+
+# Handle refresh
+if filters.get('refresh'):
+    st.rerun()
+
+st.markdown("---")
 
 try:
     service = SectorService()
 except Exception as e:
     st.error(f"Failed to initialize service: {e}")
     st.stop()
-
-# Metric selector
-st.sidebar.markdown("### Valuation Metric")
-metric_options = ["PE TTM", "PB", "P/S Ratio", "EV/EBITDA"]
-selected_metric = st.sidebar.selectbox(
-    "Primary Metric",
-    options=metric_options,
-    index=0,
-    label_visibility="collapsed"
-)
-
-# Map to column names
-metric_map = {"PE TTM": "pe_ttm", "PB": "pb", "P/S Ratio": "ps", "EV/EBITDA": "ev_ebitda"}
-primary_metric = metric_map[selected_metric]
-
-# Time range selector - selectbox with default 3Y
-st.sidebar.markdown("### Time Range")
-time_options = {"3M": 63, "6M": 126, "1Y": 252, "3Y": 756, "ALL": 2000}
-selected_range = st.sidebar.selectbox(
-    "Select Period",
-    options=list(time_options.keys()),
-    index=3,  # Default to 3Y
-    label_visibility="collapsed"
-)
-days = time_options[selected_range]
-# For candlestick distribution, always use ALL data
-days_distribution = time_options["ALL"]
-
-st.sidebar.markdown("---")
-if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
-    st.cache_data.clear()
-    st.rerun()
 
 # Load data
 @st.cache_data(ttl=3600)
@@ -117,6 +107,63 @@ def load_sector_history(sector: str, limit: int = 1000):
 def load_all_valuation():
     """Load all valuation data including market indices and sectors"""
     return SectorService().get_sector_valuation(sectors_only=False)
+
+@st.cache_data(ttl=3600)
+def load_stock_valuation(ticker: str, limit: int = 1000):
+    """Load individual stock valuation history (PE, PB) directly from parquet files"""
+    from pathlib import Path
+
+    data_path = Path(__file__).resolve().parents[3] / "DATA" / "processed" / "valuation"
+
+    # Load PE data
+    pe_file = data_path / "pe" / "historical" / "historical_pe.parquet"
+    pb_file = data_path / "pb" / "historical" / "historical_pb.parquet"
+
+    result = pd.DataFrame()
+
+    # Load PE
+    if pe_file.exists():
+        pe_df = pd.read_parquet(pe_file)
+        if 'symbol' in pe_df.columns:
+            pe_ticker = pe_df[pe_df['symbol'] == ticker].copy()
+            if not pe_ticker.empty:
+                pe_ticker = pe_ticker.sort_values('date')
+                if limit:
+                    pe_ticker = pe_ticker.tail(limit)
+                # Rename pe_ratio to pe_ttm for consistency
+                if 'pe_ratio' in pe_ticker.columns:
+                    pe_ticker['pe_ttm'] = pe_ticker['pe_ratio']
+                result = pe_ticker
+
+    # Load PB
+    if pb_file.exists():
+        pb_df = pd.read_parquet(pb_file)
+        if 'symbol' in pb_df.columns:
+            pb_ticker = pb_df[pb_df['symbol'] == ticker].copy()
+            if not pb_ticker.empty:
+                pb_ticker = pb_ticker.sort_values('date')
+                if limit:
+                    pb_ticker = pb_ticker.tail(limit)
+                # Rename pb_ratio to pb for consistency
+                if 'pb_ratio' in pb_ticker.columns:
+                    pb_ticker['pb'] = pb_ticker['pb_ratio']
+                elif 'pb' not in pb_ticker.columns and 'close_price' in pb_ticker.columns and 'book_value' in pb_ticker.columns:
+                    pb_ticker['pb'] = pb_ticker['close_price'] / pb_ticker['book_value']
+
+                # Merge with result
+                if result.empty:
+                    result = pb_ticker
+                else:
+                    # Merge PB into result
+                    pb_cols = ['date', 'symbol', 'pb'] if 'pb' in pb_ticker.columns else ['date', 'symbol']
+                    result = result.merge(pb_ticker[pb_cols], on=['date', 'symbol'], how='outer')
+
+    return result.sort_values('date') if not result.empty else pd.DataFrame()
+
+@st.cache_data(ttl=3600)
+def get_sector_tickers(sector: str):
+    """Get all tickers in a sector"""
+    return SectorService().get_sector_tickers(sector)
 
 def filter_series_by_days(series_df: pd.DataFrame, days: int) -> pd.DataFrame:
     """Filter a time series DataFrame to last N days."""
@@ -140,40 +187,15 @@ if not all_df.empty:
     index_scopes = [s for s in all_scopes if s in market_indices]
 
 # ============================================================================
-# METRIC CARDS
+# MARKET OVERVIEW - Removed (cards moved to summary section)
 # ============================================================================
-st.markdown("### Market Overview")
-
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    top_sector = overview.get('top_sector', '-')
-    st.metric("Lowest PE Sector", top_sector)
-
-with col2:
-    market_pe = overview.get('market_pe', 0) or 0
-    st.metric("VNINDEX PE", f"{market_pe:.1f}x")
-
-with col3:
-    market_pb = overview.get('market_pb', 0) or 0
-    st.metric("VNINDEX PB", f"{market_pb:.1f}x")
-
-with col4:
-    sector_count = overview.get('sector_count', 0)
-    ticker_count = overview.get('ticker_count', 0)
-    st.metric("Sectors / Tickers", f"{sector_count} / {ticker_count}")
-
-st.markdown("---")
 
 # ============================================================================
 # TABS
 # ============================================================================
-tab_vnindex, tab_distribution, tab_individual, tab_macro, tab_commodity, tab_tables = st.tabs([
-    "📊 VNIndex Analysis",
-    "🕯️ All Sectors Distribution",
-    "📈 Individual Analysis",
-    "📊 Macro",
-    "🛢️ Commodity",
+tab_vnindex, tab_valuation, tab_tables = st.tabs([
+    "📊 VN-Index",
+    "📈 Valuation",
     "📋 Data"
 ])
 
@@ -181,9 +203,6 @@ tab_vnindex, tab_distribution, tab_individual, tab_macro, tab_commodity, tab_tab
 # TAB 0: VNINDEX ANALYSIS
 # ============================================================================
 with tab_vnindex:
-    st.markdown("### VNIndex Valuation Metrics")
-    st.markdown("*Comparing three market index variants: VNINDEX (full market), VNINDEX_EXCLUDE (excluding VIC/VHM/VPB), BSC_INDEX*")
-
     # Load vnindex data
     @st.cache_data(ttl=3600)
     def load_vnindex_data():
@@ -202,38 +221,126 @@ with tab_vnindex:
         latest_vnindex_exclude = vnindex_df[vnindex_df['scope'] == 'VNINDEX_EXCLUDE'].sort_values('date').iloc[-1] if len(vnindex_df[vnindex_df['scope'] == 'VNINDEX_EXCLUDE']) > 0 else None
         latest_bsc = vnindex_df[vnindex_df['scope'] == 'BSC_INDEX'].sort_values('date').iloc[-1] if len(vnindex_df[vnindex_df['scope'] == 'BSC_INDEX']) > 0 else None
 
-        # Metric Cards (3 variants)
-        col1, col2, col3 = st.columns(3)
+        # =====================================================================
+        # COMPACT METRICS BAR (Data-Dense Dashboard style)
+        # =====================================================================
+        def _fmt(val, suffix='x'):
+            return f"{val:.1f}{suffix}" if pd.notna(val) else "—"
 
-        with col1:
-            if latest_vnindex is not None:
-                st.markdown("#### VNINDEX")
-                pe_val = latest_vnindex.get('pe_ttm')
-                pb_val = latest_vnindex.get('pb')
-                st.metric("PE TTM", f"{pe_val:.2f}x" if pd.notna(pe_val) else "—")
-                st.metric("P/B", f"{pb_val:.2f}x" if pd.notna(pb_val) else "—")
+        pe_vni = latest_vnindex.get('pe_ttm') if latest_vnindex is not None else None
+        pb_vni = latest_vnindex.get('pb') if latest_vnindex is not None else None
+        pe_exc = latest_vnindex_exclude.get('pe_ttm') if latest_vnindex_exclude is not None else None
+        pb_exc = latest_vnindex_exclude.get('pb') if latest_vnindex_exclude is not None else None
+        pe_fwd25 = latest_bsc.get('pe_fwd_2025') if latest_bsc is not None else None
+        pe_fwd26 = latest_bsc.get('pe_fwd_2026') if latest_bsc is not None else None
 
-        with col2:
-            if latest_vnindex_exclude is not None:
-                st.markdown("#### VNINDEX_EXCLUDE")
-                pe_val = latest_vnindex_exclude.get('pe_ttm')
-                pb_val = latest_vnindex_exclude.get('pb')
-                st.metric("PE TTM", f"{pe_val:.2f}x" if pd.notna(pe_val) else "—")
-                st.metric("P/B", f"{pb_val:.2f}x" if pd.notna(pb_val) else "—")
+        # Inline compact metrics using HTML
+        st.markdown(f'''
+        <div style="display: flex; gap: 24px; padding: 12px 0; flex-wrap: wrap; align-items: center;">
+            <div style="display: flex; gap: 16px; align-items: center; background: rgba(139, 92, 246, 0.1); padding: 8px 16px; border-radius: 8px; border-left: 3px solid #8B5CF6;">
+                <span style="color: #A78BFA; font-size: 0.75rem; font-weight: 600;">VNINDEX</span>
+                <span style="color: #E2E8F0;">PE <b style="color: #00D4AA;">{_fmt(pe_vni)}</b></span>
+                <span style="color: #E2E8F0;">PB <b style="color: #06B6D4;">{_fmt(pb_vni)}</b></span>
+            </div>
+            <div style="display: flex; gap: 16px; align-items: center; background: rgba(6, 182, 212, 0.1); padding: 8px 16px; border-radius: 8px; border-left: 3px solid #06B6D4;">
+                <span style="color: #22D3EE; font-size: 0.75rem; font-weight: 600;">EXCLUDE</span>
+                <span style="color: #E2E8F0;">PE <b style="color: #00D4AA;">{_fmt(pe_exc)}</b></span>
+                <span style="color: #E2E8F0;">PB <b style="color: #06B6D4;">{_fmt(pb_exc)}</b></span>
+            </div>
+            <div style="display: flex; gap: 16px; align-items: center; background: rgba(245, 158, 11, 0.1); padding: 8px 16px; border-radius: 8px; border-left: 3px solid #F59E0B;">
+                <span style="color: #FBBF24; font-size: 0.75rem; font-weight: 600;">BSC FWD</span>
+                <span style="color: #E2E8F0;">2025 <b style="color: #F59E0B;">{_fmt(pe_fwd25)}</b></span>
+                <span style="color: #E2E8F0;">2026 <b style="color: #8B5CF6;">{_fmt(pe_fwd26)}</b></span>
+            </div>
+        </div>
+        ''', unsafe_allow_html=True)
 
-        with col3:
-            if latest_bsc is not None:
-                st.markdown("#### BSC_INDEX")
-                pe_fwd_2025 = latest_bsc.get('pe_fwd_2025')
-                pe_fwd_2026 = latest_bsc.get('pe_fwd_2026')
-                st.metric("PE Fwd 2025", f"{pe_fwd_2025:.2f}x" if pd.notna(pe_fwd_2025) else "—")
-                st.metric("PE Fwd 2026", f"{pe_fwd_2026:.2f}x" if pd.notna(pe_fwd_2026) else "—")
+        # =====================================================================
+        # 3-INDEX COMPARISON LINE CHART
+        # =====================================================================
+        st.markdown(f"### {selected_metric} Comparison: 3 Index Variants")
 
-        st.markdown("---")
+        if primary_metric not in ['ps', 'ev_ebitda']:
+            # Build multi-line chart
+            fig_compare = go.Figure()
 
-        # Candlestick distribution chart (3 variants comparison)
-        st.markdown(f"### {selected_metric} Distribution: 3 Market Index Variants")
-        st.markdown("*Candlestick: Min-Max (whiskers), P25-P75 (body). Colored dot = current value.*")
+            # Define colors for each index
+            index_colors = {
+                'VNINDEX': '#8B5CF6',        # Purple
+                'VNINDEX_EXCLUDE': '#06B6D4', # Cyan
+                'BSC_INDEX': '#F59E0B'        # Amber
+            }
+            index_names = {
+                'VNINDEX': 'VNIndex',
+                'VNINDEX_EXCLUDE': 'VNIndex (Exclude)',
+                'BSC_INDEX': 'BSC Index'
+            }
+
+            for scope in ['VNINDEX', 'VNINDEX_EXCLUDE', 'BSC_INDEX']:
+                scope_data = vnindex_df[vnindex_df['scope'] == scope].copy()
+                if scope_data.empty or primary_metric not in scope_data.columns:
+                    continue
+
+                scope_data = scope_data.sort_values('date')
+                if days < len(scope_data):
+                    scope_data = scope_data.tail(days)
+
+                # Filter outliers for cleaner chart
+                metric_key = primary_metric.upper().replace('_TTM', '').replace('_', '')
+                limits = OUTLIER_LIMITS.get(metric_key, {'min': 0, 'max': 100})
+                scope_data = scope_data[
+                    (scope_data[primary_metric] >= limits['min']) &
+                    (scope_data[primary_metric] <= limits['max'])
+                ]
+
+                if len(scope_data) > 0:
+                    fig_compare.add_trace(go.Scatter(
+                        x=scope_data['date'],
+                        y=scope_data[primary_metric],
+                        name=index_names[scope],
+                        mode='lines',
+                        line=dict(color=index_colors[scope], width=2),
+                        hovertemplate=f'<b>{index_names[scope]}</b><br>Date: %{{x}}<br>{selected_metric}: %{{y:.2f}}x<extra></extra>'
+                    ))
+
+            # Layout with proper time axis
+            from WEBAPP.core.styles import get_chart_layout
+            layout = get_chart_layout(height=350)
+            layout['yaxis']['title'] = selected_metric
+            layout['xaxis'] = dict(
+                tickformat='%d/%m/%Y',
+                tickmode='auto',
+                nticks=8,
+                tickangle=-30,
+                tickfont=dict(size=10, color='#CBD5E1'),
+                showgrid=True,
+                gridcolor='rgba(255,255,255,0.05)',
+                hoverformat='%d/%m/%Y'
+            )
+            layout['showlegend'] = True
+            layout['legend'] = dict(
+                orientation='h',
+                yanchor='bottom',
+                y=1.02,
+                xanchor='center',
+                x=0.5,
+                font=dict(size=11)
+            )
+            layout['hovermode'] = 'x unified'
+            fig_compare.update_layout(**layout)
+
+            # Update hover template with proper date format
+            for trace in fig_compare.data:
+                trace.update(hovertemplate=f'<b>{trace.name}</b><br>{selected_metric}: %{{y:.2f}}x<extra></extra>')
+
+            st.plotly_chart(fig_compare, use_container_width=True, config={'displayModeBar': False})
+        else:
+            st.info(f"**{selected_metric}** is not available for Market Indices. Only PE and PB are tracked.")
+
+        # =====================================================================
+        # DISTRIBUTION CANDLESTICK (Compact)
+        # =====================================================================
+        st.markdown(f"### {selected_metric} Distribution")
 
         # Build candlestick data for 3 variants
         candle_data = []
@@ -284,40 +391,57 @@ with tab_vnindex:
             })
 
         if candle_data:
-            # Get y_range from schema
-            metric_type = primary_metric.upper().replace('_TTM', '').replace('_', '')
-            y_range = get_y_range(metric_type)
+            # Auto-scale Y-axis based on actual data range (with padding)
+            all_mins = [d['min'] for d in candle_data if d.get('min') is not None]
+            all_maxs = [d['max'] for d in candle_data if d.get('max') is not None]
+            all_currents = [d['current'] for d in candle_data if d.get('current') is not None]
+
+            if all_mins and all_maxs:
+                data_min = min(all_mins + all_currents)
+                data_max = max(all_maxs + all_currents)
+                data_range = data_max - data_min
+                # Add 10% padding on each side for better visibility
+                y_min = max(0, data_min - data_range * 0.1)
+                y_max = data_max + data_range * 0.1
+                y_range = (y_min, y_max)
+            else:
+                # Fallback to schema range if no data
+                metric_type = primary_metric.upper().replace('_TTM', '').replace('_', '')
+                y_range = get_y_range(metric_type)
 
             fig_candle = distribution_candlestick(
                 candle_data,
                 metric_label=selected_metric,
-                height=get_chart_config('candlestick_distribution').height,
+                height=450,  # Taller for better visibility
                 y_range=y_range,
-                title=f"{selected_metric} Distribution: Market Indices"
+                title=None
             )
             st.plotly_chart(fig_candle, use_container_width=True, config={'displayModeBar': False})
 
-            # Legend
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.markdown("🟢 **Undervalued** (< P25)")
-            with col2:
-                st.markdown("🟡 **Fair Value** (P25-P75)")
-            with col3:
-                st.markdown("🔴 **Expensive** (> P75)")
+            # Legend (HTML styled, no emojis)
+            st.markdown(render_valuation_legend(), unsafe_allow_html=True)
         else:
             st.warning("Not enough data for candlestick distribution")
 
+        # =====================================================================
+        # INDIVIDUAL INDEX DETAIL (Displayed directly, no expander)
+        # =====================================================================
         st.markdown("---")
+        st.markdown("### Individual Index Analysis")
 
-        # Individual index selector + line chart with bands
-        st.markdown(f"### {selected_metric} Historical Trend (Individual Index)")
+        # Index selector with pill-style buttons using HTML
+        index_options = ['VNINDEX', 'VNINDEX_EXCLUDE', 'BSC_INDEX']
+        index_labels = {'VNINDEX': 'VNIndex', 'VNINDEX_EXCLUDE': 'VNIndex (Exclude)', 'BSC_INDEX': 'BSC Index'}
+        index_colors_detail = {'VNINDEX': '#8B5CF6', 'VNINDEX_EXCLUDE': '#06B6D4', 'BSC_INDEX': '#F59E0B'}
 
-        selected_index = st.selectbox(
+        # Use radio buttons styled horizontally
+        selected_index = st.radio(
             "Select Index",
-            options=['VNINDEX', 'VNINDEX_EXCLUDE', 'BSC_INDEX'],
-            index=0,
-            key='vnindex_selector'
+            options=index_options,
+            format_func=lambda x: index_labels.get(x, x),
+            horizontal=True,
+            key='vnindex_selector',
+            label_visibility='collapsed'
         )
 
         if selected_index and primary_metric not in ['ps', 'ev_ebitda']:
@@ -329,6 +453,44 @@ with tab_vnindex:
                 index_history = index_history.tail(days)
 
             if not index_history.empty and primary_metric in index_history.columns:
+                # Stats row at top (compact cards)
+                metric_data = index_history[primary_metric].dropna()
+                if len(metric_data) >= 20:
+                    current_val = metric_data.iloc[-1]
+                    median_val = metric_data.median()
+                    mean_val = metric_data.mean()
+                    std_val = metric_data.std()
+                    z_score = (current_val - mean_val) / std_val if std_val > 0 else 0
+                    percentile = np.sum(metric_data <= current_val) / len(metric_data) * 100
+                    status_color = get_status_color(percentile)
+                    status_label = get_status_label(percentile)
+
+                    # Compact stats bar
+                    st.markdown(f'''
+                    <div style="display: flex; gap: 16px; padding: 16px 0; flex-wrap: wrap; align-items: center;">
+                        <div style="background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 8px; border-left: 3px solid {index_colors_detail[selected_index]};">
+                            <div style="color: #94A3B8; font-size: 0.7rem; margin-bottom: 2px;">CURRENT</div>
+                            <div style="color: #E2E8F0; font-size: 1.25rem; font-weight: 600;">{current_val:.2f}x</div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 8px;">
+                            <div style="color: #94A3B8; font-size: 0.7rem; margin-bottom: 2px;">MEDIAN</div>
+                            <div style="color: #E2E8F0; font-size: 1.25rem; font-weight: 600;">{median_val:.2f}x</div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 8px;">
+                            <div style="color: #94A3B8; font-size: 0.7rem; margin-bottom: 2px;">Z-SCORE</div>
+                            <div style="color: {'#00D4AA' if z_score < 0 else '#FF6B6B'}; font-size: 1.25rem; font-weight: 600;">{z_score:+.2f}σ</div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 8px;">
+                            <div style="color: #94A3B8; font-size: 0.7rem; margin-bottom: 2px;">PERCENTILE</div>
+                            <div style="color: #E2E8F0; font-size: 1.25rem; font-weight: 600;">{percentile:.0f}%</div>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 8px; border-left: 3px solid {status_color};">
+                            <div style="color: #94A3B8; font-size: 0.7rem; margin-bottom: 2px;">STATUS</div>
+                            <div style="color: {status_color}; font-size: 1.1rem; font-weight: 600;">● {status_label}</div>
+                        </div>
+                    </div>
+                    ''', unsafe_allow_html=True)
+
                 # Create line chart with bands + histogram side-by-side
                 col_line, col_hist = st.columns([0.7, 0.3])
 
@@ -338,10 +500,22 @@ with tab_vnindex:
                         date_col='date',
                         value_col=primary_metric,
                         metric_label=selected_metric,
-                        height=get_chart_config('line_with_bands').height,
-                        title=f"{selected_index} - {selected_metric}"
+                        height=350,
+                        title=None  # Title already shown above
                     )
-                    st.plotly_chart(fig_line, use_container_width=True)
+                    if fig_line:
+                        # Update xaxis format
+                        fig_line.update_layout(
+                            xaxis=dict(
+                                tickformat='%d/%m/%Y',
+                                tickmode='auto',
+                                nticks=6,
+                                tickangle=-30,
+                                hoverformat='%d/%m/%Y'
+                            ),
+                            hovermode='x unified'
+                        )
+                        st.plotly_chart(fig_line, use_container_width=True, config={'displayModeBar': False})
 
                 with col_hist:
                     # Histogram
@@ -351,43 +525,33 @@ with tab_vnindex:
                     fig_hist = histogram_with_stats(
                         metric_data,
                         metric_label=selected_metric,
-                        height=get_chart_config('line_with_bands').height,
+                        height=350,
                         current_value=current_val,
                         title="Distribution"
                     )
-                    st.plotly_chart(fig_hist, use_container_width=True)
-
-                # Stats cards
-                if stats_line:
-                    col1, col2, col3, col4 = st.columns(4)
-                    with col1:
-                        st.metric("Current", format_ratio(stats_line.get('current')))
-                    with col2:
-                        st.metric("Median", format_ratio(stats_line.get('median')))
-                    with col3:
-                        st.metric("Z-Score", format_zscore(stats_line.get('z_score')))
-                    with col4:
-                        st.metric("Percentile", format_percent(stats_line.get('percentile')))
+                    st.plotly_chart(fig_hist, use_container_width=True, config={'displayModeBar': False})
             else:
                 st.warning(f"No {selected_metric} data available for {selected_index}")
-        elif primary_metric in ['ps', 'ev_ebitda']:
-            st.warning(f"⚠️ **{selected_metric}** is not available for Market Indices. Only PE and PB are tracked.")
+
     else:
         st.warning("VNIndex data not available. Please run the daily valuation pipeline.")
 
 # ============================================================================
-# TAB 1: ALL SECTORS DISTRIBUTION (Candlestick)
+# TAB 1: VALUATION (with sub-tabs)
 # ============================================================================
-with tab_distribution:
-    # Group selector
-    group_type = st.radio(
-        "Select Group",
-        options=["📊 Sectors", "📈 Market Indices"],
-        horizontal=True,
-        label_visibility="collapsed"
-    )
+with tab_valuation:
+    # Sub-tabs for Sector Overview (4 sub-tabs)
+    subtab_sector_comp, subtab_sector_ind, subtab_stock_comp, subtab_stock_ind = st.tabs([
+        "🕯️ Sector Comparison",
+        "📈 Individual Sector",
+        "🕯️ Stock Comparison",
+        "📈 Individual Stock"
+    ])
 
-    if group_type == "📊 Sectors":
+    # =========================================================================
+    # SUB-TAB 1: SECTOR COMPARISON (Candlestick)
+    # =========================================================================
+    with subtab_sector_comp:
         # =====================================================================
         # SECTORS: Candlestick Distribution Chart
         # =====================================================================
@@ -400,6 +564,8 @@ with tab_distribution:
             fig_candle = go.Figure()
             valid_items = []
             distribution_data = []
+            all_min_values = []  # For auto-scaling
+            all_max_values = []  # For auto-scaling
 
             for scope in target_scopes:
                 # Load historical data - always use ALL for distribution chart
@@ -432,25 +598,33 @@ with tab_distribution:
                 valid_items.append(scope)
 
                 p_min = clean_data.min()
-                p5 = clean_data.quantile(0.05)
                 p25 = clean_data.quantile(0.25)
                 p50 = clean_data.quantile(0.50)
                 p75 = clean_data.quantile(0.75)
-                p95 = clean_data.quantile(0.95)
                 p_max = clean_data.max()
+                mean_val = clean_data.mean()
+                std_val = clean_data.std()
+
+                # Collect for auto-scaling
+                all_min_values.append(p_min)
+                all_max_values.append(p_max)
+                if current_val is not None and not pd.isna(current_val):
+                    all_min_values.append(current_val)
+                    all_max_values.append(current_val)
 
                 # Store for table
                 if current_val:
                     percentile = np.sum(clean_data <= current_val) / len(clean_data) * 100
+                    z_score = (current_val - mean_val) / std_val if std_val > 0 else 0
+                    status = render_status_badge(percentile)  # HTML badge with colored dot
+
                     distribution_data.append({
                         'Scope': scope,
                         'Current': current_val,
-                        'Min': p_min,
-                        'P25': p25,
                         'Median': p50,
-                        'P75': p75,
-                        'Max': p_max,
-                        'Percentile': percentile
+                        'Percentile': percentile,
+                        'Z-Score': z_score,
+                        'Status': status
                     })
 
                 # Add candlestick (body = P25-P75, whiskers = Min-Max)
@@ -468,16 +642,10 @@ with tab_distribution:
                     decreasing_fillcolor=DISTRIBUTION_COLORS['body_fill'],
                 ))
 
-                # Add current value as scatter point
+                # Add current value as scatter point with 5-level color
                 if current_val and not pd.isna(current_val):
                     percentile = np.sum(clean_data <= current_val) / len(clean_data) * 100
-
-                    if percentile < 25:
-                        dot_color = ASSESSMENT_COLORS['undervalued']
-                    elif percentile < 75:
-                        dot_color = ASSESSMENT_COLORS['fair']
-                    else:
-                        dot_color = ASSESSMENT_COLORS['expensive']
+                    dot_color = get_status_color(percentile)
 
                     fig_candle.add_trace(go.Scatter(
                         x=[scope],
@@ -490,6 +658,7 @@ with tab_distribution:
                             f'<b>{scope}</b><br>' +
                             f'Current: {current_val:.2f}x<br>' +
                             f'Percentile: {percentile:.1f}%<br>' +
+                            f'Z-Score: {z_score:+.2f}σ<br>' +
                             f'Median: {p50:.2f}x<br>' +
                             '<extra></extra>'
                         )
@@ -511,36 +680,46 @@ with tab_distribution:
                 layout['yaxis']['fixedrange'] = True
                 layout['dragmode'] = False
 
-                # Use get_y_range from chart_schema
-                metric_type = primary_metric.upper().replace('_TTM', '').replace('_', '')
-                y_range = get_y_range(metric_type)
-                layout['yaxis']['range'] = list(y_range)
+                # Auto-scale Y-axis based on actual data range (with padding)
+                if all_min_values and all_max_values:
+                    data_min = min(all_min_values)
+                    data_max = max(all_max_values)
+                    data_range = data_max - data_min
+                    # Add 10% padding on each side for better visibility
+                    y_min = max(0, data_min - data_range * 0.1)
+                    y_max = data_max + data_range * 0.1
+                    layout['yaxis']['range'] = [y_min, y_max]
+                else:
+                    # Fallback to schema range if no data
+                    metric_type = primary_metric.upper().replace('_TTM', '').replace('_', '')
+                    y_range = get_y_range(metric_type)
+                    layout['yaxis']['range'] = list(y_range)
 
                 fig_candle.update_layout(**layout)
 
                 st.plotly_chart(fig_candle, use_container_width=True, config={'displayModeBar': False})
 
-                # Legend
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.markdown("🟢 **Undervalued** (< P25)")
-                with col2:
-                    st.markdown("🟡 **Fair Value** (P25-P75)")
-                with col3:
-                    st.markdown("🔴 **Expensive** (> P75)")
+                # Legend (5 levels - HTML styled, no emojis)
+                st.markdown(render_valuation_legend(), unsafe_allow_html=True)
 
-                # Distribution table
+                # Distribution table (Valuation Matrix)
                 if distribution_data:
-                    st.markdown("### Distribution Statistics")
+                    st.markdown("### Valuation Matrix")
                     dist_df = pd.DataFrame(distribution_data)
                     dist_df_raw = dist_df.copy()
                     dist_df = dist_df.sort_values('Percentile')
                     dist_df_raw = dist_df_raw.sort_values('Percentile')
 
+                    # Format display columns
                     dist_df_display = dist_df.copy()
-                    for col in ['Current', 'Min', 'P25', 'Median', 'P75', 'Max']:
-                        dist_df_display[col] = dist_df_display[col].apply(lambda x: f'{x:.2f}x')
-                    dist_df_display['Percentile'] = dist_df_display['Percentile'].apply(lambda x: f'{x:.0f}%')
+                    dist_df_display['Current'] = dist_df_display['Current'].apply(lambda x: f'{x:.2f}x')
+                    dist_df_display['Median'] = dist_df_display['Median'].apply(lambda x: f'{x:.2f}x')
+                    dist_df_display['Percentile'] = dist_df_display['Percentile'].apply(lambda x: f'{x:.1f}%')
+                    dist_df_display['Z-Score'] = dist_df_display['Z-Score'].apply(lambda x: f'{x:+.2f}σ')
+
+                    # Reorder columns for clarity
+                    dist_df_display = dist_df_display[['Scope', 'Current', 'Median', 'Percentile', 'Z-Score', 'Status']]
+                    dist_df_display.columns = ['Sector', 'Current', 'Hist. Median', 'Percentile', 'Z-Score', 'Status']
 
                     st.markdown(render_styled_table(dist_df_display), unsafe_allow_html=True)
 
@@ -549,9 +728,9 @@ with tab_distribution:
                     dist_df_raw.to_excel(excel_buffer, index=False, engine='openpyxl')
                     excel_buffer.seek(0)
                     st.download_button(
-                        f"📥 Download {selected_metric} Distribution Data (Excel)",
+                        f"📥 Download {selected_metric} Valuation Matrix (Excel)",
                         excel_buffer,
-                        f"{selected_metric.lower().replace(' ', '_')}_distribution_sectors.xlsx",
+                        f"{selected_metric.lower().replace(' ', '_')}_valuation_matrix_sectors.xlsx",
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         use_container_width=True
                     )
@@ -560,375 +739,47 @@ with tab_distribution:
         else:
             st.warning("No sector data available")
 
-    else:
-        # =====================================================================
-        # MARKET INDICES: Line Chart (Combined View)
-        # =====================================================================
-        st.markdown(f"### {selected_metric} Historical Trend - Market Indices")
-        st.markdown("*Line chart showing historical valuation trends for all market indices.*")
+    # =========================================================================
+    # SUB-TAB 2: INDIVIDUAL SECTOR (Line chart with statistical bands)
+    # =========================================================================
+    with subtab_sector_ind:
+        st.markdown(f"### {selected_metric} Historical Trend with Statistical Bands")
+        st.markdown("*Line chart with median and ±1σ, ±2σ bands for individual sector.*")
 
-        # Warning for metrics not available for market indices
-        if primary_metric in ['ps', 'ev_ebitda']:
-            st.warning(f"⚠️ **{selected_metric}** is not available for Market Indices. Market indices only have PE and PB data. Please select a Sector to view {selected_metric}.")
-            st.info("Switch to **📊 Sectors** tab above to view P/S Ratio and EV/EBITDA distribution by sector.")
+        # Sector selector
+        available_sectors = sector_scopes if sector_scopes else []
+        if available_sectors:
+            selected_sector = st.selectbox(
+                "Select Sector",
+                options=available_sectors,
+                index=0,
+                key="individual_sector_select"
+            )
 
-        target_scopes = index_scopes if index_scopes else []
+            # Load sector history
+            sector_history = load_sector_history(selected_sector, days)
 
-        if target_scopes and primary_metric not in ['ps', 'ev_ebitda']:
-            fig_line = go.Figure()
-            line_colors = [CHART_COLORS['primary'], CHART_COLORS['secondary'], CHART_COLORS['tertiary']]
-            all_stats = []
+            if not sector_history.empty and primary_metric in sector_history.columns:
+                # Create line chart with bands + histogram side-by-side
+                col_line, col_hist = st.columns([0.7, 0.3])
 
-            for i, idx_scope in enumerate(target_scopes[:3]):
-                history = load_sector_history(idx_scope, days)
-
-                if history.empty or primary_metric not in history.columns:
-                    continue
-
-                metric_data = history[primary_metric].dropna()
-
-                # Filter outliers using centralized config
-                metric_key = primary_metric.upper().replace('_TTM', '').replace('_', '')
-                limits = OUTLIER_LIMITS.get(metric_key, {'min': 0, 'max': 100})
-                metric_data = metric_data[(metric_data > limits['min']) & (metric_data <= limits['max'])]
-                plot_df = history[(history[primary_metric] > limits['min']) & (history[primary_metric] <= limits['max'])]
-
-                if len(metric_data) < 20:
-                    continue
-
-                current_val = metric_data.iloc[-1]
-                median_val = metric_data.median()
-                mean_val = metric_data.mean()
-                std_val = metric_data.std()
-                z_score = (current_val - mean_val) / std_val if std_val > 0 else 0
-                percentile = (metric_data < current_val).mean() * 100
-
-                all_stats.append({
-                    'Index': idx_scope,
-                    'Current': current_val,
-                    'Median': median_val,
-                    'Mean': mean_val,
-                    'Z-Score': z_score,
-                    'Percentile': percentile
-                })
-
-                # Add line trace
-                fig_line.add_trace(go.Scatter(
-                    x=plot_df['date'],
-                    y=plot_df[primary_metric],
-                    name=idx_scope,
-                    mode='lines',
-                    line=dict(color=line_colors[i % len(line_colors)], width=2.5),
-                    hovertemplate=f'<b>{idx_scope}</b><br>Date: %{{x}}<br>{selected_metric}: %{{y:.2f}}x<extra></extra>'
-                ))
-
-            if all_stats:
-                # Auto-scale based on all data
-                all_values = []
-                all_dates = []
-                for idx_scope in target_scopes[:3]:
-                    hist = load_sector_history(idx_scope, days)
-                    if not hist.empty and primary_metric in hist.columns:
-                        vals = hist[primary_metric].dropna()
-                        if primary_metric == 'pe_ttm':
-                            vals = vals[(vals > 0) & (vals <= 100)]
-                        else:
-                            vals = vals[(vals >= 0) & (vals <= 100)]
-                        all_values.extend(vals.tolist())
-                        if 'date' in hist.columns:
-                            all_dates.extend(pd.to_datetime(hist['date']).tolist())
-
-                if all_values:
-                    y_min = max(0, min(all_values) * 0.9)
-                    y_max = max(all_values) * 1.1
-                else:
-                    y_min, y_max = 0, 100
-
-                # Use chart_schema for height
-                chart_config = get_chart_config('line_with_bands')
-                layout = get_chart_layout(height=chart_config.height + 200)  # +200 for larger focus
-                layout['yaxis']['title'] = selected_metric
-                layout['yaxis']['range'] = [y_min, y_max]
-                layout['showlegend'] = True
-                layout['legend'] = dict(
-                    orientation='h',
-                    yanchor='bottom',
-                    y=1.02,
-                    xanchor='center',
-                    x=0.5,
-                    font=dict(size=12, color='#E8E8E8')
-                )
-
-                # X-axis configuration
-                layout['xaxis'] = dict(
-                    showticklabels=True,
-                    tickmode='auto',
-                    nticks=8,  # Auto-select ~8 tick marks
-                    tickformat='%b %Y',  # Jan 2023, Jul 2023, etc.
-                    tickangle=0,  # Horizontal labels
-                    tickfont=dict(size=10, family='Source Sans 3', color='#CBD5E1'),
-                    showgrid=True,
-                    gridcolor='rgba(255,255,255,0.05)',
-                    showline=True,
-                    linecolor='rgba(255,255,255,0.1)',
-                    rangeslider=dict(visible=False)
-                )
-
-                # Add right padding for latest data visibility
-                if all_dates:
-                    max_date = max(all_dates)
-                    min_date = min(all_dates)
-                    padded_max = max_date + timedelta(days=30)
-                    layout['xaxis']['range'] = [min_date, padded_max]
-
-                # Add more bottom margin for x-axis labels
-                layout['margin'] = dict(l=60, r=40, t=50, b=60)
-
-                fig_line.update_layout(**layout)
-
-                st.plotly_chart(fig_line, use_container_width=True)
-
-                # Stats table
-                st.markdown("### Statistics Comparison")
-                stats_df = pd.DataFrame(all_stats)
-                stats_df_raw = stats_df.copy()
-
-                for col in ['Current', 'Median', 'Mean']:
-                    stats_df[col] = stats_df[col].apply(lambda x: f'{x:.2f}x')
-                stats_df['Z-Score'] = stats_df['Z-Score'].apply(lambda x: f'{x:+.2f}σ')
-                stats_df['Percentile'] = stats_df['Percentile'].apply(lambda x: f'{x:.0f}%')
-
-                st.markdown(render_styled_table(stats_df), unsafe_allow_html=True)
-
-                # Excel download - Statistics
-                excel_buffer = BytesIO()
-                stats_df_raw.to_excel(excel_buffer, index=False, engine='openpyxl')
-                excel_buffer.seek(0)
-                st.download_button(
-                    f"📥 Download Market Indices {selected_metric} Statistics (Excel)",
-                    excel_buffer,
-                    f"market_indices_{primary_metric}_statistics_{days}d.xlsx",
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    use_container_width=True,
-                    key="download_market_indices_stats"
-                )
-
-                # Excel download - Full Historical Data (PE + PB)
-                st.markdown("---")
-                st.markdown("### Export Full Historical Data")
-                full_data_list = []
-                for idx_scope in target_scopes[:3]:
-                    hist = load_sector_history(idx_scope, days)
-                    if not hist.empty:
-                        hist_copy = hist.copy()
-                        hist_copy['index'] = idx_scope
-                        # Select relevant columns
-                        cols_to_keep = ['date', 'index']
-                        if 'pe_ttm' in hist_copy.columns:
-                            cols_to_keep.append('pe_ttm')
-                        if 'pb' in hist_copy.columns:
-                            cols_to_keep.append('pb')
-                        if 'pe_fwd_2025' in hist_copy.columns:
-                            cols_to_keep.append('pe_fwd_2025')
-                        if 'pe_fwd_2026' in hist_copy.columns:
-                            cols_to_keep.append('pe_fwd_2026')
-                        full_data_list.append(hist_copy[[c for c in cols_to_keep if c in hist_copy.columns]])
-
-                if full_data_list:
-                    full_df = pd.concat(full_data_list, ignore_index=True)
-                    # Sort by date and index
-                    full_df = full_df.sort_values(['date', 'index'])
-
-                    excel_buffer_full = BytesIO()
-                    full_df.to_excel(excel_buffer_full, index=False, engine='openpyxl')
-                    excel_buffer_full.seek(0)
-                    st.download_button(
-                        f"📥 Download Full Historical Data - PE & PB (Excel)",
-                        excel_buffer_full,
-                        f"market_indices_full_history_{days}d.xlsx",
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        use_container_width=True,
-                        key="download_market_indices_full"
+                with col_line:
+                    fig_sector, stats_sector = line_with_statistical_bands(
+                        sector_history,
+                        date_col='date',
+                        value_col=primary_metric,
+                        metric_label=selected_metric,
+                        height=get_chart_config('line_with_bands').height,
+                        title=f"{selected_sector} - {selected_metric}"
                     )
-                    st.caption(f"Contains {len(full_df)} rows × {len(full_df.columns)} columns for {len(target_scopes[:3])} indices")
-            else:
-                st.warning("Not enough valid data for market indices")
-        else:
-            st.warning("No market index data available")
+                    if fig_sector:
+                        st.plotly_chart(fig_sector, use_container_width=True)
+                    else:
+                        st.warning(f"Not enough valid data for {selected_sector}")
 
-# ============================================================================
-# TAB 2: INDIVIDUAL ANALYSIS (Line chart with statistical bands)
-# ============================================================================
-with tab_individual:
-    st.markdown(f"### {selected_metric} Historical Trend with Statistical Bands")
-    st.markdown("*Line chart with median and ±1σ, ±2σ bands. Auto-scaled to data.*")
-
-    # Scope selector - separate groups
-    col1, col2 = st.columns([1, 3])
-
-    with col1:
-        scope_group = st.radio(
-            "Select Group",
-            options=["Market Indices", "Sectors"],
-            index=1,
-            label_visibility="collapsed"
-        )
-
-    # For Market Indices: select individual index only
-    selected_scope = None
-
-    with col2:
-        if scope_group == "Market Indices":
-            # Individual indices only (no Combined option)
-            if index_scopes:
-                selected_scope = st.selectbox(
-                    "Select Index",
-                    options=index_scopes,
-                    index=0,
-                    label_visibility="collapsed"
-                )
-            else:
-                st.warning("No market indices available")
-        else:
-            # Sectors - just select individual sector
-            available_scopes = sector_scopes
-            if available_scopes:
-                selected_scope = st.selectbox(
-                    "Select Sector",
-                    options=available_scopes,
-                    index=0,
-                    label_visibility="collapsed"
-                )
-            else:
-                selected_scope = None
-                st.warning("No sectors available")
-
-    # Helper function to create individual chart with bands
-    def create_individual_chart(scope_name, history_df, metric_col, metric_label, chart_height=None):
-        """Create line chart with statistical bands for a single scope"""
-        if history_df.empty or metric_col not in history_df.columns:
-            return None, None
-
-        # Use chart_schema default height if not provided
-        if chart_height is None:
-            chart_height = get_chart_config('line_with_bands').height
-
-        metric_data = history_df[metric_col].dropna()
-
-        # Filter outliers using centralized filter_outliers function
-        metric_key = metric_col.upper().replace('_TTM', '').replace('_', '')
-        metric_data = filter_outliers(metric_data, metric_key)
-
-        if len(metric_data) < 20:
-            return None, None
-
-        # Calculate statistics
-        median_val = metric_data.median()
-        std_val = metric_data.std()
-        mean_val = metric_data.mean()
-
-        # Filter history for plotting
-        limits = OUTLIER_LIMITS.get(metric_key, {'min': 0, 'max': 100})
-        plot_df = history_df[(history_df[metric_col] > limits['min']) & (history_df[metric_col] <= limits['max'])]
-
-        plus_1sd = mean_val + std_val
-        plus_2sd = mean_val + 2 * std_val
-        minus_1sd = mean_val - std_val
-        minus_2sd = mean_val - 2 * std_val
-        current_val = metric_data.iloc[-1]
-
-        fig = go.Figure()
-
-        # ±2 SD band - using brand blue
-        fig.add_trace(go.Scatter(x=plot_df['date'], y=[plus_2sd]*len(plot_df), mode='lines', line=dict(width=0), showlegend=False, hoverinfo='skip'))
-        fig.add_trace(go.Scatter(x=plot_df['date'], y=[minus_2sd]*len(plot_df), mode='lines', line=dict(width=0), fill='tonexty', fillcolor=BAND_COLORS['band_2sd'], showlegend=False, hoverinfo='skip'))
-
-        # ±1 SD band - using brand teal
-        fig.add_trace(go.Scatter(x=plot_df['date'], y=[plus_1sd]*len(plot_df), mode='lines', line=dict(width=0), showlegend=False, hoverinfo='skip'))
-        fig.add_trace(go.Scatter(x=plot_df['date'], y=[minus_1sd]*len(plot_df), mode='lines', line=dict(width=0), fill='tonexty', fillcolor=BAND_COLORS['band_1sd'], showlegend=False, hoverinfo='skip'))
-
-        # Main line - brand teal
-        fig.add_trace(go.Scatter(x=plot_df['date'], y=plot_df[metric_col], name=metric_label, mode='lines', line=dict(color=BAND_COLORS['main_line'], width=2.5), hovertemplate=f'<b>Date</b>: %{{x}}<br><b>{metric_label}</b>: %{{y:.2f}}x<extra></extra>'))
-
-        # Median line - brand gold
-        fig.add_hline(y=median_val, line=dict(color=BAND_COLORS['median_line'], width=2, dash='solid'), annotation=dict(text=f'Med: {median_val:.1f}x', font=dict(color=BAND_COLORS['median_line'], size=10), bgcolor='rgba(16, 24, 32, 0.9)', borderpad=3, xanchor='right'))
-
-        # Mean line - brand blue
-        fig.add_hline(y=mean_val, line=dict(color=BAND_COLORS['mean_line'], width=1.5, dash='dash'), annotation=dict(text=f'μ: {mean_val:.1f}x', font=dict(color=BAND_COLORS['mean_line'], size=9), xanchor='left'))
-
-        # ±1 SD lines - blue light
-        fig.add_hline(y=plus_1sd, line=dict(color=BAND_COLORS['sd_line'], width=1, dash='dot'), annotation=dict(text=f'+1σ', font=dict(color=BAND_COLORS['sd_line'], size=8), xanchor='left'))
-        fig.add_hline(y=minus_1sd, line=dict(color=BAND_COLORS['sd_line'], width=1, dash='dot'), annotation=dict(text=f'-1σ', font=dict(color=BAND_COLORS['sd_line'], size=8), xanchor='left'))
-
-        # ±2 SD lines - subtle blue
-        fig.add_hline(y=plus_2sd, line=dict(color='rgba(74, 123, 200, 0.5)', width=1, dash='dot'))
-        fig.add_hline(y=minus_2sd, line=dict(color='rgba(74, 123, 200, 0.5)', width=1, dash='dot'))
-
-        # Auto-scale
-        y_min = max(0, metric_data.min() * 0.9)
-        y_max = metric_data.max() * 1.1
-
-        layout = get_chart_layout(height=chart_height)
-        layout['yaxis']['title'] = metric_label
-        layout['yaxis']['range'] = [y_min, y_max]
-        layout['showlegend'] = False
-        layout['title'] = dict(text=f'<b>{scope_name}</b>', font=dict(size=14, color='#E8E8E8'), x=0.5)
-        # X-axis: clean date format, no range slider
-        layout['xaxis'] = dict(
-            tickformat='%b %Y',  # Jan 2023, Feb 2023, etc.
-            tickmode='auto',
-            nticks=8,
-            tickangle=0,
-            tickfont=dict(size=10, color='#CBD5E1'),
-            showgrid=True,
-            gridcolor='rgba(255,255,255,0.05)',
-            rangeslider=dict(visible=False)
-        )
-        # Add padding on right side for better visibility of latest data
-        if not plot_df.empty and 'date' in plot_df.columns:
-            last_date = pd.to_datetime(plot_df['date'].max())
-            padding_days = max(30, len(plot_df) // 20)  # ~5% padding
-            layout['xaxis']['range'] = [plot_df['date'].min(), last_date + timedelta(days=padding_days)]
-        fig.update_layout(**layout)
-
-        # Calculate stats for display
-        z_score = (current_val - mean_val) / std_val if std_val > 0 else 0
-        percentile = (metric_data < current_val).mean() * 100
-
-        stats = {
-            'current': current_val,
-            'median': median_val,
-            'z_score': z_score,
-            'percentile': percentile
-        }
-
-        return fig, stats
-
-    # Individual scope analysis (Market Index or Sector)
-    if selected_scope:
-        # Check if Market Index with PS/EV-EBITDA selected
-        is_market_index = scope_group == "Market Indices" or selected_scope in market_indices
-        if is_market_index and primary_metric in ['ps', 'ev_ebitda']:
-            st.warning(f"⚠️ **{selected_metric}** is not available for Market Indices. Market indices only have PE and PB data.")
-            st.info("Select **Sectors** group and choose a sector to view P/S Ratio and EV/EBITDA analysis.")
-        else:
-            history = load_sector_history(selected_scope, days)
-
-            # Create line chart with bands + histogram side-by-side
-            col_line, col_hist = st.columns([0.7, 0.3])
-
-            with col_line:
-                fig, stats = create_individual_chart(selected_scope, history, primary_metric, selected_metric, chart_height=500)
-                if fig:
-                    st.plotly_chart(fig, use_container_width=True)
-                else:
-                    st.warning(f"Not enough valid data for {selected_scope}")
-
-            with col_hist:
-                # Histogram distribution
-                if not history.empty and primary_metric in history.columns:
-                    metric_data = history[primary_metric].dropna()
-                    # Filter outliers
+                with col_hist:
+                    # Histogram distribution
+                    metric_data = sector_history[primary_metric].dropna()
                     metric_key = primary_metric.upper().replace('_TTM', '').replace('_', '')
                     clean_data = filter_outliers(metric_data, metric_key)
 
@@ -937,613 +788,260 @@ with tab_individual:
                         fig_hist = histogram_with_stats(
                             clean_data,
                             metric_label=selected_metric,
-                            height=500,
+                            height=get_chart_config('line_with_bands').height,
                             current_value=current_val,
                             title="Distribution"
                         )
                         st.plotly_chart(fig_hist, use_container_width=True)
 
-            if fig and stats:
-                # Current position analysis
-                col1, col2, col3, col4 = st.columns(4)
-                with col1:
-                    st.metric("Current", f"{stats['current']:.2f}x")
-                with col2:
-                    st.metric("Median", f"{stats['median']:.2f}x")
-                with col3:
-                    st.metric("Z-Score", f"{stats['z_score']:+.2f}σ")
-                with col4:
-                    st.metric("Percentile", f"{stats['percentile']:.0f}%")
+                # Stats cards
+                if stats_sector:
+                    col1, col2, col3, col4 = st.columns(4)
+                    with col1:
+                        st.metric("Current", format_ratio(stats_sector.get('current')))
+                    with col2:
+                        st.metric("Median", format_ratio(stats_sector.get('median')))
+                    with col3:
+                        st.metric("Z-Score", format_zscore(stats_sector.get('z_score')))
+                    with col4:
+                        st.metric("Percentile", format_percent(stats_sector.get('percentile')))
 
-                # Valuation assessment
-                if stats['z_score'] < -1:
-                    assessment = "🟢 **Significantly Undervalued** - More than 1σ below mean"
-                elif stats['z_score'] < 0:
-                    assessment = "🟢 **Undervalued** - Below historical mean"
-                elif stats['z_score'] < 1:
-                    assessment = "🟡 **Fair Value** - Near historical mean"
-                else:
-                    assessment = "🔴 **Expensive** - More than 1σ above mean"
+                    # Valuation assessment (HTML styled, no emojis)
+                    z = stats_sector.get('z_score', 0)
+                    st.markdown(f"**Assessment**: {render_valuation_assessment(z)}", unsafe_allow_html=True)
+            else:
+                st.warning(f"No {selected_metric} data available for {selected_sector}")
+        else:
+            st.warning("No sectors available")
 
-                st.markdown(f"**Assessment**: {assessment}")
+    # =========================================================================
+    # SUB-TAB 3: STOCK COMPARISON (Candlestick)
+    # =========================================================================
+    with subtab_stock_comp:
+        st.markdown(f"### {selected_metric} Distribution: Stocks in Sector")
+        st.markdown("*Candlestick: Min-Max (whiskers), P25-P75 (body). Colored dot = current value.*")
 
-                # Download buttons for Individual Analysis
-                st.markdown("---")
-                st.markdown("### Export Data")
-
-                col_dl1, col_dl2 = st.columns(2)
-
-                with col_dl1:
-                    # Download current scope data
-                    if not history.empty:
-                        export_df = history.copy()
-                        export_df['scope'] = selected_scope
-                        # Select relevant columns
-                        export_cols = ['date', 'scope']
-                        for col in ['pe_ttm', 'pb', 'ps', 'ev_ebitda', 'pe_fwd_2025', 'pe_fwd_2026', 'pb_fwd_2025', 'pb_fwd_2026']:
-                            if col in export_df.columns:
-                                export_cols.append(col)
-                        export_df = export_df[[c for c in export_cols if c in export_df.columns]]
-
-                        excel_buffer = BytesIO()
-                        export_df.to_excel(excel_buffer, index=False, engine='openpyxl')
-                        excel_buffer.seek(0)
-                        st.download_button(
-                            f"📥 Download {selected_scope}",
-                            excel_buffer,
-                            f"sector_{selected_scope}_{primary_metric}_{days}d.xlsx",
-                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            use_container_width=True,
-                            key="download_individual_scope"
-                        )
-
-                with col_dl2:
-                    # Download ALL sectors/indices data
-                    all_scopes_to_export = sector_scopes if scope_group == "Sectors" else index_scopes
-                    if all_scopes_to_export:
-                        all_data_list = []
-                        for scope in all_scopes_to_export:
-                            hist = load_sector_history(scope, days)
-                            if not hist.empty:
-                                hist_copy = hist.copy()
-                                hist_copy['scope'] = scope
-                                export_cols = ['date', 'scope']
-                                for col in ['pe_ttm', 'pb', 'ps', 'ev_ebitda', 'pe_fwd_2025', 'pe_fwd_2026', 'pb_fwd_2025', 'pb_fwd_2026']:
-                                    if col in hist_copy.columns:
-                                        export_cols.append(col)
-                                all_data_list.append(hist_copy[[c for c in export_cols if c in hist_copy.columns]])
-
-                        if all_data_list:
-                            full_df = pd.concat(all_data_list, ignore_index=True)
-                            full_df = full_df.sort_values(['date', 'scope'])
-
-                            excel_buffer_full = BytesIO()
-                            full_df.to_excel(excel_buffer_full, index=False, engine='openpyxl')
-                            excel_buffer_full.seek(0)
-
-                            group_label = "Sectors" if scope_group == "Sectors" else "Indices"
-                            st.download_button(
-                                f"📥 Download All {group_label}",
-                                excel_buffer_full,
-                                f"all_{group_label.lower()}_{primary_metric}_{days}d.xlsx",
-                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                                use_container_width=True,
-                                key="download_all_scopes"
-                            )
-                            st.caption(f"Contains {len(full_df)} rows for {len(all_scopes_to_export)} {group_label.lower()}")
-
-# ============================================================================
-# TAB 3: MACRO DATA
-# ============================================================================
-with tab_macro:
-    st.markdown("### Macro Economic Indicators")
-    st.markdown("*Interest rates, exchange rates, and government bond yields*")
-
-    # Initialize loader
-    macro_loader = MacroCommodityLoader()
-    macro_df = macro_loader.get_macro()
-
-    if macro_df.empty:
-        st.warning("No macro data available. Please run the daily update pipeline.")
-    else:
-        # Get available macro symbols
-        macro_symbols = macro_df['symbol'].unique().tolist()
-
-        # Group indicators
-        interest_rate_symbols = [s for s in macro_symbols if 'ls_' in s]
-        exchange_rate_symbols = [s for s in macro_symbols if 'ty_gia' in s]
-        bond_symbols = [s for s in macro_symbols if 'bond' in s]
-
-        # Vietnamese labels for macro indicators
-        macro_labels = {
-            'ls_huy_dong_13_thang': 'Lãi suất huy động 13 tháng',
-            'ls_huy_dong_1_3_thang': 'Lãi suất huy động 1-3 tháng',
-            'ls_huy_dong_6_9_thang': 'Lãi suất huy động 6-9 tháng',
-            'ls_lien_ngan_hang_ky_han_1_tuan': 'LS liên NH kỳ hạn 1 tuần',
-            'ls_lien_ngan_hang_ky_han_2_tuan': 'LS liên NH kỳ hạn 2 tuần',
-            'ls_qua_dem_lien_ngan_hang': 'LS qua đêm liên NH',
-            'ty_gia_san': 'Tỷ giá sàn',
-            'ty_gia_tran': 'Tỷ giá trần',
-            'ty_gia_usd_nhtm_ban_ra': 'Tỷ giá USD NHTM bán ra',
-            'ty_gia_usd_trung_tam': 'Tỷ giá USD trung tâm',
-            'ty_gia_usd_tu_do_ban_ra': 'Tỷ giá USD tự do bán ra',
-            'vn_gov_bond_5y': 'Lợi suất TPCP 5 năm'
-        }
-
-        # Selector for indicator type
-        macro_type = st.radio(
-            "Select Category",
-            options=["💰 Lãi suất huy động", "🏦 Lãi suất liên ngân hàng", "💱 Tỷ giá USD", "📜 Trái phiếu CP"],
-            horizontal=True
-        )
-
-        # =============================================
-        # EXCHANGE RATE: Dual-axis chart section
-        # =============================================
-        if macro_type == "💱 Tỷ giá USD":
-            # Dual-axis pairs for exchange rates (comparing different USD rates)
-            exchange_dual_axis_pairs = {
-                "💱 USD Trung tâm vs Tự do": ('ty_gia_usd_trung_tam', 'ty_gia_usd_tu_do_ban_ra', 'VND (TT)', 'VND (Tự do)'),
-                "🏦 USD NHTM vs Tự do": ('ty_gia_usd_nhtm_ban_ra', 'ty_gia_usd_tu_do_ban_ra', 'VND (NHTM)', 'VND (Tự do)'),
-                "📊 Tỷ giá Sàn vs Trần": ('ty_gia_san', 'ty_gia_tran', 'VND (Sàn)', 'VND (Trần)'),
-            }
-
-            # Individual exchange rates (not in pairs)
-            exchange_individual = {
-                "📌 USD Trung tâm": 'ty_gia_usd_trung_tam',
-                "🏛️ USD NHTM bán ra": 'ty_gia_usd_nhtm_ban_ra',
-                "💵 USD Tự do bán ra": 'ty_gia_usd_tu_do_ban_ra',
-                "📉 Tỷ giá sàn": 'ty_gia_san',
-                "📈 Tỷ giá trần": 'ty_gia_tran',
-            }
-
-            # Combined options: dual-axis pairs first, then individual
-            all_exchange_options = list(exchange_dual_axis_pairs.keys()) + ["---"] + list(exchange_individual.keys())
-
-            selected_exchange = st.selectbox(
-                "Select Exchange Rate View",
-                options=[opt for opt in all_exchange_options if opt != "---"],
+        # Sector selector for stock comparison
+        if sector_scopes:
+            stock_comp_sector = st.selectbox(
+                "Select Sector",
+                options=sector_scopes,
                 index=0,
-                label_visibility="visible"
+                key="stock_comp_sector_select"
             )
 
-            if selected_exchange in exchange_dual_axis_pairs:
-                # Single-axis chart for exchange rate comparison (same unit VND)
-                symbol1, symbol2, unit1, unit2 = exchange_dual_axis_pairs[selected_exchange]
+            # Get tickers in this sector
+            sector_tickers = get_sector_tickers(stock_comp_sector)
 
-                series1 = filter_series_by_days(macro_loader.get_series(symbol1), days)
-                series2 = filter_series_by_days(macro_loader.get_series(symbol2), days)
+            if sector_tickers:
+                # Build candlestick data for stocks
+                stock_candle_data = []
+                for ticker in sector_tickers[:30]:  # Limit to 30 stocks
+                    try:
+                        ticker_history = load_stock_valuation(ticker, days_distribution)
+                        if ticker_history.empty or primary_metric not in ticker_history.columns:
+                            continue
 
-                if not series1.empty and not series2.empty:
-                    label1 = macro_labels.get(symbol1, symbol1)
-                    label2 = macro_labels.get(symbol2, symbol2)
+                        metric_vals = ticker_history[primary_metric].dropna()
+                        if len(metric_vals) < 20:
+                            continue
 
-                    # Single-axis chart (same VND unit) to show gap clearly
-                    fig_exchange = go.Figure()
+                        current_val = metric_vals.iloc[-1] if len(metric_vals) > 0 else None
+                        if primary_metric == 'pe_ttm' and (current_val is None or current_val <= 0):
+                            continue
 
-                    # First series
-                    fig_exchange.add_trace(
-                        go.Scatter(
-                            x=series1['date'],
-                            y=series1['value'],
-                            name=label1,
-                            mode='lines',
-                            line=dict(color=CHART_COLORS['primary'], width=2.5),
-                            hovertemplate=f'<b>{label1}</b><br>Date: %{{x|%d/%m/%Y}}<br>Value: %{{y:,.0f}} VND<extra></extra>'
-                        )
-                    )
+                        # Filter outliers
+                        metric_key = primary_metric.upper().replace('_TTM', '').replace('_', '')
+                        clean_data = filter_outliers(metric_vals, metric_key)
+                        if len(clean_data) < 20:
+                            continue
 
-                    # Second series
-                    fig_exchange.add_trace(
-                        go.Scatter(
-                            x=series2['date'],
-                            y=series2['value'],
-                            name=label2,
-                            mode='lines',
-                            line=dict(color=CHART_COLORS['tertiary'], width=2.5),
-                            hovertemplate=f'<b>{label2}</b><br>Date: %{{x|%d/%m/%Y}}<br>Value: %{{y:,.0f}} VND<extra></extra>'
-                        )
-                    )
+                        p25 = clean_data.quantile(0.25)
+                        p50 = clean_data.quantile(0.50)
+                        p75 = clean_data.quantile(0.75)
+                        p_min = clean_data.min()
+                        p_max = clean_data.max()
+                        mean_val = clean_data.mean()
+                        std_val = clean_data.std()
+                        percentile = np.sum(clean_data <= current_val) / len(clean_data) * 100 if current_val else 50
+                        z_score = (current_val - mean_val) / std_val if std_val > 0 else 0
 
-                    # Calculate y-axis range starting from 0
-                    all_values = list(series1['value'].dropna()) + list(series2['value'].dropna())
-                    y_max = max(all_values) * 1.05 if all_values else 30000
+                        # Use 5-level status (HTML badge with colored dot)
+                        status = render_status_badge(percentile)
 
-                    layout = get_chart_layout(height=500)
-                    layout['showlegend'] = True
-                    layout['legend'] = dict(
-                        orientation='h',
-                        yanchor='bottom',
-                        y=1.02,
-                        xanchor='center',
-                        x=0.5,
-                        font=dict(size=11, color='#E8E8E8')
-                    )
-                    # X-axis formatting - clean date format, no grid
-                    layout['xaxis'] = dict(
-                        tickformat='%b %Y',
-                        tickmode='auto',
-                        nticks=8,
-                        tickangle=0,
-                        tickfont=dict(size=10, color='#CBD5E1'),
-                        showgrid=False,
-                        zeroline=False,
-                        showline=True,
-                        linecolor='rgba(255,255,255,0.2)'
-                    )
-                    # Y-axis - single axis, start from 0, no grid
-                    layout['yaxis'] = dict(
-                        title='VND',
-                        title_font=dict(color='#E8E8E8'),
-                        tickfont=dict(size=10, color='#CBD5E1'),
-                        tickformat=',d',
-                        showgrid=False,
-                        zeroline=False,
-                        range=[0, y_max],  # Start from 0
-                        showline=True,
-                        linecolor='rgba(255,255,255,0.2)'
-                    )
-                    layout['plot_bgcolor'] = 'rgba(0,0,0,0)'
-                    fig_exchange.update_layout(**layout)
-
-                    st.plotly_chart(fig_exchange, use_container_width=True)
-
-                    # Show latest values
-                    st.markdown("### Latest Values & Spread")
-                    latest1 = series1.iloc[-1]['value']
-                    latest2 = series2.iloc[-1]['value']
-                    spread = latest2 - latest1
-                    spread_pct = (spread / latest1) * 100 if latest1 > 0 else 0
-
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.metric(label1, f"{latest1:,.0f} VND")
-                    with col2:
-                        st.metric(label2, f"{latest2:,.0f} VND")
-                    with col3:
-                        st.metric("Spread (Chênh lệch)", f"{spread:+,.0f} VND", f"{spread_pct:+.2f}%")
-                else:
-                    st.warning("Data not available for selected exchange rate pair")
-
-            elif selected_exchange in exchange_individual:
-                # Single exchange rate chart
-                symbol = exchange_individual[selected_exchange]
-                series = filter_series_by_days(macro_loader.get_series(symbol), days)
-
-                if not series.empty and 'value' in series.columns:
-                    label = macro_labels.get(symbol, symbol)
-
-                    fig_single = go.Figure()
-                    fig_single.add_trace(go.Scatter(
-                        x=series['date'],
-                        y=series['value'],
-                        name=label,
-                        mode='lines',
-                        line=dict(color=CHART_COLORS['primary'], width=2),
-                        fill='tozeroy',
-                        fillcolor=f"rgba(0, 255, 136, 0.1)",
-                        hovertemplate=f'<b>{label}</b><br>Date: %{{x}}<br>Value: %{{y:,.0f}} VND<extra></extra>'
-                    ))
-
-                    layout = get_chart_layout(height=500)
-                    layout['yaxis']['title'] = 'VND'
-                    layout['yaxis']['tickformat'] = ',d'
-                    # X-axis formatting - clean date format
-                    layout['xaxis'] = dict(
-                        tickformat='%b %Y',
-                        tickmode='auto',
-                        nticks=8,
-                        tickangle=0,
-                        tickfont=dict(size=10, color='#CBD5E1'),
-                        showgrid=True,
-                        gridcolor='rgba(255,255,255,0.05)'
-                    )
-                    fig_single.update_layout(**layout)
-
-                    st.plotly_chart(fig_single, use_container_width=True)
-
-                    # Latest value
-                    latest = series.iloc[-1]
-                    st.markdown("### Latest Value")
-                    st.metric(label, f"{latest['value']:,.0f} VND",
-                             delta=None,
-                             help=f"Last updated: {latest['date'].strftime('%Y-%m-%d') if pd.notna(latest['date']) else '-'}")
-                else:
-                    st.warning("Data not available for selected exchange rate")
-
-        # =============================================
-        # OTHER MACRO CATEGORIES: Standard charts
-        # =============================================
-        else:
-            if macro_type == "💰 Lãi suất huy động":
-                target_symbols = [s for s in macro_symbols if 'ls_huy_dong' in s]
-            elif macro_type == "🏦 Lãi suất liên ngân hàng":
-                target_symbols = [s for s in macro_symbols if 'ls_lien_ngan_hang' in s or 'ls_qua_dem' in s]
-            else:
-                target_symbols = bond_symbols
-
-            if target_symbols:
-                # Create line chart
-                fig_macro = go.Figure()
-                colors = [CHART_COLORS['primary'], CHART_COLORS['secondary'], CHART_COLORS['tertiary'],
-                         '#FF6B6B', '#4ECDC4', '#45B7D1']
-
-                for i, symbol in enumerate(target_symbols):
-                    series = filter_series_by_days(macro_loader.get_series(symbol), days)
-                    if not series.empty and 'value' in series.columns:
-                        label = macro_labels.get(symbol, symbol)
-                        fig_macro.add_trace(go.Scatter(
-                            x=series['date'],
-                            y=series['value'],
-                            name=label,
-                            mode='lines',
-                            line=dict(color=colors[i % len(colors)], width=2),
-                            hovertemplate=f'<b>{label}</b><br>Date: %{{x}}<br>Value: %{{y:.2f}}<extra></extra>'
-                        ))
-
-                layout = get_chart_layout(height=500)
-                layout['showlegend'] = True
-                layout['legend'] = dict(
-                    orientation='h',
-                    yanchor='bottom',
-                    y=1.02,
-                    xanchor='center',
-                    x=0.5,
-                    font=dict(size=10, color='#E8E8E8')
-                )
-                layout['yaxis']['title'] = 'Value (%)'
-                # X-axis formatting - clean date format
-                layout['xaxis'] = dict(
-                    tickformat='%b %Y',
-                    tickmode='auto',
-                    nticks=8,
-                    tickangle=0,
-                    tickfont=dict(size=10, color='#CBD5E1'),
-                    showgrid=True,
-                    gridcolor='rgba(255,255,255,0.05)'
-                )
-                fig_macro.update_layout(**layout)
-
-                st.plotly_chart(fig_macro, use_container_width=True)
-
-                # Latest values table
-                st.markdown("### Latest Values")
-                latest_data = []
-                for symbol in target_symbols:
-                    series = macro_loader.get_series(symbol)
-                    if not series.empty and 'value' in series.columns:
-                        latest = series.iloc[-1]
-                        latest_data.append({
-                            'Indicator': macro_labels.get(symbol, symbol),
-                            'Value': f"{latest['value']:.2f}",
-                            'Unit': latest.get('unit', '%'),
-                            'Date': latest['date'].strftime('%Y-%m-%d') if pd.notna(latest['date']) else '-'
+                        stock_candle_data.append({
+                            'symbol': ticker,
+                            'current': current_val,
+                            'min': p_min,
+                            'p25': p25,
+                            'median': p50,
+                            'p75': p75,
+                            'max': p_max,
+                            'percentile': percentile,
+                            'z_score': z_score,
+                            'status': status
                         })
+                    except Exception:
+                        continue
 
-                if latest_data:
-                    latest_df = pd.DataFrame(latest_data)
-                    st.markdown(render_styled_table(latest_df), unsafe_allow_html=True)
-            else:
-                st.info("No data available for selected category")
+                if stock_candle_data:
+                    # Sort by percentile (cheapest first)
+                    stock_candle_data = sorted(stock_candle_data, key=lambda x: x.get('percentile', 50))
 
-# ============================================================================
-# TAB 4: COMMODITY DATA
-# ============================================================================
-with tab_commodity:
-    st.markdown("### Commodity Prices")
-    st.markdown("*Individual commodities with dual-axis charts for comparison pairs*")
+                    # Auto-scale Y-axis based on actual data range (with padding)
+                    all_mins = [d['min'] for d in stock_candle_data if d.get('min') is not None]
+                    all_maxs = [d['max'] for d in stock_candle_data if d.get('max') is not None]
+                    all_currents = [d['current'] for d in stock_candle_data if d.get('current') is not None]
 
-    # Initialize loader
-    commodity_loader = MacroCommodityLoader()
-    commodity_df = commodity_loader.get_commodities()
+                    if all_mins and all_maxs:
+                        data_min = min(all_mins + all_currents)
+                        data_max = max(all_maxs + all_currents)
+                        data_range = data_max - data_min
+                        # Add 10% padding on each side for better visibility
+                        y_min = max(0, data_min - data_range * 0.1)
+                        y_max = data_max + data_range * 0.1
+                        y_range = (y_min, y_max)
+                    else:
+                        # Fallback to schema range if no data
+                        metric_type = primary_metric.upper().replace('_TTM', '').replace('_', '')
+                        y_range = get_y_range(metric_type)
 
-    if commodity_df.empty:
-        st.warning("No commodity data available. Please run the daily update pipeline.")
-    else:
-        # Get available commodity symbols
-        commodity_symbols = commodity_df['symbol'].unique().tolist()
-
-        # Vietnamese labels for commodities
-        commodity_labels = {
-            'gold_vn': 'Vàng Việt Nam',
-            'gold_global': 'Vàng Thế giới',
-            'oil_crude': 'Dầu thô WTI',
-            'gas_natural': 'Khí thiên nhiên',
-            'coke': 'Than cốc',
-            'steel_d10': 'Thép thanh HPG (D10)',
-            'steel_hrc': 'Thép HRC',
-            'steel_coated': 'Tôn mạ HSG',
-            'iron_ore': 'Quặng sắt',
-            'fertilizer_ure_global': 'Ure Trung Đông',
-            'fertilizer_ure_vn': 'Ure Phú Mỹ',
-            'soybean': 'Đậu tương',
-            'corn': 'Ngô (Bắp)',
-            'sugar': 'Đường',
-            'pork_north_vn': 'Heo hơi Miền Bắc VN',
-            'pork_china': 'Heo hơi Trung Quốc',
-            'pvc': 'PVC China',
-            'cao_su': 'Cao su',
-            'sua_bot_wmp': 'Sữa bột WMP'
-        }
-
-        # Dual-axis pairs (VN vs Global/China comparison)
-        dual_axis_pairs = {
-            "🥇 Vàng (VN vs Thế giới)": ('gold_vn', 'gold_global', 'VND/lượng', 'USD/oz'),
-            "🐷 Heo hơi (VN vs Trung Quốc)": ('pork_north_vn', 'pork_china', 'VND/kg', 'CNY/kg'),
-            "🧪 Phân bón Ure (VN vs Trung Đông)": ('fertilizer_ure_vn', 'fertilizer_ure_global', 'VND/kg', 'USD/tấn'),
-        }
-
-        # Individual commodities (single axis)
-        individual_commodities = [
-            ('oil_crude', '🛢️ Dầu thô WTI'),
-            ('gas_natural', '⛽ Khí thiên nhiên'),
-            ('coke', '�ite Than cốc'),
-            ('steel_d10', '🔩 Thép thanh HPG (D10)'),
-            ('steel_hrc', '🔩 Thép HRC'),
-            ('steel_coated', '🔩 Tôn mạ HSG'),
-            ('iron_ore', '�ite Quặng sắt'),
-            ('soybean', '🌾 Đậu tương'),
-            ('corn', '🌽 Ngô (Bắp)'),
-            ('sugar', '🍬 Đường'),
-            ('cao_su', '🌳 Cao su'),
-            ('pvc', '🧪 PVC China'),
-            ('sua_bot_wmp', '🥛 Sữa bột WMP'),
-        ]
-
-        # Build options list: dual pairs first, then individual
-        all_options = list(dual_axis_pairs.keys()) + [label for _, label in individual_commodities if _ in commodity_symbols]
-
-        selected_commodity = st.selectbox(
-            "Select Commodity",
-            options=all_options,
-            index=0
-        )
-
-        # Check if selected is a dual-axis pair
-        if selected_commodity in dual_axis_pairs:
-            # DUAL-AXIS CHART
-            symbol1, symbol2, unit1, unit2 = dual_axis_pairs[selected_commodity]
-
-            series1 = filter_series_by_days(commodity_loader.get_series(symbol1), days)
-            series2 = filter_series_by_days(commodity_loader.get_series(symbol2), days)
-
-            if not series1.empty or not series2.empty:
-                fig = make_subplots(specs=[[{"secondary_y": True}]])
-
-                # First series (left Y-axis)
-                if not series1.empty:
-                    value_col1 = 'close' if 'close' in series1.columns and series1['close'].notna().any() else 'value'
-                    fig.add_trace(
-                        go.Scatter(
-                            x=series1['date'],
-                            y=series1[value_col1],
-                            name=commodity_labels.get(symbol1, symbol1),
-                            mode='lines',
-                            line=dict(color=CHART_COLORS['primary'], width=2.5),
-                            hovertemplate=f'<b>{commodity_labels.get(symbol1, symbol1)}</b><br>%{{x}}<br>%{{y:,.0f}} {unit1}<extra></extra>'
-                        ),
-                        secondary_y=False
+                    fig_stock_candle = distribution_candlestick(
+                        stock_candle_data,
+                        metric_label=selected_metric,
+                        height=get_chart_config('candlestick_distribution').height,
+                        y_range=y_range,
+                        title=f"{selected_metric} Distribution: {stock_comp_sector} Stocks"
                     )
+                    st.plotly_chart(fig_stock_candle, use_container_width=True, config={'displayModeBar': False})
 
-                # Second series (right Y-axis)
-                if not series2.empty:
-                    value_col2 = 'close' if 'close' in series2.columns and series2['close'].notna().any() else 'value'
-                    fig.add_trace(
-                        go.Scatter(
-                            x=series2['date'],
-                            y=series2[value_col2],
-                            name=commodity_labels.get(symbol2, symbol2),
-                            mode='lines',
-                            line=dict(color=CHART_COLORS['tertiary'], width=2.5),
-                            hovertemplate=f'<b>{commodity_labels.get(symbol2, symbol2)}</b><br>%{{x}}<br>%{{y:,.0f}} {unit2}<extra></extra>'
-                        ),
-                        secondary_y=True
+                    # Legend (5 levels - HTML styled, no emojis)
+                    st.markdown(render_valuation_legend(), unsafe_allow_html=True)
+
+                    # Stock Valuation Matrix
+                    st.markdown("### Valuation Matrix")
+                    stock_df = pd.DataFrame(stock_candle_data)
+                    stock_df_raw = stock_df.copy()
+                    stock_df_display = stock_df.copy()
+
+                    # Format display columns
+                    stock_df_display['current'] = stock_df_display['current'].apply(lambda x: f'{x:.2f}x' if pd.notna(x) else '-')
+                    stock_df_display['median'] = stock_df_display['median'].apply(lambda x: f'{x:.2f}x' if pd.notna(x) else '-')
+                    stock_df_display['percentile'] = stock_df_display['percentile'].apply(lambda x: f'{x:.1f}%')
+                    stock_df_display['z_score'] = stock_df_display['z_score'].apply(lambda x: f'{x:+.2f}σ')
+
+                    # Reorder columns
+                    stock_df_display = stock_df_display[['symbol', 'current', 'median', 'percentile', 'z_score', 'status']]
+                    stock_df_display.columns = ['Ticker', 'Current', 'Hist. Median', 'Percentile', 'Z-Score', 'Status']
+                    st.markdown(render_styled_table(stock_df_display), unsafe_allow_html=True)
+
+                    # Excel download
+                    excel_buffer = BytesIO()
+                    stock_df_raw.to_excel(excel_buffer, index=False, engine='openpyxl')
+                    excel_buffer.seek(0)
+                    st.download_button(
+                        f"📥 Download {stock_comp_sector} Stock Data (Excel)",
+                        excel_buffer,
+                        f"{stock_comp_sector.lower().replace(' ', '_')}_stocks_{selected_metric.lower().replace(' ', '_')}.xlsx",
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        use_container_width=True
                     )
-
-                # Layout
-                layout = get_chart_layout(height=500)
-                layout['showlegend'] = True
-                layout['legend'] = dict(
-                    orientation='h', yanchor='bottom', y=1.02,
-                    xanchor='center', x=0.5, font=dict(size=11, color='#E8E8E8')
-                )
-                layout['xaxis'] = dict(
-                    tickformat='%b %Y', tickmode='auto', nticks=8, tickangle=0,
-                    tickfont=dict(size=10, color='#CBD5E1'),
-                    showgrid=True, gridcolor='rgba(255,255,255,0.05)'
-                )
-                fig.update_layout(**layout)
-
-                # Y-axis titles
-                fig.update_yaxes(title_text=f"{commodity_labels.get(symbol1, symbol1)} ({unit1})",
-                                secondary_y=False, title_font=dict(color=CHART_COLORS['primary']))
-                fig.update_yaxes(title_text=f"{commodity_labels.get(symbol2, symbol2)} ({unit2})",
-                                secondary_y=True, title_font=dict(color=CHART_COLORS['tertiary']))
-
-                st.plotly_chart(fig, use_container_width=True)
-
-                # Latest values
-                st.markdown("### Latest Prices")
-                latest_data = []
-                for sym, unit in [(symbol1, unit1), (symbol2, unit2)]:
-                    series = commodity_loader.get_series(sym)
-                    if not series.empty:
-                        latest = series.iloc[-1]
-                        value_col = 'close' if 'close' in series.columns and pd.notna(latest.get('close')) else 'value'
-                        value = latest.get(value_col, 0)
-                        latest_data.append({
-                            'Commodity': commodity_labels.get(sym, sym),
-                            'Price': f"{value:,.0f}",
-                            'Unit': unit,
-                            'Date': latest['date'].strftime('%Y-%m-%d') if pd.notna(latest['date']) else '-'
-                        })
-                if latest_data:
-                    st.markdown(render_styled_table(pd.DataFrame(latest_data)), unsafe_allow_html=True)
-            else:
-                st.warning("No data available for this pair")
-
-        else:
-            # SINGLE COMMODITY CHART
-            # Find symbol from label
-            symbol = None
-            for sym, label in individual_commodities:
-                if label == selected_commodity:
-                    symbol = sym
-                    break
-
-            if symbol and symbol in commodity_symbols:
-                series = filter_series_by_days(commodity_loader.get_series(symbol), days)
-
-                if not series.empty:
-                    value_col = 'close' if 'close' in series.columns and series['close'].notna().any() else 'value'
-
-                    fig = go.Figure()
-                    fig.add_trace(go.Scatter(
-                        x=series['date'],
-                        y=series[value_col],
-                        name=commodity_labels.get(symbol, symbol),
-                        mode='lines',
-                        line=dict(color=CHART_COLORS['primary'], width=2.5),
-                        fill='tozeroy',
-                        fillcolor='rgba(45, 212, 191, 0.1)',
-                        hovertemplate=f'<b>{commodity_labels.get(symbol, symbol)}</b><br>%{{x}}<br>Price: %{{y:,.0f}}<extra></extra>'
-                    ))
-
-                    layout = get_chart_layout(height=500)
-                    layout['showlegend'] = False
-                    layout['yaxis']['title'] = 'Price'
-                    layout['xaxis'] = dict(
-                        tickformat='%b %Y', tickmode='auto', nticks=8, tickangle=0,
-                        tickfont=dict(size=10, color='#CBD5E1'),
-                        showgrid=True, gridcolor='rgba(255,255,255,0.05)'
-                    )
-                    fig.update_layout(**layout)
-
-                    st.plotly_chart(fig, use_container_width=True)
-
-                    # Latest value
-                    latest = series.iloc[-1]
-                    value = latest.get(value_col, 0)
-                    change_pct = None
-                    if len(series) > 1:
-                        prev = series[value_col].iloc[-2]
-                        if prev and prev != 0:
-                            change_pct = ((value - prev) / prev) * 100
-
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.metric("Latest Price", f"{value:,.0f}")
-                    with col2:
-                        st.metric("Change", f"{change_pct:+.2f}%" if change_pct else "-")
-                    with col3:
-                        st.metric("Date", latest['date'].strftime('%Y-%m-%d') if pd.notna(latest['date']) else '-')
                 else:
-                    st.warning(f"No data available for {selected_commodity}")
+                    st.warning(f"Not enough data for stocks in {stock_comp_sector}")
             else:
-                st.warning("Commodity not found")
+                st.warning(f"No tickers found in {stock_comp_sector}")
+        else:
+            st.warning("No sectors available")
+
+    # =========================================================================
+    # SUB-TAB 4: INDIVIDUAL STOCK (Line chart with statistical bands)
+    # =========================================================================
+    with subtab_stock_ind:
+        st.markdown(f"### {selected_metric} Historical Trend with Statistical Bands")
+        st.markdown("*Line chart with median and ±1σ, ±2σ bands for individual stock.*")
+
+        # Sector selector for individual stock
+        if sector_scopes:
+            stock_ind_sector = st.selectbox(
+                "Select Sector",
+                options=sector_scopes,
+                index=0,
+                key="stock_ind_sector_select"
+            )
+
+            # Get tickers in this sector
+            ind_sector_tickers = get_sector_tickers(stock_ind_sector)
+
+            if ind_sector_tickers:
+                selected_stock = st.selectbox(
+                    "Select Stock",
+                    options=ind_sector_tickers,
+                    index=0,
+                    key="individual_stock_select"
+                )
+
+                if selected_stock:
+                    stock_history = load_stock_valuation(selected_stock, days)
+
+                    if not stock_history.empty and primary_metric in stock_history.columns:
+                        # Create line chart with bands + histogram side-by-side
+                        col_line, col_hist = st.columns([0.7, 0.3])
+
+                        with col_line:
+                            fig_stock, stats_stock = line_with_statistical_bands(
+                                stock_history,
+                                date_col='date',
+                                value_col=primary_metric,
+                                metric_label=selected_metric,
+                                height=get_chart_config('line_with_bands').height,
+                                title=f"{selected_stock} - {selected_metric}"
+                            )
+                            if fig_stock:
+                                st.plotly_chart(fig_stock, use_container_width=True)
+                            else:
+                                st.warning(f"Not enough valid data for {selected_stock}")
+
+                        with col_hist:
+                            # Histogram distribution
+                            metric_data = stock_history[primary_metric].dropna()
+                            metric_key = primary_metric.upper().replace('_TTM', '').replace('_', '')
+                            clean_data = filter_outliers(metric_data, metric_key)
+
+                            if len(clean_data) >= 10:
+                                current_val = metric_data.iloc[-1] if len(metric_data) > 0 else None
+                                fig_hist = histogram_with_stats(
+                                    clean_data,
+                                    metric_label=selected_metric,
+                                    height=get_chart_config('line_with_bands').height,
+                                    current_value=current_val,
+                                    title="Distribution"
+                                )
+                                st.plotly_chart(fig_hist, use_container_width=True)
+
+                        # Stats cards
+                        if stats_stock:
+                            col1, col2, col3, col4 = st.columns(4)
+                            with col1:
+                                st.metric("Current", format_ratio(stats_stock.get('current')))
+                            with col2:
+                                st.metric("Median", format_ratio(stats_stock.get('median')))
+                            with col3:
+                                st.metric("Z-Score", format_zscore(stats_stock.get('z_score')))
+                            with col4:
+                                st.metric("Percentile", format_percent(stats_stock.get('percentile')))
+
+                            # Valuation assessment (HTML styled, no emojis)
+                            z = stats_stock.get('z_score', 0)
+                            st.markdown(f"**Assessment**: {render_valuation_assessment(z)}", unsafe_allow_html=True)
+                    else:
+                        st.warning(f"No {selected_metric} data available for {selected_stock}")
+            else:
+                st.warning(f"No tickers found in {stock_ind_sector}")
+        else:
+            st.warning("No sectors available")
 
 # ============================================================================
-# TAB 5: DATA TABLES
+# TAB 2: DATA TABLES
 # ============================================================================
 with tab_tables:
     col1, col2 = st.columns(2)
@@ -1559,7 +1057,7 @@ with tab_tables:
             display_df = sector_df[display_cols].copy()
             # Remove SECTOR: prefix for cleaner display
             display_df['scope'] = display_df['scope'].str.replace('SECTOR:', '', regex=False)
-            display_df.columns = ['Sector', 'PE TTM', 'PB'] + (['PE Fwd 2025'] if 'pe_fwd_2025' in display_cols else [])
+            display_df.columns = ['Sector', 'PE', 'PB'] + (['PE Fwd 2025'] if 'pe_fwd_2025' in display_cols else [])
 
             # Format numbers
             for col in display_df.columns[1:]:

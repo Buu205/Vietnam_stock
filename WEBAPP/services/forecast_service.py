@@ -245,7 +245,7 @@ class ForecastService:
         pe_latest = pe_bsc[pe_bsc['date'] == latest_date][['symbol', 'pe_ratio', 'ttm_earning_billion_vnd']].copy()
         pe_latest = pe_latest.rename(columns={'pe_ratio': 'pe_ttm', 'ttm_earning_billion_vnd': 'ttm_earnings'})
 
-        # Merge PE TTM into individual stocks
+        # Merge PE into individual stocks
         individual_with_valuation = individual_df.merge(pe_latest[['symbol', 'pe_ttm', 'ttm_earnings']], on='symbol', how='left')
 
         # Load PB TTM if available
@@ -268,7 +268,7 @@ class ForecastService:
             'pb_ttm': 'median'
         }).reset_index()
 
-        # Calculate sector-level PE TTM (weighted)
+        # Calculate sector-level PE (weighted)
         sector_ttm['sector_pe_ttm'] = sector_ttm['market_cap'] / sector_ttm['ttm_earnings']
         sector_ttm['sector_pe_ttm'] = sector_ttm['sector_pe_ttm'].replace([np.inf, -np.inf], np.nan)
 

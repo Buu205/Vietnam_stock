@@ -293,6 +293,138 @@ class WiChartClient(BaseAPIClient):
         """Fetch WTI oil prices (replaces oil_brent from vnstock)."""
         return self.get_commodity("dau_wti")
 
+    def get_gold_vn(self) -> pd.DataFrame:
+        """
+        Fetch Vietnam gold prices (SJC buy/sell).
+
+        Returns:
+            DataFrame with gold buy and sell prices in VND/lượng
+        """
+        endpoint = "/vietnambiz/vi-mo?key=hang_hoa&name=vang"
+
+        try:
+            response = self.get(endpoint)
+
+            if not response.success or not response.data:
+                return pd.DataFrame()
+
+            chart_data = response.data.get("chart", {})
+            series_list = chart_data.get("series", [])
+
+            if not series_list:
+                return pd.DataFrame()
+
+            all_records = []
+
+            for series in series_list:
+                series_name = series.get("name", "")
+                data_points = series.get("data", [])
+
+                # Map series name to symbol - use sell price for gold_vn
+                if "bán ra" in series_name.lower():
+                    symbol = "gold_vn"
+                    name = "Vàng SJC bán ra"
+                elif "mua vào" in series_name.lower():
+                    symbol = "gold_vn_buy"
+                    name = "Vàng SJC mua vào"
+                else:
+                    continue
+
+                for point in data_points:
+                    if len(point) >= 2:
+                        timestamp_ms = point[0]
+                        value = point[1]
+                        date = datetime.fromtimestamp(timestamp_ms / 1000)
+
+                        all_records.append({
+                            "date": date,
+                            "symbol": symbol,
+                            "category": "commodity",
+                            "name": name,
+                            "value": value * 1000,  # Convert from nghìn đồng to VND
+                            "unit": "VND/lượng",
+                            "source": "wichart",
+                        })
+
+            if not all_records:
+                return pd.DataFrame()
+
+            df = pd.DataFrame(all_records)
+            df["date"] = pd.to_datetime(df["date"])
+
+            logger.info(f"[wichart] Fetched {len(df)} records for Gold VN")
+            return df
+
+        except Exception as e:
+            logger.error(f"[wichart] Error fetching Gold VN: {e}")
+            return pd.DataFrame()
+
+    def get_ure_vn(self) -> pd.DataFrame:
+        """
+        Fetch Vietnam domestic Ure fertilizer prices (DPM & DCM).
+
+        Returns:
+            DataFrame with Ure Phú Mỹ (DPM) and Ure Cà Mau (DCM) prices
+        """
+        endpoint = "/vietnambiz/vi-mo?key=hang_hoa&name=phan_ure"
+
+        try:
+            response = self.get(endpoint)
+
+            if not response.success or not response.data:
+                return pd.DataFrame()
+
+            chart_data = response.data.get("chart", {})
+            series_list = chart_data.get("series", [])
+
+            if not series_list:
+                return pd.DataFrame()
+
+            all_records = []
+
+            for series in series_list:
+                series_name = series.get("name", "")
+                data_points = series.get("data", [])
+
+                # Map series name to symbol
+                if "Phú Mỹ" in series_name:
+                    symbol = "ure_vn_dpm"
+                    name = "Ure Phú Mỹ (DPM)"
+                elif "Cà Mau" in series_name:
+                    symbol = "ure_vn_dcm"
+                    name = "Ure Cà Mau (DCM)"
+                else:
+                    continue
+
+                for point in data_points:
+                    if len(point) >= 2:
+                        timestamp_ms = point[0]
+                        value = point[1]
+                        date = datetime.fromtimestamp(timestamp_ms / 1000)
+
+                        all_records.append({
+                            "date": date,
+                            "symbol": symbol,
+                            "category": "commodity",
+                            "name": name,
+                            "value": value,
+                            "unit": "VND/kg",
+                            "source": "wichart",
+                        })
+
+            if not all_records:
+                return pd.DataFrame()
+
+            df = pd.DataFrame(all_records)
+            df["date"] = pd.to_datetime(df["date"])
+
+            logger.info(f"[wichart] Fetched {len(df)} records for Ure VN (DPM + DCM)")
+            return df
+
+        except Exception as e:
+            logger.error(f"[wichart] Error fetching Ure VN: {e}")
+            return pd.DataFrame()
+
     def get_all_macro(self) -> pd.DataFrame:
         """
         Fetch all macro data (exchange rates + interest rates + deposit rates).

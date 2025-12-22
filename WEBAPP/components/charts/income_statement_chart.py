@@ -69,7 +69,7 @@ def render_income_statement_chart(df: pd.DataFrame, height: int = 450):
     fig.update_layout(
         title={
             'text': 'Income Statement Trends',
-            'font': {'size': 18, 'family': 'Inter'},
+            'font': {'size': 18, 'family': 'Space Grotesk, sans-serif'},
             'x': 0
         },
         xaxis_title='Period',
@@ -86,7 +86,7 @@ def render_income_statement_chart(df: pd.DataFrame, height: int = 450):
         ),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Inter', size=12),
+        font=dict(family='DM Sans, sans-serif', size=12),
         margin=dict(l=50, r=50, t=80, b=50)
     )
 
@@ -158,7 +158,7 @@ def render_margins_chart(df: pd.DataFrame, height: int = 400):
     fig.update_layout(
         title={
             'text': 'Profitability Margins',
-            'font': {'size': 18, 'family': 'Inter'},
+            'font': {'size': 18, 'family': 'Space Grotesk, sans-serif'},
             'x': 0
         },
         xaxis_title='Period',
@@ -168,7 +168,7 @@ def render_margins_chart(df: pd.DataFrame, height: int = 400):
         showlegend=True,
         legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
         plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Inter', size=12),
+        font=dict(family='DM Sans, sans-serif', size=12),
         margin=dict(l=50, r=50, t=80, b=50)
     )
 
@@ -306,7 +306,7 @@ def render_roe_roa_chart(df: pd.DataFrame, height: int = 400):
     fig.update_layout(
         title={
             'text': '<b>Return Metrics Trend</b><br><sup style="font-size: 12px; color: #9CA3AF;">ROE vs ROA Performance Analysis</sup>',
-            'font': {'size': 20, 'family': 'Inter, sans-serif', 'color': '#FFFFFF'},
+            'font': {'size': 20, 'family': 'Space Grotesk, sans-serif', 'color': '#FFFFFF'},
             'x': 0,
             'xanchor': 'left'
         },
@@ -315,7 +315,7 @@ def render_roe_roa_chart(df: pd.DataFrame, height: int = 400):
         yaxis=dict(
             title=dict(
                 text='<b>ROE (%)</b>',
-                font=dict(size=13, color=BRAND_BLUE, family='Inter')
+                font=dict(size=13, color=BRAND_BLUE, family='DM Sans, sans-serif')
             ),
             tickformat='.2f',
             tickfont=dict(color=BRAND_BLUE, size=11),
@@ -328,7 +328,7 @@ def render_roe_roa_chart(df: pd.DataFrame, height: int = 400):
         yaxis2=dict(
             title=dict(
                 text='<b>ROA (%)</b>',
-                font=dict(size=13, color=BRAND_TEAL, family='Inter')
+                font=dict(size=13, color=BRAND_TEAL, family='DM Sans, sans-serif')
             ),
             tickformat='.2f',
             tickfont=dict(color=BRAND_TEAL, size=11),
@@ -340,7 +340,7 @@ def render_roe_roa_chart(df: pd.DataFrame, height: int = 400):
         xaxis=dict(
             title=dict(
                 text='<b>Period</b>',
-                font=dict(size=13, color='#E3EBF7', family='Inter')
+                font=dict(size=13, color='#E3EBF7', family='DM Sans, sans-serif')
             ),
             showgrid=True,
             gridcolor='rgba(255, 255, 255, 0.05)',
@@ -367,10 +367,10 @@ def render_roe_roa_chart(df: pd.DataFrame, height: int = 400):
             bgcolor='rgba(255, 255, 255, 0.05)',
             bordercolor='rgba(255, 255, 255, 0.1)',
             borderwidth=1,
-            font=dict(size=12, color='#FFFFFF', family='Inter')
+            font=dict(size=12, color='#FFFFFF', family='DM Sans, sans-serif')
         ),
 
-        font=dict(family='Inter, sans-serif', size=12, color='#E3EBF7'),
+        font=dict(family='DM Sans, sans-serif', size=12, color='#E3EBF7'),
         margin=dict(l=60, r=60, t=80, b=80)
     )
 
@@ -439,7 +439,7 @@ def render_balance_sheet_chart(df: pd.DataFrame, height: int = 400):
     ))
 
     fig.update_layout(
-        title={'text': 'Balance Sheet Structure', 'font': {'size': 18, 'family': 'Inter'}, 'x': 0},
+        title={'text': 'Balance Sheet Structure', 'font': {'size': 18, 'family': 'Space Grotesk, sans-serif'}, 'x': 0},
         barmode='group',
         xaxis_title='Period',
         yaxis_title='VND Billions',
@@ -447,7 +447,7 @@ def render_balance_sheet_chart(df: pd.DataFrame, height: int = 400):
         legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Inter', size=12),
+        font=dict(family='DM Sans, sans-serif', size=12),
         margin=dict(l=50, r=50, t=80, b=50),
         hovermode='x unified'
     )
@@ -523,7 +523,7 @@ def render_cash_flow_chart(df: pd.DataFrame, height: int = 400):
         ))
 
     fig.update_layout(
-        title={'text': 'Cash Flow Analysis', 'font': {'size': 18, 'family': 'Inter'}, 'x': 0},
+        title={'text': 'Cash Flow Analysis', 'font': {'size': 18, 'family': 'Space Grotesk, sans-serif'}, 'x': 0},
         barmode='group',
         xaxis_title='Period',
         yaxis_title='VND Billions',
@@ -531,7 +531,7 @@ def render_cash_flow_chart(df: pd.DataFrame, height: int = 400):
         legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Inter', size=12),
+        font=dict(family='DM Sans, sans-serif', size=12),
         margin=dict(l=50, r=50, t=80, b=50),
         hovermode='x unified'
     )
@@ -589,13 +589,13 @@ def render_peer_comparison_chart(
     ))
 
     fig.update_layout(
-        title={'text': f'Peer Comparison: {metric_label}', 'font': {'size': 18, 'family': 'Inter'}, 'x': 0},
+        title={'text': f'Peer Comparison: {metric_label}', 'font': {'size': 18, 'family': 'Space Grotesk, sans-serif'}, 'x': 0},
         xaxis_title=metric_label,
         yaxis_title='',
         height=height,
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Inter', size=12),
+        font=dict(family='DM Sans, sans-serif', size=12),
         margin=dict(l=80, r=80, t=60, b=50),
         showlegend=False
     )

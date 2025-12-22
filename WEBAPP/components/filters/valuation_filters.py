@@ -42,7 +42,7 @@ TIME_RANGE_OPTIONS = {
 # =============================================================================
 def metric_selector(
     key: str = "metric",
-    default: str = "PE TTM",
+    default: str = "PE",
     include_ev: bool = True,
     location: str = "sidebar"
 ) -> str:
@@ -56,14 +56,14 @@ def metric_selector(
         location: "sidebar" or "main" for placement
 
     Returns:
-        Selected metric string: "PE TTM", "PB", "P/S Ratio", or "EV/EBITDA"
+        Selected metric string: "PE", "PB", "P/S Ratio", or "EV/EBITDA"
 
     Example:
         >>> metric = metric_selector(key="sector_metric")
-        >>> if metric == "PE TTM":
+        >>> if metric == "PE":
         >>>     load_pe_data()
     """
-    options = ["PE TTM", "PB", "P/S Ratio"]
+    options = ["PE", "PB", "P/S Ratio"]
     if include_ev:
         options.append("EV/EBITDA")
 
@@ -90,13 +90,13 @@ def metric_to_column(metric: str) -> str:
     Convert metric display name to column name.
 
     Args:
-        metric: Display name like "PE TTM", "PB", etc.
+        metric: Display name like "PE", "PB", etc.
 
     Returns:
         Column name like "pe_ttm", "pb", etc.
     """
     mapping = {
-        "PE TTM": "pe_ttm",
+        "PE": "pe_ttm",
         "PB": "pb",
         "P/S Ratio": "ps",
         "EV/EBITDA": "ev_ebitda"
@@ -388,7 +388,7 @@ def render_sidebar_filters(
 # =============================================================================
 def metric_radio(
     key: str = "metric_radio",
-    default: str = "PE TTM",
+    default: str = "PE",
     include_ev: bool = True,
     horizontal: bool = True
 ) -> str:
@@ -407,7 +407,7 @@ def metric_radio(
     Example:
         >>> metric = metric_radio(key="sector_metric_radio")
     """
-    options = ["PE TTM", "PB", "P/S Ratio"]
+    options = ["PE", "PB", "P/S Ratio"]
     if include_ev:
         options.append("EV/EBITDA")
 

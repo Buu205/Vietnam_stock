@@ -126,10 +126,10 @@ def get_page_style() -> str:
         min-height: 100vh;
     }
 
-    /* ========== CRITICAL: REMOVE TOP WHITESPACE ========== */
+    /* ========== CHART-FIRST: TIGHTER CONTAINER ========== */
     .block-container {
-        padding: 0.5rem 2.5rem 2rem 2.5rem !important;
-        max-width: 1800px;
+        padding: 0.5rem 1.5rem 1.5rem 1.5rem !important;  /* Reduced from 2.5rem */
+        max-width: 100% !important;  /* Full width, no 1800px cap */
         margin-top: 0 !important;
     }
 
@@ -190,15 +190,15 @@ def get_page_style() -> str:
         text-shadow: 0 0 80px rgba(139, 92, 246, 0.4);
     }
 
-    /* Section Headers - Uppercase Tech Style */
+    /* Section Headers - Compact Tech Style */
     h3 {
-        font-size: 0.8rem !important;
+        font-size: 0.75rem !important;  /* Reduced from 0.8rem */
         font-weight: 600 !important;
         color: var(--text-accent) !important;
         text-transform: uppercase;
-        letter-spacing: 0.12em;
-        margin: 1rem 0 0.75rem 0 !important;
-        padding-bottom: 0.5rem;
+        letter-spacing: 0.1em;  /* Reduced from 0.12em */
+        margin: 0.75rem 0 0.5rem 0 !important;  /* Reduced from 1rem 0 0.75rem */
+        padding-bottom: 0.4rem;  /* Reduced from 0.5rem */
         border-bottom: 1px solid var(--glass-border);
         position: relative;
     }
@@ -231,15 +231,15 @@ def get_page_style() -> str:
     }
 
     /* ============================================================
-       METRIC CARDS - GLASSMORPHISM
+       METRIC CARDS - COMPACT GLASSMORPHISM
        ============================================================ */
     [data-testid="stMetric"] {
         background: var(--glass-bg);
         backdrop-filter: var(--glass-blur);
         -webkit-backdrop-filter: var(--glass-blur);
         border: 1px solid var(--glass-border);
-        border-radius: 16px;
-        padding: 1.5rem 1.75rem !important;
+        border-radius: 12px;  /* Reduced from 16px */
+        padding: 1rem 1.25rem !important;  /* Reduced from 1.5rem 1.75rem */
         transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
         overflow: hidden;
@@ -281,20 +281,20 @@ def get_page_style() -> str:
         opacity: 1;
     }
 
-    /* Metric Label */
+    /* Metric Label - Compact */
     [data-testid="stMetricLabel"] {
         font-family: var(--font-body) !important;
-        font-size: 0.75rem !important;
+        font-size: 0.7rem !important;  /* Reduced from 0.75rem */
         font-weight: 600 !important;
         color: var(--text-secondary) !important;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
+        letter-spacing: 0.08em;  /* Reduced from 0.1em */
     }
 
-    /* Metric Value - Large monospace */
+    /* Metric Value - Compact monospace */
     [data-testid="stMetricValue"] {
         font-family: var(--font-mono) !important;
-        font-size: 2rem !important;
+        font-size: 1.75rem !important;  /* Reduced from 2rem */
         font-weight: 600 !important;
         color: var(--text-white) !important;
         letter-spacing: -0.02em;
@@ -334,6 +334,35 @@ def get_page_style() -> str:
         opacity: 0.3;
     }
 
+    /* ========== COLLAPSED SIDEBAR OPTIMIZATION ========== */
+    [data-testid="stSidebar"][aria-expanded="false"] {
+        width: 0px !important;
+        min-width: 0px !important;
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-testid="stSidebar"][aria-expanded="true"] {
+        width: 280px !important;
+        min-width: 280px !important;
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Sidebar toggle button styling */
+    [data-testid="stSidebar"] button[kind="header"],
+    [data-testid="collapsedControl"] {
+        background: rgba(139, 92, 246, 0.15) !important;
+        border: 1px solid rgba(139, 92, 246, 0.3) !important;
+        color: var(--purple-light) !important;
+        transition: all 0.2s ease !important;
+    }
+
+    [data-testid="stSidebar"] button[kind="header"]:hover,
+    [data-testid="collapsedControl"]:hover {
+        background: rgba(139, 92, 246, 0.25) !important;
+        border-color: var(--purple-primary) !important;
+        box-shadow: var(--glow-purple) !important;
+    }
+
     [data-testid="stSidebar"] .stMarkdown h1,
     [data-testid="stSidebar"] .stMarkdown h2 {
         font-size: 12px !important;
@@ -342,6 +371,62 @@ def get_page_style() -> str:
         text-transform: uppercase;
         letter-spacing: 0.08em;
         margin-bottom: 0.5rem;
+    }
+
+    /* ============================================================
+       STICKY FILTER BAR - TOP HORIZONTAL FILTERS
+       ============================================================ */
+    .filter-bar-container {
+        position: sticky;
+        top: 0;
+        z-index: var(--z-sticky);
+        background: linear-gradient(180deg, var(--bg-void) 0%, var(--bg-deep) 100%);
+        padding: 0.75rem 0;
+        margin: -0.5rem 0 1rem 0;
+        border-bottom: 1px solid var(--glass-border);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* Compact filter inputs in top bar */
+    .filter-bar-container .stSelectbox > div > div,
+    .filter-bar-container .stTextInput > div > div {
+        min-height: 36px !important;
+        font-size: 13px !important;
+        background: var(--bg-elevated) !important;
+        border: 1px solid var(--glass-border) !important;
+    }
+
+    .filter-bar-container .stSelectbox > div > div:hover,
+    .filter-bar-container .stTextInput > div > div:hover {
+        border-color: var(--purple-primary) !important;
+    }
+
+    .filter-bar-container .stButton > button {
+        min-height: 36px !important;
+        padding: 0.4rem 1rem !important;
+        font-size: 13px !important;
+        background: var(--glass-bg) !important;
+        border: 1px solid var(--glass-border) !important;
+        color: var(--text-primary) !important;
+    }
+
+    .filter-bar-container .stButton > button:hover {
+        background: var(--bg-hover) !important;
+        border-color: var(--purple-primary) !important;
+        color: var(--purple-light) !important;
+    }
+
+    /* Pill-style radio buttons for inline filters */
+    .filter-bar-container .stRadio > div {
+        gap: 0.5rem;
+        flex-wrap: nowrap;
+    }
+
+    .filter-bar-container .stRadio > div > label {
+        padding: 0.35rem 0.75rem;
+        font-size: 12px;
+        white-space: nowrap;
     }
 
     /* Sidebar inputs */
@@ -477,24 +562,24 @@ def get_page_style() -> str:
     }
 
     /* ============================================================
-       TABS - GLASS SEGMENTED CONTROL
+       TABS - COMPACT GLASS SEGMENTED CONTROL
        ============================================================ */
     .stTabs [data-baseweb="tab-list"] {
         background: var(--glass-bg);
         backdrop-filter: var(--glass-blur);
-        border-radius: 12px;
-        padding: 5px;
-        gap: 4px;
+        border-radius: 10px;  /* Reduced from 12px */
+        padding: 4px;  /* Reduced from 5px */
+        gap: 3px;  /* Reduced from 4px */
         border: 1px solid var(--glass-border);
     }
 
     .stTabs [data-baseweb="tab"] {
         background: transparent !important;
-        border-radius: 8px;
-        padding: 0.65rem 1.75rem;
+        border-radius: 6px;  /* Reduced from 8px */
+        padding: 0.5rem 1.25rem;  /* Reduced from 0.65rem 1.75rem */
         font-family: var(--font-body);
         font-weight: 500;
-        font-size: 0.875rem;
+        font-size: 0.8rem;  /* Reduced from 0.875rem */
         color: var(--text-secondary);
         transition: all 0.25s ease;
         border: none;
@@ -625,13 +710,13 @@ def get_page_style() -> str:
     }
 
     /* ============================================================
-       CHARTS - GLASS CONTAINER
+       CHARTS - MINIMAL GLASS CONTAINER
        ============================================================ */
     .stPlotlyChart {
         background: var(--glass-bg);
         backdrop-filter: var(--glass-blur);
-        border-radius: 16px;
-        padding: 1rem;
+        border-radius: 12px;  /* Reduced from 16px */
+        padding: 0.5rem;  /* Reduced from 1rem */
         border: 1px solid var(--glass-border);
         box-shadow: var(--glass-shadow);
         width: 100% !important;
@@ -788,7 +873,7 @@ def get_page_style() -> str:
     }
 
     /* ============================================================
-       HORIZONTAL RULE - GRADIENT FADE
+       HORIZONTAL RULE - GRADIENT FADE (COMPACT)
        ============================================================ */
     hr {
         border: none;
@@ -800,7 +885,7 @@ def get_page_style() -> str:
             var(--glass-border) 80%,
             transparent 100%
         );
-        margin: 1rem 0 1.25rem 0;
+        margin: 0.75rem 0 1rem 0;  /* Reduced from 1rem 0 1.25rem */
         opacity: 0.6;
     }
 
@@ -1099,13 +1184,13 @@ def get_chart_layout(title: str = "", height: int = 400) -> dict:
     return {
         'title': {
             'text': title,
-            'font': {'family': 'Space Grotesk, sans-serif', 'size': 16, 'color': '#C4B5FD'},
+            'font': {'family': 'Space Grotesk, sans-serif', 'size': 14, 'color': '#C4B5FD'},
             'x': 0,
             'xanchor': 'left'
         },
         'height': height,
         'autosize': True,
-        'margin': {'l': 50, 'r': 30, 't': 50, 'b': 50, 'pad': 4},
+        'margin': {'l': 40, 'r': 20, 't': 40, 'b': 40, 'pad': 2},  # Reduced margins
         'paper_bgcolor': 'rgba(0,0,0,0)',
         'plot_bgcolor': 'rgba(0,0,0,0)',
         'font': {
@@ -1395,5 +1480,99 @@ def get_table_style() -> str:
     .styled-table tbody tr:hover td.cell-first {
         color: #A78BFA;
     }
+
+    /* ============================================================
+       STATUS BADGES (Valuation Matrix)
+       ============================================================ */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-family: 'DM Sans', -apple-system, sans-serif;
+        font-weight: 600;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    .status-very-cheap { color: #3B82F6 !important; }
+    .status-cheap { color: #22C55E !important; }
+    .status-fair { color: #FFD666 !important; }
+    .status-expensive { color: #FF9F43 !important; }
+    .status-very-expensive { color: #FF6B6B !important; }
+
+    /* Valuation Legend - Colored Dots with Gradients */
+    .valuation-legend {
+        display: flex;
+        gap: 16px;
+        padding: 8px 0;
+        flex-wrap: wrap;
+        font-family: 'DM Sans', -apple-system, sans-serif;
+        font-size: 0.8rem;
+    }
+
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #E2E8F0;
+    }
+
+    .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .legend-dot.very-cheap { background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%); }
+    .legend-dot.cheap { background: linear-gradient(135deg, #4ADE80 0%, #22C55E 100%); }
+    .legend-dot.fair { background: linear-gradient(135deg, #FDE047 0%, #FFD666 100%); }
+    .legend-dot.expensive { background: linear-gradient(135deg, #FDBA74 0%, #FF9F43 100%); }
+    .legend-dot.very-expensive { background: linear-gradient(135deg, #FCA5A5 0%, #FF6B6B 100%); }
     </style>
     '''
+
+
+def render_valuation_legend() -> str:
+    """
+    Render HTML legend for valuation status colors (5-level percentile).
+
+    Returns:
+        HTML string with colored dots and labels for use with st.markdown(html, unsafe_allow_html=True)
+
+    Example:
+        >>> st.markdown(render_valuation_legend(), unsafe_allow_html=True)
+    """
+    return '''
+    <div class="valuation-legend">
+        <span class="legend-item"><span class="legend-dot very-cheap"></span><b>Rất Rẻ</b> (0-10%)</span>
+        <span class="legend-item"><span class="legend-dot cheap"></span><b>Rẻ</b> (10-40%)</span>
+        <span class="legend-item"><span class="legend-dot fair"></span><b>Hợp lý</b> (40-70%)</span>
+        <span class="legend-item"><span class="legend-dot expensive"></span><b>Đắt</b> (70-90%)</span>
+        <span class="legend-item"><span class="legend-dot very-expensive"></span><b>Rất Đắt</b> (90-100%)</span>
+    </div>
+    '''
+
+
+def render_valuation_assessment(z_score: float) -> str:
+    """
+    Render valuation assessment text with colored dot (no emoji).
+
+    Args:
+        z_score: Z-score value
+
+    Returns:
+        HTML string with assessment text
+
+    Example:
+        >>> st.markdown(render_valuation_assessment(-1.5), unsafe_allow_html=True)
+    """
+    if z_score < -1:
+        return '<span class="legend-item"><span class="legend-dot very-cheap"></span><b>Significantly Undervalued</b> - More than 1σ below mean</span>'
+    elif z_score < 0:
+        return '<span class="legend-item"><span class="legend-dot cheap"></span><b>Undervalued</b> - Below historical mean</span>'
+    elif z_score < 1:
+        return '<span class="legend-item"><span class="legend-dot fair"></span><b>Fair Value</b> - Near historical mean</span>'
+    else:
+        return '<span class="legend-item"><span class="legend-dot very-expensive"></span><b>Expensive</b> - More than 1σ above mean</span>'

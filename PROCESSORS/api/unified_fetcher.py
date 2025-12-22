@@ -152,6 +152,18 @@ class UnifiedDataFetcher:
                 )
                 all_dfs.append(std_df)
                 logger.info(f"  ✅ Oil WTI: {len(std_df)} records")
+
+            # Ure VN (DPM + DCM) - Vietnam domestic fertilizer
+            df_ure_vn = self.wichart.get_ure_vn()
+            if not df_ure_vn.empty:
+                all_dfs.append(df_ure_vn)  # Already standardized in wichart client
+                logger.info(f"  ✅ Ure VN (DPM+DCM): {len(df_ure_vn)} records")
+
+            # Gold VN (SJC) - Vietnam domestic gold
+            df_gold_vn = self.wichart.get_gold_vn()
+            if not df_gold_vn.empty:
+                all_dfs.append(df_gold_vn)  # Already standardized in wichart client
+                logger.info(f"  ✅ Gold VN (SJC): {len(df_gold_vn)} records")
         except Exception as e:
             logger.error(f"  ❌ WiChart error: {e}")
 

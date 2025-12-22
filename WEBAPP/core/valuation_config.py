@@ -37,11 +37,20 @@ OUTLIER_RULES = OUTLIER_LIMITS
 # =============================================================================
 # Colors for valuation status based on percentile position
 STATUS_COLORS = {
-    'very_cheap': '#00D4AA',     # Bright teal - P0-10
-    'cheap': '#7FFFD4',          # Light aqua - P10-25
-    'fair': '#FFD666',           # Gold - P25-75
-    'expensive': '#FF9F43',      # Orange - P75-90
+    'very_cheap': '#3B82F6',     # Blue - P0-10
+    'cheap': '#22C55E',          # Lime green - P10-40
+    'fair': '#FFD666',           # Gold - P40-70
+    'expensive': '#FF9F43',      # Orange - P70-90
     'very_expensive': '#FF6B6B'  # Coral red - P90-100
+}
+
+# Gradient colors for beautiful display (start -> end)
+STATUS_GRADIENTS = {
+    'very_cheap': ('#60A5FA', '#3B82F6'),     # Light blue -> Blue
+    'cheap': ('#4ADE80', '#22C55E'),           # Light green -> Green
+    'fair': ('#FDE047', '#FFD666'),            # Light gold -> Gold
+    'expensive': ('#FDBA74', '#FF9F43'),       # Light orange -> Orange
+    'very_expensive': ('#FCA5A5', '#FF6B6B')   # Light coral -> Coral red
 }
 
 # =============================================================================
@@ -80,14 +89,34 @@ MARKER_SIZES = {
 }
 
 # =============================================================================
-# PERCENTILE THRESHOLDS
+# PERCENTILE THRESHOLDS (Mean Reversion Valuation Matrix)
 # =============================================================================
+# Primary metric: Percentile Rank (0-100%)
+# Secondary: Z-Score for reference
 PERCENTILE_THRESHOLDS = {
-    'very_cheap': (0, 10),
-    'cheap': (10, 25),
-    'fair': (25, 75),
-    'expensive': (75, 90),
-    'very_expensive': (90, 100)
+    'very_cheap': (0, 10),      # Z < -1.5
+    'cheap': (10, 40),          # -1.5 ≤ Z < -0.5
+    'fair': (40, 70),           # -0.5 ≤ Z ≤ 0.5
+    'expensive': (70, 90),      # 0.5 < Z ≤ 1.5
+    'very_expensive': (90, 100) # Z > 1.5
+}
+
+# Vietnamese status labels
+STATUS_LABELS = {
+    'very_cheap': 'Rất Rẻ',
+    'cheap': 'Rẻ',
+    'fair': 'Hợp lý',
+    'expensive': 'Đắt',
+    'very_expensive': 'Rất Đắt'
+}
+
+# Status badge colors (CSS-ready hex codes for HTML badges)
+STATUS_BADGE_COLORS = {
+    'very_cheap': '#3B82F6',     # Blue - P0-10
+    'cheap': '#22C55E',          # Lime green - P10-40
+    'fair': '#FFD666',           # Gold - P40-70
+    'expensive': '#FF9F43',      # Orange - P70-90
+    'very_expensive': '#FF6B6B'  # Coral red - P90-100
 }
 
 
@@ -183,6 +212,29 @@ def format_change(value: Optional[float]) -> str:
 # =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
+def get_status_key(percentile: float) -> str:
+    """
+    Get status key based on percentile position (using new thresholds).
+
+    Thresholds:
+        - 0-10%: very_cheap
+        - 10-40%: cheap
+        - 40-70%: fair
+        - 70-90%: expensive
+        - 90-100%: very_expensive
+    """
+    if percentile <= 10:
+        return 'very_cheap'
+    elif percentile <= 40:
+        return 'cheap'
+    elif percentile <= 70:
+        return 'fair'
+    elif percentile <= 90:
+        return 'expensive'
+    else:
+        return 'very_expensive'
+
+
 def get_status_color(percentile: float) -> str:
     """
     Get color based on percentile position.
@@ -192,45 +244,106 @@ def get_status_color(percentile: float) -> str:
 
     Returns:
         Hex color code
-
-    Example:
-        >>> get_status_color(5)
-        '#00D4AA'  # very_cheap
-        >>> get_status_color(50)
-        '#FFD666'  # fair
     """
-    if percentile < 10:
-        return STATUS_COLORS['very_cheap']
-    elif percentile < 25:
-        return STATUS_COLORS['cheap']
-    elif percentile < 75:
-        return STATUS_COLORS['fair']
-    elif percentile < 90:
-        return STATUS_COLORS['expensive']
-    else:
-        return STATUS_COLORS['very_expensive']
+    key = get_status_key(percentile)
+    return STATUS_COLORS[key]
 
 
 def get_percentile_status(percentile: float) -> str:
     """
-    Get status label based on percentile.
+    Get Vietnamese status label based on percentile.
 
     Args:
         percentile: Value from 0-100
 
     Returns:
-        Status string: 'Very Cheap', 'Cheap', 'Fair', 'Expensive', 'Very Expensive'
+        Vietnamese status: 'Rất Rẻ', 'Rẻ', 'Hợp lý', 'Đắt', 'Rất Đắt'
     """
-    if percentile < 10:
-        return 'Very Cheap'
-    elif percentile < 25:
-        return 'Cheap'
-    elif percentile < 75:
-        return 'Fair'
-    elif percentile < 90:
-        return 'Expensive'
-    else:
-        return 'Very Expensive'
+    key = get_status_key(percentile)
+    return STATUS_LABELS[key]
+
+
+def get_status_with_emoji(percentile: float) -> str:
+    """
+    DEPRECATED: Use get_status_label() or render_status_badge() instead.
+    Returns plain text status label (no emoji).
+
+    Args:
+        percentile: Value from 0-100
+
+    Returns:
+        Vietnamese status label (e.g., 'Rất Rẻ', 'Đắt')
+    """
+    key = get_status_key(percentile)
+    return STATUS_LABELS[key]
+
+
+def get_status_label(percentile: float) -> str:
+    """
+    Get plain text status label based on percentile.
+
+    Args:
+        percentile: Value from 0-100
+
+    Returns:
+        Vietnamese status label (e.g., 'Rất Rẻ', 'Đắt')
+    """
+    key = get_status_key(percentile)
+    return STATUS_LABELS[key]
+
+
+def render_status_badge(percentile: float) -> str:
+    """
+    Render HTML status badge with colored dot and text.
+
+    Args:
+        percentile: Value from 0-100
+
+    Returns:
+        HTML string for colored badge: '<span class="status-badge ...">● Label</span>'
+
+    Example:
+        >>> render_status_badge(5)
+        '<span class="status-badge status-very-cheap">● Rất Rẻ</span>'
+    """
+    key = get_status_key(percentile)
+    color = STATUS_BADGE_COLORS[key]
+    label = STATUS_LABELS[key]
+    css_class = key.replace('_', '-')
+    return f'<span class="status-badge status-{css_class}" style="color: {color};">● {label}</span>'
+
+
+def render_status_dot(percentile: float) -> str:
+    """
+    Render HTML colored dot indicator.
+
+    Args:
+        percentile: Value from 0-100
+
+    Returns:
+        HTML string for colored dot: '<span style="color: #...;">●</span>'
+    """
+    key = get_status_key(percentile)
+    color = STATUS_BADGE_COLORS[key]
+    return f'<span style="color: {color}; font-size: 1.2em;">●</span>'
+
+
+def get_valuation_status(percentile: float) -> Tuple[str, str, str]:
+    """
+    Get complete valuation status info.
+
+    Args:
+        percentile: Value from 0-100
+
+    Returns:
+        Tuple of (status_key, status_label, status_color)
+
+    Example:
+        >>> get_valuation_status(5)
+        ('very_cheap', 'Rất Rẻ', '#00D4AA')
+    """
+    key = get_status_key(percentile)
+    return (key, STATUS_LABELS[key], STATUS_COLORS[key])
 
 
 def filter_outliers(series: pd.Series, metric: str) -> pd.Series:
