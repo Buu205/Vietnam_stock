@@ -1,0 +1,1 @@
+"""FX & Commodities dashboard module."""
