@@ -439,8 +439,14 @@ with tab2:
             sector_display['Avg Upside'] = sector_df['avg_upside_pct'].apply(format_upside)
             sector_display['Avg ROE 25F'] = sector_df['avg_roe_2025f'].apply(lambda x: format_number(x * 100 if pd.notna(x) else None, 1, '%'))
 
-            # Render styled table
-            st.markdown(render_styled_table(sector_display, highlight_first_col=True), unsafe_allow_html=True)
+            # Add Total Earning Growth columns
+            if 'total_earning_growth_2025' in sector_df.columns:
+                sector_display['Earn Gr 25'] = sector_df['total_earning_growth_2025'].apply(format_growth)
+            if 'total_earning_growth_2026' in sector_df.columns:
+                sector_display['Earn Gr 26'] = sector_df['total_earning_growth_2026'].apply(format_growth)
+
+            # Render styled table with BSC Universal row highlighted
+            st.markdown(render_styled_table(sector_display, highlight_first_col=True, highlight_row='BSC Universal'), unsafe_allow_html=True)
 
         with sector_tab2:
             st.markdown("#### Revenue & Profit Growth by Sector (YoY)")
@@ -458,25 +464,34 @@ with tab2:
             if 'avg_rev_growth_2026' in sector_df.columns:
                 sector_growth['Rev Gr 26F'] = sector_df['avg_rev_growth_2026'].apply(format_growth)
 
-            # Profit growth columns
+            # Profit growth columns (average)
             if 'avg_npatmi_growth_2025' in sector_df.columns:
                 sector_growth['Profit Gr 25F'] = sector_df['avg_npatmi_growth_2025'].apply(format_growth)
             if 'avg_npatmi_growth_2026' in sector_df.columns:
                 sector_growth['Profit Gr 26F'] = sector_df['avg_npatmi_growth_2026'].apply(format_growth)
 
+            # Total Earning Growth columns (aggregated sector total)
+            if 'total_earning_growth_2025' in sector_df.columns:
+                sector_growth['Tot Earn Gr 25'] = sector_df['total_earning_growth_2025'].apply(format_growth)
+            if 'total_earning_growth_2026' in sector_df.columns:
+                sector_growth['Tot Earn Gr 26'] = sector_df['total_earning_growth_2026'].apply(format_growth)
+
             sector_growth['Avg ROE 25F'] = sector_df['avg_roe_2025f'].apply(lambda x: format_number(x * 100 if pd.notna(x) else None, 1, '%'))
             sector_growth['Avg Upside'] = sector_df['avg_upside_pct'].apply(format_upside)
 
-            # Render styled table
-            st.markdown(render_styled_table(sector_growth, highlight_first_col=True), unsafe_allow_html=True)
+            # Render styled table with BSC Universal highlighted
+            st.markdown(render_styled_table(sector_growth, highlight_first_col=True, highlight_row='BSC Universal'), unsafe_allow_html=True)
 
             # Legend
             st.markdown("""
             **Giải thích:**
-            - **Rev Gr 25F**: Tăng trưởng doanh thu 2024 → 2025 (forecast)
-            - **Rev Gr 26F**: Tăng trưởng doanh thu 2025F → 2026F
-            - **Profit Gr 25F**: Tăng trưởng LNST 2024 → 2025 (forecast)
-            - **Profit Gr 26F**: Tăng trưởng LNST 2025F → 2026F
+            - **Rev Gr 25F**: Tăng trưởng doanh thu TB 2024 → 2025 (forecast)
+            - **Rev Gr 26F**: Tăng trưởng doanh thu TB 2025F → 2026F
+            - **Profit Gr 25F**: Tăng trưởng LNST TB 2024 → 2025 (forecast)
+            - **Profit Gr 26F**: Tăng trưởng LNST TB 2025F → 2026F
+            - **Tot Earn Gr 25**: Tổng tăng trưởng lợi nhuận ngành 2024 → 2025
+            - **Tot Earn Gr 26**: Tổng tăng trưởng lợi nhuận ngành 2025F → 2026F
+            - **BSC Universal**: Tổng hợp toàn bộ 92+ mã trong BSC coverage
             """)
 
         # Summary metrics

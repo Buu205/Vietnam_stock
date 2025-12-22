@@ -1314,13 +1314,14 @@ BAND_COLORS = {
 # STYLED HTML TABLE FUNCTION
 # ============================================================
 
-def render_styled_table(df, highlight_first_col: bool = True) -> str:
+def render_styled_table(df, highlight_first_col: bool = True, highlight_row: str = None) -> str:
     """
     Render a pandas DataFrame as a styled HTML table.
 
     Args:
         df: pandas DataFrame to render
         highlight_first_col: Whether to highlight the first column
+        highlight_row: Value in first column to highlight as special row (e.g., 'BSC Universal')
 
     Returns:
         HTML string to be used with st.markdown(html, unsafe_allow_html=True)
@@ -1342,8 +1343,14 @@ def render_styled_table(df, highlight_first_col: bool = True) -> str:
             <tbody>
     '''
 
+    # Get first column name for highlight row check
+    first_col = df.columns[0] if len(df.columns) > 0 else None
+
     for idx, row in df.iterrows():
-        html += '<tr>'
+        # Check if this row should be highlighted
+        is_highlight_row = highlight_row and first_col and str(row[first_col]) == highlight_row
+        row_style = ' style="background: rgba(0, 201, 173, 0.15); border-top: 2px solid #00C9AD; border-bottom: 2px solid #00C9AD; font-weight: 600;"' if is_highlight_row else ''
+        html += f'<tr{row_style}>'
         for i, (col, val) in enumerate(row.items()):
             cell_class = "cell-first" if i == 0 and highlight_first_col else "cell"
             html += f'<td class="{cell_class}">{val}</td>'
