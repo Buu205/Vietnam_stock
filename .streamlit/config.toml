@@ -1,0 +1,15 @@
+[theme]
+# Crypto Terminal Theme - Purple/Cyan Glassmorphism
+primaryColor = "#8B5CF6"
+backgroundColor = "#0F0B1E"
+secondaryBackgroundColor = "#1A1625"
+textColor = "#E2E8F0"
+font = "sans serif"
+
+[server]
+headless = true
+port = 8501
+
+[browser]
+gatherUsageStats = false
+
