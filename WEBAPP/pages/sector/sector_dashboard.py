@@ -110,14 +110,15 @@ def load_all_valuation():
 
 @st.cache_data(ttl=3600)
 def load_stock_valuation(ticker: str, limit: int = 1000):
-    """Load individual stock valuation history (PE, PB) directly from parquet files"""
+    """Load individual stock valuation history (PE, PB, PS, EV/EBITDA) from parquet files"""
     from pathlib import Path
 
     data_path = Path(__file__).resolve().parents[3] / "DATA" / "processed" / "valuation"
 
-    # Load PE data
     pe_file = data_path / "pe" / "historical" / "historical_pe.parquet"
     pb_file = data_path / "pb" / "historical" / "historical_pb.parquet"
+    ps_file = data_path / "ps" / "historical" / "historical_ps.parquet"
+    ev_file = data_path / "ev_ebitda" / "historical" / "historical_ev_ebitda.parquet"
 
     result = pd.DataFrame()
 
@@ -130,7 +131,6 @@ def load_stock_valuation(ticker: str, limit: int = 1000):
                 pe_ticker = pe_ticker.sort_values('date')
                 if limit:
                     pe_ticker = pe_ticker.tail(limit)
-                # Rename pe_ratio to pe_ttm for consistency
                 if 'pe_ratio' in pe_ticker.columns:
                     pe_ticker['pe_ttm'] = pe_ticker['pe_ratio']
                 result = pe_ticker
@@ -144,19 +144,50 @@ def load_stock_valuation(ticker: str, limit: int = 1000):
                 pb_ticker = pb_ticker.sort_values('date')
                 if limit:
                     pb_ticker = pb_ticker.tail(limit)
-                # Rename pb_ratio to pb for consistency
                 if 'pb_ratio' in pb_ticker.columns:
                     pb_ticker['pb'] = pb_ticker['pb_ratio']
                 elif 'pb' not in pb_ticker.columns and 'close_price' in pb_ticker.columns and 'book_value' in pb_ticker.columns:
                     pb_ticker['pb'] = pb_ticker['close_price'] / pb_ticker['book_value']
 
-                # Merge with result
                 if result.empty:
                     result = pb_ticker
                 else:
-                    # Merge PB into result
                     pb_cols = ['date', 'symbol', 'pb'] if 'pb' in pb_ticker.columns else ['date', 'symbol']
                     result = result.merge(pb_ticker[pb_cols], on=['date', 'symbol'], how='outer')
+
+    # Load P/S
+    if ps_file.exists():
+        ps_df = pd.read_parquet(ps_file)
+        if 'symbol' in ps_df.columns:
+            ps_ticker = ps_df[ps_df['symbol'] == ticker].copy()
+            if not ps_ticker.empty:
+                ps_ticker = ps_ticker.sort_values('date')
+                if limit:
+                    ps_ticker = ps_ticker.tail(limit)
+                if 'ps_ratio' in ps_ticker.columns:
+                    ps_ticker['ps'] = ps_ticker['ps_ratio']
+
+                if result.empty:
+                    result = ps_ticker
+                else:
+                    ps_cols = ['date', 'symbol', 'ps'] if 'ps' in ps_ticker.columns else ['date', 'symbol']
+                    result = result.merge(ps_ticker[ps_cols], on=['date', 'symbol'], how='outer')
+
+    # Load EV/EBITDA
+    if ev_file.exists():
+        ev_df = pd.read_parquet(ev_file)
+        if 'symbol' in ev_df.columns:
+            ev_ticker = ev_df[ev_df['symbol'] == ticker].copy()
+            if not ev_ticker.empty:
+                ev_ticker = ev_ticker.sort_values('date')
+                if limit:
+                    ev_ticker = ev_ticker.tail(limit)
+
+                if result.empty:
+                    result = ev_ticker
+                else:
+                    ev_cols = ['date', 'symbol', 'ev_ebitda'] if 'ev_ebitda' in ev_ticker.columns else ['date', 'symbol']
+                    result = result.merge(ev_ticker[ev_cols], on=['date', 'symbol'], how='outer')
 
     return result.sort_values('date') if not result.empty else pd.DataFrame()
 
