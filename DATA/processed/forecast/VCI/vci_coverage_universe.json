@@ -1,0 +1,3654 @@
+[
+  {
+    "ticker": "ACB",
+    "sector": "Banks",
+    "projectedTsrPercentage": 0.3933054393,
+    "rating": "BUY",
+    "marketCapVnd": 122766092716100.0,
+    "marketCapUsd": 4674132599.128118,
+    "targetPrice": 33300.0,
+    "numberOfSharesMktCap": 5136656599.0,
+    "pe": {
+      "2025F": 6.9618409554,
+      "2026F": 5.9275793651
+    },
+    "pb": {
+      "2025F": 1.2115843659,
+      "2026F": 1.0036510298
+    },
+    "roe": {
+      "2025F": 0.201,
+      "2026F": 0.208
+    },
+    "npatmiGrowth": {
+      "2025F": 0.058705053,
+      "2026F": 0.1746866607
+    },
+    "npatmi": {
+      "2025F": 17872000000000.0,
+      "2026F": 20994000000000.0
+    },
+    "analyst": "Nga Ho",
+    "adtvVnd": {
+      "3M": 276333870005.38464,
+      "1M": 216343532200.0,
+      "6M": 374372640454.26355
+    },
+    "adtvUsd": {
+      "6M": 14253669.920208016,
+      "3M": 10520992.575876057,
+      "1M": 8236951.54007234
+    },
+    "maximumForeignPercentage": 0.01343186,
+    "tpUpdatedTime": "11-Nov-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "BID",
+    "sector": "Banks",
+    "projectedTsrPercentage": 0.2228116711,
+    "rating": "BUY",
+    "marketCapVnd": 264705344270900.0,
+    "marketCapUsd": 10078254112.731771,
+    "targetPrice": 46100.0,
+    "numberOfSharesMktCap": 7021361917.0,
+    "pe": {
+      "2025F": 11.5396388124,
+      "2026F": 10.9624890957
+    },
+    "pb": {
+      "2025F": 1.5890970735,
+      "2026F": 1.3762100854
+    },
+    "roe": {
+      "2025F": 0.1721,
+      "2026F": 0.1555
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0507478123,
+      "2026F": 0.0659718805
+    },
+    "npatmi": {
+      "2025F": 26415800000000.0,
+      "2026F": 28158500000000.0
+    },
+    "analyst": "Quan Vu",
+    "adtvVnd": {
+      "3M": 110412320796.92308,
+      "1M": 68721415006.81818,
+      "6M": 234586294758.91473
+    },
+    "adtvUsd": {
+      "6M": 8931517.028704159,
+      "3M": 4203781.48855599,
+      "1M": 2616463.5449007493
+    },
+    "maximumForeignPercentage": 0.12889813,
+    "tpUpdatedTime": "17-Nov-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "CTG",
+    "sector": "Banks",
+    "projectedTsrPercentage": 0.8867924528,
+    "rating": "BUY",
+    "marketCapVnd": 267572207000150.0,
+    "marketCapUsd": 10187405558.734056,
+    "targetPrice": 65000.0,
+    "numberOfSharesMktCap": 7766972627.0,
+    "pe": {
+      "2025F": 6.9776391477,
+      "2026F": 5.9022066886
+    },
+    "pb": {
+      "2025F": 1.0405140002,
+      "2026F": 0.8662378078
+    },
+    "roe": {
+      "2025F": 0.1879,
+      "2026F": 0.1895
+    },
+    "npatmiGrowth": {
+      "2025F": 0.1940650711,
+      "2026F": 0.1821053953
+    },
+    "npatmi": {
+      "2025F": 30259400000000.0,
+      "2026F": 35769800000000.0
+    },
+    "analyst": "Quan Vu",
+    "adtvVnd": {
+      "3M": 428251518720.7692,
+      "1M": 357365892843.1818,
+      "6M": 469145025471.3178
+    },
+    "adtvUsd": {
+      "6M": 17861984.598184574,
+      "3M": 16305026.412365094,
+      "1M": 13606163.824221656
+    },
+    "maximumForeignPercentage": 0.04374275,
+    "tpUpdatedTime": "17-Nov-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "MBB",
+    "sector": "Banks",
+    "projectedTsrPercentage": 0.3360323887,
+    "rating": "BUY",
+    "marketCapVnd": 198958497752300.0,
+    "marketCapUsd": 7575042747.089282,
+    "targetPrice": 32500.0,
+    "numberOfSharesMktCap": 8054999909.0,
+    "pe": {
+      "2025F": 7.9549114332,
+      "2026F": 6.251581878
+    },
+    "pb": {
+      "2025F": 1.4506031927,
+      "2026F": 1.1773827689
+    },
+    "roe": {
+      "2025F": 0.2026,
+      "2026F": 0.2131
+    },
+    "npatmiGrowth": {
+      "2025F": 0.1048422727,
+      "2026F": 0.2727636262
+    },
+    "npatmi": {
+      "2025F": 25007000000000.0,
+      "2026F": 31828000000000.0
+    },
+    "analyst": "Ngoc Huynh",
+    "adtvVnd": {
+      "3M": 673608278932.3077,
+      "1M": 564275974422.7273,
+      "6M": 809151608616.279
+    },
+    "adtvUsd": {
+      "6M": 30807219.060204796,
+      "3M": 25646612.56167172,
+      "1M": 21483951.05359708
+    },
+    "maximumForeignPercentage": 0.02125966,
+    "tpUpdatedTime": "24-Nov-25",
+    "dividendPerShareTsr": 500.0
+  },
+  {
+    "ticker": "STB",
+    "sector": "Banks",
+    "projectedTsrPercentage": 0.1306122449,
+    "rating": "O-PF",
+    "marketCapVnd": 92375570084000.0,
+    "marketCapUsd": 3517059588.197221,
+    "targetPrice": 55400.0,
+    "numberOfSharesMktCap": 1885215716.0,
+    "pe": {
+      "2025F": 9.0050354688,
+      "2026F": 7.8911345519
+    },
+    "pb": {
+      "2025F": 1.3929866106,
+      "2026F": 1.1656026512
+    },
+    "roe": {
+      "2025F": 0.189,
+      "2026F": 0.182
+    },
+    "npatmiGrowth": {
+      "2025F": 0.1236778191,
+      "2026F": 0.1411544671
+    },
+    "npatmi": {
+      "2025F": 11335100000000.0,
+      "2026F": 12935100000000.0
+    },
+    "analyst": "Nga Ho",
+    "adtvVnd": {
+      "3M": 414092086520.7692,
+      "1M": 305334902875.0,
+      "6M": 519222974036.4341
+    },
+    "adtvUsd": {
+      "6M": 19768626.46245704,
+      "3M": 15765927.527918112,
+      "1M": 11625162.87359604
+    },
+    "maximumForeignPercentage": 0.15780878,
+    "tpUpdatedTime": "08-Dec-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "VCB",
+    "sector": "Banks",
+    "projectedTsrPercentage": 0.2921739131,
+    "rating": "BUY",
+    "marketCapVnd": 480451317905000.0,
+    "marketCapUsd": 18292454517.608986,
+    "targetPrice": 73500.0,
+    "numberOfSharesMktCap": 8355675094.0,
+    "pe": {
+      "2025F": 14.8234080949,
+      "2026F": 13.2311657232
+    },
+    "pb": {
+      "2025F": 2.076978745,
+      "2026F": 1.8232679032
+    },
+    "roe": {
+      "2025F": 0.1654,
+      "2026F": 0.1565
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0409944608,
+      "2026F": 0.1566884262
+    },
+    "npatmi": {
+      "2025F": 35218300000000.0,
+      "2026F": 40736600000000.0
+    },
+    "analyst": "Quan Vu",
+    "adtvVnd": {
+      "3M": 239309317307.69232,
+      "1M": 202363625286.36365,
+      "6M": 392730768022.4806
+    },
+    "adtvUsd": {
+      "6M": 14952627.75642416,
+      "3M": 9111338.94185008,
+      "1M": 7704687.808351938
+    },
+    "maximumForeignPercentage": 0.08823618,
+    "tpUpdatedTime": "10-Nov-25",
+    "dividendPerShareTsr": 800.0
+  },
+  {
+    "ticker": "VPB",
+    "sector": "Banks",
+    "projectedTsrPercentage": 0.3532513181,
+    "rating": "BUY",
+    "marketCapVnd": 225720126448450.0,
+    "marketCapUsd": 8593951130.723396,
+    "targetPrice": 38000.0,
+    "numberOfSharesMktCap": 7933923601.0,
+    "pe": {
+      "2025F": 10.1173541963,
+      "2026F": 7.401144641
+    },
+    "pb": {
+      "2025F": 1.3745788028,
+      "2026F": 1.1592804081
+    },
+    "roe": {
+      "2025F": 0.143,
+      "2026F": 0.1719
+    },
+    "npatmiGrowth": {
+      "2025F": 0.4137144306,
+      "2026F": 0.3671493253
+    },
+    "npatmi": {
+      "2025F": 22307000000000.0,
+      "2026F": 30497000000000.0
+    },
+    "analyst": "Ngoc Huynh",
+    "adtvVnd": {
+      "3M": 740660498955.3846,
+      "1M": 437050155343.1818,
+      "6M": 985977101360.0775
+    },
+    "adtvUsd": {
+      "6M": 37539581.243482865,
+      "3M": 28199524.041705105,
+      "1M": 16640021.143848537
+    },
+    "maximumForeignPercentage": 0.05549739,
+    "tpUpdatedTime": "19-Nov-25",
+    "dividendPerShareTsr": 500.0
+  },
+  {
+    "ticker": "TCB",
+    "sector": "Banks",
+    "projectedTsrPercentage": 0.369047619,
+    "rating": "BUY",
+    "marketCapVnd": 238097677910400.0,
+    "marketCapUsd": 9065207611.28498,
+    "targetPrice": 44800.0,
+    "numberOfSharesMktCap": 7086240414.0,
+    "pe": {
+      "2025F": 9.2511013216,
+      "2026F": 7.7099586966
+    },
+    "pb": {
+      "2025F": 1.3890466088,
+      "2026F": 1.1780947634
+    },
+    "roe": {
+      "2025F": 0.1663,
+      "2026F": 0.1763
+    },
+    "npatmiGrowth": {
+      "2025F": 0.1961157831,
+      "2026F": 0.2016003729
+    },
+    "npatmi": {
+      "2025F": 25744000000000.0,
+      "2026F": 30934000000000.0
+    },
+    "analyst": "Quan Vu",
+    "adtvVnd": {
+      "3M": 505982982056.9231,
+      "1M": 324882733663.63635,
+      "6M": 717091740794.9612
+    },
+    "adtvUsd": {
+      "6M": 27302179.356366314,
+      "3M": 19264533.86852934,
+      "1M": 12369416.853745911
+    },
+    "maximumForeignPercentage": 2.804e-05,
+    "tpUpdatedTime": "07-Nov-25",
+    "dividendPerShareTsr": 1200.0
+  },
+  {
+    "ticker": "TPB",
+    "sector": "Banks",
+    "projectedTsrPercentage": -0.0207715134,
+    "rating": "BUY",
+    "marketCapVnd": 46742689810050.0,
+    "marketCapUsd": 1779656950.6967447,
+    "targetPrice": 16500.0,
+    "numberOfSharesMktCap": 2774046873.0,
+    "pe": {
+      "2025F": 6.7424272738,
+      "2026F": 6.1579505171
+    },
+    "pb": {
+      "2025F": 1.0069264831,
+      "2026F": 0.8651509419
+    },
+    "roe": {
+      "2025F": 0.1618,
+      "2026F": 0.1515
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0894856428,
+      "2026F": 0.0949056233
+    },
+    "npatmi": {
+      "2025F": 6617100000000.0,
+      "2026F": 7245100000000.0
+    },
+    "analyst": "Nga Ho",
+    "adtvVnd": {
+      "3M": 220004639870.76923,
+      "1M": 126021249768.18182,
+      "6M": 424719618663.5659
+    },
+    "adtvUsd": {
+      "6M": 16170554.679747418,
+      "3M": 8376342.6564161135,
+      "1M": 4798067.761971514
+    },
+    "maximumForeignPercentage": 0.05340246,
+    "tpUpdatedTime": "27-May-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "HDB",
+    "sector": "Banks",
+    "projectedTsrPercentage": 0.0481695569,
+    "rating": "O-PF",
+    "marketCapVnd": 129886922528100.0,
+    "marketCapUsd": 4945247383.51799,
+    "targetPrice": 26200.0,
+    "numberOfSharesMktCap": 5005276398.0,
+    "pe": {
+      "2025F": 5.6120242215,
+      "2026F": 4.7702205882
+    },
+    "pb": {
+      "2025F": 1.2836879038,
+      "2026F": 1.0525519181
+    },
+    "roe": {
+      "2025F": 0.266,
+      "2026F": 0.26
+    },
+    "npatmiGrowth": {
+      "2025F": 0.2662383452,
+      "2026F": 0.2376709362
+    },
+    "npatmi": {
+      "2025F": 16161000000000.0,
+      "2026F": 20002000000000.0
+    },
+    "analyst": "Ngoc Huynh",
+    "adtvVnd": {
+      "3M": 536319704279.2308,
+      "1M": 493105167411.36365,
+      "6M": 555064844455.0388
+    },
+    "adtvUsd": {
+      "6M": 21133251.26423144,
+      "3M": 20419558.510536104,
+      "1M": 18774230.626741428
+    },
+    "maximumForeignPercentage": 0.03351798,
+    "tpUpdatedTime": "08-Sep-25",
+    "dividendPerShareTsr": 1000.0
+  },
+  {
+    "ticker": "VIB",
+    "sector": "Banks",
+    "projectedTsrPercentage": 0.0511363636,
+    "rating": "O-PF",
+    "marketCapVnd": 59910500496000.0,
+    "marketCapUsd": 2281001351.4563107,
+    "targetPrice": 18500.0,
+    "numberOfSharesMktCap": 3404005710.0,
+    "pe": {
+      "2025F": 7.7277716795,
+      "2026F": 6.7396798652
+    },
+    "pb": {
+      "2025F": 1.2076708027,
+      "2026F": 1.0223254216
+    },
+    "roe": {
+      "2025F": 0.176,
+      "2026F": 0.178
+    },
+    "npatmiGrowth": {
+      "2025F": 0.1357792864,
+      "2026F": 0.146508966
+    },
+    "npatmi": {
+      "2025F": 7863000000000.0,
+      "2026F": 9015000000000.0
+    },
+    "analyst": "Nga Ho",
+    "adtvVnd": {
+      "3M": 132203437984.61539,
+      "1M": 89703897122.72726,
+      "6M": 239524916944.57364
+    },
+    "adtvUsd": {
+      "6M": 9119547.57070526,
+      "3M": 5033445.192637174,
+      "1M": 3415339.6962774512
+    },
+    "maximumForeignPercentage": 1.55e-06,
+    "tpUpdatedTime": "23-May-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "LPB",
+    "sector": "Banks",
+    "projectedTsrPercentage": -0.0735632184,
+    "rating": "U-PF",
+    "marketCapVnd": 129946771350000.0,
+    "marketCapUsd": 4947526036.550543,
+    "targetPrice": 39300.0,
+    "numberOfSharesMktCap": 2987282100.0,
+    "pe": {
+      "2025F": 12.839433294,
+      "2026F": 12.0066243445
+    },
+    "pb": {
+      "2025F": 2.4058959351,
+      "2026F": 1.986231534
+    },
+    "roe": {
+      "2025F": 0.2389,
+      "2026F": 0.2286
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0974703988,
+      "2026F": 0.0695980653
+    },
+    "npatmi": {
+      "2025F": 10668400000000.0,
+      "2026F": 11410900000000.0
+    },
+    "analyst": "Quan Vu",
+    "adtvVnd": {
+      "3M": 114745452118.46153,
+      "1M": 74451564334.09091,
+      "6M": 131515561791.86046
+    },
+    "adtvUsd": {
+      "6M": 5007255.350917969,
+      "3M": 4368758.8851498775,
+      "1M": 2834630.281138051
+    },
+    "maximumForeignPercentage": 0.04083627,
+    "tpUpdatedTime": "18-Nov-25",
+    "dividendPerShareTsr": 1000.0
+  },
+  {
+    "ticker": "BVH",
+    "sector": "Insurance",
+    "projectedTsrPercentage": 0.0703703704,
+    "rating": "O-PF",
+    "marketCapVnd": 40085429256000.0,
+    "marketCapUsd": 1526191862.0217018,
+    "targetPrice": 56900.0,
+    "numberOfSharesMktCap": 742322764.0,
+    "pe": {
+      "2025F": 15.2155536771,
+      "2026F": 12.8205128205
+    },
+    "pb": {
+      "2025F": 1.5848083762,
+      "2026F": 1.4070523764
+    },
+    "roe": {
+      "2025F": 0.113,
+      "2026F": 0.122
+    },
+    "npatmiGrowth": {
+      "2025F": 0.2315789474,
+      "2026F": 0.1869193608
+    },
+    "npatmi": {
+      "2025F": 2691000000000.0,
+      "2026F": 3194000000000.0
+    },
+    "analyst": "Ngoc Huynh",
+    "adtvVnd": {
+      "3M": 22034384159.23077,
+      "1M": 23303109831.81818,
+      "6M": 31107964308.52713
+    },
+    "adtvUsd": {
+      "6M": 1184388.5135551924,
+      "3M": 838925.7246994392,
+      "1M": 887230.5285291522
+    },
+    "maximumForeignPercentage": 0.22240905,
+    "tpUpdatedTime": "26-May-25",
+    "dividendPerShareTsr": 900.0
+  },
+  {
+    "ticker": "BMI",
+    "sector": "Insurance",
+    "projectedTsrPercentage": 0.3258426966,
+    "rating": "BUY",
+    "marketCapVnd": 2679747742800.0,
+    "marketCapUsd": 102027326.96744718,
+    "targetPrice": 23100.0,
+    "numberOfSharesMktCap": 150547626.0,
+    "pe": {
+      "2025F": 8.2259771986,
+      "2026F": 7.0714035694
+    },
+    "pb": {
+      "2025F": 0.84802339,
+      "2026F": 0.7442090091
+    },
+    "roe": {
+      "2025F": 0.126,
+      "2026F": 0.133
+    },
+    "npatmiGrowth": {
+      "2025F": 0.1043478261,
+      "2026F": 0.1601049869
+    },
+    "npatmi": {
+      "2025F": 381000000000.0,
+      "2026F": 442000000000.0
+    },
+    "analyst": "Ngoc Huynh",
+    "adtvVnd": {
+      "3M": 8746778819.230768,
+      "1M": 6807797604.545454,
+      "6M": 9646599283.72093
+    },
+    "adtvUsd": {
+      "6M": 367279.6224527291,
+      "3M": 333020.3243567778,
+      "1M": 259196.5583303047
+    },
+    "maximumForeignPercentage": 0.20428113,
+    "tpUpdatedTime": "12-Apr-24",
+    "dividendPerShareTsr": 500.0
+  },
+  {
+    "ticker": "SSI",
+    "sector": "Brokerage",
+    "projectedTsrPercentage": 0.3571428572,
+    "rating": "O-PF",
+    "marketCapVnd": 76725810761600.0,
+    "marketCapUsd": 2921218761.1498194,
+    "targetPrice": 40800.0,
+    "numberOfSharesMktCap": 2491097752.0,
+    "pe": {
+      "2025F": 16.0416666667,
+      "2026F": 12.3645122441
+    },
+    "pb": {
+      "2025F": 1.9377158619,
+      "2026F": 1.7023746824
+    },
+    "roe": {
+      "2025F": 0.156,
+      "2026F": 0.1826
+    },
+    "npatmiGrowth": {
+      "2025F": 0.691147625,
+      "2026F": 0.3590753977
+    },
+    "npatmi": {
+      "2025F": 4621230000000.0,
+      "2026F": 6280600000000.0
+    },
+    "analyst": "Nga Ho",
+    "adtvVnd": {
+      "3M": 1207271092870.0,
+      "1M": 832935749313.6364,
+      "6M": 1497568197686.8218
+    },
+    "adtvUsd": {
+      "6M": 57017635.54870824,
+      "3M": 45965014.00609176,
+      "1M": 31712764.10864787
+    },
+    "maximumForeignPercentage": 0.67336912,
+    "tpUpdatedTime": "27-Aug-25",
+    "dividendPerShareTsr": 1000.0
+  },
+  {
+    "ticker": "VEA",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.0476470588,
+    "rating": "M-PF",
+    "marketCapVnd": 45179200000000.0,
+    "marketCapUsd": 1720129449.8381877,
+    "targetPrice": 30800.0,
+    "numberOfSharesMktCap": 1328800000.0,
+    "pe": {
+      "2025F": 5.9181897302,
+      "2026F": 6.3634662175
+    },
+    "pb": {
+      "2025F": 1.3401220281,
+      "2026F": 1.1053623525
+    },
+    "roe": {
+      "2025F": 0.287,
+      "2026F": 0.257
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0440157587,
+      "2026F": -0.0683148992
+    },
+    "npatmi": {
+      "2025F": 7685000000000.0,
+      "2026F": 7160000000000.0
+    },
+    "analyst": "Nguyen Nguyen",
+    "adtvVnd": {
+      "3M": 19164321449.23077,
+      "1M": 10678857736.363636,
+      "6M": 23665664263.56589
+    },
+    "adtvUsd": {
+      "6M": 901034.2380950272,
+      "3M": 729652.4442882456,
+      "1M": 406581.2958828721
+    },
+    "maximumForeignPercentage": 0.47180802,
+    "tpUpdatedTime": "28-Oct-25",
+    "dividendPerShareTsr": 4820.0
+  },
+  {
+    "ticker": "FPT",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.2662406816,
+    "rating": "BUY",
+    "marketCapVnd": 159959318661900.0,
+    "marketCapUsd": 6090208210.999429,
+    "targetPrice": 116600.0,
+    "numberOfSharesMktCap": 1703507121.0,
+    "pe": {
+      "2025F": 17.4762702401,
+      "2026F": 15.2410323
+    },
+    "pb": {
+      "2025F": 4.1082664419,
+      "2026F": 3.2508655314
+    },
+    "roe": {
+      "2025F": 0.271,
+      "2026F": 0.256
+    },
+    "npatmiGrowth": {
+      "2025F": 0.1649484536,
+      "2026F": 0.1538293456
+    },
+    "npatmi": {
+      "2025F": 9153000000000.0,
+      "2026F": 10561000000000.0
+    },
+    "analyst": "Ngan Ly",
+    "adtvVnd": {
+      "3M": 837074995743.0769,
+      "1M": 528725242513.63635,
+      "6M": 931180243215.5039
+    },
+    "adtvUsd": {
+      "6M": 35453274.061127126,
+      "3M": 31870359.632327314,
+      "1M": 20130410.908571724
+    },
+    "maximumForeignPercentage": 0.09877877,
+    "tpUpdatedTime": "22-Oct-25",
+    "dividendPerShareTsr": 2300.0
+  },
+  {
+    "ticker": "DGW",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.1432129514,
+    "rating": "M-PF",
+    "marketCapVnd": 8879923305000.0,
+    "marketCapUsd": 338089598.5151342,
+    "targetPrice": 45400.0,
+    "numberOfSharesMktCap": 221168700.0,
+    "pe": {
+      "2025F": 16.7570951586,
+      "2026F": 14.3239386372
+    },
+    "pb": {
+      "2025F": 2.5352873847,
+      "2026F": 2.1728322364
+    },
+    "roe": {
+      "2025F": 0.166,
+      "2026F": 0.172
+    },
+    "npatmiGrowth": {
+      "2025F": 0.1917715453,
+      "2026F": 0.1814744802
+    },
+    "npatmi": {
+      "2025F": 529000000000.0,
+      "2026F": 625000000000.0
+    },
+    "analyst": "Ngan Ly",
+    "adtvVnd": {
+      "3M": 69775162168.46153,
+      "1M": 81827651745.45454,
+      "6M": 106593636663.1783
+    },
+    "adtvUsd": {
+      "6M": 4058390.88761387,
+      "3M": 2656583.3683023616,
+      "1M": 3115463.611096689
+    },
+    "maximumForeignPercentage": 0.26224176,
+    "tpUpdatedTime": "18-Nov-25",
+    "dividendPerShareTsr": 500.0
+  },
+  {
+    "ticker": "MWG",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.23039807,
+    "rating": "BUY",
+    "marketCapVnd": 121735065652700.0,
+    "marketCapUsd": 4634877808.97392,
+    "targetPrice": 101000.0,
+    "numberOfSharesMktCap": 1468456763.0,
+    "pe": {
+      "2025F": 18.6622675523,
+      "2026F": 14.6063509339
+    },
+    "pb": {
+      "2025F": 3.5669595034,
+      "2026F": 2.908225672
+    },
+    "roe": {
+      "2025F": 0.21330208566366218,
+      "2026F": 0.2281345053065419
+    },
+    "npatmiGrowth": {
+      "2025F": 0.762286069,
+      "2026F": 0.3007027819
+    },
+    "npatmi": {
+      "2025F": 6558996905464.128,
+      "2026F": 8531305521215.68
+    },
+    "analyst": "Vinh Bui",
+    "adtvVnd": {
+      "3M": 552423487987.6923,
+      "1M": 459418912445.4545,
+      "6M": 609190892318.6046
+    },
+    "adtvUsd": {
+      "6M": 23194018.363548625,
+      "3M": 21032685.626792017,
+      "1M": 17491677.61071595
+    },
+    "maximumForeignPercentage": 0.02484899,
+    "tpUpdatedTime": "14-Oct-25",
+    "dividendPerShareTsr": 1000.0
+  },
+  {
+    "ticker": "FRT",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.2486111111,
+    "rating": "BUY",
+    "marketCapVnd": 24523457040000.0,
+    "marketCapUsd": 933693395.7738435,
+    "targetPrice": 178800.0,
+    "numberOfSharesMktCap": 170301785.0,
+    "pe": {
+      "2025F": 33.0199495529,
+      "2026F": 21.8049666869
+    },
+    "pb": {
+      "2025F": 9.2175258839,
+      "2026F": 6.4679596038
+    },
+    "roe": {
+      "2025F": 0.258,
+      "2026F": 0.237
+    },
+    "npatmiGrowth": {
+      "2025F": 1.3431870445,
+      "2026F": 0.5174731183
+    },
+    "npatmi": {
+      "2025F": 744000000000.0,
+      "2026F": 1129000000000.0
+    },
+    "analyst": "Ngan Ly",
+    "adtvVnd": {
+      "3M": 84253680230.76923,
+      "1M": 87862854631.81818,
+      "6M": 86555428674.41861
+    },
+    "adtvUsd": {
+      "6M": 3295466.540050204,
+      "3M": 3207830.9625269077,
+      "1M": 3345244.798470138
+    },
+    "maximumForeignPercentage": 0.1671538,
+    "tpUpdatedTime": "13-Nov-25",
+    "dividendPerShareTsr": 1000.0
+  },
+  {
+    "ticker": "VNM",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.1609375,
+    "rating": "BUY",
+    "marketCapVnd": 133757148480000.0,
+    "marketCapUsd": 5092600360.936607,
+    "targetPrice": 70300.0,
+    "numberOfSharesMktCap": 2089955445.0,
+    "pe": {
+      "2025F": 15.9892939192,
+      "2026F": 15.2415819933
+    },
+    "pb": {
+      "2025F": 3.2133164924,
+      "2026F": 2.6006817911
+    },
+    "roe": {
+      "2025F": 0.2579915119154378,
+      "2026F": 0.2698214020046043
+    },
+    "npatmiGrowth": {
+      "2025F": -0.0048073796,
+      "2026F": 0.0490573699
+    },
+    "npatmi": {
+      "2025F": 9347157955418.512,
+      "2026F": 9805704940873.176
+    },
+    "analyst": "Vinh Bui",
+    "adtvVnd": {
+      "3M": 284015389389.2308,
+      "1M": 323586966400.0,
+      "6M": 323042401348.8372
+    },
+    "adtvUsd": {
+      "6M": 12299348.994815808,
+      "3M": 10813454.764486229,
+      "1M": 12320082.482391015
+    },
+    "maximumForeignPercentage": 0.493675,
+    "tpUpdatedTime": "24-Apr-25",
+    "dividendPerShareTsr": 4000.0
+  },
+  {
+    "ticker": "PNJ",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.2486486486,
+    "rating": "BUY",
+    "marketCapVnd": 31556292397500.0,
+    "marketCapUsd": 1201457924.900057,
+    "targetPrice": 113500.0,
+    "numberOfSharesMktCap": 341149107.0,
+    "pe": {
+      "2025F": 13.5690186299,
+      "2026F": 12.4378109453
+    },
+    "pb": {
+      "2025F": 2.3250580005,
+      "2026F": 1.9588470452
+    },
+    "roe": {
+      "2025F": 0.193,
+      "2026F": 0.187
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0955986749,
+      "2026F": 0.0958963283
+    },
+    "npatmi": {
+      "2025F": 2315000000000.0,
+      "2026F": 2537000000000.0
+    },
+    "analyst": "Ngan Ly",
+    "adtvVnd": {
+      "3M": 54348203523.07692,
+      "1M": 43455831454.545456,
+      "6M": 57726457267.44186
+    },
+    "adtvUsd": {
+      "6M": 2197847.2212998993,
+      "3M": 2069225.3387807698,
+      "1M": 1654514.8088538153
+    },
+    "maximumForeignPercentage": 0.00055291,
+    "tpUpdatedTime": "07-Nov-25",
+    "dividendPerShareTsr": 2000.0
+  },
+  {
+    "ticker": "MSN",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.3350923483,
+    "rating": "BUY",
+    "marketCapVnd": 109600391640600.0,
+    "marketCapUsd": 4172868518.5836663,
+    "targetPrice": 101200.0,
+    "numberOfSharesMktCap": 1445915457.0,
+    "pe": {
+      "2025F": 40.3045222494,
+      "2026F": 25.811049899
+    },
+    "pb": {
+      "2025F": 3.4817376728,
+      "2026F": 3.0816148633
+    },
+    "roe": {
+      "2025F": 0.0899600729365649,
+      "2026F": 0.12626514642710232
+    },
+    "npatmiGrowth": {
+      "2025F": 0.4267211446,
+      "2026F": 0.5689456631
+    },
+    "npatmi": {
+      "2025F": 2852099744543.652,
+      "2026F": 4474789524828.839
+    },
+    "analyst": "Vinh Bui",
+    "adtvVnd": {
+      "3M": 626563513232.3077,
+      "1M": 376763746000.0,
+      "6M": 734719847595.3489
+    },
+    "adtvUsd": {
+      "6M": 27973342.760150347,
+      "3M": 23855454.53007073,
+      "1M": 14344707.633733105
+    },
+    "maximumForeignPercentage": 0.77378821,
+    "tpUpdatedTime": "21-May-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "MCH",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.0672941176,
+    "rating": "M-PF",
+    "marketCapVnd": 224549888575000.0,
+    "marketCapUsd": 8549396100.323625,
+    "targetPrice": 220800.0,
+    "numberOfSharesMktCap": 1056705358.0,
+    "pe": {
+      "2025F": 34.8921672489,
+      "2026F": 29.3710429842
+    },
+    "pb": {
+      "2025F": 9.0825788967,
+      "2026F": 6.3322296714
+    },
+    "roe": {
+      "2025F": 0.48035653020079105,
+      "2026F": 0.43796916196159685
+    },
+    "npatmiGrowth": {
+      "2025F": -0.1765071813,
+      "2026F": 0.1962943379
+    },
+    "npatmi": {
+      "2025F": 6425941352407.566,
+      "2026F": 7687317255430.79
+    },
+    "analyst": "Vinh Bui",
+    "adtvVnd": {
+      "3M": 85180267460.0,
+      "1M": 74778156409.09091,
+      "6M": 66511491935.65891
+    },
+    "adtvUsd": {
+      "6M": 2532324.079027562,
+      "3M": 3243109.3645535884,
+      "1M": 2847064.778568091
+    },
+    "maximumForeignPercentage": 0.34640734,
+    "tpUpdatedTime": "28-Nov-25",
+    "dividendPerShareTsr": 6000.0
+  },
+  {
+    "ticker": "SAB",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.2676056338,
+    "rating": "BUY",
+    "marketCapVnd": 63743349888400.0,
+    "marketCapUsd": 2426931273.1163144,
+    "targetPrice": 58000.0,
+    "numberOfSharesMktCap": 1282562372.0,
+    "pe": {
+      "2025F": 14.7477744807,
+      "2026F": 14.0197461213
+    },
+    "pb": {
+      "2025F": 2.2990742477,
+      "2026F": 1.9668372643
+    },
+    "roe": {
+      "2025F": 0.2,
+      "2026F": 0.231
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0284064665,
+      "2026F": 0.0520997081
+    },
+    "npatmi": {
+      "2025F": 4453000000000.0,
+      "2026F": 4685000000000.0
+    },
+    "analyst": "Nguyen Nguyen",
+    "adtvVnd": {
+      "3M": 55918653880.76923,
+      "1M": 105734810729.54546,
+      "6M": 60987621012.4031
+    },
+    "adtvUsd": {
+      "6M": 2322011.079855439,
+      "3M": 2129017.851923443,
+      "1M": 4025692.394043231
+    },
+    "maximumForeignPercentage": 0.41377126,
+    "tpUpdatedTime": "10-Sep-25",
+    "dividendPerShareTsr": 5000.0
+  },
+  {
+    "ticker": "QNS",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.2755555556,
+    "rating": "O-PF",
+    "marketCapVnd": 16544166885000.0,
+    "marketCapUsd": 629894037.1216447,
+    "targetPrice": 53400.0,
+    "numberOfSharesMktCap": 367648153.0,
+    "pe": {
+      "2025F": 6.5331010453,
+      "2026F": 6.4599483204
+    },
+    "pb": {
+      "2025F": 1.1538377452,
+      "2026F": 0.9774919418
+    },
+    "roe": {
+      "2025F": 0.216,
+      "2026F": 0.199
+    },
+    "npatmiGrowth": {
+      "2025F": -0.0018390805,
+      "2026F": 0.0115154307
+    },
+    "npatmi": {
+      "2025F": 2171000000000.0,
+      "2026F": 2196000000000.0
+    },
+    "analyst": "Vinh Bui",
+    "adtvVnd": {
+      "3M": 5853003940.0,
+      "1M": 4021377490.90909,
+      "6M": 7550714563.565891
+    },
+    "adtvUsd": {
+      "6M": 287481.993663274,
+      "3M": 222844.2391014658,
+      "1M": 153107.8427911323
+    },
+    "maximumForeignPercentage": 0.40832674,
+    "tpUpdatedTime": "30-Aug-24",
+    "dividendPerShareTsr": 4000.0
+  },
+  {
+    "ticker": "STK",
+    "sector": "Industrials",
+    "projectedTsrPercentage": 0.5223880597,
+    "rating": "O-PF",
+    "marketCapVnd": 2347062427500.0,
+    "marketCapUsd": 89360838.66362078,
+    "targetPrice": 25500.0,
+    "numberOfSharesMktCap": 140123130.0,
+    "pe": {
+      "2025F": 20.1322115385,
+      "2026F": 11.2718707941
+    },
+    "pb": {
+      "2025F": 0.962023691,
+      "2026F": 0.9413213221
+    },
+    "roe": {
+      "2025F": 0.0454,
+      "2026F": 0.0762
+    },
+    "npatmiGrowth": {
+      "2025F": 0.8695652174,
+      "2026F": 0.9069767442
+    },
+    "npatmi": {
+      "2025F": 86000000000.0,
+      "2026F": 164000000000.0
+    },
+    "analyst": "Han Nguyen",
+    "adtvVnd": {
+      "3M": 538415708.461538,
+      "1M": 137061661.363636,
+      "6M": 1004533360.852713
+    },
+    "adtvUsd": {
+      "6M": 38246.0826519213,
+      "3M": 20499.3606876656,
+      "1M": 5218.4146721354
+    },
+    "maximumForeignPercentage": 0.82254329,
+    "tpUpdatedTime": "17-Jan-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "VHC",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.2018348624,
+    "rating": "O-PF",
+    "marketCapVnd": 12232697165500.0,
+    "marketCapUsd": 465741373.13915855,
+    "targetPrice": 63500.0,
+    "numberOfSharesMktCap": 224453159.0,
+    "pe": {
+      "2025F": 9.0606816293,
+      "2026F": 8.1660173809
+    },
+    "pb": {
+      "2025F": 1.2204371652,
+      "2026F": 1.0617834197
+    },
+    "roe": {
+      "2025F": 0.148,
+      "2026F": 0.148
+    },
+    "npatmiGrowth": {
+      "2025F": 0.101141925,
+      "2026F": 0.1096296296
+    },
+    "npatmi": {
+      "2025F": 1350000000000.0,
+      "2026F": 1498000000000.0
+    },
+    "analyst": "Nguyen Nguyen",
+    "adtvVnd": {
+      "3M": 67436316533.84615,
+      "1M": 40808776013.63636,
+      "6M": 92008718834.88371
+    },
+    "adtvUsd": {
+      "6M": 3503092.2838333794,
+      "3M": 2567535.3715532515,
+      "1M": 1553732.1916480623
+    },
+    "maximumForeignPercentage": 0.80601046,
+    "tpUpdatedTime": "13-Oct-25",
+    "dividendPerShareTsr": 2000.0
+  },
+  {
+    "ticker": "VTP",
+    "sector": "Transport & Logistics",
+    "projectedTsrPercentage": -0.2849898581,
+    "rating": "M-PF",
+    "marketCapVnd": 12007807941200.0,
+    "marketCapUsd": 457179057.3462783,
+    "targetPrice": 69000.0,
+    "numberOfSharesMktCap": 121783042.0,
+    "pe": {
+      "2025F": 33.9648639339,
+      "2026F": 28.9744343227
+    },
+    "pb": {
+      "2025F": 6.0162347729,
+      "2026F": 4.8476367715
+    },
+    "roe": {
+      "2025F": 0.229,
+      "2026F": 0.242
+    },
+    "npatmiGrowth": {
+      "2025F": 0.1480446927,
+      "2026F": 0.1727493917
+    },
+    "npatmi": {
+      "2025F": 411000000000.0,
+      "2026F": 482000000000.0
+    },
+    "analyst": "Nguyen Nguyen",
+    "adtvVnd": {
+      "3M": 71138405332.3077,
+      "1M": 40501812936.36363,
+      "6M": 79841675297.67442
+    },
+    "adtvUsd": {
+      "6M": 3039850.5729173585,
+      "3M": 2708486.7821171787,
+      "1M": 1542045.0385061349
+    },
+    "maximumForeignPercentage": 0.44300959,
+    "tpUpdatedTime": "06-Sep-24",
+    "dividendPerShareTsr": 1500.0
+  },
+  {
+    "ticker": "CTR",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.2234169653,
+    "rating": "O-PF",
+    "marketCapVnd": 9574098072300.0,
+    "marketCapUsd": 364519248.8977727,
+    "targetPrice": 100400.0,
+    "numberOfSharesMktCap": 114385879.0,
+    "pe": {
+      "2025F": 21.6783216783,
+      "2026F": 18.6372745491
+    },
+    "pb": {
+      "2025F": 3.8929227763,
+      "2026F": 3.0455178211
+    },
+    "roe": {
+      "2025F": 0.294,
+      "2026F": 0.299
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0892193309,
+      "2026F": 0.1638225256
+    },
+    "npatmi": {
+      "2025F": 586000000000.0,
+      "2026F": 682000000000.0
+    },
+    "analyst": "Nguyen Nguyen",
+    "adtvVnd": {
+      "3M": 43773606861.53846,
+      "1M": 28619276545.454544,
+      "6M": 52425378349.612404
+    },
+    "adtvUsd": {
+      "6M": 1996016.6894959987,
+      "3M": 1666613.6250347786,
+      "1M": 1089635.5052524097
+    },
+    "maximumForeignPercentage": 0.44089831,
+    "tpUpdatedTime": "12-Sep-25",
+    "dividendPerShareTsr": 2000.0
+  },
+  {
+    "ticker": "DHC",
+    "sector": "Industrials",
+    "projectedTsrPercentage": 0.1788856305,
+    "rating": "BUY",
+    "marketCapVnd": 3293760124600.0,
+    "marketCapUsd": 125404916.2231106,
+    "targetPrice": 39100.0,
+    "numberOfSharesMktCap": 96591206.0,
+    "pe": {
+      "2025F": 10.1882282641,
+      "2026F": 9.2562432139
+    },
+    "pb": {
+      "2025F": 1.4174400795,
+      "2026F": 1.2291497564
+    },
+    "roe": {
+      "2025F": 0.1526,
+      "2026F": 0.1515
+    },
+    "npatmiGrowth": {
+      "2025F": 0.3347107438,
+      "2026F": 0.1021671827
+    },
+    "npatmi": {
+      "2025F": 323000000000.0,
+      "2026F": 356000000000.0
+    },
+    "analyst": "Han Nguyen",
+    "adtvVnd": {
+      "3M": 8692293776.153847,
+      "1M": 7707632300.0,
+      "6M": 11591048483.333332
+    },
+    "adtvUsd": {
+      "6M": 441311.5737039152,
+      "3M": 330945.8890597315,
+      "1M": 293456.3982486198
+    },
+    "maximumForeignPercentage": 0.14553091,
+    "tpUpdatedTime": "21-Aug-25",
+    "dividendPerShareTsr": 1100.0
+  },
+  {
+    "ticker": "PTB",
+    "sector": "Industrials",
+    "projectedTsrPercentage": 0.2295454545,
+    "rating": "O-PF",
+    "marketCapVnd": 3534347696000.0,
+    "marketCapUsd": 134564922.7489054,
+    "targetPrice": 52000.0,
+    "numberOfSharesMktCap": 80326084.0,
+    "pe": {
+      "2025F": 7.8125,
+      "2026F": 7.6164099013
+    },
+    "pb": {
+      "2025F": 0.8932530213,
+      "2026F": 0.79518858
+    },
+    "roe": {
+      "2025F": 0.126,
+      "2026F": 0.119
+    },
+    "npatmiGrowth": {
+      "2025F": 0.072972973,
+      "2026F": 0.0251889169
+    },
+    "npatmi": {
+      "2025F": 397000000000.0,
+      "2026F": 407000000000.0
+    },
+    "analyst": "Han Nguyen",
+    "adtvVnd": {
+      "3M": 5363238277.692307,
+      "1M": 4560501236.363636,
+      "6M": 6946308877.131782
+    },
+    "adtvUsd": {
+      "6M": 264470.1647489732,
+      "3M": 204197.1550615765,
+      "1M": 173634.1609123791
+    },
+    "maximumForeignPercentage": 0.11434345,
+    "tpUpdatedTime": "06-Oct-25",
+    "dividendPerShareTsr": 2100.0
+  },
+  {
+    "ticker": "DGC",
+    "sector": "Industrials",
+    "projectedTsrPercentage": 0.7236467236,
+    "rating": "BUY",
+    "marketCapVnd": 26660444592600.0,
+    "marketCapUsd": 1015055952.5071387,
+    "targetPrice": 118000.0,
+    "numberOfSharesMktCap": 379778413.0,
+    "pe": {
+      "2025F": 8.3293782629,
+      "2026F": 7.1867321867
+    },
+    "pb": {
+      "2025F": 1.6109712746,
+      "2026F": 1.3161014314
+    },
+    "roe": {
+      "2025F": 0.2187,
+      "2026F": 0.2213
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0709267313,
+      "2026F": 0.1590128085
+    },
+    "npatmi": {
+      "2025F": 3201000000000.0,
+      "2026F": 3710000000000.0
+    },
+    "analyst": "Han Nguyen",
+    "adtvVnd": {
+      "3M": 227664170390.76923,
+      "1M": 328270600695.4545,
+      "6M": 244854361975.1938
+    },
+    "adtvUsd": {
+      "6M": 9322458.099188799,
+      "3M": 8667967.652418397,
+      "1M": 12498404.747590119
+    },
+    "maximumForeignPercentage": 0.3891108,
+    "tpUpdatedTime": "07-Nov-25",
+    "dividendPerShareTsr": 3000.0
+  },
+  {
+    "ticker": "ACG",
+    "sector": "Industrials",
+    "projectedTsrPercentage": 0.321279555,
+    "rating": "BUY",
+    "marketCapVnd": 5420826658700.0,
+    "marketCapUsd": 206389745.2389111,
+    "targetPrice": 45800.0,
+    "numberOfSharesMktCap": 150787946.0,
+    "pe": {
+      "2025F": 9.9387397631,
+      "2026F": 8.961563988
+    },
+    "pb": {
+      "2025F": 1.1411816282,
+      "2026F": 1.0062939669
+    },
+    "roe": {
+      "2025F": 0.1327637910981666,
+      "2026F": 0.1378989053733927
+    },
+    "npatmiGrowth": {
+      "2025F": 0.3665938164,
+      "2026F": 0.109040763
+    },
+    "npatmi": {
+      "2025F": 574126867425.3109,
+      "2026F": 636730099113.0581
+    },
+    "analyst": "Huy Hoang",
+    "adtvVnd": {
+      "3M": 593965586.923076,
+      "1M": 1127250500.0,
+      "6M": 672278864.341085
+    },
+    "adtvUsd": {
+      "6M": 25595.9971194017,
+      "3M": 22614.3379753694,
+      "1M": 42918.3514182372
+    },
+    "maximumForeignPercentage": 0.11535163,
+    "tpUpdatedTime": "15-Jul-25",
+    "dividendPerShareTsr": 1700.0
+  },
+  {
+    "ticker": "KBC",
+    "sector": "Industrial Parks",
+    "projectedTsrPercentage": 0.2390670554,
+    "rating": "BUY",
+    "marketCapVnd": 32302188233700.0,
+    "marketCapUsd": 1229856776.4591663,
+    "targetPrice": 42500.0,
+    "numberOfSharesMktCap": 941754759.0,
+    "pe": {
+      "2025F": 18.7329328236,
+      "2026F": 10.9096692112
+    },
+    "pb": {
+      "2025F": 1.5989663884,
+      "2026F": 1.3945732688
+    },
+    "roe": {
+      "2025F": 0.077,
+      "2026F": 0.115
+    },
+    "npatmiGrowth": {
+      "2025F": 3.3062827225,
+      "2026F": 0.8
+    },
+    "npatmi": {
+      "2025F": 1645000000000.0,
+      "2026F": 2961000000000.0
+    },
+    "analyst": "Anh Pham",
+    "adtvVnd": {
+      "3M": 175608145470.76923,
+      "1M": 102206618031.81818,
+      "6M": 245566099296.89923
+    },
+    "adtvUsd": {
+      "6M": 9349556.417167304,
+      "3M": 6686013.53400987,
+      "1M": 3891361.8135091634
+    },
+    "maximumForeignPercentage": 0.38775103,
+    "tpUpdatedTime": "24-Nov-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "GVR",
+    "sector": "Industrial Parks",
+    "projectedTsrPercentage": 0.1947069943,
+    "rating": "M-PF",
+    "marketCapVnd": 105800000000000.0,
+    "marketCapUsd": 4028174376.5467353,
+    "targetPrice": 31200.0,
+    "numberOfSharesMktCap": 4000000000.0,
+    "pe": {
+      "2025F": 24.6505125815,
+      "2026F": 22.1709974853
+    },
+    "pb": {
+      "2025F": 1.8472254568,
+      "2026F": 1.7051565828
+    },
+    "roe": {
+      "2025F": 0.079,
+      "2026F": 0.083
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0762095763,
+      "2026F": 0.1115769858
+    },
+    "npatmi": {
+      "2025F": 4293000000000.0,
+      "2026F": 4772000000000.0
+    },
+    "analyst": "Anh Pham",
+    "adtvVnd": {
+      "3M": 66800211351.53846,
+      "1M": 53661074452.27273,
+      "6M": 111572465972.86821
+    },
+    "adtvUsd": {
+      "6M": 4247952.254820796,
+      "3M": 2543316.632459108,
+      "1M": 2043063.9425955731
+    },
+    "maximumForeignPercentage": 0.12599346,
+    "tpUpdatedTime": "04-Jul-25",
+    "dividendPerShareTsr": 400.0
+  },
+  {
+    "ticker": "PHR",
+    "sector": "Industrial Parks",
+    "projectedTsrPercentage": 0.1894463668,
+    "rating": "O-PF",
+    "marketCapVnd": 7831853644400.0,
+    "marketCapUsd": 298185937.3462783,
+    "targetPrice": 67400.0,
+    "numberOfSharesMktCap": 135499198.0,
+    "pe": {
+      "2025F": 15.90533847,
+      "2026F": 10.7474897731
+    },
+    "pb": {
+      "2025F": 1.8264514139,
+      "2026F": 1.5362565304
+    },
+    "roe": {
+      "2025F": 0.139,
+      "2026F": 0.183
+    },
+    "npatmiGrowth": {
+      "2025F": 0.1891304348,
+      "2026F": 0.4808043876
+    },
+    "npatmi": {
+      "2025F": 547000000000.0,
+      "2026F": 810000000000.0
+    },
+    "analyst": "Anh Pham",
+    "adtvVnd": {
+      "3M": 11923808861.538462,
+      "1M": 15199222890.90909,
+      "6M": 25792381403.100777
+    },
+    "adtvUsd": {
+      "6M": 982005.7644432049,
+      "3M": 453980.9199138954,
+      "1M": 578687.3364138241
+    },
+    "maximumForeignPercentage": 0.34921021,
+    "tpUpdatedTime": "25-Jun-25",
+    "dividendPerShareTsr": 1350.0
+  },
+  {
+    "ticker": "SZC",
+    "sector": "Industrial Parks",
+    "projectedTsrPercentage": 0.4686971235,
+    "rating": "O-PF",
+    "marketCapVnd": 5318582251650.0,
+    "marketCapUsd": 202496944.6659052,
+    "targetPrice": 42400.0,
+    "numberOfSharesMktCap": 179985863.0,
+    "pe": {
+      "2025F": 18.3426443203,
+      "2026F": 15.1150895141
+    },
+    "pb": {
+      "2025F": 1.5550125982,
+      "2026F": 1.3987977829
+    },
+    "roe": {
+      "2025F": 0.1,
+      "2026F": 0.116
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0430463576,
+      "2026F": 0.2126984127
+    },
+    "npatmi": {
+      "2025F": 315000000000.0,
+      "2026F": 382000000000.0
+    },
+    "analyst": "Anh Pham",
+    "adtvVnd": {
+      "3M": 20853974592.307693,
+      "1M": 10577277488.636362,
+      "6M": 62538894736.82171
+    },
+    "adtvUsd": {
+      "6M": 2381073.471799799,
+      "3M": 793983.4225131427,
+      "1M": 402713.7821677655
+    },
+    "maximumForeignPercentage": 0.17540133,
+    "tpUpdatedTime": "01-Jul-25",
+    "dividendPerShareTsr": 1000.0
+  },
+  {
+    "ticker": "IDC",
+    "sector": "Industrial Parks",
+    "projectedTsrPercentage": 0.5053763441,
+    "rating": "BUY",
+    "marketCapVnd": 14117356215600.0,
+    "marketCapUsd": 537496905.2198744,
+    "targetPrice": 54000.0,
+    "numberOfSharesMktCap": 379498823.0,
+    "pe": {
+      "2025F": 8.7282965744,
+      "2026F": 7.4668807708
+    },
+    "pb": {
+      "2025F": 1.9447087608,
+      "2026F": 1.5391995555
+    },
+    "roe": {
+      "2025F": 0.279,
+      "2026F": 0.287
+    },
+    "npatmiGrowth": {
+      "2025F": -0.1813627255,
+      "2026F": 0.1689106487
+    },
+    "npatmi": {
+      "2025F": 1634000000000.0,
+      "2026F": 1910000000000.0
+    },
+    "analyst": "Anh Pham",
+    "adtvVnd": {
+      "3M": 84768495040.0,
+      "1M": 66316317890.90909,
+      "6M": 104931970010.8527
+    },
+    "adtvUsd": {
+      "6M": 3995125.452535797,
+      "3M": 3227431.754806777,
+      "1M": 2524893.1235830607
+    },
+    "maximumForeignPercentage": 0.3753567,
+    "tpUpdatedTime": "26-Nov-25",
+    "dividendPerShareTsr": 2000.0
+  },
+  {
+    "ticker": "SIP",
+    "sector": "Industrial Parks",
+    "projectedTsrPercentage": 0.4540229885,
+    "rating": "BUY",
+    "marketCapVnd": 12638295624600.0,
+    "marketCapUsd": 481183918.69788694,
+    "targetPrice": 73900.0,
+    "numberOfSharesMktCap": 242112943.0,
+    "pe": {
+      "2025F": 11.2859560068,
+      "2026F": 10.594775856
+    },
+    "pb": {
+      "2025F": 2.2741216276,
+      "2026F": 1.843763938
+    },
+    "roe": {
+      "2025F": 0.26,
+      "2026F": 0.239
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0401709402,
+      "2026F": 0.065735415
+    },
+    "npatmi": {
+      "2025F": 1217000000000.0,
+      "2026F": 1297000000000.0
+    },
+    "analyst": "Anh Pham",
+    "adtvVnd": {
+      "3M": 18915735632.307693,
+      "1M": 17322076527.272728,
+      "6M": 32753525870.542637
+    },
+    "adtvUsd": {
+      "6M": 1247040.7717701367,
+      "3M": 720187.9167069367,
+      "1M": 659511.7657442502
+    },
+    "maximumForeignPercentage": 0.45928373,
+    "tpUpdatedTime": "18-Jun-25",
+    "dividendPerShareTsr": 2000.0
+  },
+  {
+    "ticker": "DXG",
+    "sector": "Real Estate",
+    "projectedTsrPercentage": 0.3483146067,
+    "rating": "BUY",
+    "marketCapVnd": 19800438564200.0,
+    "marketCapUsd": 753871637.7003617,
+    "targetPrice": 24000.0,
+    "numberOfSharesMktCap": 1112384189.0,
+    "pe": {
+      "2025F": 66.6666666667,
+      "2026F": 41.1085450346
+    },
+    "pb": {
+      "2025F": 1.685259922,
+      "2026F": 1.6087191563
+    },
+    "roe": {
+      "2025F": 0.024,
+      "2026F": 0.035
+    },
+    "npatmiGrowth": {
+      "2025F": 0.1484375,
+      "2026F": 0.7414965986
+    },
+    "npatmi": {
+      "2025F": 294000000000.0,
+      "2026F": 512000000000.0
+    },
+    "analyst": "Anh Pham",
+    "adtvVnd": {
+      "3M": 423580235513.0769,
+      "1M": 219238927334.0909,
+      "6M": 469046912717.82947
+    },
+    "adtvUsd": {
+      "6M": 17858249.104048334,
+      "3M": 16127174.39608136,
+      "1M": 8347189.314071612
+    },
+    "maximumForeignPercentage": 0.31207959,
+    "tpUpdatedTime": "05-Dec-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "DXS",
+    "sector": "Real Estate",
+    "projectedTsrPercentage": 0.4468085106,
+    "rating": "BUY",
+    "marketCapVnd": 5443569365600.0,
+    "marketCapUsd": 207255639.27660385,
+    "targetPrice": 13600.0,
+    "numberOfSharesMktCap": 579103124.0,
+    "pe": {
+      "2025F": 13.3522727273,
+      "2026F": 10.7921928817
+    },
+    "pb": {
+      "2025F": 0.8419661301,
+      "2026F": 0.7748511434
+    },
+    "roe": {
+      "2025F": 0.073,
+      "2026F": 0.083
+    },
+    "npatmiGrowth": {
+      "2025F": 2.2127659574,
+      "2026F": 0.2362030905
+    },
+    "npatmi": {
+      "2025F": 453000000000.0,
+      "2026F": 560000000000.0
+    },
+    "analyst": "Anh Pham",
+    "adtvVnd": {
+      "3M": 24879110954.0,
+      "1M": 15969378998.181818,
+      "6M": 43373851686.35659
+    },
+    "adtvUsd": {
+      "6M": 1651393.5536400757,
+      "3M": 947234.3786027032,
+      "1M": 608009.8609625668
+    },
+    "maximumForeignPercentage": 0.31810801,
+    "tpUpdatedTime": "05-Dec-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "KDH",
+    "sector": "Real Estate",
+    "projectedTsrPercentage": 0.4854517611,
+    "rating": "BUY",
+    "marketCapVnd": 36640316452350.0,
+    "marketCapUsd": 1395024422.3243861,
+    "targetPrice": 48500.0,
+    "numberOfSharesMktCap": 1122214899.0,
+    "pe": {
+      "2025F": 37.8770301624,
+      "2026F": 22.2866894198
+    },
+    "pb": {
+      "2025F": 1.9874416414,
+      "2026F": 1.8135229527
+    },
+    "roe": {
+      "2025F": 0.058,
+      "2026F": 0.091
+    },
+    "npatmiGrowth": {
+      "2025F": 0.2867737948,
+      "2026F": 0.6983669549
+    },
+    "npatmi": {
+      "2025F": 1041000000000.0,
+      "2026F": 1768000000000.0
+    },
+    "analyst": "Anh Pham",
+    "adtvVnd": {
+      "3M": 221431980476.92307,
+      "1M": 164495029686.36365,
+      "6M": 207270680694.96124
+    },
+    "adtvUsd": {
+      "6M": 7891516.493240481,
+      "3M": 8430686.483035335,
+      "1M": 6262898.522229722
+    },
+    "maximumForeignPercentage": 0.22071051,
+    "tpUpdatedTime": "12-Nov-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "NLG",
+    "sector": "Real Estate",
+    "projectedTsrPercentage": 0.6560252366,
+    "rating": "BUY",
+    "marketCapVnd": 15380677791100.0,
+    "marketCapUsd": 585595956.2573768,
+    "targetPrice": 52100.0,
+    "numberOfSharesMktCap": 485194883.0,
+    "pe": {
+      "2025F": 17.9181414397,
+      "2026F": 22.3251717981
+    },
+    "pb": {
+      "2025F": 1.1754562694,
+      "2026F": 1.3853406045
+    },
+    "roe": {
+      "2025F": 0.06344334978153303,
+      "2026F": 0.05537971282900572
+    },
+    "npatmiGrowth": {
+      "2025F": 0.3702482699,
+      "2026F": 0.0112736608
+    },
+    "npatmi": {
+      "2025F": 709644327620.3354,
+      "2026F": 717644617053.1798
+    },
+    "analyst": "Thuc Than",
+    "adtvVnd": {
+      "3M": 101306704453.07692,
+      "1M": 54890432440.90909,
+      "6M": 130625087224.031
+    },
+    "adtvUsd": {
+      "6M": 4973351.88364862,
+      "3M": 3857098.970229466,
+      "1M": 2089869.8816260837
+    },
+    "maximumForeignPercentage": 0.05226695,
+    "tpUpdatedTime": "07-Nov-25",
+    "dividendPerShareTsr": 396.0
+  },
+  {
+    "ticker": "HDC",
+    "sector": "Real Estate",
+    "projectedTsrPercentage": 0.1244813278,
+    "rating": "O-PF",
+    "marketCapVnd": 4814085161100.0,
+    "marketCapUsd": 183288983.86065105,
+    "targetPrice": 27100.0,
+    "numberOfSharesMktCap": 199754571.0,
+    "pe": {
+      "2025F": 28.0718919989,
+      "2026F": 16.2360629232
+    },
+    "pb": {
+      "2025F": 1.9863447094,
+      "2026F": 1.7678758737
+    },
+    "roe": {
+      "2025F": 0.07413577958923676,
+      "2026F": 0.11636874642249168
+    },
+    "npatmiGrowth": {
+      "2025F": 1.622447684,
+      "2026F": 0.7289740651
+    },
+    "npatmi": {
+      "2025F": 173231026661.12204,
+      "2026F": 299511952373.1539
+    },
+    "analyst": "Thuc Than",
+    "adtvVnd": {
+      "3M": 134316048409.23077,
+      "1M": 48603052681.818184,
+      "6M": 179108323580.23254
+    },
+    "adtvUsd": {
+      "6M": 6819277.501626977,
+      "3M": 5113879.627231326,
+      "1M": 1850487.4426734508
+    },
+    "maximumForeignPercentage": 0.45949494,
+    "tpUpdatedTime": "21-Mar-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "NVL",
+    "sector": "Real Estate",
+    "projectedTsrPercentage": 0.4440433213,
+    "rating": "BUY",
+    "marketCapVnd": 28359395231400.0,
+    "marketCapUsd": 1079740918.7664192,
+    "targetPrice": 20000.0,
+    "numberOfSharesMktCap": 2047609764.0,
+    "pe": {
+      "2025F": -36.9014543126,
+      "2026F": 77.3354004685
+    },
+    "pb": {
+      "2025F": 0.7473308853,
+      "2026F": 0.7884145587
+    },
+    "roe": {
+      "2025F": -0.04174599970412085,
+      "2026F": 0.021413619574189146
+    },
+    "npatmiGrowth": {
+      "2025F": null,
+      "2026F": null
+    },
+    "npatmi": {
+      "2025F": -789704193081.0466,
+      "2026F": 401843573540.71765
+    },
+    "analyst": "Thuc Than",
+    "adtvVnd": {
+      "3M": 209849534605.3846,
+      "1M": 131492168990.90909,
+      "6M": 325991630869.76746
+    },
+    "adtvUsd": {
+      "6M": 12411636.431363696,
+      "3M": 7989702.440715195,
+      "1M": 5006364.7055362305
+    },
+    "maximumForeignPercentage": 0.40299701,
+    "tpUpdatedTime": "01-Oct-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "VIC",
+    "sector": "Real Estate",
+    "projectedTsrPercentage": -0.2929292929,
+    "rating": "SELL",
+    "marketCapVnd": 1144345607064000.0,
+    "marketCapUsd": 43569221666.247856,
+    "targetPrice": 105000.0,
+    "numberOfSharesMktCap": 7706031024.0,
+    "pe": {
+      "2025F": 88.4942050078,
+      "2026F": 81.1860701094
+    },
+    "pb": {
+      "2025F": 7.3977433661,
+      "2026F": 6.8046823255
+    },
+    "roe": {
+      "2025F": 0.07929433847737774,
+      "2026F": 0.07390642845818934
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0529715222,
+      "2026F": 0.0943573245
+    },
+    "npatmi": {
+      "2025F": 12533549512114.514,
+      "2026F": 13716181710729.016
+    },
+    "analyst": "Thuc Than",
+    "adtvVnd": {
+      "3M": 819063944852.3077,
+      "1M": 953517831686.3636,
+      "6M": 631497296635.6589
+    },
+    "adtvUsd": {
+      "6M": 24043300.842781607,
+      "3M": 31184616.213680096,
+      "1M": 36303743.82967309
+    },
+    "maximumForeignPercentage": 0.4481894,
+    "tpUpdatedTime": "05-Dec-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "VHM",
+    "sector": "Real Estate",
+    "projectedTsrPercentage": 0.1714285714,
+    "rating": "O-PF",
+    "marketCapVnd": 416902318406000.0,
+    "marketCapUsd": 15872922840.510185,
+    "targetPrice": 118900.0,
+    "numberOfSharesMktCap": 4107412004.0,
+    "pe": {
+      "2025F": 10.7918081934,
+      "2026F": 10.0807503994
+    },
+    "pb": {
+      "2025F": 1.7279706788,
+      "2026F": 1.4751166528
+    },
+    "roe": {
+      "2025F": 0.174053335178339,
+      "2026F": 0.15788144364788936
+    },
+    "npatmiGrowth": {
+      "2025F": 0.2147748494,
+      "2026F": 0.0705361968
+    },
+    "npatmi": {
+      "2025F": 38631368398151.23,
+      "2026F": 41356278201573.055
+    },
+    "analyst": "Thuc Than",
+    "adtvVnd": {
+      "3M": 642346827758.4615,
+      "1M": 490769440200.0,
+      "6M": 552728285942.6356
+    },
+    "adtvUsd": {
+      "6M": 21044290.346188296,
+      "3M": 24456380.268740207,
+      "1M": 18685301.359223302
+    },
+    "maximumForeignPercentage": 0.41174598,
+    "tpUpdatedTime": "05-Dec-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "VRE",
+    "sector": "Real Estate",
+    "projectedTsrPercentage": 0.0094637224,
+    "rating": "M-PF",
+    "marketCapVnd": 72032493597000.0,
+    "marketCapUsd": 2742527835.408338,
+    "targetPrice": 32000.0,
+    "numberOfSharesMktCap": 2272318410.0,
+    "pe": {
+      "2025F": 11.3288313784,
+      "2026F": 13.2428804136
+    },
+    "pb": {
+      "2025F": 1.4917457668,
+      "2026F": 1.3407011671
+    },
+    "roe": {
+      "2025F": 0.14097849463156045,
+      "2026F": 0.10665308347714189
+    },
+    "npatmiGrowth": {
+      "2025F": 0.5524110084,
+      "2026F": -0.1445341931
+    },
+    "npatmi": {
+      "2025F": 6358333959964.546,
+      "2026F": 5439337291449.315
+    },
+    "analyst": "Thuc Than",
+    "adtvVnd": {
+      "3M": 411946694963.0769,
+      "1M": 318397815577.2727,
+      "6M": 289878702866.27905
+    },
+    "adtvUsd": {
+      "6M": 11036691.523559073,
+      "3M": 15684245.001449721,
+      "1M": 12122513.442881124
+    },
+    "maximumForeignPercentage": 0.35331062,
+    "tpUpdatedTime": "05-Dec-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "ACV",
+    "sector": "Transport & Logistics",
+    "projectedTsrPercentage": 0.254368932,
+    "rating": "O-PF",
+    "marketCapVnd": 184489687184500.0,
+    "marketCapUsd": 7024164750.980392,
+    "targetPrice": 64600.0,
+    "numberOfSharesMktCap": 3582324023.0,
+    "pe": {
+      "2025F": 17.1723907969,
+      "2026F": 23.261065944
+    },
+    "pb": {
+      "2025F": 2.5714726994,
+      "2026F": 2.2954720941
+    },
+    "roe": {
+      "2025F": 0.179,
+      "2026F": 0.1136
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0181598063,
+      "2026F": -0.2671989129
+    },
+    "npatmi": {
+      "2025F": 11774000000000.0,
+      "2026F": 8628000000000.0
+    },
+    "analyst": "Han Nguyen",
+    "adtvVnd": {
+      "3M": 46908542138.46154,
+      "1M": 51147784018.181816,
+      "6M": 53154216872.093025
+    },
+    "adtvUsd": {
+      "6M": 2023766.1097313163,
+      "3M": 1785971.5263073116,
+      "1M": 1947374.224945053
+    },
+    "maximumForeignPercentage": 0.46578528,
+    "tpUpdatedTime": "19-Nov-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "GMD",
+    "sector": "Transport & Logistics",
+    "projectedTsrPercentage": 0.3512605042,
+    "rating": "BUY",
+    "marketCapVnd": 25376458985500.0,
+    "marketCapUsd": 966170149.8381877,
+    "targetPrice": 78200.0,
+    "numberOfSharesMktCap": 426495109.0,
+    "pe": {
+      "2025F": 17.9701199317,
+      "2026F": 13.5034067189
+    },
+    "pb": {
+      "2025F": 1.8004826129,
+      "2026F": 1.5942389612
+    },
+    "roe": {
+      "2025F": 0.11797898456023281,
+      "2026F": 0.14840470235449002
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0305881999,
+      "2026F": 0.3507459347
+    },
+    "npatmi": {
+      "2025F": 1504085764755.049,
+      "2026F": 2031637732243.038
+    },
+    "analyst": "Huy Hoang",
+    "adtvVnd": {
+      "3M": 122774199149.23077,
+      "1M": 66180426668.181816,
+      "6M": 171813447529.45737
+    },
+    "adtvUsd": {
+      "6M": 6541536.170929274,
+      "3M": 4674441.239262546,
+      "1M": 2519719.271585068
+    },
+    "maximumForeignPercentage": 0.06959055,
+    "tpUpdatedTime": "21-Nov-25",
+    "dividendPerShareTsr": 2200.0
+  },
+  {
+    "ticker": "SCS",
+    "sector": "Transport & Logistics",
+    "projectedTsrPercentage": 0.3984674329,
+    "rating": "O-PF",
+    "marketCapVnd": 4953100460400.0,
+    "marketCapUsd": 188581780.33123928,
+    "targetPrice": 67000.0,
+    "numberOfSharesMktCap": 94886982.0,
+    "pe": {
+      "2025F": 7.2140083354,
+      "2026F": 7.0350096232
+    },
+    "pb": {
+      "2025F": 2.3842303613,
+      "2026F": 1.7807257872
+    },
+    "roe": {
+      "2025F": 0.4774775172534393,
+      "2026F": 0.45935325334659255
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0016636378,
+      "2026F": 0.0254439897
+    },
+    "npatmi": {
+      "2025F": 693980614835.3761,
+      "2026F": 711638250431.7021
+    },
+    "analyst": "Huy Hoang",
+    "adtvVnd": {
+      "3M": 17342936667.692307,
+      "1M": 15852699500.0,
+      "6M": 23099075168.217052
+    },
+    "adtvUsd": {
+      "6M": 879462.2184739026,
+      "3M": 660305.9839212757,
+      "1M": 603567.4662097848
+    },
+    "maximumForeignPercentage": 0.20211731,
+    "tpUpdatedTime": "29-May-25",
+    "dividendPerShareTsr": 6000.0
+  },
+  {
+    "ticker": "TLG",
+    "sector": "Consumer",
+    "projectedTsrPercentage": 0.2899408284,
+    "rating": "BUY",
+    "marketCapVnd": 4893986838000.0,
+    "marketCapUsd": 186331118.90348372,
+    "targetPrice": 61900.0,
+    "numberOfSharesMktCap": 96528340.0,
+    "pe": {
+      "2025F": 9.4010754682,
+      "2026F": 8.2345298035
+    },
+    "pb": {
+      "2025F": 1.5815470073,
+      "2026F": 1.3274481069
+    },
+    "roe": {
+      "2025F": 0.1955,
+      "2026F": 0.2102
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0238095238,
+      "2026F": 0.1416490486
+    },
+    "npatmi": {
+      "2025F": 473000000000.0,
+      "2026F": 540000000000.0
+    },
+    "analyst": "Han Nguyen",
+    "adtvVnd": {
+      "3M": 18258388538.461536,
+      "1M": 40569435104.545456,
+      "6M": 17888721458.52713
+    },
+    "adtvUsd": {
+      "6M": 681085.9112327101,
+      "3M": 695160.4240800128,
+      "1M": 1544619.6498970287
+    },
+    "maximumForeignPercentage": 0.87673086,
+    "tpUpdatedTime": "12-Sep-25",
+    "dividendPerShareTsr": 3500.0
+  },
+  {
+    "ticker": "REE",
+    "sector": "Power & Water",
+    "projectedTsrPercentage": 0.2794830372,
+    "rating": "BUY",
+    "marketCapVnd": 33528638804100.0,
+    "marketCapUsd": 1276552019.9543118,
+    "targetPrice": 78200.0,
+    "numberOfSharesMktCap": 541658139.0,
+    "pe": {
+      "2025F": 12.8343354758,
+      "2026F": 10.6742541818
+    },
+    "pb": {
+      "2025F": 1.5595061245,
+      "2026F": 1.3608207065
+    },
+    "roe": {
+      "2025F": 0.131,
+      "2026F": 0.141
+    },
+    "npatmiGrowth": {
+      "2025F": 0.3110888108,
+      "2026F": 0.2020665901
+    },
+    "npatmi": {
+      "2025F": 2613000000000.0,
+      "2026F": 3141000000000.0
+    },
+    "analyst": "Tuan Do",
+    "adtvVnd": {
+      "3M": 27817670907.692307,
+      "1M": 21777234236.363636,
+      "6M": 49211546890.69768
+    },
+    "adtvUsd": {
+      "6M": 1873654.9358727462,
+      "3M": 1059115.58757633,
+      "1M": 829135.1317861655
+    },
+    "maximumForeignPercentage": 0.0,
+    "tpUpdatedTime": "03-Nov-25",
+    "dividendPerShareTsr": 1000.0
+  },
+  {
+    "ticker": "HDG",
+    "sector": "Power & Water",
+    "projectedTsrPercentage": 0.3120567376,
+    "rating": "O-PF",
+    "marketCapVnd": 10432957587000.0,
+    "marketCapUsd": 397219021.016562,
+    "targetPrice": 37000.0,
+    "numberOfSharesMktCap": 369963035.0,
+    "pe": {
+      "2025F": 15.1044456347,
+      "2026F": 8.2480257385
+    },
+    "pb": {
+      "2025F": 1.5320188322,
+      "2026F": 1.2858271126
+    },
+    "roe": {
+      "2025F": 0.112,
+      "2026F": 0.182
+    },
+    "npatmiGrowth": {
+      "2025F": 1.0459770115,
+      "2026F": 0.8314606742
+    },
+    "npatmi": {
+      "2025F": 712000000000.0,
+      "2026F": 1304000000000.0
+    },
+    "analyst": "Tuan Do",
+    "adtvVnd": {
+      "3M": 117185021621.53847,
+      "1M": 59939896111.36363,
+      "6M": 155956094375.1938
+    },
+    "adtvUsd": {
+      "6M": 5937791.523898489,
+      "3M": 4461641.79027369,
+      "1M": 2282120.544883443
+    },
+    "maximumForeignPercentage": 0.29368264,
+    "tpUpdatedTime": "17-Nov-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "PC1",
+    "sector": "Power & Water",
+    "projectedTsrPercentage": 0.252900232,
+    "rating": "BUY",
+    "marketCapVnd": 8863199141650.0,
+    "marketCapUsd": 337452851.38587475,
+    "targetPrice": 27000.0,
+    "numberOfSharesMktCap": 411285343.0,
+    "pe": {
+      "2025F": 13.6565272497,
+      "2026F": 10.9613428281
+    },
+    "pb": {
+      "2025F": 1.4225310017,
+      "2026F": 1.2476016001
+    },
+    "roe": {
+      "2025F": 0.122,
+      "2026F": 0.14
+    },
+    "npatmiGrowth": {
+      "2025F": 0.4957264957,
+      "2026F": 0.2471428571
+    },
+    "npatmi": {
+      "2025F": 700000000000.0,
+      "2026F": 873000000000.0
+    },
+    "analyst": "Tuan Do",
+    "adtvVnd": {
+      "3M": 61423174783.07692,
+      "1M": 66773823475.0,
+      "6M": 108369810691.08527
+    },
+    "adtvUsd": {
+      "6M": 4126016.017174387,
+      "3M": 2338594.128424783,
+      "1M": 2542311.9541214546
+    },
+    "maximumForeignPercentage": 0.37356599,
+    "tpUpdatedTime": "05-Nov-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "GEX",
+    "sector": "Power & Water",
+    "projectedTsrPercentage": 0.2482269504,
+    "rating": "M-PF",
+    "marketCapVnd": 38171475500400.0,
+    "marketCapUsd": 1453320978.5037122,
+    "targetPrice": 52300.0,
+    "numberOfSharesMktCap": 902398948.0,
+    "pe": {
+      "2025F": 25.1486325803,
+      "2026F": 21.9512195122
+    },
+    "pb": {
+      "2025F": 2.4571462101,
+      "2026F": 2.2075080866
+    },
+    "roe": {
+      "2025F": 0.107,
+      "2026F": 0.117
+    },
+    "npatmiGrowth": {
+      "2025F": -0.0606989577,
+      "2026F": 0.1462140992
+    },
+    "npatmi": {
+      "2025F": 1532000000000.0,
+      "2026F": 1756000000000.0
+    },
+    "analyst": "Tuan Do",
+    "adtvVnd": {
+      "3M": 693729603720.0,
+      "1M": 465526718995.4545,
+      "6M": 678939380610.4651
+    },
+    "adtvUsd": {
+      "6M": 25849586.164495148,
+      "3M": 26412701.455168474,
+      "1M": 17724223.07235692
+    },
+    "maximumForeignPercentage": 0.42345397,
+    "tpUpdatedTime": "21-Aug-25",
+    "dividendPerShareTsr": 500.0
+  },
+  {
+    "ticker": "VGC",
+    "sector": "Industrial Parks",
+    "projectedTsrPercentage": 0.6370370371,
+    "rating": "BUY",
+    "marketCapVnd": 18158175000000.0,
+    "marketCapUsd": 691344945.7452884,
+    "targetPrice": 64100.0,
+    "numberOfSharesMktCap": 448350000.0,
+    "pe": {
+      "2025F": 16.6803953871,
+      "2026F": 11.5979381443
+    },
+    "pb": {
+      "2025F": 1.9200100788,
+      "2026F": 1.635928334
+    },
+    "roe": {
+      "2025F": 0.136,
+      "2026F": 0.187
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0325791855,
+      "2026F": 0.4382120947
+    },
+    "npatmi": {
+      "2025F": 1141000000000.0,
+      "2026F": 1641000000000.0
+    },
+    "analyst": "Tuan Do",
+    "adtvVnd": {
+      "3M": 49390818957.69231,
+      "1M": 27562097609.090908,
+      "6M": 76750693686.04651
+    },
+    "adtvUsd": {
+      "6M": 2922166.1407213598,
+      "3M": 1880480.4476562843,
+      "1M": 1049385.0222383747
+    },
+    "maximumForeignPercentage": 0.46438146,
+    "tpUpdatedTime": "21-Oct-25",
+    "dividendPerShareTsr": 2200.0
+  },
+  {
+    "ticker": "DPG",
+    "sector": "Power & Water",
+    "projectedTsrPercentage": 0.3859432799,
+    "rating": "BUY",
+    "marketCapVnd": 4087400747600.0,
+    "marketCapUsd": 155621578.0544451,
+    "targetPrice": 55200.0,
+    "numberOfSharesMktCap": 100799032.0,
+    "pe": {
+      "2025F": 11.9757826344,
+      "2026F": 5.3117631648
+    },
+    "pb": {
+      "2025F": 1.4411311378,
+      "2026F": 1.3308972805
+    },
+    "roe": {
+      "2025F": 0.122,
+      "2026F": 0.226
+    },
+    "npatmiGrowth": {
+      "2025F": 0.5223214286,
+      "2026F": 1.2580645161
+    },
+    "npatmi": {
+      "2025F": 341000000000.0,
+      "2026F": 770000000000.0
+    },
+    "analyst": "Loc Pham",
+    "adtvVnd": {
+      "3M": 51088818777.69231,
+      "1M": 20824418663.636364,
+      "6M": 84898160879.84496
+    },
+    "adtvUsd": {
+      "6M": 3232368.584802778,
+      "3M": 1945129.212933269,
+      "1M": 792858.1254002042
+    },
+    "maximumForeignPercentage": 0.43503876,
+    "tpUpdatedTime": "04-Sep-25",
+    "dividendPerShareTsr": 1000.0
+  },
+  {
+    "ticker": "TV2",
+    "sector": "Power & Water",
+    "projectedTsrPercentage": 0.2369146006,
+    "rating": "BUY",
+    "marketCapVnd": 2451199789500.0,
+    "marketCapUsd": 93325710.62250143,
+    "targetPrice": 43900.0,
+    "numberOfSharesMktCap": 67526165.0,
+    "pe": {
+      "2025F": 57.345971564,
+      "2026F": 14.4448865897
+    },
+    "pb": {
+      "2025F": 1.7925786938,
+      "2026F": 1.5524424058
+    },
+    "roe": {
+      "2025F": 0.051,
+      "2026F": 0.152
+    },
+    "npatmiGrowth": {
+      "2025F": 0.0461538462,
+      "2026F": 2.1323529412
+    },
+    "npatmi": {
+      "2025F": 68000000000.0,
+      "2026F": 213000000000.0
+    },
+    "analyst": "Loc Pham",
+    "adtvVnd": {
+      "3M": 7422944810.0,
+      "1M": 8766919536.363636,
+      "6M": 17099449986.04651
+    },
+    "adtvUsd": {
+      "6M": 651035.5981742437,
+      "3M": 282617.3542737483,
+      "1M": 333787.151584376
+    },
+    "maximumForeignPercentage": 0.07692308,
+    "tpUpdatedTime": "18-Sep-25",
+    "dividendPerShareTsr": 1000.0
+  },
+  {
+    "ticker": "PPC",
+    "sector": "Power & Water",
+    "projectedTsrPercentage": 0.168699187,
+    "rating": "O-PF",
+    "marketCapVnd": 3154832451360.0,
+    "marketCapUsd": 120115455.98172472,
+    "targetPrice": 11000.0,
+    "numberOfSharesMktCap": 320613054.0,
+    "pe": {
+      "2025F": 65.1655629139,
+      "2026F": 9.7425742574
+    },
+    "pb": {
+      "2025F": 0.6905139427,
+      "2026F": 0.643002147
+    },
+    "roe": {
+      "2025F": 0.011,
+      "2026F": 0.076
+    },
+    "npatmiGrowth": {
+      "2025F": -0.8820754717,
+      "2026F": 5.76
+    },
+    "npatmi": {
+      "2025F": 50000000000.0,
+      "2026F": 338000000000.0
+    },
+    "analyst": "Phuoc Duong",
+    "adtvVnd": {
+      "3M": 2774177261.384615,
+      "1M": 1688918401.818181,
+      "6M": 5902991263.875968
+    },
+    "adtvUsd": {
+      "6M": 224747.4305682836,
+      "3M": 105622.5875265416,
+      "1M": 64303.0040669401
+    },
+    "maximumForeignPercentage": 0.44511756,
+    "tpUpdatedTime": "10-Dec-25",
+    "dividendPerShareTsr": 500.0
+  },
+  {
+    "ticker": "QTP",
+    "sector": "Power & Water",
+    "projectedTsrPercentage": 0.2380952381,
+    "rating": "BUY",
+    "marketCapVnd": 5670000000000.0,
+    "marketCapUsd": 215876641.91890347,
+    "targetPrice": 14600.0,
+    "numberOfSharesMktCap": 450000000.0,
+    "pe": {
+      "2025F": 10.824742268,
+      "2026F": 8.6006825939
+    },
+    "pb": {
+      "2025F": 1.0113836187,
+      "2026F": 0.8999740909
+    },
+    "roe": {
+      "2025F": 0.108,
+      "2026F": 0.133
+    },
+    "npatmiGrowth": {
+      "2025F": -0.1523076923,
+      "2026F": 0.2595281307
+    },
+    "npatmi": {
+      "2025F": 551000000000.0,
+      "2026F": 694000000000.0
+    },
+    "analyst": "Phuoc Duong",
+    "adtvVnd": {
+      "3M": 2016143333.846153,
+      "1M": 1653905431.818181,
+      "6M": 4105058773.64341
+    },
+    "adtvUsd": {
+      "6M": 156293.8805879844,
+      "3M": 76761.5965675291,
+      "1M": 62969.9383901839
+    },
+    "maximumForeignPercentage": -0.00972091,
+    "tpUpdatedTime": "10-Dec-25",
+    "dividendPerShareTsr": 1000.0
+  },
+  {
+    "ticker": "NT2",
+    "sector": "Power & Water",
+    "projectedTsrPercentage": 0.2644628099,
+    "rating": "BUY",
+    "marketCapVnd": 6966599901800.0,
+    "marketCapUsd": 265242714.70778602,
+    "targetPrice": 28600.0,
+    "numberOfSharesMktCap": 287876029.0,
+    "pe": {
+      "2025F": 8.1017743555,
+      "2026F": 7.3001508296
+    },
+    "pb": {
+      "2025F": 1.3716768578,
+      "2026F": 1.1481891298
+    },
+    "roe": {
+      "2025F": 0.19,
+      "2026F": 0.188
+    },
+    "npatmiGrowth": {
+      "2025F": 9.7469879518,
+      "2026F": 0.1087443946
+    },
+    "npatmi": {
+      "2025F": 892000000000.0,
+      "2026F": 989000000000.0
+    },
+    "analyst": "Loc Pham",
+    "adtvVnd": {
+      "3M": 28910022640.0,
+      "1M": 16631181900.0,
+      "6M": 33044749382.170544
+    },
+    "adtvUsd": {
+      "6M": 1258128.6648456326,
+      "3M": 1100705.2213972968,
+      "1M": 633207.0017133066
+    },
+    "maximumForeignPercentage": 0.37038189,
+    "tpUpdatedTime": "10-Dec-25",
+    "dividendPerShareTsr": 2000.0
+  },
+  {
+    "ticker": "POW",
+    "sector": "Power & Water",
+    "projectedTsrPercentage": 0.1721311475,
+    "rating": "O-PF",
+    "marketCapVnd": 37427791911200.0,
+    "marketCapUsd": 1425006354.8905387,
+    "targetPrice": 14300.0,
+    "numberOfSharesMktCap": 3067851796.0,
+    "pe": {
+      "2025F": 16.7582417582,
+      "2026F": 19.6774193548
+    },
+    "pb": {
+      "2025F": 0.9956715832,
+      "2026F": 1.0352190649
+    },
+    "roe": {
+      "2025F": 0.041,
+      "2026F": 0.058
+    },
+    "npatmiGrowth": {
+      "2025F": 0.9244604317,
+      "2026F": -0.0621495327
+    },
+    "npatmi": {
+      "2025F": 2140000000000.0,
+      "2026F": 2007000000000.0
+    },
+    "analyst": "Loc Pham",
+    "adtvVnd": {
+      "3M": 104239349953.84615,
+      "1M": 105863670756.81818,
+      "6M": 165267946137.2093
+    },
+    "adtvUsd": {
+      "6M": 6292326.142669305,
+      "3M": 3968754.995387251,
+      "1M": 4030598.543948912
+    },
+    "maximumForeignPercentage": 0.45785614,
+    "tpUpdatedTime": "10-Dec-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "BWE",
+    "sector": "Power & Water",
+    "projectedTsrPercentage": 0.3318181818,
+    "rating": "BUY",
+    "marketCapVnd": 9676860336000.0,
+    "marketCapUsd": 368431766.0765277,
+    "targetPrice": 57300.0,
+    "numberOfSharesMktCap": 219928644.0,
+    "pe": {
+      "2025F": 13.5342971393,
+      "2026F": 10.6666666667
+    },
+    "pb": {
+      "2025F": 1.5617447755,
+      "2026F": 1.3276285794
+    },
+    "roe": {
+      "2025F": 0.1483,
+      "2026F": 0.1707
+    },
+    "npatmiGrowth": {
+      "2025F": 0.3426791277,
+      "2026F": 0.2679814385
+    },
+    "npatmi": {
+      "2025F": 862000000000.0,
+      "2026F": 1093000000000.0
+    },
+    "analyst": "Loc Pham",
+    "adtvVnd": {
+      "3M": 5981899958.461538,
+      "1M": 3495173770.454545,
+      "6M": 7681940671.705426
+    },
+    "adtvUsd": {
+      "6M": 292478.2285058224,
+      "3M": 227751.7593170203,
+      "1M": 133073.4350068359
+    },
+    "maximumForeignPercentage": 0.41402089,
+    "tpUpdatedTime": "11-Nov-25",
+    "dividendPerShareTsr": 1300.0
+  },
+  {
+    "ticker": "TDM",
+    "sector": "Power & Water",
+    "projectedTsrPercentage": 0.0276338514,
+    "rating": "M-PF",
+    "marketCapVnd": 6432690000000.0,
+    "marketCapUsd": 244914905.7681325,
+    "targetPrice": 58100.0,
+    "numberOfSharesMktCap": 111100000.0,
+    "pe": {
+      "2025F": 35.0484261501,
+      "2026F": 45.1286048324
+    },
+    "pb": {
+      "2025F": 2.3652534624,
+      "2026F": 2.2376117627
+    },
+    "roe": {
+      "2025F": 0.078,
+      "2026F": 0.06
+    },
+    "npatmiGrowth": {
+      "2025F": -0.0245098039,
+      "2026F": -0.2211055276
+    },
+    "npatmi": {
+      "2025F": 199000000000.0,
+      "2026F": 155000000000.0
+    },
+    "analyst": "Loc Pham",
+    "adtvVnd": {
+      "3M": 431650523.076923,
+      "1M": 178367054.545454,
+      "6M": 424611819.379844
+    },
+    "adtvUsd": {
+      "6M": 16166.4503856784,
+      "3M": 16434.4383429249,
+      "1M": 6791.0548085077
+    },
+    "maximumForeignPercentage": 0.48683435,
+    "tpUpdatedTime": "11-Nov-25",
+    "dividendPerShareTsr": 1400.0
+  },
+  {
+    "ticker": "GAS",
+    "sector": "Oil & Gas",
+    "projectedTsrPercentage": 0.228125,
+    "rating": "BUY",
+    "marketCapVnd": 154428784384000.0,
+    "marketCapUsd": 5879641514.715401,
+    "targetPrice": 76100.0,
+    "numberOfSharesMktCap": 2412949756.0,
+    "pe": {
+      "2025F": 12.7974405119,
+      "2026F": 12.1488230828
+    },
+    "pb": {
+      "2025F": 2.1283122368,
+      "2026F": 1.8055510665
+    },
+    "roe": {
+      "2025F": 0.193,
+      "2026F": 0.185
+    },
+    "npatmiGrowth": {
+      "2025F": 0.1841700327,
+      "2026F": 0.0534394542
+    },
+    "npatmi": {
+      "2025F": 12313000000000.0,
+      "2026F": 12971000000000.0
+    },
+    "analyst": "Tuan Do",
+    "adtvVnd": {
+      "3M": 46058632301.53846,
+      "1M": 55913842054.545456,
+      "6M": 62155408613.17829
+    },
+    "adtvUsd": {
+      "6M": 2366472.819843072,
+      "3M": 1753612.499582656,
+      "1M": 2128834.6489451914
+    },
+    "maximumForeignPercentage": 0.47148238,
+    "tpUpdatedTime": "12-Nov-25",
+    "dividendPerShareTsr": 2500.0
+  },
+  {
+    "ticker": "PVD",
+    "sector": "Oil & Gas",
+    "projectedTsrPercentage": 0.0507246377,
+    "rating": "BUY",
+    "marketCapVnd": 15342288165600.0,
+    "marketCapUsd": 584134329.5488292,
+    "targetPrice": 29000.0,
+    "numberOfSharesMktCap": 555880006.0,
+    "pe": {
+      "2025F": 20.2941176471,
+      "2026F": 15.1398793198
+    },
+    "pb": {
+      "2025F": 0.9199264085,
+      "2026F": 0.8592000406
+    },
+    "roe": {
+      "2025F": 0.053,
+      "2026F": 0.066
+    },
+    "npatmiGrowth": {
+      "2025F": 0.243281471,
+      "2026F": 0.3412969283
+    },
+    "npatmi": {
+      "2025F": 879000000000.0,
+      "2026F": 1179000000000.0
+    },
+    "analyst": "Phuoc Duong",
+    "adtvVnd": {
+      "3M": 185545284150.0,
+      "1M": 196184605313.63635,
+      "6M": 191170639156.20154
+    },
+    "adtvUsd": {
+      "6M": 7278531.854414679,
+      "3M": 7064355.002855511,
+      "1M": 7469431.00375543
+    },
+    "maximumForeignPercentage": 0.39209947,
+    "tpUpdatedTime": "05-Nov-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "PVS",
+    "sector": "Oil & Gas",
+    "projectedTsrPercentage": 0.3034055728,
+    "rating": "BUY",
+    "marketCapVnd": 16518869197700.0,
+    "marketCapUsd": 628930866.0841424,
+    "targetPrice": 42100.0,
+    "numberOfSharesMktCap": 511420099.0,
+    "pe": {
+      "2025F": 16.8492436098,
+      "2026F": 14.1294838145
+    },
+    "pb": {
+      "2025F": 1.115704289,
+      "2026F": 1.0153599068
+    },
+    "roe": {
+      "2025F": 0.081,
+      "2026F": 0.089
+    },
+    "npatmiGrowth": {
+      "2025F": 0.1448598131,
+      "2026F": 0.1934693878
+    },
+    "npatmi": {
+      "2025F": 1225000000000.0,
+      "2026F": 1462000000000.0
+    },
+    "analyst": "Phuoc Duong",
+    "adtvVnd": {
+      "3M": 142825890658.46155,
+      "1M": 117079981231.81818,
+      "6M": 201181544188.3721
+    },
+    "adtvUsd": {
+      "6M": 7659681.865157895,
+      "3M": 5437878.951397737,
+      "1M": 4457642.5369053185
+    },
+    "maximumForeignPercentage": 0.35532141,
+    "tpUpdatedTime": "27-Oct-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "PVT",
+    "sector": "Oil & Gas",
+    "projectedTsrPercentage": 0.2109589041,
+    "rating": "BUY",
+    "marketCapVnd": 8576245038750.0,
+    "marketCapUsd": 326527509.5659623,
+    "targetPrice": 22100.0,
+    "numberOfSharesMktCap": 469931235.0,
+    "pe": {
+      "2025F": 8.7614018243,
+      "2026F": 7.0192307692
+    },
+    "pb": {
+      "2025F": 0.9811678653,
+      "2026F": 0.8561119986
+    },
+    "roe": {
+      "2025F": 0.124,
+      "2026F": 0.136
+    },
+    "npatmiGrowth": {
+      "2025F": -0.0640439158,
+      "2026F": 0.2482893451
+    },
+    "npatmi": {
+      "2025F": 1023000000000.0,
+      "2026F": 1277000000000.0
+    },
+    "analyst": "Phuoc Duong",
+    "adtvVnd": {
+      "3M": 59690393760.0,
+      "1M": 69819063536.36363,
+      "6M": 67647000101.93798
+    },
+    "adtvUsd": {
+      "6M": 2575556.82855275,
+      "3M": 2272621.1216447745,
+      "1M": 2658254.8462350518
+    },
+    "maximumForeignPercentage": 0.39791061,
+    "tpUpdatedTime": "06-Nov-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "OIL",
+    "sector": "Oil & Gas",
+    "projectedTsrPercentage": 0.2075471698,
+    "rating": "O-PF",
+    "marketCapVnd": 10962832700000.0,
+    "marketCapUsd": 417393211.49819154,
+    "targetPrice": 12700.0,
+    "numberOfSharesMktCap": 1034229500.0,
+    "pe": {
+      "2025F": 132.5,
+      "2026F": 23.3995584989
+    },
+    "pb": {
+      "2025F": 1.0340056353,
+      "2026F": 0.9795742774
+    },
+    "roe": {
+      "2025F": 0.015,
+      "2026F": 0.05
+    },
+    "npatmiGrowth": {
+      "2025F": -0.5936739659,
+      "2026F": 2.5269461078
+    },
+    "npatmi": {
+      "2025F": 167000000000.0,
+      "2026F": 589000000000.0
+    },
+    "analyst": "Phuoc Duong",
+    "adtvVnd": {
+      "3M": 7851281149.230769,
+      "1M": 6038494204.545454,
+      "6M": 16029495395.348837
+    },
+    "adtvUsd": {
+      "6M": 610298.701517184,
+      "3M": 298925.6100982589,
+      "1M": 229906.4993164079
+    },
+    "maximumForeignPercentage": 0.06003972,
+    "tpUpdatedTime": "17-Oct-25",
+    "dividendPerShareTsr": 100.0
+  },
+  {
+    "ticker": "PLX",
+    "sector": "Oil & Gas",
+    "projectedTsrPercentage": 0.2137733142,
+    "rating": "BUY",
+    "marketCapVnd": 44280139389750.0,
+    "marketCapUsd": 1685899082.038835,
+    "targetPrice": 41100.0,
+    "numberOfSharesMktCap": 1270592235.0,
+    "pe": {
+      "2025F": 19.4150417827,
+      "2026F": 15.1390095569
+    },
+    "pb": {
+      "2025F": 1.5523432807,
+      "2026F": 1.394927932
+    },
+    "roe": {
+      "2025F": 0.084,
+      "2026F": 0.102
+    },
+    "npatmiGrowth": {
+      "2025F": -0.1311418685,
+      "2026F": 0.2823576264
+    },
+    "npatmi": {
+      "2025F": 2511000000000.0,
+      "2026F": 3220000000000.0
+    },
+    "analyst": "Phuoc Duong",
+    "adtvVnd": {
+      "3M": 52899596461.53846,
+      "1M": 51217136411.36363,
+      "6M": 70856438927.51938
+    },
+    "adtvUsd": {
+      "6M": 2697751.339330645,
+      "3M": 2014071.8241590885,
+      "1M": 1950014.7120260282
+    },
+    "maximumForeignPercentage": 0.05328667,
+    "tpUpdatedTime": "13-Oct-25",
+    "dividendPerShareTsr": 1200.0
+  },
+  {
+    "ticker": "PLC",
+    "sector": "Oil & Gas",
+    "projectedTsrPercentage": 0.3708333334,
+    "rating": "BUY",
+    "marketCapVnd": 1939141584000.0,
+    "marketCapUsd": 73829871.8446602,
+    "targetPrice": 31900.0,
+    "numberOfSharesMktCap": 80797566.0,
+    "pe": {
+      "2025F": 15.3354632588,
+      "2026F": 7.68
+    },
+    "pb": {
+      "2025F": 1.4131488567,
+      "2026F": 1.194359045
+    },
+    "roe": {
+      "2025F": 0.098,
+      "2026F": 0.178
+    },
+    "npatmiGrowth": {
+      "2025F": 1.9302325581,
+      "2026F": 1.0
+    },
+    "npatmi": {
+      "2025F": 126000000000.0,
+      "2026F": 252000000000.0
+    },
+    "analyst": "Phuoc Duong",
+    "adtvVnd": {
+      "3M": 5689376280.0,
+      "1M": 2534772345.454545,
+      "6M": 11956253871.31783
+    },
+    "adtvUsd": {
+      "6M": 455216.214403877,
+      "3M": 216614.364363221,
+      "1M": 96507.6088122804
+    },
+    "maximumForeignPercentage": 0.47835468,
+    "tpUpdatedTime": "12-Sep-25",
+    "dividendPerShareTsr": 1000.0
+  },
+  {
+    "ticker": "BSR",
+    "sector": "Oil & Gas",
+    "projectedTsrPercentage": -0.2225705329,
+    "rating": "SELL",
+    "marketCapVnd": 79866429991700.0,
+    "marketCapUsd": 3040793070.310299,
+    "targetPrice": 12400.0,
+    "numberOfSharesMktCap": 5007299686.0,
+    "pe": {
+      "2025F": 26.8971332209,
+      "2026F": 20.3443877551
+    },
+    "pb": {
+      "2025F": 1.3660741685,
+      "2026F": 1.2801249455
+    },
+    "roe": {
+      "2025F": 0.052,
+      "2026F": 0.065
+    },
+    "npatmiGrowth": {
+      "2025F": 3.7036450079,
+      "2026F": 0.3227762803
+    },
+    "npatmi": {
+      "2025F": 2968000000000.0,
+      "2026F": 3926000000000.0
+    },
+    "analyst": "Phuoc Duong",
+    "adtvVnd": {
+      "3M": 153626420851.53845,
+      "1M": 92520634547.72726,
+      "6M": 220681293171.31784
+    },
+    "adtvUsd": {
+      "6M": 8402105.203552935,
+      "3M": 5849092.741349265,
+      "1M": 3522582.697419656
+    },
+    "maximumForeignPercentage": 0.48130266,
+    "tpUpdatedTime": "28-Aug-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "DPM",
+    "sector": "Oil & Gas",
+    "projectedTsrPercentage": 0.3422222222,
+    "rating": "O-PF",
+    "marketCapVnd": 15298312972500.0,
+    "marketCapUsd": 582460040.8338093,
+    "targetPrice": 29000.0,
+    "numberOfSharesMktCap": 679925021.0,
+    "pe": {
+      "2025F": 17.019667171,
+      "2026F": 12.3220153341
+    },
+    "pb": {
+      "2025F": 1.2659870542,
+      "2026F": 1.1265380857
+    },
+    "roe": {
+      "2025F": 0.095,
+      "2026F": 0.124
+    },
+    "npatmiGrowth": {
+      "2025F": 1.0130111524,
+      "2026F": 0.3813481071
+    },
+    "npatmi": {
+      "2025F": 1083000000000.0,
+      "2026F": 1496000000000.0
+    },
+    "analyst": "Tuan Do",
+    "adtvVnd": {
+      "3M": 92069648279.23077,
+      "1M": 61946325356.818184,
+      "6M": 133917989523.25581
+    },
+    "adtvUsd": {
+      "6M": 5098724.139472904,
+      "3M": 3505412.0799250244,
+      "1M": 2358512.2922831974
+    },
+    "maximumForeignPercentage": 0.46373893,
+    "tpUpdatedTime": "17-Sep-25",
+    "dividendPerShareTsr": 1200.0
+  },
+  {
+    "ticker": "DCM",
+    "sector": "Oil & Gas",
+    "projectedTsrPercentage": 0.5235109718,
+    "rating": "BUY",
+    "marketCapVnd": 16887860000000.0,
+    "marketCapUsd": 642979630.6872263,
+    "targetPrice": 46600.0,
+    "numberOfSharesMktCap": 529400000.0,
+    "pe": {
+      "2025F": 9.0087545891,
+      "2026F": 7.2632058288
+    },
+    "pb": {
+      "2025F": 1.3877089578,
+      "2026F": 1.149245553
+    },
+    "roe": {
+      "2025F": 0.191,
+      "2026F": 0.213
+    },
+    "npatmiGrowth": {
+      "2025F": 0.435915493,
+      "2026F": 0.2398234429
+    },
+    "npatmi": {
+      "2025F": 2039000000000.0,
+      "2026F": 2528000000000.0
+    },
+    "analyst": "Tuan Do",
+    "adtvVnd": {
+      "3M": 76623316516.92308,
+      "1M": 38950565502.27273,
+      "6M": 143258351809.30234
+    },
+    "adtvUsd": {
+      "6M": 5454344.253162092,
+      "3M": 2917316.4483884666,
+      "1M": 1482983.647526089
+    },
+    "maximumForeignPercentage": 0.45378045,
+    "tpUpdatedTime": "17-Sep-25",
+    "dividendPerShareTsr": 2000.0
+  },
+  {
+    "ticker": "HPG",
+    "sector": "Materials",
+    "projectedTsrPercentage": 0.3670411985,
+    "rating": "BUY",
+    "marketCapVnd": 204934938328500.0,
+    "marketCapUsd": 7802586648.71502,
+    "targetPrice": 35700.0,
+    "numberOfSharesMktCap": 7675465855.0,
+    "pe": {
+      "2025F": 13.2705058209,
+      "2026F": 9.7802453182
+    },
+    "pb": {
+      "2025F": 1.5720838503,
+      "2026F": 1.3476111504
+    },
+    "roe": {
+      "2025F": 0.13083085866231994,
+      "2026F": 0.15798123171288966
+    },
+    "npatmiGrowth": {
+      "2025F": 0.3314170562,
+      "2026F": 0.3568684005
+    },
+    "npatmi": {
+      "2025F": 16003099892023.336,
+      "2026F": 21714100552741.055
+    },
+    "analyst": "Huy Hoang",
+    "adtvVnd": {
+      "3M": 989309568903.8462,
+      "1M": 623146016770.4546,
+      "6M": 1439311089956.9768
+    },
+    "adtvUsd": {
+      "6M": 54799584.6166753,
+      "3M": 37666459.88592599,
+      "1M": 23725338.54066075
+    },
+    "maximumForeignPercentage": 0.29077278,
+    "tpUpdatedTime": "10-Nov-25",
+    "dividendPerShareTsr": 800.0
+  },
+  {
+    "ticker": "HSG",
+    "sector": "Materials",
+    "projectedTsrPercentage": -0.1194968553,
+    "rating": "M-PF",
+    "marketCapVnd": 9873618713100.0,
+    "marketCapUsd": 375923042.56996,
+    "targetPrice": 13500.0,
+    "numberOfSharesMktCap": 620982309.0,
+    "pe": {
+      "2025F": 19.8898207752,
+      "2026F": 16.8371515275
+    },
+    "pb": {
+      "2025F": 0.8438652207,
+      "2026F": 0.8028090735
+    },
+    "roe": {
+      "2025F": 0.04564110562853356,
+      "2026F": 0.05281712588687991
+    },
+    "npatmiGrowth": {
+      "2025F": -0.0237159617,
+      "2026F": 0.1813055636
+    },
+    "npatmi": {
+      "2025F": 502468011138.8466,
+      "2026F": 593568257106.1327
+    },
+    "analyst": "Huy Hoang",
+    "adtvVnd": {
+      "3M": 75079877174.61539,
+      "1M": 39613395786.36363,
+      "6M": 152128422945.73642
+    },
+    "adtvUsd": {
+      "6M": 5792058.745316445,
+      "3M": 2858552.338648977,
+      "1M": 1508219.9042971113
+    },
+    "maximumForeignPercentage": 0.44445429,
+    "tpUpdatedTime": "18-Apr-25",
+    "dividendPerShareTsr": 500.0
+  },
+  {
+    "ticker": "BMP",
+    "sector": "Materials",
+    "projectedTsrPercentage": 0.1982758621,
+    "rating": "BUY",
+    "marketCapVnd": 14243803212000.0,
+    "marketCapUsd": 542311182.6384923,
+    "targetPrice": 192500.0,
+    "numberOfSharesMktCap": 81860938.0,
+    "pe": {
+      "2025F": 10.7863461437,
+      "2026F": 10.1731103699
+    },
+    "pb": {
+      "2025F": 3.5303000002,
+      "2026F": 2.6144623061
+    },
+    "roe": {
+      "2025F": 0.4683171459156304,
+      "2026F": 0.47082864934647606
+    },
+    "npatmiGrowth": {
+      "2025F": 0.3454166591,
+      "2026F": 0.0602800669
+    },
+    "npatmi": {
+      "2025F": 1332983914008.461,
+      "2026F": 1413336273539.0747
+    },
+    "analyst": "Huy Hoang",
+    "adtvVnd": {
+      "3M": 23578673587.692307,
+      "1M": 29419547627.272728,
+      "6M": 22488971186.046513
+    },
+    "adtvUsd": {
+      "6M": 856233.4356004765,
+      "3M": 897722.2001786525,
+      "1M": 1120104.6117370161
+    },
+    "maximumForeignPercentage": 0.14821803,
+    "tpUpdatedTime": "12-Nov-25",
+    "dividendPerShareTsr": 16000.0
+  },
+  {
+    "ticker": "NKG",
+    "sector": "Materials",
+    "projectedTsrPercentage": -0.1266666667,
+    "rating": "M-PF",
+    "marketCapVnd": 6713563215000.0,
+    "marketCapUsd": 255608727.01313534,
+    "targetPrice": 13100.0,
+    "numberOfSharesMktCap": 447570881.0,
+    "pe": {
+      "2025F": 15.6710416676,
+      "2026F": 11.605145096
+    },
+    "pb": {
+      "2025F": 1.0634401039,
+      "2026F": 0.9716490887
+    },
+    "roe": {
+      "2025F": 0.06423663891947701,
+      "2026F": 0.07300898521069636
+    },
+    "npatmiGrowth": {
+      "2025F": -0.0250594376,
+      "2026F": 0.3503529286
+    },
+    "npatmi": {
+      "2025F": 441655337119.233,
+      "2026F": 596390577923.8271
+    },
+    "analyst": "Huy Hoang",
+    "adtvVnd": {
+      "3M": 149028917500.76923,
+      "1M": 66318469697.72727,
+      "6M": 224380722555.03876
+    },
+    "adtvUsd": {
+      "6M": 8542955.360938083,
+      "3M": 5674049.781106767,
+      "1M": 2524975.050360833
+    },
+    "maximumForeignPercentage": 0.44985785,
+    "tpUpdatedTime": "18-Apr-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "AST",
+    "sector": "Transport & Logistics",
+    "projectedTsrPercentage": 0.0922077923,
+    "rating": "BUY",
+    "marketCapVnd": 3465000000000.0,
+    "marketCapUsd": 131924614.50599657,
+    "targetPrice": 80600.0,
+    "numberOfSharesMktCap": 45000000.0,
+    "pe": {
+      "2025F": 15.9453302961,
+      "2026F": 13.4193098641
+    },
+    "pb": {
+      "2025F": 4.6178973081,
+      "2026F": 3.4092871292
+    },
+    "roe": {
+      "2025F": 0.3132,
+      "2026F": 0.2931
+    },
+    "npatmiGrowth": {
+      "2025F": 0.5033557047,
+      "2026F": 0.1875
+    },
+    "npatmi": {
+      "2025F": 224000000000.0,
+      "2026F": 266000000000.0
+    },
+    "analyst": "Han Nguyen",
+    "adtvVnd": {
+      "3M": 739990450.76923,
+      "1M": 491797750.0,
+      "6M": 1084320203.875968
+    },
+    "adtvUsd": {
+      "6M": 41283.8455692354,
+      "3M": 28174.0129742711,
+      "1M": 18724.4526936988
+    },
+    "maximumForeignPercentage": 0.03556702,
+    "tpUpdatedTime": "26-Aug-25",
+    "dividendPerShareTsr": 3500.0
+  },
+  {
+    "ticker": "HVN",
+    "sector": "Transport & Logistics",
+    "projectedTsrPercentage": 0.4435797665,
+    "rating": "O-PF",
+    "marketCapVnd": 79965504022700.0,
+    "marketCapUsd": 3044565163.6284027,
+    "targetPrice": 37100.0,
+    "numberOfSharesMktCap": 3111498211.0,
+    "pe": {
+      "2025F": 6.6533572184,
+      "2026F": 9.2423903817
+    },
+    "pb": {
+      "2025F": -134.8119977438,
+      "2026F": 9.9227745255
+    },
+    "roe": {
+      "2025F": null,
+      "2026F": 0.6161
+    },
+    "npatmiGrowth": {
+      "2025F": 0.2457694342,
+      "2026F": -0.0809720896
+    },
+    "npatmi": {
+      "2025F": 9423000000000.0,
+      "2026F": 8660000000000.0
+    },
+    "analyst": "Han Nguyen",
+    "adtvVnd": {
+      "3M": 35859891076.92307,
+      "1M": 29185924545.454544,
+      "6M": 52637567170.54263
+    },
+    "adtvUsd": {
+      "6M": 2004095.456712074,
+      "3M": 1365310.9109812705,
+      "1M": 1111209.7675786996
+    },
+    "maximumForeignPercentage": 0.21103712,
+    "tpUpdatedTime": "22-Jul-25",
+    "dividendPerShareTsr": 0.0
+  },
+  {
+    "ticker": "VJC",
+    "sector": "Transport & Logistics",
+    "projectedTsrPercentage": -0.4297148574,
+    "rating": "O-PF",
+    "marketCapVnd": 118263105666600.0,
+    "marketCapUsd": 4502688203.563678,
+    "targetPrice": 114000.0,
+    "numberOfSharesMktCap": 591611334.0,
+    "pe": {
+      "2025F": 28.8622581577,
+      "2026F": 22.3751958809
+    },
+    "pb": {
+      "2025F": 5.3854979701,
+      "2026F": 4.3414818479
+    },
+    "roe": {
+      "2025F": 0.181,
+      "2026F": 0.214
+    },
+    "npatmiGrowth": {
+      "2025F": 1.7461430575,
+      "2026F": 0.2903472932
+    },
+    "npatmi": {
+      "2025F": 3916000000000.0,
+      "2026F": 5053000000000.0
+    },
+    "analyst": "Nam Hoang",
+    "adtvVnd": {
+      "3M": 410079202033.8461,
+      "1M": 454349679127.2727,
+      "6M": 331698025667.44183
+    },
+    "adtvUsd": {
+      "6M": 12628898.749950193,
+      "3M": 15613143.043359837,
+      "1M": 17298674.248135265
+    },
+    "maximumForeignPercentage": 0.2275014,
+    "tpUpdatedTime": "15-Mar-24",
+    "dividendPerShareTsr": 0.0
+  }
+]
