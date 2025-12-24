@@ -118,3 +118,7 @@ DATA/processed/forecast/*.xlsm
 # Excel temp files
 ~$*.xlsx
 ~$*.xlsm
+
+# API Token cache (expires regularly, should not be committed)
+PROCESSORS/api/*/vietcap_token.json
+**/vietcap_token.json
