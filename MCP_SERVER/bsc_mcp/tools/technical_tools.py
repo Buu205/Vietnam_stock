@@ -508,21 +508,24 @@ def register(mcp: FastMCP):
         include_value: bool = True
     ) -> str:
         """
-        Get raw OHLCV (Open, High, Low, Close, Volume) data with trading value.
+        Get raw OHLCV (Open, High, Low, Close, Volume) data directly from source.
 
-        This tool returns price data with trading value for:
+        This tool reads directly from raw OHLCV parquet (not processed data),
+        ideal for getting most recent data after OHLCV adjustment refresh.
+
+        Use cases:
         - External technical analysis with ta-lib
         - Money flow analysis
         - Custom indicator calculations
-        - Charting and visualization
+        - Real-time access after dividend/split adjustments
 
         Args:
             ticker: Stock symbol (e.g., "FPT", "VNM", "VCB")
             limit: Number of trading days to return (default: 60)
-            include_value: Include trading value columns (default: True)
+            include_value: Include market cap column (default: True)
 
         Returns:
-            Markdown table with OHLCV and trading value data
+            Markdown table with OHLCV data
 
         Examples:
             - bsc_get_ohlcv_raw("FPT") - Last 60 days with trading value
@@ -533,28 +536,21 @@ def register(mcp: FastMCP):
             loader = get_data_loader()
             ticker = ticker.upper().strip()
 
-            # Load technical data (contains OHLCV)
-            df = loader.get_technical_basic()
-
-            # Filter by ticker
-            ticker_df = df[df['symbol'] == ticker].copy()
+            # Load raw OHLCV data directly (bypasses processed pipeline)
+            ticker_df = loader.get_ohlcv_raw(
+                ticker=ticker,
+                limit=limit,
+                include_value=include_value
+            )
 
             if ticker_df.empty:
                 all_tickers = loader.get_available_tickers()
                 suggestions = [t for t in all_tickers if t.startswith(ticker[:2])][:5]
                 raise TickerNotFoundError(ticker, suggestions)
 
-            # Sort by date descending and limit
-            ticker_df = ticker_df.sort_values('date', ascending=False).head(limit)
-
-            # Select columns based on include_value
-            if include_value:
-                ohlcv_cols = ['date', 'open', 'high', 'low', 'close', 'volume', 'trading_value']
-            else:
-                ohlcv_cols = ['date', 'open', 'high', 'low', 'close', 'volume']
-
-            available_cols = [c for c in ohlcv_cols if c in ticker_df.columns]
-            result_df = ticker_df[available_cols].copy()
+            # Sort by date descending for display
+            ticker_df = ticker_df.sort_values('date', ascending=False)
+            result_df = ticker_df.drop(columns=['symbol'], errors='ignore').copy()
 
             # Format date
             if 'date' in result_df.columns:
@@ -565,17 +561,12 @@ def register(mcp: FastMCP):
 
             # Calculate basic stats
             if len(ticker_df) > 0:
-                latest_close = ticker_df.iloc[0]['close'] if 'close' in ticker_df.columns else 0
+                latest_close = ticker_df.iloc[-1]['close'] if 'close' in ticker_df.columns else 0
                 avg_volume = ticker_df['volume'].mean() if 'volume' in ticker_df.columns else 0
                 high_period = ticker_df['high'].max() if 'high' in ticker_df.columns else 0
                 low_period = ticker_df['low'].min() if 'low' in ticker_df.columns else 0
 
-                # Trading value stats (in billions VND)
-                avg_trading_value = ticker_df['trading_value'].mean() / 1e9 if 'trading_value' in ticker_df.columns else 0
-                latest_trading_value = ticker_df.iloc[0]['trading_value'] / 1e9 if 'trading_value' in ticker_df.columns else 0
-                max_trading_value = ticker_df['trading_value'].max() / 1e9 if 'trading_value' in ticker_df.columns else 0
-
-                stats = f"""### OHLCV Summary
+                stats = f"""### OHLCV Summary (Raw Data)
 | Metric | Value |
 |--------|-------|
 | **Latest Close** | {format_price(latest_close)} |
@@ -584,27 +575,17 @@ def register(mcp: FastMCP):
 | **Low ({limit}d)** | {format_price(low_period)} |
 
 """
-                if include_value:
-                    stats += f"""### Trading Value Analysis (tỷ VND)
-| Metric | Value |
-|--------|-------|
-| **Latest Trading Value** | {format_number(latest_trading_value, 2)} tỷ |
-| **Avg Trading Value ({limit}d)** | {format_number(avg_trading_value, 2)} tỷ |
-| **Max Trading Value ({limit}d)** | {format_number(max_trading_value, 2)} tỷ |
-| **Value vs Avg** | {format_percent((latest_trading_value / avg_trading_value - 1) if avg_trading_value > 0 else 0)} |
-
-"""
             else:
                 stats = ""
 
-            # Format trading value columns for display (convert to billions VND)
-            if 'trading_value' in result_df.columns:
-                result_df['trading_value'] = (result_df['trading_value'] / 1e9).round(2)
-                result_df = result_df.rename(columns={'trading_value': 'value_bn'})
+            # Format market cap for display (convert to billions VND)
+            if 'market_cap' in result_df.columns:
+                result_df['market_cap'] = (result_df['market_cap'] / 1e9).round(2)
+                result_df = result_df.rename(columns={'market_cap': 'mkt_cap_bn'})
 
             return header + stats + format_dataframe_markdown(
                 result_df,
-                title=f"OHLCV + Trading Value (Last {len(result_df)} days)"
+                title=f"Raw OHLCV (Last {len(result_df)} days)"
             )
 
         except TickerNotFoundError as e:

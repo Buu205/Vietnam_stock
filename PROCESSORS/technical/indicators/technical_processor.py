@@ -14,7 +14,7 @@ import pandas as pd
 import numpy as np
 import talib
 from pathlib import Path
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -237,6 +237,127 @@ class TechnicalProcessor:
         logger.info("=" * 80)
 
         return df
+
+    # =========================================================================
+    # SELECTIVE MODE - Process only specified symbols
+    # =========================================================================
+
+    def calculate_selective_indicators(
+        self,
+        symbols: List[str],
+        n_sessions: int = 500
+    ) -> pd.DataFrame:
+        """
+        Calculate indicators for specified symbols only.
+
+        Args:
+            symbols: List of symbols to process
+            n_sessions: Historical lookback (min 200 for SMA200)
+
+        Returns:
+            DataFrame with indicators for specified symbols
+        """
+        logger.info(f"Selective processing: {len(symbols)} symbols")
+        logger.info(f"Symbols: {', '.join(symbols[:10])}{'...' if len(symbols) > 10 else ''}")
+
+        # Load full OHLCV then filter
+        ohlcv_df = self.load_ohlcv_data(n_sessions)
+        ohlcv_df = ohlcv_df[ohlcv_df['symbol'].isin(symbols)]
+
+        if ohlcv_df.empty:
+            logger.warning("No data found for specified symbols")
+            return pd.DataFrame()
+
+        results = []
+        for symbol in symbols:
+            symbol_df = ohlcv_df[ohlcv_df['symbol'] == symbol].copy()
+
+            if len(symbol_df) < 200:
+                logger.warning(f"Skipping {symbol}: only {len(symbol_df)} rows (need 200)")
+                continue
+
+            symbol_df = symbol_df.sort_values('date')
+
+            try:
+                symbol_df = self.calculate_indicators_for_symbol(symbol_df)
+                results.append(symbol_df)
+            except Exception as e:
+                logger.error(f"Error processing {symbol}: {e}")
+                continue
+
+        if not results:
+            return pd.DataFrame()
+
+        combined = pd.concat(results, ignore_index=True)
+        logger.info(f"✅ Calculated indicators for {len(results)} symbols")
+        return combined
+
+    def atomic_merge_basic_data(
+        self,
+        new_data: pd.DataFrame,
+        affected_symbols: List[str],
+        output_path: str = "DATA/processed/technical/basic_data.parquet"
+    ) -> bool:
+        """
+        Atomically merge new indicator data for affected symbols.
+
+        Pattern:
+        1. Load existing parquet
+        2. Remove rows for affected symbols
+        3. Append new data
+        4. Write to .tmp, atomic rename
+
+        Args:
+            new_data: New indicator data for affected symbols
+            affected_symbols: List of symbols being updated
+            output_path: Path to basic_data.parquet
+
+        Returns:
+            True if successful
+        """
+        output_path = Path(output_path)
+        temp_path = output_path.with_suffix('.parquet.tmp')
+
+        try:
+            # Load existing
+            if output_path.exists():
+                existing = pd.read_parquet(output_path)
+                original_count = len(existing)
+            else:
+                existing = pd.DataFrame()
+                original_count = 0
+
+            # Remove affected symbols from existing
+            if not existing.empty:
+                mask = ~existing['symbol'].isin(affected_symbols)
+                filtered = existing[mask].copy()
+            else:
+                filtered = pd.DataFrame()
+
+            # Prepare new data
+            if not new_data.empty:
+                new_data = new_data.copy()
+                new_data['date'] = pd.to_datetime(new_data['date']).dt.date
+                combined = pd.concat([filtered, new_data], ignore_index=True)
+            else:
+                combined = filtered
+
+            # Sort and save
+            combined = combined.sort_values(['symbol', 'date']).reset_index(drop=True)
+            combined.to_parquet(temp_path, index=False)
+
+            # Atomic rename
+            temp_path.replace(output_path)
+
+            logger.info(f"✅ Merged {len(affected_symbols)} symbols into {output_path.name}")
+            logger.info(f"   Rows: {original_count} → {len(combined)}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Merge failed: {e}")
+            if temp_path.exists():
+                temp_path.unlink()
+            return False
 
 
 def main():

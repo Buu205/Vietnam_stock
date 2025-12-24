@@ -12,8 +12,14 @@ Usage:
     # Detect and refresh flagged symbols
     python ohlcv_adjustment_detector.py --detect --refresh
 
-    # Force refresh specific symbols
-    python ohlcv_adjustment_detector.py --refresh --symbols VIC,CTG,HDB
+    # RECOMMENDED: Detect, refresh, selective cascade (10x faster)
+    python ohlcv_adjustment_detector.py --detect --refresh --cascade-selective
+
+    # Legacy: Detect, refresh, full cascade (all 458 symbols)
+    python ohlcv_adjustment_detector.py --detect --refresh --cascade
+
+    # Force refresh specific symbols with selective cascade
+    python ohlcv_adjustment_detector.py --symbols CTG,HDB --refresh --cascade-selective
 
     # Dry run (show what would be refreshed)
     python ohlcv_adjustment_detector.py --detect --refresh --dry-run
@@ -369,13 +375,127 @@ class OHLCVAdjustmentDetector:
         self.existing_df.to_parquet(self.parquet_path, index=False)
         logger.info(f"Saved {len(self.existing_df)} records to {self.parquet_path}")
 
+    def _cascade_refresh_technical(self, n_sessions: int = 500):
+        """
+        Cascade refresh all technical indicators after OHLCV update.
+
+        This ensures all derived data (MA, RSI, MACD, alerts, money flow, etc.)
+        is recalculated from the updated OHLCV prices.
+        """
+        logger.info("=" * 60)
+        logger.info("CASCADE REFRESH: Regenerating technical indicators...")
+        logger.info("=" * 60)
+
+        try:
+            from PROCESSORS.pipelines.daily.daily_ta_complete import CompleteTAUpdatePipeline
+
+            pipeline = CompleteTAUpdatePipeline()
+            pipeline.run(n_sessions=n_sessions)
+
+            logger.info("✅ Cascade refresh complete")
+
+        except Exception as e:
+            logger.error(f"❌ Cascade refresh failed: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def _cascade_refresh_selective(self, symbols: List[str], n_sessions: int = 500):
+        """
+        Selective cascade refresh for affected symbols only.
+
+        Steps:
+        1. Recalc technical indicators for symbols
+        2. Recalc alerts for symbols
+        3. Recalc money flow for symbols
+        4. ALWAYS recalc market breadth (full - needs all symbols for %)
+
+        Args:
+            symbols: List of symbols to refresh
+            n_sessions: Historical lookback sessions
+        """
+        logger.info("=" * 60)
+        logger.info(f"SELECTIVE CASCADE REFRESH: {len(symbols)} symbols")
+        logger.info(f"Symbols: {', '.join(symbols[:10])}{'...' if len(symbols) > 10 else ''}")
+        logger.info("=" * 60)
+
+        try:
+            from PROCESSORS.technical.indicators.technical_processor import TechnicalProcessor
+            from PROCESSORS.technical.indicators.alert_detector import TechnicalAlertDetector
+            from PROCESSORS.technical.indicators.money_flow import MoneyFlowAnalyzer
+
+            # Step 1: Technical indicators (selective)
+            logger.info("\n[1/4] Recalculating technical indicators...")
+            processor = TechnicalProcessor()
+            tech_df = processor.calculate_selective_indicators(symbols, n_sessions)
+            if not tech_df.empty:
+                processor.atomic_merge_basic_data(tech_df, symbols)
+                logger.info(f"  ✅ Merged {len(symbols)} symbols into basic_data.parquet")
+
+            # Step 2: Alerts (selective)
+            logger.info("\n[2/4] Recalculating alerts...")
+            detector = TechnicalAlertDetector()
+            alerts = detector.detect_all_alerts(n_sessions=n_sessions, symbols=symbols)
+            detector.merge_alerts_selective(alerts, symbols)
+            logger.info(f"  ✅ Merged alerts for {len(symbols)} symbols")
+
+            # Step 3: Money flow (selective)
+            logger.info("\n[3/4] Recalculating money flow...")
+            mf_analyzer = MoneyFlowAnalyzer()
+            mf_df = mf_analyzer.calculate_all_money_flow(n_sessions=n_sessions, symbols=symbols)
+            if not mf_df.empty:
+                mf_analyzer.atomic_merge_money_flow(mf_df, symbols)
+                logger.info(f"  ✅ Merged money flow for {len(symbols)} symbols")
+
+            # Step 4: Market breadth (always full - needs all symbols for %)
+            logger.info("\n[4/4] Recalculating market breadth (full)...")
+            self._recalc_market_breadth()
+
+            # Step 5: Create cache invalidation marker for BSC MCP
+            self._create_cache_invalidation_marker()
+
+            logger.info("\n✅ SELECTIVE CASCADE REFRESH COMPLETE")
+
+        except Exception as e:
+            logger.error(f"❌ Selective cascade failed: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def _recalc_market_breadth(self):
+        """Always full recalc - needs all symbols for % calculations."""
+        try:
+            from PROCESSORS.technical.indicators.sector_breadth import SectorBreadthAnalyzer
+
+            breadth = SectorBreadthAnalyzer()
+            df = breadth.calculate_sector_breadth(date=date.today())
+            if not df.empty:
+                breadth.save_sector_breadth(df)
+                logger.info("  ✅ Market breadth recalculated")
+        except Exception as e:
+            logger.warning(f"  ⚠️ Market breadth recalc failed: {e}")
+
+    def _create_cache_invalidation_marker(self):
+        """
+        Create cache invalidation marker for BSC MCP.
+
+        BSC MCP DataLoader checks for this marker and clears its cache
+        when detected, ensuring fresh data is loaded after OHLCV refresh.
+        """
+        marker_path = Path("DATA/.cache_invalidated")
+        try:
+            marker_path.touch()
+            logger.info("  ✅ Cache invalidation marker created for BSC MCP")
+        except Exception as e:
+            logger.warning(f"  ⚠️ Could not create cache marker: {e}")
+
     def run(
         self,
         detect: bool = True,
         refresh: bool = False,
         symbols: Optional[List[str]] = None,
         dry_run: bool = False,
-        threshold: Optional[float] = None
+        threshold: Optional[float] = None,
+        cascade: bool = False,
+        cascade_selective: bool = False
     ) -> Dict:
         """
         Run detection and/or refresh.
@@ -386,6 +506,8 @@ class OHLCVAdjustmentDetector:
             symbols: Specific symbols to process (overrides detection)
             dry_run: Don't actually refresh
             threshold: Override default threshold
+            cascade: Run cascade refresh of technical indicators after OHLCV update (FULL - all 458 symbols)
+            cascade_selective: Run selective cascade refresh (RECOMMENDED - only affected symbols)
 
         Returns:
             Dict with run results
@@ -395,7 +517,9 @@ class OHLCVAdjustmentDetector:
 
         results = {
             'detection': None,
-            'refresh': None
+            'refresh': None,
+            'cascade': False,
+            'cascade_mode': None
         }
 
         # Determine symbols to refresh
@@ -437,6 +561,21 @@ class OHLCVAdjustmentDetector:
             print(f"Success: {results['refresh']['success']}")
             print(f"Failed: {results['refresh']['failed']}")
 
+            # Cascade refresh if requested and OHLCV was actually updated
+            if not dry_run and results['refresh']['success'] > 0:
+                refreshed_symbols = results['refresh']['symbols_refreshed']
+
+                if cascade_selective:
+                    # Selective cascade (RECOMMENDED) - only affected symbols
+                    self._cascade_refresh_selective(refreshed_symbols)
+                    results['cascade'] = True
+                    results['cascade_mode'] = 'selective'
+                elif cascade:
+                    # Full cascade (legacy) - all 458 symbols
+                    self._cascade_refresh_technical()
+                    results['cascade'] = True
+                    results['cascade_mode'] = 'full'
+
         return results
 
 
@@ -450,6 +589,8 @@ def main():
     parser.add_argument('--symbols', type=str, help='Comma-separated symbols to force refresh')
     parser.add_argument('--dry-run', action='store_true', help='Show what would be done without doing it')
     parser.add_argument('--threshold', type=float, default=2.0, help='Detection threshold %% (default: 2.0)')
+    parser.add_argument('--cascade', action='store_true', help='Full cascade: refresh ALL technical indicators (slow, legacy)')
+    parser.add_argument('--cascade-selective', action='store_true', help='Selective cascade: only refresh TA for affected symbols (RECOMMENDED, 10x faster)')
     parser.add_argument('--output', type=str, help='Save detection results to CSV')
 
     args = parser.parse_args()
@@ -472,7 +613,9 @@ def main():
         refresh=args.refresh,
         symbols=symbols,
         dry_run=args.dry_run,
-        threshold=args.threshold
+        threshold=args.threshold,
+        cascade=args.cascade,
+        cascade_selective=args.cascade_selective
     )
 
     # Save detection results if requested

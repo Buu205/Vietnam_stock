@@ -18,7 +18,7 @@ import pandas as pd
 import numpy as np
 import talib
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Optional
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -161,12 +161,17 @@ class MoneyFlowAnalyzer:
 
         return pd.Series(signals, index=df.index)
 
-    def calculate_all_money_flow(self, n_sessions: int = 200) -> pd.DataFrame:
+    def calculate_all_money_flow(
+        self,
+        n_sessions: int = 200,
+        symbols: List[str] = None
+    ) -> pd.DataFrame:
         """
         Calculate money flow for all symbols.
 
         Args:
             n_sessions: Number of sessions
+            symbols: Optional list of symbols to process (selective mode)
 
         Returns:
             DataFrame with money flow indicators
@@ -175,6 +180,11 @@ class MoneyFlowAnalyzer:
 
         # Load data
         ohlcv_df = self.load_data(n_sessions)
+
+        # Selective mode: filter to specified symbols
+        if symbols is not None:
+            ohlcv_df = ohlcv_df[ohlcv_df['symbol'].isin(symbols)]
+            logger.info(f"Selective mode: processing {len(symbols)} symbols")
 
         # Calculate for each symbol
         results = []
@@ -215,6 +225,73 @@ class MoneyFlowAnalyzer:
 
         file_size = output_path.stat().st_size / (1024 * 1024)
         logger.info(f"✅ Saved money flow data to {output_path} ({file_size:.1f} MB)")
+
+    def atomic_merge_money_flow(
+        self,
+        new_data: pd.DataFrame,
+        affected_symbols: List[str],
+        output_path: str = "DATA/processed/technical/money_flow/individual_money_flow.parquet"
+    ) -> bool:
+        """
+        Atomically merge money flow data for affected symbols.
+
+        Pattern:
+        1. Load existing parquet
+        2. Remove rows for affected symbols
+        3. Append new data
+        4. Write to .tmp, atomic rename
+
+        Args:
+            new_data: New money flow data for affected symbols
+            affected_symbols: List of symbols being updated
+            output_path: Path to money flow parquet file
+
+        Returns:
+            True if successful
+        """
+        output_path = Path(output_path)
+        temp_path = output_path.with_suffix('.parquet.tmp')
+
+        try:
+            # Load existing
+            if output_path.exists():
+                existing = pd.read_parquet(output_path)
+                original_count = len(existing)
+            else:
+                existing = pd.DataFrame()
+                original_count = 0
+
+            # Remove affected symbols from existing
+            if not existing.empty:
+                mask = ~existing['symbol'].isin(affected_symbols)
+                filtered = existing[mask].copy()
+            else:
+                filtered = pd.DataFrame()
+
+            # Prepare new data
+            if not new_data.empty:
+                new_data = new_data.copy()
+                new_data['date'] = pd.to_datetime(new_data['date']).dt.date
+                combined = pd.concat([filtered, new_data], ignore_index=True)
+            else:
+                combined = filtered
+
+            # Sort and save
+            combined = combined.sort_values(['symbol', 'date']).reset_index(drop=True)
+            combined.to_parquet(temp_path, index=False)
+
+            # Atomic rename
+            temp_path.replace(output_path)
+
+            logger.info(f"✅ Merged money flow for {len(affected_symbols)} symbols")
+            logger.info(f"   Rows: {original_count} → {len(combined)}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Money flow merge failed: {e}")
+            if temp_path.exists():
+                temp_path.unlink()
+            return False
 
 
 def main():

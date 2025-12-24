@@ -19,6 +19,7 @@ import numpy as np
 import talib
 from pathlib import Path
 from typing import Dict, List, Optional
+from datetime import date as date_type
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -462,13 +463,19 @@ class TechnicalAlertDetector:
             'score': score
         }
 
-    def detect_all_alerts(self, date: str = None, n_sessions: int = 200) -> Dict[str, pd.DataFrame]:
+    def detect_all_alerts(
+        self,
+        date: str = None,
+        n_sessions: int = 200,
+        symbols: List[str] = None
+    ) -> Dict[str, pd.DataFrame]:
         """
         Detect all alerts for all symbols.
 
         Args:
             date: Target date (default: latest)
             n_sessions: Number of sessions to load
+            symbols: Optional list of symbols to process (selective mode)
 
         Returns:
             Dict with alert DataFrames
@@ -477,6 +484,11 @@ class TechnicalAlertDetector:
 
         # Load data
         ohlcv_df = self.load_data(n_sessions)
+
+        # Selective mode: filter to specified symbols
+        if symbols is not None:
+            ohlcv_df = ohlcv_df[ohlcv_df['symbol'].isin(symbols)]
+            logger.info(f"Selective mode: processing {len(symbols)} symbols")
 
         if date is None:
             date = ohlcv_df['date'].max()
@@ -539,3 +551,51 @@ class TechnicalAlertDetector:
             'patterns': pd.DataFrame(pattern_alerts),
             'combined': pd.DataFrame(combined_signals)
         }
+
+    def merge_alerts_selective(
+        self,
+        new_alerts: Dict[str, pd.DataFrame],
+        affected_symbols: List[str],
+        output_dir: str = "DATA/processed/technical/alerts/daily"
+    ) -> bool:
+        """
+        Merge new alerts for affected symbols only.
+
+        Preserves existing alerts for non-affected symbols.
+
+        Args:
+            new_alerts: Dict of new alert DataFrames by type
+            affected_symbols: List of symbols being updated
+            output_dir: Directory for alert parquet files
+
+        Returns:
+            True if successful
+        """
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        try:
+            for alert_type, new_df in new_alerts.items():
+                output_path = output_dir / f"{alert_type}_latest.parquet"
+
+                if output_path.exists():
+                    existing = pd.read_parquet(output_path)
+                    # Remove affected symbols from existing
+                    filtered = existing[~existing['symbol'].isin(affected_symbols)]
+                    # Append new alerts
+                    if not new_df.empty:
+                        combined = pd.concat([filtered, new_df], ignore_index=True)
+                    else:
+                        combined = filtered
+                else:
+                    combined = new_df if not new_df.empty else pd.DataFrame()
+
+                if not combined.empty:
+                    combined.to_parquet(output_path, index=False)
+
+            logger.info(f"✅ Merged alerts for {len(affected_symbols)} symbols")
+            return True
+
+        except Exception as e:
+            logger.error(f"Alert merge failed: {e}")
+            return False

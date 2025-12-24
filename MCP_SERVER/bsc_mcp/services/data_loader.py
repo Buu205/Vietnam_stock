@@ -206,6 +206,7 @@ class DataLoader:
 
     def get_technical_basic(self, force_refresh: bool = False) -> pd.DataFrame:
         """Load technical indicators data."""
+        self.check_cache_invalidation()
         return self._load_cached(
             cache_key="technical_basic",
             relative_path=self.config.TECHNICAL_BASIC_PATH,
@@ -349,11 +350,75 @@ class DataLoader:
         )
 
     # =========================================================================
+    # Raw OHLCV Data Loader
+    # =========================================================================
+
+    def get_ohlcv_raw(
+        self,
+        ticker: str = None,
+        limit: int = 60,
+        include_value: bool = True
+    ) -> pd.DataFrame:
+        """
+        Read directly from raw OHLCV parquet.
+
+        Use this for real-time access to OHLCV after adjustment refresh,
+        bypassing processed pipeline delays.
+
+        Args:
+            ticker: Optional ticker filter (e.g., "VCB")
+            limit: Number of recent days per symbol to return
+            include_value: Include trading value columns
+
+        Returns:
+            DataFrame with raw OHLCV data
+        """
+        ohlcv_path = self.config.DATA_ROOT / "raw" / "ohlcv" / "OHLCV_mktcap.parquet"
+
+        if not ohlcv_path.exists():
+            logger.warning(f"OHLCV file not found: {ohlcv_path}")
+            return pd.DataFrame()
+
+        df = pd.read_parquet(ohlcv_path)
+        df['date'] = pd.to_datetime(df['date'])
+
+        if ticker:
+            df = df[df['symbol'] == ticker.upper()]
+
+        # Get most recent N days per symbol
+        if not df.empty:
+            df = df.sort_values(['symbol', 'date'], ascending=[True, False])
+            df = df.groupby('symbol').head(limit)
+            df = df.sort_values(['symbol', 'date'])
+
+        # Select columns
+        base_cols = ['symbol', 'date', 'open', 'high', 'low', 'close', 'volume']
+        if include_value and 'market_cap' in df.columns:
+            base_cols.append('market_cap')
+
+        return df[base_cols] if not df.empty else df
+
+    def check_cache_invalidation(self):
+        """
+        Check for external cache invalidation marker.
+
+        Called at start of data loading to detect when data pipeline
+        has updated parquet files and cache should be cleared.
+        """
+        marker_path = self.config.DATA_ROOT / ".cache_invalidated"
+
+        if marker_path.exists():
+            self.clear_cache()
+            marker_path.unlink()
+            logger.info("Cache invalidated by external update (OHLCV refresh)")
+
+    # =========================================================================
     # Utility Methods
     # =========================================================================
 
     def get_available_tickers(self) -> List[str]:
         """Get list of all available tickers from technical data."""
+        self.check_cache_invalidation()
         try:
             df = self.get_technical_basic()
             return sorted(df['symbol'].unique().tolist())
