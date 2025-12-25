@@ -1,6 +1,91 @@
 # Phase 3: Stock Layer Implementation
 
 **Goal:** Generate buy/sell signals with position sizing for individual stocks
+**Updated:** 2025-12-25 (VSA relaxed, Risk filters added)
+
+---
+
+## 0. Risk Filters (MANDATORY)
+
+### Trading Cost Configuration
+
+```python
+# CRITICAL: Add to all backtests and live trading
+RISK_CONFIG = {
+    # Liquidity filter
+    'min_avg_value_20d': 5_000_000_000,  # 5 tỷ VND minimum daily value
+
+    # Trading costs (realistic for VN market)
+    'fee_pct': 0.0015,      # 0.15% trading fee
+    'slippage_pct': 0.005,  # 0.5% slippage (midcap stocks)
+    'total_cost_pct': 0.0065,  # 0.65% total round-trip cost
+
+    # Position limits
+    'max_per_sector_pct': 0.30,  # Max 30% in any single sector
+    'max_positions': 10,         # Max 10 concurrent positions
+    'max_per_position_pct': 0.15,  # Max 15% in single stock
+}
+```
+
+### Liquidity Filter Implementation
+
+```python
+def apply_liquidity_filter(df: pd.DataFrame, min_value: float = 5e9) -> pd.DataFrame:
+    """
+    Filter stocks by minimum average daily trading value
+
+    Args:
+        df: OHLCV data with 'value' column (price × volume)
+        min_value: Minimum 20-day average value (default 5 tỷ VND)
+
+    Returns:
+        Filtered DataFrame with only liquid stocks
+    """
+    # Calculate 20-day average trading value
+    df['avg_value_20d'] = df.groupby('symbol')['value'].transform(
+        lambda x: x.rolling(20, min_periods=10).mean()
+    )
+
+    # Filter
+    liquid_stocks = df[df['avg_value_20d'] >= min_value].copy()
+
+    # Log filtered count
+    total = df['symbol'].nunique()
+    kept = liquid_stocks['symbol'].nunique()
+    print(f"Liquidity filter: {kept}/{total} stocks pass (>= {min_value/1e9:.0f} tỷ VND)")
+
+    return liquid_stocks
+```
+
+### Sector Position Limit
+
+```python
+def check_sector_exposure(
+    holdings: pd.DataFrame,
+    new_position: dict,
+    max_sector_pct: float = 0.30
+) -> bool:
+    """
+    Check if adding new position exceeds sector limit
+
+    Returns:
+        True if position allowed, False if sector limit exceeded
+    """
+    total_value = holdings['position_value'].sum() + new_position['position_value']
+    sector = new_position['sector']
+
+    # Current sector exposure
+    sector_value = holdings[holdings['sector'] == sector]['position_value'].sum()
+    new_sector_value = sector_value + new_position['position_value']
+
+    sector_pct = new_sector_value / total_value
+
+    if sector_pct > max_sector_pct:
+        print(f"⚠️ Sector limit: {sector} would be {sector_pct:.1%} (max {max_sector_pct:.0%})")
+        return False
+
+    return True
+```
 
 ---
 
@@ -61,28 +146,48 @@ def calculate_rvol(df: pd.DataFrame, period: int = 20) -> pd.Series:
 
 ---
 
-## 3. VSA Pattern Detection
+## 3. VSA Pattern Detection (RELAXED)
 
-### Patterns Implemented
+### Problem with Original VSA
+- Textbook conditions too strict for VN midcap stocks
+- Very few signals generated in backtest
+- Need practical "High Volatility Reversal" instead of perfect "Stopping Volume"
 
-#### 3.1 Stopping Volume (Bullish)
-- **Context:** Downtrend (close < MA20)
-- **Volume:** High (RVOL > 1.3)
-- **Spread:** Narrow (< avg spread)
-- **Close:** Near high (close_position > 0.55)
+### Patterns Implemented (Relaxed Conditions)
+
+#### 3.1 High Volatility Reversal (Bullish) - Replaces Stopping Volume
+- **Context:** At or near 20-day low
+- **Volume:** High (RVOL > 1.5)
+- **Candle:** Green candle (close > open) - No need for perfect rút chân
 
 ```python
-def detect_stopping_volume(df: pd.DataFrame) -> pd.Series:
-    """Stopping Volume = Smart money absorbing selling"""
-    in_downtrend = df['close'] < df['ma20']
-    high_vol = df['rvol'] > 1.3
-    close_near_high = (df['close'] - df['low']) / (df['high'] - df['low']) > 0.55
-    narrow_spread = df['spread'] < df['spread'].rolling(20).mean()
+def detect_high_vol_reversal(df: pd.DataFrame) -> pd.Series:
+    """
+    High Volatility Reversal = Practical alternative to Stopping Volume
 
-    return in_downtrend & high_vol & close_near_high & narrow_spread
+    RELAXED CONDITIONS (vs original):
+    - 20-day low (vs close < MA20)
+    - RVOL > 1.5 (vs RVOL > 1.3 + narrow spread + close position)
+    - Green candle only (vs close_position > 0.55 + narrow spread)
+
+    More signals, still has edge in VN market.
+    """
+    # At or near 20-day low (within 3%)
+    low_20d = df.groupby('symbol')['low'].transform(
+        lambda x: x.rolling(20).min()
+    )
+    near_20d_low = df['low'] <= low_20d * 1.03
+
+    # High volume
+    high_vol = df['rvol'] > 1.5
+
+    # Green candle (close > open)
+    green_candle = df['close'] > df['open']
+
+    return near_20d_low & high_vol & green_candle
 ```
 
-#### 3.2 No Demand (Bearish)
+#### 3.2 No Demand (Bearish) - Keep Original
 - **Context:** Uptrend (close > MA20)
 - **Candle:** Up candle (close > open)
 - **Volume:** Low (RVOL < 0.8)
@@ -99,16 +204,20 @@ def detect_no_demand(df: pd.DataFrame) -> pd.Series:
     return in_uptrend & up_candle & low_vol & narrow_spread
 ```
 
-#### 3.3 Climax Volume (Reversal Warning)
-- **Volume:** Very high (RVOL > 2.0)
-- **Spread:** Wide
-- **Close:** Near extreme (high for up climax, low for down climax)
+#### 3.3 Climax Volume (Reversal Warning) - Slightly Relaxed
+- **Volume:** Very high (RVOL > 1.8, was 2.0)
+- **Spread:** Wide (> 1.3x avg, was 1.5x)
+- **Close:** Near extreme
 
 ```python
 def detect_climax(df: pd.DataFrame) -> pd.DataFrame:
-    """Climax = Exhaustion move, potential reversal"""
-    very_high_vol = df['rvol'] > 2.0
-    wide_spread = df['spread'] > df['spread'].rolling(20).mean() * 1.5
+    """
+    Climax = Exhaustion move, potential reversal
+
+    RELAXED: RVOL > 1.8 (was 2.0), spread > 1.3x (was 1.5x)
+    """
+    very_high_vol = df['rvol'] > 1.8  # Relaxed from 2.0
+    wide_spread = df['spread'] > df['spread'].rolling(20).mean() * 1.3  # Relaxed from 1.5
 
     # Up Climax
     close_near_high = (df['close'] - df['low']) / (df['high'] - df['low']) > 0.8
@@ -123,6 +232,15 @@ def detect_climax(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 ```
+
+### VSA Threshold Comparison
+
+| Pattern | Original | Relaxed | Reason |
+|---------|----------|---------|--------|
+| Stopping Vol → High Vol Reversal | close < MA20, RVOL > 1.3, close_pos > 0.55, narrow spread | 20-day low, RVOL > 1.5, green candle | More signals, practical |
+| Climax RVOL | > 2.0 | > 1.8 | VN market lower avg volume |
+| Climax Spread | > 1.5x avg | > 1.3x avg | More realistic |
+| No Demand | unchanged | unchanged | Already works |
 
 ---
 
