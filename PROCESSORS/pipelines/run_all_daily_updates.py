@@ -88,6 +88,8 @@ def show_data_integrity_report():
     data_checks = [
         ("OHLCV (Source)", "DATA/raw/ohlcv/OHLCV_mktcap.parquet", "date", "symbol"),
         ("Technical (TA)", "DATA/processed/technical/basic_data.parquet", "date", "symbol"),
+        ("RS Rating", "DATA/processed/technical/rs_rating/stock_rs_rating_daily.parquet", "date", "symbol"),
+        ("Market Breadth", "DATA/processed/technical/market_breadth/market_breadth_daily.parquet", "date", None),
         ("PE Ratio", "DATA/processed/valuation/pe/historical/historical_pe.parquet", "date", "symbol"),
         ("PB Ratio", "DATA/processed/valuation/pb/historical/historical_pb.parquet", "date", "symbol"),
         ("P/S Ratio", "DATA/processed/valuation/ps/historical/historical_ps.parquet", "date", "symbol"),
@@ -173,11 +175,13 @@ def check_output_files(step_key: str) -> Dict[str, any]:
                 info["status"] = "ok"
 
         elif step_key == "ta":
-            # Check main TA files
+            # Check main TA files (including RS Rating for TA Dashboard)
             files_to_check = [
                 data_dir / "processed" / "technical" / "basic_data.parquet",
                 data_dir / "processed" / "technical" / "vnindex" / "vnindex_analysis.parquet",
                 data_dir / "processed" / "technical" / "market_breadth" / "market_breadth_daily.parquet",
+                data_dir / "processed" / "technical" / "rs_rating" / "stock_rs_rating_daily.parquet",
+                data_dir / "processed" / "technical" / "sector_breadth" / "sector_breadth_daily.parquet",
             ]
 
             for file_path in files_to_check:
