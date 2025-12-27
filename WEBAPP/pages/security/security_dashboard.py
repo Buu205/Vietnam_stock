@@ -30,6 +30,7 @@ from WEBAPP.core.styles import (
     CHART_COLORS, BAR_COLORS,
     render_styled_table, get_table_style
 )
+from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
 
 # ============================================================================
 # PAGE CONFIG & STYLES
@@ -39,6 +40,9 @@ from WEBAPP.core.styles import (
 # Inject unified premium styles from core/styles.py
 st.markdown(get_page_style(), unsafe_allow_html=True)
 st.markdown(get_table_style(), unsafe_allow_html=True)
+
+# Initialize session state for this page
+init_page_state('security')
 
 # ============================================================================
 # HEADER
@@ -203,14 +207,14 @@ with col4:
 st.markdown("---")
 
 # ============================================================================
-# TABS
+# TABS (Session State Persisted)
 # ============================================================================
-tab_charts, tab_tables = st.tabs(["📊 Charts", "📋 Tables"])
+active_tab = render_persistent_tabs(["📊 Charts", "📋 Tables"], "security_active_tab")
 
 # ============================================================================
 # TAB 1: CHARTS
 # ============================================================================
-with tab_charts:
+if active_tab == 0:
     # Row 1: Revenue Mix & Profitability
     col1, col2 = st.columns(2)
 
@@ -358,7 +362,7 @@ with tab_charts:
 # ============================================================================
 # TAB 2: TABLES
 # ============================================================================
-with tab_tables:
+elif active_tab == 1:
     # Income Statement Table
     st.markdown("### Income Statement")
     income_metrics = {

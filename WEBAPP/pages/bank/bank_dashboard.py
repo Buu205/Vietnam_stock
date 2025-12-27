@@ -30,6 +30,7 @@ from WEBAPP.core.styles import (
     CHART_COLORS, BAR_COLORS,
     render_styled_table, get_table_style
 )
+from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
 
 # ============================================================================
 # PAGE CONFIG & STYLES
@@ -39,6 +40,9 @@ from WEBAPP.core.styles import (
 # Inject unified premium styles from core/styles.py
 st.markdown(get_page_style(), unsafe_allow_html=True)
 st.markdown(get_table_style(), unsafe_allow_html=True)
+
+# Initialize session state for this page
+init_page_state('bank')
 
 # ============================================================================
 # METRIC DEFINITIONS (for selectable charts)
@@ -357,14 +361,14 @@ with quick_col4:
 st.markdown("---")
 
 # ============================================================================
-# TABS
+# TABS (Session State Persisted)
 # ============================================================================
-tab_charts, tab_tables = st.tabs(["📊 Charts", "📋 Tables"])
+active_tab = render_persistent_tabs(["📊 Charts", "📋 Tables"], "bank_active_tab")
 
 # ============================================================================
 # TAB 1: CHARTS - Dynamic based on selection
 # ============================================================================
-with tab_charts:
+if active_tab == 0:
     if not selected_metrics:
         st.warning("Please select at least one metric from the sidebar.")
     else:
@@ -487,14 +491,16 @@ with tab_charts:
 # ============================================================================
 # TAB 2: TABLES
 # ============================================================================
-with tab_tables:
-    # Sub-tabs for organized tables
-    tab_size, tab_income, tab_growth, tab_quality, tab_efficiency = st.tabs([
-        "📊 Size", "💰 Income Statement", "📈 Growth", "🛡️ Asset Quality", "⚙️ Efficiency"
-    ])
+elif active_tab == 1:
+    # Sub-tabs for organized tables (Session State Persisted)
+    tables_tab = render_persistent_tabs(
+        ["📊 Size", "💰 Income", "📈 Growth", "🛡️ Quality", "⚙️ Efficiency"],
+        "bank_tables_tab",
+        style="secondary"
+    )
 
     # === Size Table ===
-    with tab_size:
+    if tables_tab == 0:
         st.markdown("### Size Metrics")
         size_metrics = {
             'Total Assets': ('total_assets', 'billions'),
@@ -522,7 +528,7 @@ with tab_tables:
             st.info("Size data not available")
 
     # === Income Statement Table ===
-    with tab_income:
+    elif tables_tab == 1:
         st.markdown("### Income Statement")
         income_metrics = {
             'NII': ('nii', 'billions'),
@@ -551,7 +557,7 @@ with tab_tables:
             st.markdown(html_table, unsafe_allow_html=True)
 
     # === Growth Table ===
-    with tab_growth:
+    elif tables_tab == 2:
         st.markdown("### Growth Metrics")
         st.markdown("**YoY = Year-over-Year | YTD = Year-to-Date**")
 
@@ -585,7 +591,7 @@ with tab_tables:
             st.info("Growth data not available")
 
     # === Asset Quality Table ===
-    with tab_quality:
+    elif tables_tab == 3:
         st.markdown("### Asset Quality")
 
         quality_metrics = {
@@ -616,7 +622,7 @@ with tab_tables:
             st.info("Asset quality data not available")
 
     # === Efficiency Table ===
-    with tab_efficiency:
+    elif tables_tab == 4:
         st.markdown("### Efficiency & Earning Quality")
 
         efficiency_metrics = {

@@ -48,12 +48,16 @@ from WEBAPP.components.charts.valuation_charts import (
 )
 from WEBAPP.core.chart_schema import get_chart_config, get_y_range, CHART_SCHEMA
 from WEBAPP.components.filters.global_filter_bar import render_global_filters
+from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
 
 # Note: st.set_page_config is handled by main_app.py
 
 # Inject premium styles
 st.markdown(get_page_style(), unsafe_allow_html=True)
 st.markdown(get_table_style(), unsafe_allow_html=True)
+
+# Initialize session state for this page
+init_page_state('sector')
 
 # Header
 st.title("Sector Analysis")
@@ -222,18 +226,17 @@ if not all_df.empty:
 # ============================================================================
 
 # ============================================================================
-# TABS
+# TABS (Session State Persisted)
 # ============================================================================
-tab_vnindex, tab_valuation, tab_tables = st.tabs([
-    "📊 VN-Index",
-    "📈 Valuation",
-    "📋 Data"
-])
+active_tab = render_persistent_tabs(
+    ["📊 VN-Index", "📈 Valuation", "📋 Data"],
+    "sector_active_tab"
+)
 
 # ============================================================================
 # TAB 0: VNINDEX ANALYSIS
 # ============================================================================
-with tab_vnindex:
+if active_tab == 0:
     # Load vnindex data
     @st.cache_data(ttl=3600)
     def load_vnindex_data():
@@ -570,19 +573,18 @@ with tab_vnindex:
 # ============================================================================
 # TAB 1: VALUATION (with sub-tabs)
 # ============================================================================
-with tab_valuation:
-    # Sub-tabs for Sector Overview (4 sub-tabs)
-    subtab_sector_comp, subtab_sector_ind, subtab_stock_comp, subtab_stock_ind = st.tabs([
-        "🕯️ Sector Comparison",
-        "📈 Individual Sector",
-        "🕯️ Stock Comparison",
-        "📈 Individual Stock"
-    ])
+elif active_tab == 1:
+    # Sub-tabs for Sector Overview (Session State Persisted)
+    valuation_tab = render_persistent_tabs(
+        ["🕯️ Sector Comp", "📈 Sector Ind", "🕯️ Stock Comp", "📈 Stock Ind"],
+        "sector_tables_tab",
+        style="secondary"
+    )
 
     # =========================================================================
     # SUB-TAB 1: SECTOR COMPARISON (Candlestick)
     # =========================================================================
-    with subtab_sector_comp:
+    if valuation_tab == 0:
         # =====================================================================
         # SECTORS: Candlestick Distribution Chart
         # =====================================================================
@@ -773,7 +775,7 @@ with tab_valuation:
     # =========================================================================
     # SUB-TAB 2: INDIVIDUAL SECTOR (Line chart with statistical bands)
     # =========================================================================
-    with subtab_sector_ind:
+    elif valuation_tab == 1:
         st.markdown(f"### {selected_metric} Historical Trend with Statistical Bands")
         st.markdown("*Line chart with median and ±1σ, ±2σ bands for individual sector.*")
 
@@ -848,7 +850,7 @@ with tab_valuation:
     # =========================================================================
     # SUB-TAB 3: STOCK COMPARISON (Candlestick)
     # =========================================================================
-    with subtab_stock_comp:
+    elif valuation_tab == 2:
         st.markdown(f"### {selected_metric} Distribution: Stocks in Sector")
         st.markdown("*Candlestick: Min-Max (whiskers), P25-P75 (body). Colored dot = current value.*")
 
@@ -987,7 +989,7 @@ with tab_valuation:
     # =========================================================================
     # SUB-TAB 4: INDIVIDUAL STOCK (Line chart with statistical bands)
     # =========================================================================
-    with subtab_stock_ind:
+    elif valuation_tab == 3:
         st.markdown(f"### {selected_metric} Historical Trend with Statistical Bands")
         st.markdown("*Line chart with median and ±1σ, ±2σ bands for individual stock.*")
 
@@ -1074,7 +1076,7 @@ with tab_valuation:
 # ============================================================================
 # TAB 2: DATA TABLES
 # ============================================================================
-with tab_tables:
+elif active_tab == 2:
     col1, col2 = st.columns(2)
 
     with col1:

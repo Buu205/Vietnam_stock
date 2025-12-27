@@ -38,6 +38,7 @@ from WEBAPP.components.charts.valuation_charts import (
 from WEBAPP.core.chart_schema import get_chart_config, get_y_range, CHART_SCHEMA
 from WEBAPP.core.valuation_config import format_ratio, format_percent, format_change, filter_outliers
 from WEBAPP.components.tables.table_builders import forward_matrix_table
+from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
 
 # Rating color mapping
 RATING_COLORS = {
@@ -61,6 +62,9 @@ RATING_BG_COLORS = {
 # Inject premium styles
 st.markdown(get_page_style(), unsafe_allow_html=True)
 st.markdown(get_table_style(), unsafe_allow_html=True)
+
+# Initialize session state for this page
+init_page_state('forecast')
 
 # Additional custom styles for rating badges and upside colors
 st.markdown("""
@@ -224,8 +228,11 @@ with col4:
 
 st.markdown("---")
 
-# Tabs
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Individual Stocks", "Sector Valuation", "9M Achievement", "Charts", "Forward Matrix"])
+# Tabs (Session State Persisted)
+active_tab = render_persistent_tabs(
+    ["Individual", "Sector", "9M Achievement", "Charts", "Forward"],
+    "forecast_active_tab"
+)
 
 
 def format_rating_badge(rating: str) -> str:
@@ -311,7 +318,7 @@ def format_achievement(val) -> str:
 # ============================================================================
 # TAB 1: INDIVIDUAL STOCKS TABLE
 # ============================================================================
-with tab1:
+if active_tab == 0:
     st.markdown("### Individual Stocks Forecast")
     st.markdown("*92 stocks covered by BSC Research with target prices, forward valuations, and earnings forecasts*")
 
@@ -332,10 +339,14 @@ with tab1:
     st.markdown(f"**Showing {len(filtered_df)} stocks**")
 
     if not filtered_df.empty:
-        # Sub-tabs for different views
-        view_tab1, view_tab2 = st.tabs(["Valuation View", "Earnings View"])
+        # Sub-tabs for different views (Session State Persisted)
+        view_tab = render_persistent_tabs(
+            ["Valuation View", "Earnings View"],
+            "forecast_view_tab",
+            style="secondary"
+        )
 
-        with view_tab1:
+        if view_tab == 0:
             st.markdown("#### Valuation Metrics")
             # Create display dataframe - Valuation focus
             display_cols = [
@@ -363,7 +374,7 @@ with tab1:
 
             st.markdown(render_styled_table(formatted_df, highlight_first_col=True), unsafe_allow_html=True)
 
-        with view_tab2:
+        elif view_tab == 1:
             st.markdown("#### Earnings Forecast 2025-2026")
             # Create display dataframe - Earnings focus
             earnings_cols = [
@@ -417,15 +428,19 @@ with tab1:
 # ============================================================================
 # TAB 2: SECTOR VALUATION TABLE
 # ============================================================================
-with tab2:
+elif active_tab == 1:
     st.markdown("### Sector Forward Valuation")
     st.markdown("*PE/PB Forward 2025-2026 aggregated by ICB L2 sector classification*")
 
     if not sector_df.empty:
-        # Sub-tabs for different views of sector data
-        sector_tab1, sector_tab2 = st.tabs(["Valuation View", "Growth View"])
+        # Sub-tabs for different views of sector data (Session State Persisted)
+        sector_tab = render_persistent_tabs(
+            ["Valuation View", "Growth View"],
+            "forecast_sector_tab",
+            style="secondary"
+        )
 
-        with sector_tab1:
+        if sector_tab == 0:
             st.markdown("#### PE/PB Forward by Sector")
             # Create display dataframe - Valuation focus
             sector_display = pd.DataFrame()
@@ -448,7 +463,7 @@ with tab2:
             # Render styled table with BSC Universal row highlighted
             st.markdown(render_styled_table(sector_display, highlight_first_col=True, highlight_row='BSC Universal'), unsafe_allow_html=True)
 
-        with sector_tab2:
+        elif sector_tab == 1:
             st.markdown("#### Revenue & Profit Growth by Sector (YoY)")
             st.markdown("*Tăng trưởng doanh thu và LNST trung bình theo ngành, chỉ tính các mã BSC coverage*")
 
@@ -532,7 +547,7 @@ with tab2:
 # ============================================================================
 # TAB 3: 9M ACHIEVEMENT
 # ============================================================================
-with tab3:
+elif active_tab == 2:
     st.markdown("### 9M 2025 Achievement Tracking")
     st.markdown("*Đánh giá tiến độ hoàn thành kế hoạch dựa trên KQKD 9 tháng đầu năm*")
 
@@ -662,7 +677,7 @@ with tab3:
 # ============================================================================
 # TAB 4: CHARTS
 # ============================================================================
-with tab4:
+elif active_tab == 3:
     st.markdown("### Visualization")
 
     chart_type = st.radio(
@@ -1153,7 +1168,7 @@ with tab4:
 # ============================================================================
 # TAB 5: FORWARD VALUATION MATRIX
 # ============================================================================
-with tab5:
+elif active_tab == 4:
     st.markdown("### Forward Valuation Matrix: TTM vs 2025F vs 2026F")
     st.markdown("*Compare current trailing (TTM) valuations against BSC forward forecasts for 2025-2026*")
 

@@ -25,12 +25,16 @@ from WEBAPP.services.macro_commodity_loader import MacroCommodityLoader
 from WEBAPP.components.tables.performance_table import (
     build_performance_table, calculate_period_changes, get_top_movers
 )
+from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
 
 logger = logging.getLogger(__name__)
 
 # Apply global styles
 st.markdown(get_page_style(), unsafe_allow_html=True)
 st.markdown(get_table_style(), unsafe_allow_html=True)
+
+# Initialize session state for this page
+init_page_state('fx_commodities')
 
 # Additional responsive CSS
 st.markdown("""
@@ -254,17 +258,17 @@ with st.sidebar:
     )
 
 # ============================================================================
-# TABS: Macro & FX | Commodities
+# TABS: Macro & FX | Commodities (Session State Persisted)
 # ============================================================================
-tab_macro, tab_commodity = st.tabs([
-    "📊 Macro & FX",
-    "🛢️ Commodities"
-])
+active_tab = render_persistent_tabs(
+    ["📊 Macro & FX", "🛢️ Commodities"],
+    "fx_active_tab"
+)
 
 # ============================================================================
 # TAB 1: MACRO DATA
 # ============================================================================
-with tab_macro:
+if active_tab == 0:
     st.markdown("### Macro Economic Indicators")
     st.markdown("*Interest rates, exchange rates, and government bond yields*")
 
@@ -567,7 +571,7 @@ with tab_macro:
 # ============================================================================
 # TAB 2: COMMODITY DATA
 # ============================================================================
-with tab_commodity:
+elif active_tab == 1:
     st.markdown("### Commodity Prices")
     st.markdown("*Individual commodities with dual-axis charts for comparison pairs*")
 

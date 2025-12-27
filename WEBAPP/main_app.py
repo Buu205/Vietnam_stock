@@ -26,6 +26,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from WEBAPP.core.styles import get_page_style
+from WEBAPP.core.session_state import init_all_pages
 
 # ============================================================================
 # PAGE CONFIG - Must be first Streamlit command
@@ -41,6 +42,11 @@ st.set_page_config(
 # INJECT GLOBAL STYLES (includes floating sidebar toggle)
 # ============================================================================
 st.markdown(get_page_style(), unsafe_allow_html=True)
+
+# ============================================================================
+# INITIALIZE SESSION STATE (prevents widget reset issues)
+# ============================================================================
+init_all_pages()
 
 # ============================================================================
 # DEFINE PAGES using st.Page
@@ -119,13 +125,15 @@ with st.sidebar:
 
     all_tickers = load_all_tickers()
 
-    # Compact search input
-    search_ticker = st.text_input(
+    # Quick Search - using session state to prevent page resets
+    st.text_input(
         "🔍 Quick Search",
         placeholder="Enter ticker...",
         key="global_ticker_search",
-        help="Type a ticker symbol"
-    ).upper().strip()
+        help="Type a ticker symbol",
+        on_change=lambda: None  # Prevent form submission interference
+    )
+    search_ticker = st.session_state.get("global_ticker_search", "").upper().strip()
 
     if search_ticker:
         matches = [t for t in all_tickers if search_ticker in t]
@@ -133,15 +141,15 @@ with st.sidebar:
             if len(matches) == 1 or search_ticker in matches:
                 selected = search_ticker if search_ticker in matches else matches[0]
                 st.session_state['quick_search_ticker'] = selected
-            else:
-                selected = st.selectbox(
+            elif len(matches) <= 15:
+                # Only show selectbox if there are multiple matches
+                st.selectbox(
                     "Select",
-                    matches[:15],
+                    matches,
                     key="search_select",
-                    label_visibility="collapsed"
+                    label_visibility="collapsed",
+                    on_change=lambda: st.session_state.update({'quick_search_ticker': st.session_state.get('search_select')})
                 )
-                if selected:
-                    st.session_state['quick_search_ticker'] = selected
         else:
             st.caption(f"❌ '{search_ticker}' not found")
 

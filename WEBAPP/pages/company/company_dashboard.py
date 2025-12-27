@@ -35,6 +35,7 @@ from WEBAPP.core.styles import (
     CHART_COLORS, BAR_COLORS,
     render_styled_table, get_table_style
 )
+from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
 
 # ============================================================================
 # STYLES
@@ -44,6 +45,9 @@ from WEBAPP.core.styles import (
 # Inject unified premium styles from core/styles.py
 st.markdown(get_page_style(), unsafe_allow_html=True)
 st.markdown(get_table_style(), unsafe_allow_html=True)
+
+# Initialize session state for this page
+init_page_state('company')
 
 # ============================================================================
 # HEADER
@@ -178,14 +182,14 @@ with col4:
 st.markdown("---")
 
 # ============================================================================
-# MAIN TABS: Charts | Tables
+# MAIN TABS: Charts | Tables (Session State Persisted)
 # ============================================================================
-tab_charts, tab_tables = st.tabs(["📈 Charts", "📋 Tables"])
+active_tab = render_persistent_tabs(["📈 Charts", "📋 Tables"], "company_active_tab")
 
 # ============================================================================
 # CHARTS TAB
 # ============================================================================
-with tab_charts:
+if active_tab == 0:
     # Convert to billions for charts
     chart_df = df.copy()
     value_cols = ['net_revenue', 'gross_profit', 'ebit', 'ebitda', 'npatmi',
@@ -516,17 +520,19 @@ with tab_charts:
 # ============================================================================
 # TABLES TAB
 # ============================================================================
-with tab_tables:
-    # Nested tabs for financial statement tables
-    tab_is, tab_bs, tab_cf = st.tabs(["Income Statement", "Balance Sheet", "Cash Flow"])
+elif active_tab == 1:
+    # Nested tabs for financial statement tables (Session State Persisted)
+    tables_tab = render_persistent_tabs(
+        ["Income Statement", "Balance Sheet", "Cash Flow"],
+        "company_tables_tab",
+        style="secondary"
+    )
 
-    with tab_is:
+    if tables_tab == 0:
         render_income_statement_table(df, period)
-
-    with tab_bs:
+    elif tables_tab == 1:
         render_balance_sheet_table(df, period)
-
-    with tab_cf:
+    elif tables_tab == 2:
         render_cash_flow_table(df, period)
 
     # Export Section
