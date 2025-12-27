@@ -1,566 +1,194 @@
 """
-Technical Analysis Dashboard
-============================
-Premium financial dashboard for technical analysis.
+Technical Dashboard - 3-Layer Systematic Trading
+================================================
 
-Design: Financial Editorial Theme
-- Dark terminal aesthetic with vibrant accents
-- Candlestick charts with MA overlays
-- RSI, MACD, Bollinger Bands
+Premium financial dashboard with Crypto Terminal aesthetic.
+Features glassmorphism design, trading-focused colors, and optimized filters.
 
-Run:
-    streamlit run WEBAPP/pages/technical/technical_dashboard.py
+3-Layer Analysis:
+- Layer 1 (Market): Regime detection, breadth analysis, exposure model
+- Layer 2 (Sector): RRG rotation, sector ranking, money flow
+- Layer 3 (Stock): Signal scanner, RS Rating heatmap
+
+Design: Crypto Terminal Dark Mode
+- Purple (#8B5CF6) primary accent
+- Cyan (#06B6D4) secondary accent
+- Green (#10B981) bullish/positive
+- Red (#EF4444) bearish/negative
+- Glassmorphism cards with subtle blur
+
+Author: Claude Code
+Date: 2025-12-25
 """
 
 import streamlit as st
-import pandas as pd
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import sys
+import pandas as pd
 from pathlib import Path
+from datetime import datetime
 
+# Add project root to path
 project_root = Path(__file__).resolve().parents[3]
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from WEBAPP.services.technical_service import TechnicalService
-from WEBAPP.core.styles import get_page_style, get_chart_layout, CHART_COLORS
+from WEBAPP.pages.technical.components import (
+    render_market_overview,
+    render_sector_rotation,
+    render_stock_scanner,
+)
+from WEBAPP.pages.technical.services import get_ta_service, TADashboardService
+from WEBAPP.core.styles import get_page_style, get_table_style
+from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
 
 # Note: st.set_page_config is handled by main_app.py
 
 # Inject premium styles
 st.markdown(get_page_style(), unsafe_allow_html=True)
+st.markdown(get_table_style(), unsafe_allow_html=True)
 
-# Header
-st.title("Technical Analysis")
-st.markdown("**Price charts and technical indicators for Vietnamese stocks**")
-st.markdown("---")
+# Initialize session state for this page
+init_page_state('technical')
 
-# Sidebar
-st.sidebar.markdown("## Filters")
 
-try:
-    service = TechnicalService()
-    available_tickers = service.get_available_tickers()
-    if not available_tickers:
-        st.error("No technical data found.")
-        st.stop()
-except FileNotFoundError as e:
-    st.error(f"Error: {e}")
-    st.stop()
+def render_header() -> None:
+    """Render dashboard header with title and subtitle."""
+    st.markdown('''
+    <div style="margin-bottom: 8px;">
+        <h1 style="margin: 0; font-size: 1.8rem; font-weight: 700; color: #F8FAFC; letter-spacing: -0.02em;">Technical Dashboard</h1>
+        <p style="margin: 4px 0 0 0; color: #94A3B8; font-size: 0.9rem;">Market / Sector / Stock — Systematic Trading Analysis</p>
+    </div>
+    ''', unsafe_allow_html=True)
 
-# Ticker selector - check for Quick Search pre-selection
-st.sidebar.markdown("### Stock")
-default_ticker = st.session_state.get('quick_search_ticker', None)
-if default_ticker and default_ticker in available_tickers:
-    default_index = available_tickers.index(default_ticker)
-    # Clear the quick search after using it
-    st.session_state['quick_search_ticker'] = None
-else:
-    default_index = 0
 
-ticker = st.sidebar.selectbox(
-    "Select Stock",
-    options=available_tickers,
-    index=default_index,
-    label_visibility="collapsed"
-)
+def render_compact_status_bar(service: TADashboardService) -> None:
+    """Render compact market status bar with glassmorphism styling."""
+    try:
+        state = service.get_market_state()
 
-# Days selector
-limit = st.sidebar.slider("History (Days)", min_value=30, max_value=500, value=180)
+        # Regime styling
+        regime_styles = {
+            'BULLISH': ('#10B981', 'rgba(16, 185, 129, 0.15)'),
+            'NEUTRAL': ('#F59E0B', 'rgba(245, 158, 11, 0.15)'),
+            'BEARISH': ('#EF4444', 'rgba(239, 68, 68, 0.15)'),
+        }
+        signal_styles = {
+            'RISK_ON': ('#10B981', 'rgba(16, 185, 129, 0.15)'),
+            'CAUTION': ('#F59E0B', 'rgba(245, 158, 11, 0.15)'),
+            'RISK_OFF': ('#EF4444', 'rgba(239, 68, 68, 0.15)'),
+        }
 
-# Chart options
-st.sidebar.markdown("### Chart Options")
-show_volume = st.sidebar.checkbox("Show Volume", value=True)
-show_bb = st.sidebar.checkbox("Show Bollinger Bands", value=False)
+        regime_color, regime_bg = regime_styles.get(state.regime, ('#64748B', 'rgba(100, 116, 139, 0.15)'))
+        signal_color, signal_bg = signal_styles.get(state.signal, ('#64748B', 'rgba(100, 116, 139, 0.15)'))
+        change_color = '#10B981' if state.vnindex_change_pct >= 0 else '#EF4444'
+        change_sign = '+' if state.vnindex_change_pct >= 0 else ''
 
-st.sidebar.markdown("---")
-if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
-    st.cache_data.clear()
-    st.rerun()
+        # Exposure bar color
+        if state.exposure_level >= 80:
+            exp_color = '#10B981'
+        elif state.exposure_level >= 60:
+            exp_color = '#22C55E'
+        elif state.exposure_level >= 40:
+            exp_color = '#F59E0B'
+        else:
+            exp_color = '#EF4444'
 
-# Load data
-@st.cache_data(ttl=3600)
-def load_data(ticker, limit):
-    service = TechnicalService()
-    return service.get_technical_data(ticker, limit=limit)
+        st.markdown(f'''
+        <div style="display: flex; gap: 12px; padding: 8px 0; flex-wrap: wrap; align-items: stretch; margin-bottom: 16px;">
+            <div style="flex: 1; min-width: 130px; background: rgba(139, 92, 246, 0.08); padding: 10px 14px; border-radius: 8px; border-left: 3px solid #8B5CF6;">
+                <div style="color: #64748B; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">VN-Index</div>
+                <div style="display: flex; align-items: baseline; gap: 6px; margin-top: 2px;">
+                    <span style="color: #F8FAFC; font-size: 1.2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;">{state.vnindex_close:,.0f}</span>
+                    <span style="color: {change_color}; font-size: 0.8rem; font-weight: 600;">{change_sign}{state.vnindex_change_pct:.2f}%</span>
+                </div>
+            </div>
+            <div style="flex: 0.8; min-width: 100px; background: {regime_bg}; padding: 10px 14px; border-radius: 8px; border-left: 3px solid {regime_color};">
+                <div style="color: #64748B; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Regime</div>
+                <div style="color: {regime_color}; font-size: 0.95rem; font-weight: 700; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                    <span style="display: inline-block; width: 6px; height: 6px; background: {regime_color}; border-radius: 50%;"></span>
+                    {state.regime}
+                </div>
+            </div>
+            <div style="flex: 0.8; min-width: 100px; background: {signal_bg}; padding: 10px 14px; border-radius: 8px; border-left: 3px solid {signal_color};">
+                <div style="color: #64748B; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Signal</div>
+                <div style="color: {signal_color}; font-size: 0.95rem; font-weight: 700; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
+                    <span style="display: inline-block; width: 6px; height: 6px; background: {signal_color}; border-radius: 50%;"></span>
+                    {state.signal.replace('_', ' ')}
+                </div>
+            </div>
+            <div style="flex: 0.8; min-width: 90px; background: rgba(6, 182, 212, 0.08); padding: 10px 14px; border-radius: 8px; border-left: 3px solid #06B6D4;">
+                <div style="color: #64748B; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">MA20</div>
+                <div style="color: #06B6D4; font-size: 1.1rem; font-weight: 700; margin-top: 2px; font-family: 'JetBrains Mono', monospace;">{state.breadth_ma20_pct:.0f}%</div>
+            </div>
+            <div style="flex: 1.2; min-width: 140px; background: rgba(0, 0, 0, 0.25); padding: 10px 14px; border-radius: 8px; border-left: 3px solid {exp_color};">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #64748B; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Exposure</span>
+                    <span style="color: {exp_color}; font-size: 0.9rem; font-weight: 700;">{state.exposure_level}%</span>
+                </div>
+                <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 6px; overflow: hidden;">
+                    <div style="width: {state.exposure_level}%; height: 100%; background: {exp_color}; border-radius: 2px;"></div>
+                </div>
+            </div>
+        </div>
+        ''', unsafe_allow_html=True)
 
-df = load_data(ticker, limit)
-if df.empty:
-    st.warning(f"No data for {ticker}")
-    st.stop()
+    except Exception as e:
+        st.warning(f"Could not load market status: {e}")
 
-# Get latest values
-latest = df.iloc[-1]
 
-# ============================================================================
-# METRIC CARDS
-# ============================================================================
-st.markdown(f"### Current Indicators — {ticker}")
+def main() -> None:
+    """Main dashboard entry point."""
 
-col1, col2, col3, col4, col5 = st.columns(5)
+    # Header
+    render_header()
 
-with col1:
-    close = latest.get('close', 0) or 0
-    # Calculate delta
-    if len(df) > 1:
-        prev_close = df.iloc[-2].get('close', close)
-        delta_pct = ((close - prev_close) / prev_close * 100) if prev_close > 0 else 0
-        st.metric("Close Price", f"{close:,.0f}", f"{delta_pct:+.2f}%")
-    else:
-        st.metric("Close Price", f"{close:,.0f}")
+    # Get singleton service
+    try:
+        service = get_ta_service()
+    except Exception as e:
+        st.error(f"Failed to initialize TA service: {e}")
+        st.markdown('''
+        <div style="background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 12px; padding: 24px; text-align: center; margin: 24px 0;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" style="margin-bottom: 12px;">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+            </svg>
+            <div style="color: #F8FAFC; font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">Run Data Pipeline First</div>
+            <code style="background: rgba(0,0,0,0.4); color: #06B6D4; padding: 8px 16px; border-radius: 6px; font-size: 0.85rem;">
+                python3 PROCESSORS/pipelines/daily/daily_ta_complete.py
+            </code>
+        </div>
+        ''', unsafe_allow_html=True)
+        return
 
-with col2:
-    rsi = latest.get('rsi_14', 0) or 0
-    rsi_status = "🔴 Overbought" if rsi > 70 else "🟢 Oversold" if rsi < 30 else "⚪ Neutral"
-    st.metric("RSI (14)", f"{rsi:.1f}", rsi_status)
+    # Compact status bar
+    render_compact_status_bar(service)
 
-with col3:
-    pct = latest.get('price_vs_sma50', 0) or 0
-    trend = "📈 Above" if pct > 0 else "📉 Below"
-    st.metric("Price vs SMA50", f"{pct:+.1f}%", trend)
-
-with col4:
-    adx = latest.get('adx_14', 0) or 0
-    adx_status = "💪 Strong" if adx > 25 else "😴 Weak"
-    st.metric("ADX (14)", f"{adx:.1f}", adx_status)
-
-with col5:
-    macd = latest.get('macd', 0) or 0
-    macd_signal = latest.get('macd_signal', 0) or 0
-    macd_trend = "🟢 Bullish" if macd > macd_signal else "🔴 Bearish"
-    st.metric("MACD", f"{macd:.2f}", macd_trend)
-
-st.markdown("---")
-
-# ============================================================================
-# TABS
-# ============================================================================
-tab_charts, tab_oscillators, tab_tables = st.tabs(["📊 Price & Volume", "📈 Oscillators", "📋 Data"])
-
-# ============================================================================
-# TAB 1: PRICE & VOLUME CHARTS
-# ============================================================================
-with tab_charts:
-    st.markdown("### OHLC Chart with Moving Averages")
-
-    # Main price chart
-    if show_volume:
-        fig = make_subplots(
-            rows=2, cols=1,
-            shared_xaxes=True,
-            vertical_spacing=0.05,
-            row_heights=[0.75, 0.25]
-        )
-    else:
-        fig = go.Figure()
-
-    # Candlestick
-    if all(col in df.columns for col in ['open', 'high', 'low', 'close']):
-        fig.add_trace(go.Candlestick(
-            x=df['date'],
-            open=df['open'],
-            high=df['high'],
-            low=df['low'],
-            close=df['close'],
-            name='OHLC',
-            increasing=dict(line=dict(color='#00D4AA'), fillcolor='#00D4AA'),
-            decreasing=dict(line=dict(color='#FF6B6B'), fillcolor='#FF6B6B'),
-        ), row=1 if show_volume else None, col=1 if show_volume else None)
-
-    # Moving averages
-    ma_configs = [
-        ('sma_20', '#5B8DEF', 'SMA 20'),
-        ('sma_50', '#FFD666', 'SMA 50'),
-        ('sma_200', '#A78BFA', 'SMA 200'),
-    ]
-
-    for ma_col, color, name in ma_configs:
-        if ma_col in df.columns:
-            fig.add_trace(go.Scatter(
-                x=df['date'],
-                y=df[ma_col],
-                name=name,
-                mode='lines',
-                line=dict(color=color, width=1.5),
-                hovertemplate=f'<b>{name}</b>: %{{y:,.0f}}<extra></extra>'
-            ), row=1 if show_volume else None, col=1 if show_volume else None)
-
-    # Bollinger Bands
-    if show_bb and all(col in df.columns for col in ['bb_upper', 'bb_middle', 'bb_lower']):
-        fig.add_trace(go.Scatter(
-            x=df['date'],
-            y=df['bb_upper'],
-            name='BB Upper',
-            mode='lines',
-            line=dict(color='rgba(255, 214, 102, 0.5)', width=1),
-            showlegend=False,
-            hoverinfo='skip'
-        ), row=1 if show_volume else None, col=1 if show_volume else None)
-
-        fig.add_trace(go.Scatter(
-            x=df['date'],
-            y=df['bb_lower'],
-            name='BB Lower',
-            mode='lines',
-            line=dict(color='rgba(255, 214, 102, 0.5)', width=1),
-            fill='tonexty',
-            fillcolor='rgba(255, 214, 102, 0.1)',
-            showlegend=False,
-            hoverinfo='skip'
-        ), row=1 if show_volume else None, col=1 if show_volume else None)
-
-        fig.add_trace(go.Scatter(
-            x=df['date'],
-            y=df['bb_middle'],
-            name='BB Middle',
-            mode='lines',
-            line=dict(color='rgba(255, 214, 102, 0.7)', width=1, dash='dot'),
-            hovertemplate='<b>BB Middle</b>: %{y:,.0f}<extra></extra>'
-        ), row=1 if show_volume else None, col=1 if show_volume else None)
-
-    # Volume
-    if show_volume and 'volume' in df.columns:
-        colors = ['#00D4AA' if df['close'].iloc[i] >= df['open'].iloc[i] else '#FF6B6B'
-                  for i in range(len(df))]
-        fig.add_trace(go.Bar(
-            x=df['date'],
-            y=df['volume'],
-            name='Volume',
-            marker_color=colors,
-            opacity=0.7,
-            hovertemplate='<b>Volume</b>: %{y:,.0f}<extra></extra>'
-        ), row=2, col=1)
-
-    layout = get_chart_layout(height=550 if show_volume else 450)
-    layout['xaxis']['rangeslider'] = {'visible': False}
-    layout['legend'] = dict(
-        orientation='h',
-        yanchor='bottom',
-        y=1.02,
-        xanchor='right',
-        x=1
+    # ============ TAB NAVIGATION (Session State Persisted) ============
+    active_tab = render_persistent_tabs(
+        ["Market Overview", "Sector Rotation", "Stock Scanner"],
+        "ta_active_tab"
     )
 
-    if show_volume:
-        layout['yaxis'] = dict(title='Price', gridcolor='rgba(148, 163, 184, 0.1)')
-        layout['yaxis2'] = dict(title='Volume', gridcolor='rgba(148, 163, 184, 0.1)')
+    # ============ RENDER ACTIVE TAB CONTENT ============
+    if active_tab == 0:
+        render_market_overview(service)
+    elif active_tab == 1:
+        render_sector_rotation(service)
+    elif active_tab == 2:
+        render_stock_scanner(service)
 
-    fig.update_layout(**layout)
-    st.plotly_chart(fig, use_container_width=True)
-
-    # Signal summary
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("### MA Signal Summary")
-        ma_signals = []
-
-        price = latest.get('close', 0)
-        for ma_col, _, name in ma_configs:
-            if ma_col in df.columns:
-                ma_val = latest.get(ma_col, 0)
-                if ma_val and ma_val > 0:
-                    signal = "🟢 Above" if price > ma_val else "🔴 Below"
-                    pct_diff = ((price - ma_val) / ma_val * 100) if ma_val > 0 else 0
-                    ma_signals.append({
-                        'MA': name,
-                        'Value': f"{ma_val:,.0f}",
-                        'Signal': signal,
-                        'Distance': f"{pct_diff:+.1f}%"
-                    })
-
-        if ma_signals:
-            st.dataframe(pd.DataFrame(ma_signals), use_container_width=True, hide_index=True)
-
-    with col2:
-        st.markdown("### Trend Analysis")
-
-        # Calculate trend
-        if len(df) >= 20:
-            sma_20_trend = df['sma_20'].iloc[-1] > df['sma_20'].iloc[-20] if 'sma_20' in df.columns else None
-            sma_50_trend = df['sma_50'].iloc[-1] > df['sma_50'].iloc[-20] if 'sma_50' in df.columns and len(df) >= 50 else None
-
-            trend_data = []
-            if sma_20_trend is not None:
-                trend_data.append({
-                    'Indicator': 'SMA 20 Direction',
-                    'Status': '📈 Uptrend' if sma_20_trend else '📉 Downtrend'
-                })
-            if sma_50_trend is not None:
-                trend_data.append({
-                    'Indicator': 'SMA 50 Direction',
-                    'Status': '📈 Uptrend' if sma_50_trend else '📉 Downtrend'
-                })
-
-            # Golden/Death Cross check
-            if 'sma_50' in df.columns and 'sma_200' in df.columns:
-                golden = latest.get('sma_50', 0) > latest.get('sma_200', 0)
-                trend_data.append({
-                    'Indicator': 'MA Cross',
-                    'Status': '🌟 Golden Cross' if golden else '💀 Death Cross'
-                })
-
-            if trend_data:
-                st.dataframe(pd.DataFrame(trend_data), use_container_width=True, hide_index=True)
-
-# ============================================================================
-# TAB 2: OSCILLATORS
-# ============================================================================
-with tab_oscillators:
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("### RSI (14)")
-        if 'rsi_14' in df.columns:
-            fig = go.Figure()
-
-            # RSI line
-            fig.add_trace(go.Scatter(
-                x=df['date'],
-                y=df['rsi_14'],
-                name='RSI',
-                mode='lines',
-                line=dict(color='#00D4AA', width=2),
-                fill='tozeroy',
-                fillcolor='rgba(0, 212, 170, 0.1)',
-                hovertemplate='<b>RSI</b>: %{y:.1f}<extra></extra>'
-            ))
-
-            # Overbought/Oversold zones
-            fig.add_hrect(y0=70, y1=100, fillcolor='rgba(255, 107, 107, 0.1)', line_width=0)
-            fig.add_hrect(y0=0, y1=30, fillcolor='rgba(0, 212, 170, 0.1)', line_width=0)
-
-            fig.add_hline(y=70, line=dict(color='#FF6B6B', width=1, dash='dash'),
-                         annotation=dict(text='Overbought (70)', font=dict(color='#FF6B6B', size=10)))
-            fig.add_hline(y=30, line=dict(color='#00D4AA', width=1, dash='dash'),
-                         annotation=dict(text='Oversold (30)', font=dict(color='#00D4AA', size=10)))
-            fig.add_hline(y=50, line=dict(color='#94A3B8', width=1, dash='dot'))
-
-            layout = get_chart_layout(height=300)
-            layout['yaxis']['range'] = [0, 100]
-            fig.update_layout(**layout)
-
-            st.plotly_chart(fig, use_container_width=True)
-
-    with col2:
-        st.markdown("### MACD")
-        if all(col in df.columns for col in ['macd', 'macd_signal', 'macd_hist']):
-            fig = go.Figure()
-
-            # MACD histogram
-            colors = ['#00D4AA' if v >= 0 else '#FF6B6B' for v in df['macd_hist']]
-            fig.add_trace(go.Bar(
-                x=df['date'],
-                y=df['macd_hist'],
-                name='Histogram',
-                marker_color=colors,
-                opacity=0.6,
-                hovertemplate='<b>Histogram</b>: %{y:.2f}<extra></extra>'
-            ))
-
-            # MACD & Signal lines
-            fig.add_trace(go.Scatter(
-                x=df['date'],
-                y=df['macd'],
-                name='MACD',
-                mode='lines',
-                line=dict(color='#5B8DEF', width=2),
-                hovertemplate='<b>MACD</b>: %{y:.2f}<extra></extra>'
-            ))
-
-            fig.add_trace(go.Scatter(
-                x=df['date'],
-                y=df['macd_signal'],
-                name='Signal',
-                mode='lines',
-                line=dict(color='#FFD666', width=2),
-                hovertemplate='<b>Signal</b>: %{y:.2f}<extra></extra>'
-            ))
-
-            fig.add_hline(y=0, line=dict(color='#94A3B8', width=1, dash='dot'))
-
-            layout = get_chart_layout(height=300)
-            layout['legend'] = dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
-            fig.update_layout(**layout)
-
-            st.plotly_chart(fig, use_container_width=True)
-
-    # Stochastic and other oscillators
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("### Stochastic Oscillator")
-        if all(col in df.columns for col in ['stoch_k', 'stoch_d']):
-            fig = go.Figure()
-
-            fig.add_trace(go.Scatter(
-                x=df['date'],
-                y=df['stoch_k'],
-                name='%K',
-                mode='lines',
-                line=dict(color='#5B8DEF', width=2),
-            ))
-
-            fig.add_trace(go.Scatter(
-                x=df['date'],
-                y=df['stoch_d'],
-                name='%D',
-                mode='lines',
-                line=dict(color='#FFD666', width=2),
-            ))
-
-            fig.add_hrect(y0=80, y1=100, fillcolor='rgba(255, 107, 107, 0.1)', line_width=0)
-            fig.add_hrect(y0=0, y1=20, fillcolor='rgba(0, 212, 170, 0.1)', line_width=0)
-
-            fig.add_hline(y=80, line=dict(color='#FF6B6B', width=1, dash='dash'))
-            fig.add_hline(y=20, line=dict(color='#00D4AA', width=1, dash='dash'))
-
-            layout = get_chart_layout(height=250)
-            layout['yaxis']['range'] = [0, 100]
-            layout['legend'] = dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1)
-            fig.update_layout(**layout)
-
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("Stochastic data not available")
-
-    with col2:
-        st.markdown("### CCI (20)")
-        if 'cci_20' in df.columns:
-            fig = go.Figure()
-
-            fig.add_trace(go.Scatter(
-                x=df['date'],
-                y=df['cci_20'],
-                name='CCI',
-                mode='lines',
-                line=dict(color='#A78BFA', width=2),
-                fill='tozeroy',
-                fillcolor='rgba(167, 139, 250, 0.1)',
-            ))
-
-            fig.add_hline(y=100, line=dict(color='#FF6B6B', width=1, dash='dash'),
-                         annotation=dict(text='Overbought (+100)', font=dict(size=10)))
-            fig.add_hline(y=-100, line=dict(color='#00D4AA', width=1, dash='dash'),
-                         annotation=dict(text='Oversold (-100)', font=dict(size=10)))
-            fig.add_hline(y=0, line=dict(color='#94A3B8', width=1, dash='dot'))
-
-            layout = get_chart_layout(height=250)
-            fig.update_layout(**layout)
-
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.info("CCI data not available")
-
-# ============================================================================
-# TAB 3: DATA TABLES
-# ============================================================================
-with tab_tables:
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("### Price & Moving Averages")
-        price_cols = {
-            'Close': 'close',
-            'SMA 20': 'sma_20',
-            'SMA 50': 'sma_50',
-            'SMA 100': 'sma_100',
-            'SMA 200': 'sma_200',
-            'EMA 20': 'ema_20',
-            'EMA 50': 'ema_50'
-        }
-
-        table_data = []
-        for name, col in price_cols.items():
-            if col in df.columns:
-                val = latest.get(col)
-                table_data.append({
-                    'Indicator': name,
-                    'Value': f"{val:,.0f}" if pd.notna(val) else "-"
-                })
-
-        if table_data:
-            st.dataframe(pd.DataFrame(table_data), use_container_width=True, hide_index=True)
-
-        st.markdown("### Volatility")
-        vol_cols = {
-            'ATR (14)': 'atr_14',
-            'BB Upper': 'bb_upper',
-            'BB Middle': 'bb_middle',
-            'BB Lower': 'bb_lower',
-            'BB Width': 'bb_width'
-        }
-
-        vol_data = []
-        for name, col in vol_cols.items():
-            if col in df.columns:
-                val = latest.get(col)
-                if col == 'bb_width':
-                    vol_data.append({'Indicator': name, 'Value': f"{val:.2f}" if pd.notna(val) else "-"})
-                else:
-                    vol_data.append({'Indicator': name, 'Value': f"{val:,.0f}" if pd.notna(val) else "-"})
-
-        if vol_data:
-            st.dataframe(pd.DataFrame(vol_data), use_container_width=True, hide_index=True)
-
-    with col2:
-        st.markdown("### Momentum Indicators")
-        ind_cols = {
-            'RSI (14)': 'rsi_14',
-            'ADX (14)': 'adx_14',
-            'MACD': 'macd',
-            'MACD Signal': 'macd_signal',
-            'MACD Histogram': 'macd_hist',
-            'Stoch %K': 'stoch_k',
-            'Stoch %D': 'stoch_d',
-            'CCI (20)': 'cci_20',
-            'MFI (14)': 'mfi_14'
-        }
-
-        table_data = []
-        for name, col in ind_cols.items():
-            if col in df.columns:
-                val = latest.get(col)
-                table_data.append({
-                    'Indicator': name,
-                    'Value': f"{val:.2f}" if pd.notna(val) else "-"
-                })
-
-        if table_data:
-            st.dataframe(pd.DataFrame(table_data), use_container_width=True, hide_index=True)
-
-        st.markdown("### Volume Indicators")
-        vol_ind_cols = {
-            'Volume': 'volume',
-            'OBV': 'obv',
-            'CMF (20)': 'cmf_20'
-        }
-
-        vol_ind_data = []
-        for name, col in vol_ind_cols.items():
-            if col in df.columns:
-                val = latest.get(col)
-                if col == 'volume' or col == 'obv':
-                    vol_ind_data.append({'Indicator': name, 'Value': f"{val:,.0f}" if pd.notna(val) else "-"})
-                else:
-                    vol_ind_data.append({'Indicator': name, 'Value': f"{val:.3f}" if pd.notna(val) else "-"})
-
-        if vol_ind_data:
-            st.dataframe(pd.DataFrame(vol_ind_data), use_container_width=True, hide_index=True)
-
+    # Footer
     st.markdown("---")
+    last_update = datetime.now().strftime('%Y-%m-%d %H:%M')
+    st.markdown(f'''
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+        <span style="color: #64748B; font-size: 0.75rem;">Technical Dashboard v2.0 | 3-Layer Systematic Trading</span>
+        <span style="color: #64748B; font-size: 0.75rem;">Last update: {last_update}</span>
+    </div>
+    ''', unsafe_allow_html=True)
 
-    # Download button
-    csv = df.to_csv(index=False).encode('utf-8')
-    st.download_button(
-        "📥 Download Technical Data (CSV)",
-        csv,
-        f"{ticker}_technical_data.csv",
-        "text/csv",
-        use_container_width=True
-    )
 
-# Footer
-st.markdown("---")
-st.caption(f"Data: Technical Analysis | Ticker: **{ticker}** | {len(df)} trading days | Last updated: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M')}")
+if __name__ == "__main__":
+    main()
