@@ -1,0 +1,260 @@
+================================================================================
+                    TA DASHBOARD AUDIT - SUMMARY MATRIX
+                          2025-12-25
+================================================================================
+
+QUICK OVERVIEW
+──────────────────────────────────────────────────────────────────────────────
+
+MCP_SERVER              CONFIG SYSTEM           TA INTEGRATION
+─────────────           ──────────────          ──────────────
+✅ 28 tools             ✅ Clean structure      ⚠️  Partial
+✅ 5 data sources       ✅ 3 registries         ⚠️  Config defined
+✅ No duplication       ✅ JSON configs         ❌  Not used in MCP
+
+================================================================================
+TOOL INVENTORY (28 Total)
+================================================================================
+
+CATEGORY                TOOLS           STATUS          NOTES
+─────────────────────────────────────────────────────────────────────────────
+Discovery               5/5             ✅ COMPLETE     Tickers, sectors, peers
+Fundamental             5/5             ✅ COMPLETE     All entity types
+Technical               6/6             ✅ COMPLETE     Indicators, alerts
+Valuation               5/5             ✅ COMPLETE     PE/PB/PS/EV ratios
+Forecast (BSC)          3/3             ✅ COMPLETE     93 stocks covered
+Sector                  3/3             ✅ AVAILABLE    Need TA scores
+Macro                   3/3             ✅ COMPLETE     Rates, FX, commodities
+                        ─────
+TOTAL                   28/28           ✅ 100%
+
+================================================================================
+DATA ACCESS ARCHITECTURE
+================================================================================
+
+                    DATA/processed/ (parquet files)
+                            ↓
+                    Config.py (path mgmt)
+                            ↓
+                    DataLoader (singleton, 5min cache)
+                            ↓
+                    Tool functions (format, filter)
+                            ↓
+                    MCP FastMCP Server
+                            ↓
+                    AI Agent (Claude/Cursor)
+
+Files:
+  • config.py           146 lines (path mgmt, validation)
+  • data_loader.py      489 lines (25+ loader methods)
+  • 7 tool modules      900+ lines (standard pattern)
+
+================================================================================
+CONFIG SYSTEM COVERAGE
+================================================================================
+
+COMPONENT               FILES               STATUS          SIZE
+─────────────────────────────────────────────────────────────────────────────
+Registries
+  MetricRegistry        metric_lookup.py    ✅ Active       2,099 metrics
+  SectorRegistry        sector_lookup.py    ✅ Active       457 tickers
+  SchemaRegistry        schema_registry.py  ✅ Active       Formatting
+
+Metadata
+  Metrics               metric_registry.json ✅ Active      770 KB
+  Sector mapping        sector_*_registry    ✅ Active      50 KB
+  Formulas              formula_registry.json ✅ Active     ~100 KB
+
+Schemas (Schema Registry)
+  Technical            indicators.json      ✅ Defined      123 lines
+  Signals              signals.json         ✅ Defined      varies
+  Display              charts.json          ✅ Defined      varies
+
+Business Logic
+  FA Analysis          fa_analysis.json     ✅ Configured   ~60 lines
+  TA Analysis          ta_analysis.json     ✅ Configured   41 lines
+  Valuation            valuation_analysis   ✅ Configured   varies
+
+Sector Analysis
+  Config Manager       config_manager.py    ✅ Active       600 lines
+  Weights              default_weights.json ✅ Configured   67 lines
+  Indicators Config    indicators_config    ✅ Configured   176 lines
+
+================================================================================
+TA CONFIGURATION DETAIL
+================================================================================
+
+WHAT'S DEFINED:
+  ✅ Indicator selection (enabled true/false per indicator)
+  ✅ RSI thresholds (30 oversold, 70 overbought)
+  ✅ Volume spike multiplier (2.0x)
+  ✅ TA weights (momentum 40%, trend 40%, breadth 20%)
+  ✅ Signal rules (MA crossover, RSI divergence, etc.)
+  ✅ Sector-specific focus metrics
+
+WHAT'S MISSING:
+  ❌ TA score calculation formula
+  ❌ How to normalize different indicators to 0-100
+  ❌ Pattern strength weighting
+  ❌ Breadth aggregation method (market → sector)
+
+================================================================================
+DATA SOURCES IN MCP
+================================================================================
+
+TICKER LEVEL:
+  DATA/processed/technical/basic_data.parquet
+    • OHLCV, MA 20/50/200, EMA 12/26
+    • RSI 14, MACD, Bollinger Bands
+    • ATR, OBV, CMF, MFI
+    • All via bsc_get_technical_indicators()
+
+MARKET LEVEL:
+  DATA/processed/technical/market_breadth/
+    • Advance/Decline counts
+    • McClellan Oscillator
+    • Via bsc_get_market_breadth()
+
+ALERTS:
+  DATA/processed/technical/alerts/daily/
+    • breakout_latest.parquet
+    • ma_crossover_latest.parquet
+    • volume_spike_latest.parquet
+    • patterns_latest.parquet
+    • Via bsc_get_technical_alerts()
+
+SECTOR SCORES (PRE-CALCULATED):
+  DATA/processed/sector/
+    • sector_fundamental_metrics.parquet
+    • sector_valuation_metrics.parquet
+    • Via bsc_get_sector_scores()
+
+================================================================================
+INTEGRATION GAPS
+================================================================================
+
+GAP #1: TA Scores Not Real-Time
+  Current: bsc_get_sector_scores() reads pre-calculated data
+  Missing: Real-time TA score generation in MCP tool
+  Impact: Can't adjust for latest market conditions instantly
+
+GAP #2: Config Not Used in MCP Tools
+  Current: Weights defined in config/ but tools don't load them
+  Missing: ConfigManager integration in MCP sector_tools.py
+  Impact: User weight customizations ignored
+
+GAP #3: No Sector-Level Breadth Aggregation
+  Current: bsc_get_market_breadth() returns market-wide only
+  Missing: bsc_get_sector_breadth_aggregated() tool
+  Impact: Can't assess individual sector momentum
+
+GAP #4: No Portfolio Analysis
+  Current: Single ticker or whole market analysis
+  Missing: Portfolio-level TA analysis tool
+  Impact: Can't analyze multiple holdings together
+
+================================================================================
+DUPLICATION ANALYSIS
+================================================================================
+
+CODE DUPLICATION: ❌ NONE FOUND
+
+Architecture (Correct Pattern):
+  PROCESSORS/ → Generates data → DATA/processed/
+  MCP_SERVER/ → Reads data → Returns to AI Agent
+  Config/     → Centralized settings
+
+No Code Sharing Needed - Each Layer Independent
+
+================================================================================
+KEY FINDINGS
+================================================================================
+
+STRENGTH #1: Clean Separation of Concerns
+  • PROCESSORS: Calculation & aggregation
+  • MCP: Data access & formatting
+  • Config: Central rules & weights
+  • No code duplication or circular dependencies
+
+STRENGTH #2: Comprehensive Tool Coverage
+  • 28 tools cover all major analysis areas
+  • Good error handling with suggestions
+  • Consistent markdown output for AI readability
+
+STRENGTH #3: Efficient Data Management
+  • 5-minute TTL caching prevents repeated disk reads
+  • Force refresh option for pipeline updates
+  • Cache invalidation markers for coordination
+
+WEAKNESS #1: TA Scoring Missing
+  • Config defined but not applied
+  • No real-time score calculation
+  • Sector tools expect pre-calculated data
+
+WEAKNESS #2: Limited Documentation
+  • No TA configuration usage guide
+  • No how-to extend custom indicators
+  • Weights defined but not explained
+
+WEAKNESS #3: Hardcoded Defaults
+  • Tool thresholds hardcoded in code
+  • Should load from indicators_config.json
+  • Makes config changes ineffective
+
+================================================================================
+PRIORITY ACTIONS
+================================================================================
+
+P1: CREATE TA SCORE CALCULATION
+    File: PROCESSORS/sector_analysis/ta_sector_calculator.py
+    Input: sector_breadth, technical_basic, money_flow
+    Output: sector_ta_scores.parquet with TA components
+    Timeline: 1-2 days
+    Blocker: TA score formula definition
+
+P2: INTEGRATE CONFIG INTO MCP
+    File: MCP_SERVER/bsc_mcp/tools/sector_tools.py
+    Action: Load ConfigManager, apply weights
+    Timeline: 1 day
+    Blocker: None
+
+P3: ADD SECTOR AGGREGATION TOOLS
+    Tools: bsc_get_sector_breadth_aggregated()
+           bsc_get_sector_momentum_analysis()
+    Timeline: 1 day
+    Blocker: None
+
+P4: DOCUMENT TA CONFIGURATION
+    File: docs/TA_CONFIGURATION_GUIDE.md
+    Content: Score calc, weights, thresholds, extension
+    Timeline: 1 day
+    Blocker: None
+
+================================================================================
+UNRESOLVED QUESTIONS
+================================================================================
+
+Q1: TA Score Weight Distribution?
+    Current: momentum 40%, trend 40%, breadth 20%
+    Need: Validate with domain experts
+
+Q2: Real-time vs Daily Calculation?
+    Option A: Daily (PROCESSORS pipeline) - stable, slower
+    Option B: Real-time (MCP tool) - faster, resource-intensive
+    Need: Product decision
+
+Q3: User Weight Persistence?
+    Current: Per-session user_preferences.json
+    Need: Per-user/sector/strategy support?
+
+Q4: Breadth Aggregation Method?
+    Option A: Simple count (advancing vs declining)
+    Option B: Market-cap weighted
+    Option C: Use pre-calculated sector_breadth table
+    Need: Technical specification
+
+================================================================================
+END OF SUMMARY
+Report File: plans/reports/scout-20251225-mcp-config-audit.md
+Generated: 2025-12-25
+================================================================================

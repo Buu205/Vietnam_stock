@@ -400,6 +400,21 @@ class SectorRegistry:
         """Get last update timestamp"""
         return self.registry.get("last_updated", "unknown")
 
+    def get_all_ticker_sectors(self) -> Dict[str, str]:
+        """
+        Get mapping of all tickers to their industry_code (sector code).
+
+        Returns:
+            Dict mapping ticker -> industry_code (e.g., {'VCB': 'BANK', 'FPT': 'IT'})
+        """
+        result = {}
+        ticker_mapping = self.registry.get("ticker_mapping", {})
+        for ticker, info in ticker_mapping.items():
+            industry_code = info.get("industry_code")
+            if industry_code:
+                result[ticker] = industry_code
+        return result
+
     def __repr__(self) -> str:
         """String representation"""
         stats = self.get_statistics()

@@ -1,0 +1,336 @@
+================================================================================
+                    TA DASHBOARD ARCHITECTURE MAP
+                        2025-12-25 Audit
+================================================================================
+
+1. DATA FLOW ARCHITECTURE
+════════════════════════════════════════════════════════════════════════════════
+
+PROCESSORS LAYER                  MCP_SERVER LAYER             CLIENT LAYER
+(Data Generation)                 (Data Access API)            (Consumption)
+─────────────────────────────────────────────────────────────────────────────
+
+  calculators/
+    ├─ company_calculator.py
+    ├─ bank_calculator.py        bsc_mcp/
+    ├─ insurance_calc.py      ├─ config.py ─────────────┐
+    └─ security_calc.py       ├─ services/               │
+         │                    │  └─ data_loader.py ◄────┤─ Claude/Cursor
+         │                    │     ├─ get_company_fundamentals() │
+  transformers/                │     ├─ get_technical_basic()      │
+    ├─ financial/formulas.py   │     ├─ get_market_breadth()       │
+    ├─ technical/indicators.py │     └─ get_sector_valuation()     │
+    └─ valuation/ratios.py     │                                    │
+         │                    ├─ tools/                            │
+         │                    │  ├─ discovery_tools.py             │
+         │                    │  ├─ fundamental_tools.py           │
+         │                    │  ├─ technical_tools.py             │
+         ↓                    │  ├─ valuation_tools.py             │
+    DATA/processed/           │  ├─ forecast_tools.py              │
+    ├─ fundamental/           │  ├─ sector_tools.py ◄──────────┘
+    │  ├─ company/            │  └─ macro_tools.py
+    │  ├─ bank/               │
+    │  ├─ insurance/          └─ server.py (FastMCP)
+    │  └─ security/
+    │
+    ├─ technical/
+    │  ├─ basic_data.parquet
+    │  ├─ market_breadth/
+    │  ├─ alerts/
+    │  └─ sector_breadth/
+    │
+    ├─ valuation/
+    │  ├─ pe/
+    │  ├─ pb/
+    │  └─ ev_ebitda/
+    │
+    ├─ sector/
+    │  ├─ sector_fundamental_metrics.parquet
+    │  ├─ sector_valuation_metrics.parquet
+    │  └─ sector_ta_metrics.parquet [MISSING]
+    │
+    └─ forecast/bsc/
+       ├─ bsc_individual.parquet
+       ├─ bsc_sector.parquet
+       └─ bsc_combined.parquet
+
+
+2. CONFIG SYSTEM HIERARCHY
+════════════════════════════════════════════════════════════════════════════════
+
+config/
+├─ REGISTRIES (Python Classes)
+│  ├─ MetricRegistry           ◄─── 2,099 financial metrics
+│  │  • get_metric(code, type)
+│  │  • get_calculated_formula()
+│  │  • search_by_name()
+│  │
+│  ├─ SectorRegistry            ◄─── 457 tickers × 19 sectors
+│  │  • get_ticker(symbol)
+│  │  • get_peers(symbol)
+│  │  • validate_ticker()
+│  │
+│  └─ SchemaRegistry            ◄─── Formatting utilities
+│     • format_price()
+│     • format_percentage()
+│     • get_schema()
+│
+├─ METADATA (JSON Files)
+│  ├─ metric_registry.json         770 KB - Source of truth
+│  ├─ sector_industry_registry.json 50 KB
+│  └─ formula_registry.json         100 KB
+│
+├─ SCHEMAS (Organization)
+│  ├─ core/
+│  │  ├─ types.json        (Base data types)
+│  │  ├─ entities.json     (COMPANY, BANK, etc.)
+│  │  └─ mappings.json     (Field transformations)
+│  │
+│  ├─ domain/
+│  │  ├─ fundamental/      (FA metrics, reports)
+│  │  ├─ technical/
+│  │  │  ├─ indicators.json (Defines all indicators)
+│  │  │  ├─ signals.json
+│  │  │  └─ trends.json
+│  │  ├─ valuation/        (PE, PB, EV/EBITDA)
+│  │  └─ unified/
+│  │     ├─ sector.json    (Sector structure)
+│  │     └─ insights.json  (Analysis results)
+│  │
+│  └─ display/
+│     ├─ charts.json       (Chart configurations)
+│     ├─ tables.json       (Table layouts)
+│     └─ dashboards.json   (Dashboard specs)
+│
+├─ BUSINESS LOGIC (Decision Rules)
+│  ├─ analysis/
+│  │  ├─ fa_analysis.json       ◄──── FA scoring rules
+│  │  ├─ ta_analysis.json       ◄──── TA signal generation
+│  │  ├─ valuation_analysis.json
+│  │  └─ unified_analysis.json
+│  │
+│  ├─ decisions/
+│  │  ├─ thresholds.json        (Min/max values)
+│  │  ├─ weights.json           (Component weights)
+│  │  └─ rules.json             (Decision logic)
+│  │
+│  └─ alerts/
+│     ├─ rules.json
+│     └─ channels.json
+│
+└─ SECTOR ANALYSIS (TA/FA Configuration)
+   ├─ config_manager.py          ◄────── Main config orchestrator
+   │  • get_active_config()
+   │  • update_weights()
+   │  • get_enabled_indicators()
+   │  • save_user_config()
+   │
+   ├─ default_weights.json       ◄────── FA/TA weights (67 lines)
+   │  • fa_weights: growth, profitability, efficiency, health
+   │  • ta_weights: valuation, momentum, breadth
+   │  • composite: fundamental 60%, technical 40%
+   │  • sector_overrides for Banking, Tech, RE
+   │
+   └─ indicators_config.json     ◄────── TA thresholds (176 lines)
+      • enabled: which indicators to use
+      • alerts: price_movement, volume_spike, ma_crossover
+      • thresholds: RSI 30/70, volume spike 2.0x
+      • sector_specific: Banking NIM, Insurance ratios
+
+
+3. MCP TOOL REGISTRATION & FLOW
+════════════════════════════════════════════════════════════════════════════════
+
+MCP Server Startup:
+  ┌──────────────────────────────────────────────────────────┐
+  │ server.py (FastMCP entry point)                          │
+  │  ├─ Register discovery_tools (5)                         │
+  │  ├─ Register fundamental_tools (5)                       │
+  │  ├─ Register technical_tools (6)                         │
+  │  ├─ Register valuation_tools (5)                         │
+  │  ├─ Register forecast_tools (3)                          │
+  │  ├─ Register sector_tools (3)                            │
+  │  └─ Register macro_tools (3)                             │
+  │                                                           │
+  │  Total: 28 Tools Ready                                   │
+  └──────────────────────────────────────────────────────────┘
+            │
+            ↓
+  Tool Invocation Flow:
+    Claude Agent → "bsc_get_sector_scores()" 
+                   ↓
+    MCP Tool Function
+      1. get_data_loader()        (singleton)
+      2. loader.get_sector_valuation()  (cached, 5min TTL)
+      3. Filter by sector/signal
+      4. format_dataframe_markdown()
+      5. Return markdown table
+                   ↓
+    Claude Sees Formatted Result
+
+
+4. TA CONFIGURATION FLOW (CURRENT)
+════════════════════════════════════════════════════════════════════════════════
+
+default_weights.json
+  │
+  └─ ConfigManager.load()
+       │
+       └─ Active Configuration Loaded
+            │
+            ├─ fa_weights: {growth: 0.3, profitability: 0.3, ...}
+            ├─ ta_weights: {valuation: 0.4, momentum: 0.4, breadth: 0.2}
+            └─ composite_weights: {fundamental: 0.6, technical: 0.4}
+
+indicators_config.json
+  │
+  └─ ConfigManager.load()
+       │
+       └─ Enabled Indicators & Thresholds Loaded
+            │
+            ├─ Enabled indicators: ma_20, ma_50, rsi, macd, etc.
+            ├─ RSI thresholds: 30 oversold, 70 overbought
+            └─ Volume spike: 2.0x multiplier
+
+ta_analysis.json
+  │
+  └─ Signal Generation Rules Defined
+       │
+       ├─ Buy signals: rsi<30, ma_20 above ma_50, macd>0
+       └─ Sell signals: rsi>70, ma_20 below ma_50, macd<0
+
+PROBLEM: Config Loaded But NOT Used in MCP Tools!
+  ├─ ConfigManager exists
+  ├─ Weights defined
+  ├─ But MCP sector_tools.py doesn't load ConfigManager
+  └─ So user customizations are IGNORED
+
+
+5. TA INTEGRATION GAPS
+════════════════════════════════════════════════════════════════════════════════
+
+Gap #1: No Real-Time TA Score Calculation
+┌─────────────────────────────────────────────────────────┐
+│ CURRENT STATE:                                          │
+│  bsc_get_sector_scores()                                │
+│    └─ Reads pre-calculated sector_valuation.parquet     │
+│    └─ Returns whatever is in that file                  │
+│    └─ Can't adapt to market changes instantly           │
+│                                                         │
+│ NEEDED:                                                 │
+│  sector_ta_calculator.py                                │
+│    ├─ Input: market_breadth, technical_basic, money_flow│
+│    ├─ Process: Apply TA weighting rules                 │
+│    └─ Output: sector_ta_scores.parquet with real scores │
+└─────────────────────────────────────────────────────────┘
+
+Gap #2: Config Not Integrated into Tools
+┌─────────────────────────────────────────────────────────┐
+│ CURRENT STATE:                                          │
+│  config/sector_analysis/config_manager.py               │
+│    └─ Can load & modify weights                         │
+│    └─ But MCP tools don't use it                        │
+│    └─ Hardcoded defaults in tools instead               │
+│                                                         │
+│ NEEDED:                                                 │
+│  sector_tools.py Enhancement                            │
+│    ├─ Import ConfigManager                              │
+│    ├─ Load user weights at tool runtime                 │
+│    └─ Apply config to score calculation                 │
+└─────────────────────────────────────────────────────────┘
+
+Gap #3: No Sector Breadth Aggregation
+┌─────────────────────────────────────────────────────────┐
+│ CURRENT STATE:                                          │
+│  bsc_get_market_breadth() → Market-wide only            │
+│                                                         │
+│ NEEDED:                                                 │
+│  bsc_get_sector_breadth_aggregated(sector)              │
+│    ├─ Count advancing vs declining in sector            │
+│    ├─ Calculate breadth ratio                           │
+│    └─ Return sector momentum metric                     │
+└─────────────────────────────────────────────────────────┘
+
+Gap #4: No Portfolio Analysis
+┌─────────────────────────────────────────────────────────┐
+│ CURRENT STATE:                                          │
+│  bsc_get_technical_indicators(ticker) → Single ticker   │
+│                                                         │
+│ NEEDED:                                                 │
+│  bsc_get_portfolio_ta_analysis(tickers=[...])           │
+│    ├─ Analyze multiple holdings together                │
+│    ├─ Weighted by portfolio allocation                  │
+│    └─ Return portfolio TA score                         │
+└─────────────────────────────────────────────────────────┘
+
+
+6. FILE DEPENDENCY MAP
+════════════════════════════════════════════════════════════════════════════════
+
+MCP Depends On:
+  ├─ DATA/processed/ (all parquet files)
+  │  ├─ technical/basic_data.parquet
+  │  ├─ market_breadth/*.parquet
+  │  ├─ sector/*.parquet
+  │  └─ forecast/bsc/*.parquet
+  │
+  └─ config/registries/ (metadata lookups)
+     ├─ metric_registry.json
+     └─ sector_industry_registry.json
+
+Config Depends On:
+  ├─ JSON configuration files (all in config/)
+  └─ config/registries/ (metadata)
+
+PROCESSORS Depends On:
+  └─ Raw input files
+     ├─ BSC Excel templates
+     ├─ Raw OHLCV
+     └─ API responses
+
+NO CIRCULAR DEPENDENCIES ✅
+NO CODE DUPLICATION ✅
+
+
+7. TA SCORE CALCULATION (PROPOSED)
+════════════════════════════════════════════════════════════════════════════════
+
+Input Data:
+  • technical/basic_data.parquet → Ticker-level indicators
+  • technical/market_breadth/*.parquet → Market advance/decline
+  • technical/money_flow/*.parquet → Dollar inflows/outflows
+  • config/sector_analysis/default_weights.json → Weights
+
+Processing:
+  For each sector:
+    1. Collect all tickers in sector
+    2. Calculate sub-scores:
+       - Momentum: RSI + MACD + price trends (weighted)
+       - Trend: MA alignment (20/50/200) (weighted)
+       - Volatility: BB position + ATR (weighted)
+       - Breadth: % advancing in sector (weighted)
+    3. Normalize each sub-score to 0-100
+    4. Apply sector weights to get composite
+    5. Generate signal (BUY/HOLD/SELL based on score)
+
+Output:
+  sector_ta_scores.parquet
+  Columns:
+    - date
+    - sector
+    - momentum_score
+    - trend_score
+    - volatility_score
+    - breadth_score
+    - ta_score
+    - ta_signal
+
+Daily Update:
+  Run in PROCESSORS/daily_sector_complete_update.py
+  Updates DATA/processed/sector/sector_ta_metrics.parquet
+
+
+================================================================================
+END OF ARCHITECTURE MAP
+Generated: 2025-12-25
+================================================================================

@@ -89,3 +89,55 @@ Scout will return:
 ---
 
 **Last Updated:** 2025-12-21
+
+---
+
+## 2025-12-25: MCP Server & Config Audit
+
+**Reports:**
+- `scout-20251225-mcp-config-audit.md` - Full technical audit (792 lines)
+  - Part 1: MCP Server architecture (28 tools inventory)
+  - Part 2: Config system structure (registries, schemas, weights)
+  - Part 3: Integration analysis (no code duplication, clean separation)
+  - Part 4: TA-specific findings (what's configured, what's missing)
+  - Part 5: Findings & recommendations (4 priority actions)
+  - Part 6: Quick reference (key files, patterns, unresolved questions)
+
+- `scout-20251225-audit-summary.txt` - Executive summary matrix (260 lines)
+  - Tool inventory breakdown (28/28 complete)
+  - Data access architecture diagram
+  - Config system coverage matrix
+  - TA configuration detail (defined vs missing)
+  - Integration gaps analysis
+  - Duplication assessment (none found)
+  - Key findings & priority actions
+
+**Key Findings:**
+- MCP_SERVER: 28 fully implemented tools covering all analysis areas
+- CONFIG: Clean system with registries, schemas, business logic configs
+- TA INTEGRATION: Config defined (weights, thresholds) but NOT used in MCP tools
+- DUPLICATION: NONE - Clean separation between PROCESSORS, MCP, CONFIG layers
+- GAPS: 4 identified (TA scoring, config integration, sector breadth, portfolio)
+
+**Priority Actions:**
+1. Create TA sector score calculator (blocker: formula definition)
+2. Integrate ConfigManager into MCP tools (1 day)
+3. Add sector aggregation tools (1 day)
+4. Document TA configuration guide (1 day)
+
+**Unresolved Questions:**
+1. TA score weight distribution validation
+2. Real-time vs daily calculation approach
+3. User weight persistence strategy
+4. Breadth aggregation method specification
+
+
+---
+
+### Report Index
+
+| Date | Topic | Reports | Size | Key Finding |
+|------|-------|---------|------|------------|
+| 2025-12-25 | MCP & Config Audit | 3 reports | 80KB | TA config defined but not integrated into MCP tools |
+| 2025-12-21 | TA System Audit | 1 report | 27KB | Comprehensive TA system review |
+
