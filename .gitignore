@@ -79,21 +79,50 @@ DATA/raw/macro/*.parquet
 DATA/processed/**/*.parquet
 DATA/processed/**/*.csv
 
-# EXCEPTIONS: Essential processed files for dashboard deployment
-# These files are required for the Streamlit dashboard to function
-!DATA/processed/forecast/bsc/*.parquet
-!DATA/processed/fundamental/company/*.parquet
-!DATA/processed/fundamental/bank/*.parquet
-!DATA/processed/fundamental/insurance/*.parquet
-!DATA/processed/fundamental/security/*.parquet
-!DATA/processed/fundamental/*_full.parquet
-!DATA/processed/valuation/**/*.parquet
-!DATA/processed/technical/*.parquet
-!DATA/processed/technical/**/*.parquet
-!DATA/processed/sector/*.parquet
-!DATA/processed/macro_commodity/*.parquet
-!DATA/processed/market_indices/*.parquet
-!DATA/processed/stock_valuation/*.parquet
+# EXCEPTIONS: 24 essential files required by Streamlit (83.2 MB)
+# Analysis: plans/reports/audit-251228-streamlit-data-dependencies.md
+
+# Fundamental (3 files)
+!DATA/processed/fundamental/company/company_financial_metrics.parquet
+!DATA/processed/fundamental/bank/bank_financial_metrics.parquet
+!DATA/processed/fundamental/security/security_financial_metrics.parquet
+
+# Technical - Basic (1 file)
+!DATA/processed/technical/basic_data.parquet
+
+# Technical - Market/Sector Breadth (3 files)
+!DATA/processed/technical/market_breadth/market_breadth_daily.parquet
+!DATA/processed/technical/sector_breadth/sector_breadth_daily.parquet
+!DATA/processed/technical/vnindex/vnindex_indicators.parquet
+
+# Technical - Alerts/Signals (4 files)
+!DATA/processed/technical/alerts/daily/patterns_latest.parquet
+!DATA/processed/technical/alerts/daily/ma_crossover_latest.parquet
+!DATA/processed/technical/alerts/daily/volume_spike_latest.parquet
+!DATA/processed/technical/alerts/daily/breakout_latest.parquet
+
+# Technical - Money Flow (3 files)
+!DATA/processed/technical/money_flow/sector_money_flow_1d.parquet
+!DATA/processed/technical/money_flow/sector_money_flow_1w.parquet
+!DATA/processed/technical/money_flow/sector_money_flow_1m.parquet
+
+# Technical - RS Rating (1 file)
+!DATA/processed/technical/rs_rating/stock_rs_rating_daily.parquet
+
+# Valuation (5 files)
+!DATA/processed/valuation/pe/historical/historical_pe.parquet
+!DATA/processed/valuation/pb/historical/historical_pb.parquet
+!DATA/processed/valuation/ev_ebitda/historical/historical_ev_ebitda.parquet
+!DATA/processed/valuation/ps/historical/historical_ps.parquet
+!DATA/processed/valuation/vnindex/vnindex_valuation_refined.parquet
+
+# Forecast (3 files)
+!DATA/processed/forecast/bsc/bsc_individual.parquet
+!DATA/processed/forecast/bsc/bsc_sector_valuation.parquet
+!DATA/processed/forecast/bsc/bsc_combined.parquet
+
+# Macro/Commodity (1 file)
+!DATA/processed/macro_commodity/macro_commodity_unified.parquet
 
 # But keep Python files
 !DATA/processed/**/*.py
