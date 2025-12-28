@@ -79,14 +79,25 @@ class OHLCVValidator:
             schema_path: Path to ohlcv_data_schema.json (auto-detects if None)
         """
         if schema_path is None:
-            # Auto-detect schema path
-            root = Path(__file__).resolve().parents[2]
-            schema_path = root / "calculated_results" / "schemas" / "ohlcv_data_schema.json"
+            # Auto-detect schema path (canonical v4.0.0)
+            root = Path(__file__).resolve().parents[3]
+            schema_path = root / "config" / "schemas" / "data" / "ohlcv_data_schema.json"
 
-        with open(schema_path, 'r', encoding='utf-8') as f:
-            self.schema = json.load(f)
-
-        self.validation_rules = self.schema.get('validation_rules', {})
+        # Try to load schema, use defaults if not found
+        if schema_path.exists():
+            try:
+                with open(schema_path, 'r', encoding='utf-8') as f:
+                    self.schema = json.load(f)
+                self.validation_rules = self.schema.get('validation_rules', {})
+            except Exception as e:
+                import logging
+                logging.warning(f"Failed to load schema from {schema_path}: {e}. Using defaults.")
+                self.schema = {}
+                self.validation_rules = {}
+        else:
+            # Schema not found, use defaults
+            self.schema = {}
+            self.validation_rules = {}
 
     def validate_ohlcv_data(self, df: pd.DataFrame, strict: bool = False) -> ValidationResult:
         """

@@ -21,13 +21,17 @@ class ConsistencyChecker:
     Kiểm tra tính nhất quán dữ liệu qua các nguồn và khoảng thời gian khác nhau.
     """
     
-    def __init__(self, data_warehouse_path: str = "data_warehouse"):
+    def __init__(self, data_warehouse_path: str = None):
         """Initialize ConsistencyChecker.
         Khởi tạo ConsistencyChecker.
-        
+
         Args:
-            data_warehouse_path: Path to data warehouse
+            data_warehouse_path: Path to data warehouse (default: canonical v4.0.0)
         """
+        # Use canonical v4.0.0 path as default
+        if data_warehouse_path is None:
+            data_warehouse_path = Path(__file__).resolve().parents[3] / "DATA"
+
         self.data_warehouse_path = Path(data_warehouse_path)
         self.consistency_rules = self._load_consistency_rules()
     

@@ -108,24 +108,24 @@ def merge_entity(entity_name, input_file, processed_file):
         return False
 
 def main():
-    base_path = Path(__file__).parent.parent.parent
-    
+    base_path = Path(__file__).resolve().parents[3]
+
     entities = {
         'COMPANY': {
             'input': base_path / 'copy/input/COMPANY_Q3_2025_FILTERED_448.parquet',
-            'processed': base_path / 'data_warehouse/raw/fundamental/processed/company_full.parquet'
+            'processed': base_path / 'DATA/processed/fundamental/company_full.parquet'
         },
         'BANK': {
             'input': base_path / 'copy/input/BANK_Q3_2025_FILTERED_448.parquet',
-            'processed': base_path / 'data_warehouse/raw/fundamental/processed/bank_full.parquet'
+            'processed': base_path / 'DATA/processed/fundamental/bank_full.parquet'
         },
         'SECURITY': {
             'input': base_path / 'copy/input/SECURITY_Q3_2025_FILTERED_448.parquet',
-            'processed': base_path / 'data_warehouse/raw/fundamental/processed/security_full.parquet'
+            'processed': base_path / 'DATA/processed/fundamental/security_full.parquet'
         },
         'INSURANCE': {
             'input': base_path / 'copy/input/INSURANCE_Q3_2025_FILTERED_448.parquet',
-            'processed': base_path / 'data_warehouse/raw/fundamental/processed/insurance_full.parquet'
+            'processed': base_path / 'DATA/processed/fundamental/insurance_full.parquet'
         }
     }
     

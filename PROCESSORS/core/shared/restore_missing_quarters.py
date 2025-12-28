@@ -16,14 +16,16 @@ logger = logging.getLogger(__name__)
 
 def restore_missing_quarters():
     """Khôi phục các quý bị thiếu từ backup"""
-    
-    calc_path = Path('calculated_results/fundamental')
-    processed_path = Path('data_warehouse/raw/fundamental/processed')
-    
+
+    # Canonical v4.0.0 paths
+    base_path = Path(__file__).resolve().parents[3]
+    calc_path = base_path / 'DATA' / 'processed' / 'fundamental'
+    processed_path = base_path / 'DATA' / 'processed' / 'fundamental'
+
     # Đường dẫn files
     company_input = processed_path / 'company_full.parquet'
-    company_current = calc_path / 'company/company_financial_metrics.parquet'
-    company_backup = calc_path / 'company/company_financial_metrics_backup.parquet'
+    company_current = calc_path / 'company' / 'company_financial_metrics.parquet'
+    company_backup = calc_path / 'company' / 'company_financial_metrics_backup.parquet'
     
     # Backup file hiện tại trước khi sửa
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')

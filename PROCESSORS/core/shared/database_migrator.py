@@ -25,27 +25,34 @@ class DatabaseMigrator:
     Migrator cơ sở dữ liệu cho dữ liệu tài chính cơ bản.
     """
     
-    def __init__(self, 
-                 input_dir: str = "calculated_results/fundamental",
-                 output_dir: str = "data_warehouse/processed/fundamental_std",
+    def __init__(self,
+                 input_dir: str = None,
+                 output_dir: str = None,
                  temp_db_path: str = "temp_fundamental_migration.db"):
         """Initialize DatabaseMigrator.
         Khởi tạo DatabaseMigrator.
-        
+
         Args:
-            input_dir: Input directory containing fundamental parquet files
-            output_dir: Output directory for standardized files
+            input_dir: Input directory containing fundamental parquet files (default: canonical v4.0.0)
+            output_dir: Output directory for standardized files (default: canonical v4.0.0)
             temp_db_path: Temporary DuckDB file path
         """
+        # Use canonical v4.0.0 paths as defaults
+        base_path = Path(__file__).resolve().parents[3]
+        if input_dir is None:
+            input_dir = base_path / 'DATA' / 'processed' / 'fundamental'
+        if output_dir is None:
+            output_dir = base_path / 'DATA' / 'processed' / 'fundamental_std'
+
         self.input_dir = Path(input_dir)
         self.output_dir = Path(output_dir)
         self.temp_db_path = temp_db_path
-        
+
         # Create output directory structure
         self.output_dir.mkdir(parents=True, exist_ok=True)
         (self.output_dir / "bank").mkdir(exist_ok=True)
         (self.output_dir / "company").mkdir(exist_ok=True)
-        
+
         # Initialize validators
         self.bank_validator = DataValidator(data_type="bank")
         self.company_validator = DataValidator(data_type="company")

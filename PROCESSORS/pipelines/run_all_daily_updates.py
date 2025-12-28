@@ -362,7 +362,8 @@ def run_script(
     description: str,
     step_num: int,
     total_steps: int,
-    step_key: str
+    step_key: str,
+    target_date: Optional[str] = None
 ) -> Tuple[bool, float, Optional[Dict]]:
     """
     Run a daily script and return success status, duration, and file info.
@@ -373,6 +374,7 @@ def run_script(
         step_num: Current step number
         total_steps: Total number of steps
         step_key: Step key for file verification
+        target_date: Optional target date (YYYY-MM-DD) to pass to script
 
     Returns:
         Tuple of (success, duration_seconds, file_info)
@@ -382,13 +384,22 @@ def run_script(
     logger.info("\n" + "=" * 80)
     logger.info(f"🚀 STEP {step_num}/{total_steps}: {description}")
     logger.info(f"   Script: {script_name}")
+    if target_date:
+        logger.info(f"   Target Date: {target_date}")
     logger.info("=" * 80)
 
     start_time = datetime.now()
 
     try:
+        # Build command with optional date parameter
+        cmd = [sys.executable, str(script_path)]
+        if target_date:
+            # Only add --date if script supports it (ohlcv, ta)
+            if script_name in ['daily_ohlcv_update.py', 'daily_ta_complete.py']:
+                cmd.extend(['--date', target_date])
+        
         result = subprocess.run(
-            [sys.executable, str(script_path)],
+            cmd,
             capture_output=True,
             text=True,
             timeout=600  # 10 minute timeout
@@ -444,6 +455,9 @@ Examples:
   # Run all updates
   python3 PROCESSORS/pipelines/run_all_daily_updates.py
 
+  # Force run for specific date (26/12/2025)
+  python3 PROCESSORS/pipelines/run_all_daily_updates.py --date 2025-12-26
+
   # Skip OHLCV and TA
   python3 PROCESSORS/pipelines/run_all_daily_updates.py --skip-ohlcv --skip-ta
 
@@ -460,6 +474,8 @@ Examples:
     parser.add_argument('--skip-bscforecast', action='store_true', help='Skip BSC forecast update')
     parser.add_argument('--only', choices=['ohlcv', 'ta', 'macro', 'valuation', 'sector', 'bscforecast'],
                        help='Run only specified update')
+    parser.add_argument('--date', type=str, default=None,
+                       help='Target date (YYYY-MM-DD) to force run for specific date. Example: 2025-12-26')
 
     args = parser.parse_args()
 
@@ -471,6 +487,8 @@ Examples:
     logger.info("\n" + "=" * 80)
     logger.info("🚀 MASTER DAILY UPDATE PIPELINE - STARTED")
     logger.info(f"   Time: {pipeline_start.strftime('%Y-%m-%d %H:%M:%S')}")
+    if args.date:
+        logger.info(f"   🎯 FORCE DATE MODE: Processing for date {args.date}")
     logger.info("=" * 80)
 
     # Define pipeline (order matters!)
@@ -506,7 +524,7 @@ Examples:
 
     # Run pipeline
     for step_num, (script, description, key) in enumerate(active_pipeline, start=1):
-        success, duration, file_info = run_script(script, description, step_num, total_steps, key)
+        success, duration, file_info = run_script(script, description, step_num, total_steps, key, args.date)
         results[key] = success
         durations[key] = duration
         if file_info:

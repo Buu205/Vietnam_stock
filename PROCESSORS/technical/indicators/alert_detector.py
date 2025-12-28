@@ -316,24 +316,210 @@ class TechnicalAlertDetector:
 
         return None
 
+    # Historical Win Rates (Research-based from backtested data)
+    # Sources:
+    # - Quantified Strategies: 75 patterns backtest on S&P 500
+    # - Liberated Stock Trader: 56,680 trades on Dow Jones
+    # - YourTradingCoach: Historical win percentages
+    PATTERN_HISTORICAL_WIN_RATES = {
+        # Bullish Patterns
+        'inverted_hammer': 60,       # Liberated: 60% win rate, 1.12% profit
+        'morning_star': 58,          # 3-candle reversal, well-documented
+        'three_white_soldiers': 56,  # Strong but less frequent
+        'hammer': 55,                # Moderate reliability
+        'engulfing': 57,             # Works for both bullish/bearish
+
+        # Bearish Patterns
+        'three_black_crows': 58,     # Three Outside Down proxy
+        'evening_star': 57,          # Mirror of morning star
+        'shooting_star': 55,         # Moderate reliability
+        'hanging_man': 52,           # Needs strong confirmation
+        'gravestone_doji': 57,       # Liberated: 57% win rate
+
+        # Neutral/Low Reliability
+        'doji': 50,                  # Indecision, coin flip
+        'spinning_top': 50,          # No directional bias
+    }
+
+    def calculate_context_score(
+        self,
+        df: pd.DataFrame,
+        is_bullish: bool,
+        vol_ratio: float,
+        rsi: float
+    ) -> tuple:
+        """
+        Calculate context confirmation score (0-100).
+
+        Factors (25 points each):
+        1. Volume Confirmation
+        2. RSI Alignment
+        3. Trend Alignment (EMA20/EMA50)
+        4. Support/Resistance Proximity
+
+        Args:
+            df: DataFrame with OHLCV + calculated MAs
+            is_bullish: Whether pattern is bullish
+            vol_ratio: Current volume / 20-day avg volume
+            rsi: Current RSI value
+
+        Returns:
+            (score: int, confirmations: list of strings)
+        """
+        confirmations = []
+        score = 0
+
+        close = df['close'].values.astype(float)
+        high = df['high'].values.astype(float)
+        low = df['low'].values.astype(float)
+        price = close[-1]
+
+        # 1. Volume Confirmation (25 points max)
+        if vol_ratio >= 2.5:
+            score += 25
+            confirmations.append(f"Vol x{vol_ratio:.1f} (Very Strong)")
+        elif vol_ratio >= 2.0:
+            score += 20
+            confirmations.append(f"Vol x{vol_ratio:.1f} (Strong)")
+        elif vol_ratio >= 1.5:
+            score += 15
+            confirmations.append(f"Vol x{vol_ratio:.1f} (Good)")
+        elif vol_ratio >= 1.0:
+            score += 5
+            confirmations.append(f"Vol x{vol_ratio:.1f} (Normal)")
+        else:
+            confirmations.append(f"Vol x{vol_ratio:.1f} (Weak)")
+
+        # 2. RSI Alignment (25 points max)
+        if is_bullish:
+            if rsi < 30:
+                score += 25
+                confirmations.append(f"RSI {rsi:.0f} (Oversold)")
+            elif rsi < 40:
+                score += 15
+                confirmations.append(f"RSI {rsi:.0f} (Low)")
+            elif rsi < 50:
+                score += 5
+                confirmations.append(f"RSI {rsi:.0f} (Neutral)")
+            else:
+                confirmations.append(f"RSI {rsi:.0f} (High)")
+        else:  # Bearish
+            if rsi > 70:
+                score += 25
+                confirmations.append(f"RSI {rsi:.0f} (Overbought)")
+            elif rsi > 60:
+                score += 15
+                confirmations.append(f"RSI {rsi:.0f} (High)")
+            elif rsi > 50:
+                score += 5
+                confirmations.append(f"RSI {rsi:.0f} (Neutral)")
+            else:
+                confirmations.append(f"RSI {rsi:.0f} (Low)")
+
+        # 3. Trend Alignment (25 points max)
+        try:
+            ema20 = talib.EMA(close, timeperiod=20)[-1]
+            ema50 = talib.EMA(close, timeperiod=50)[-1]
+
+            if is_bullish:
+                if price > ema20 > ema50:
+                    score += 25
+                    confirmations.append("Uptrend (P>EMA20>EMA50)")
+                elif price > ema20:
+                    score += 15
+                    confirmations.append("Above EMA20")
+                elif price > ema50:
+                    score += 5
+                    confirmations.append("Above EMA50")
+                else:
+                    confirmations.append("Downtrend (counter)")
+            else:  # Bearish
+                if price < ema20 < ema50:
+                    score += 25
+                    confirmations.append("Downtrend (P<EMA20<EMA50)")
+                elif price < ema20:
+                    score += 15
+                    confirmations.append("Below EMA20")
+                elif price < ema50:
+                    score += 5
+                    confirmations.append("Below EMA50")
+                else:
+                    confirmations.append("Uptrend (counter)")
+        except Exception:
+            confirmations.append("Trend N/A")
+
+        # 4. Support/Resistance Proximity (25 points max)
+        try:
+            high_20 = np.max(high[-21:-1])
+            low_20 = np.min(low[-21:-1])
+            range_20 = high_20 - low_20
+
+            if range_20 > 0:
+                if is_bullish:
+                    # Near support = good for bullish
+                    pct_from_low = (price - low_20) / range_20 * 100
+                    if pct_from_low < 15:
+                        score += 25
+                        confirmations.append(f"Near support ({pct_from_low:.0f}%)")
+                    elif pct_from_low < 30:
+                        score += 15
+                        confirmations.append(f"Close to support ({pct_from_low:.0f}%)")
+                    else:
+                        confirmations.append(f"Far from support ({pct_from_low:.0f}%)")
+                else:  # Bearish
+                    # Near resistance = good for bearish
+                    pct_from_high = (high_20 - price) / range_20 * 100
+                    if pct_from_high < 15:
+                        score += 25
+                        confirmations.append(f"Near resistance ({pct_from_high:.0f}%)")
+                    elif pct_from_high < 30:
+                        score += 15
+                        confirmations.append(f"Close to resistance ({pct_from_high:.0f}%)")
+                    else:
+                        confirmations.append(f"Far from resistance ({pct_from_high:.0f}%)")
+        except Exception:
+            confirmations.append("S/R N/A")
+
+        return score, confirmations
+
     def detect_candlestick_patterns(self, symbol: str, df: pd.DataFrame) -> List[Dict]:
         """
-        Detect candlestick patterns (top 10 most reliable).
+        Detect candlestick patterns with 3-metric scoring system.
+
+        Metrics:
+        1. win_rate: Historical win rate from backtest research (50-60%)
+        2. context_score: Context confirmation score (0-100)
+        3. composite_score: Weighted composite for sorting (-100 to +100)
+
+        Formula:
+            composite = direction × (win_rate × 0.4 + context × 0.6)
 
         Args:
             symbol: Stock symbol
             df: DataFrame with OHLCV
 
         Returns:
-            List of pattern alerts
+            List of pattern alerts with 3 metrics
         """
-        if len(df) < 3:
+        if len(df) < 20:  # Need enough data for context
             return []
 
         close = df['close'].values.astype(float)
         high = df['high'].values.astype(float)
         low = df['low'].values.astype(float)
         open_price = df['open'].values.astype(float)
+        volume = df['volume'].values.astype(float)
+
+        # Calculate volume ratio for confirmation
+        avg_volume = np.mean(volume[-20:-1]) if len(volume) >= 20 else np.mean(volume[:-1])
+        current_volume = volume[-1]
+        vol_ratio = current_volume / avg_volume if avg_volume > 0 else 1.0
+
+        # Calculate RSI for context
+        try:
+            rsi = talib.RSI(close, timeperiod=14)[-1]
+        except Exception:
+            rsi = 50.0
 
         patterns = {
             'hammer': talib.CDLHAMMER(open_price, high, low, close),
@@ -351,13 +537,37 @@ class TechnicalAlertDetector:
         alerts = []
         for pattern_name, values in patterns.items():
             if values[-1] != 0:
+                is_bullish = values[-1] > 0
+
+                # 1. Historical Win Rate (fixed per pattern)
+                win_rate = self.PATTERN_HISTORICAL_WIN_RATES.get(pattern_name, 50)
+
+                # 2. Context Confirmation Score (dynamic, 0-100)
+                context_score, confirmations = self.calculate_context_score(
+                    df, is_bullish, vol_ratio, rsi
+                )
+
+                # 3. Composite Score (for sorting, -100 to +100)
+                # Formula: direction × (win_rate × 0.4 + context × 0.6)
+                weighted_score = (win_rate * 0.4) + (context_score * 0.6)
+                composite_score = round(weighted_score if is_bullish else -weighted_score)
+
+                # Legacy 'strength' field = absolute composite for backward compat
+                strength = abs(composite_score)
+
                 alerts.append({
                     'symbol': symbol,
                     'date': df.iloc[-1]['date'],
                     'alert_type': 'CANDLESTICK_PATTERN',
                     'pattern_name': pattern_name,
-                    'signal': 'BULLISH' if values[-1] > 0 else 'BEARISH',
-                    'strength': abs(int(values[-1])),
+                    'signal': 'BULLISH' if is_bullish else 'BEARISH',
+                    # New 3-metric system
+                    'win_rate': win_rate,
+                    'context_score': context_score,
+                    'context_details': ' | '.join(confirmations),
+                    'composite_score': composite_score,
+                    # Legacy field for backward compatibility
+                    'strength': strength,
                     'price': float(close[-1])
                 })
 

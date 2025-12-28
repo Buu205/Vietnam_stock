@@ -21,8 +21,8 @@ class DataSourceManager:
     Quản lý xử lý nhiều nguồn dữ liệu.
     """
     
-    def __init__(self, 
-                 data_warehouse_path: str = "data_warehouse",
+    def __init__(self,
+                 data_warehouse_path: str = None,
                  config_path: str = "config/data_sources.json"):
         """Initialize DataSourceManager.
         Khởi tạo DataSourceManager.
@@ -31,6 +31,10 @@ class DataSourceManager:
             data_warehouse_path: Path to data warehouse
             config_path: Path to data sources configuration
         """
+        # Use canonical v4.0.0 path as default
+        if data_warehouse_path is None:
+            data_warehouse_path = Path(__file__).resolve().parents[3] / "DATA"
+
         self.data_warehouse_path = Path(data_warehouse_path)
         self.config_path = Path(config_path)
         self.data_sources = {}

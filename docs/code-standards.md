@@ -2,7 +2,7 @@
 
 **Project:** Vietnam Stock Dashboard
 **Python Version:** 3.13
-**Last Updated:** 2025-12-21
+**Last Updated:** 2025-12-28
 
 ---
 
@@ -59,7 +59,7 @@ ENTITY_TYPES = ["COMPANY", "BANK", "INSURANCE", "SECURITY"]
 input_path = Path("DATA/raw/ohlcv/OHLCV_mktcap.parquet")
 output_path = Path("DATA/processed/valuation/pe/historical_pe.parquet")
 
-# WRONG: Deprecated paths
+# WRONG: Deprecated paths (95% files still using these - needs migration)
 input_path = "data_warehouse/raw/..."      # NO
 output_path = "calculated_results/..."      # NO
 output_path = "DATA/refined/..."            # NO
@@ -94,17 +94,18 @@ DATA/
 
 ---
 
-## 3. Registry Usage
+## 3. Registry Usage (CRITICAL)
 
 ### Import Pattern (Canonical)
 
 ```python
-# CORRECT: Import from config/
+# CORRECT: Import from config/ (as of 2025-12-10)
 from config.registries import MetricRegistry, SectorRegistry
 from config.schema_registry import SchemaRegistry
 
-# WRONG: Old paths (deprecated)
+# WRONG: Old paths (deprecated, will fail)
 from PROCESSORS.core.registries.metric_lookup import MetricRegistry  # NO
+from PROCESSORS.core.registries.schema_registry import SchemaRegistry  # NO
 ```
 
 ### MetricRegistry
@@ -152,7 +153,42 @@ formatted_mcap = schema_reg.format_market_cap(1.5e12) # "1.5T"
 
 ---
 
-## 4. Data Handling
+## 4. Session State (CRITICAL for WEBAPP)
+
+### Initialize Page State
+
+```python
+# CRITICAL: Call at the top of EVERY dashboard page
+from WEBAPP.core.session_state import init_page_state
+
+# Initialize page state (prevents widget interaction page resets)
+init_page_state('company')  # or 'bank', 'technical', etc.
+```
+
+### Available Page States
+
+```python
+# Global state (all pages)
+'global_ticker_search', 'quick_search_ticker', 'search_select'
+
+# Company page
+'selected_ticker', 'company_timeframe', 'company_active_tab'
+
+# Bank page
+'selected_bank', 'bank_timeframe', 'bank_metric', 'bank_active_tab'
+
+# Technical page (3 tabs)
+'ta_active_tab', 'ta_selected_sector', 'ta_selected_signal',
+'ta_search_symbol', 'ta_timeframe', 'breadth_tf', 'rs_heatmap_top_n',
+'rrg_mode', 'rrg_trail', 'money_flow_timeframe'
+
+# Forecast page
+'forecast_sector', 'forecast_rating', 'forecast_active_tab'
+```
+
+---
+
+## 5. Data Handling
 
 ### Loading Processed Data
 
@@ -189,7 +225,7 @@ def get_sector_scores():
 
 ---
 
-## 5. Error Handling
+## 6. Error Handling
 
 ### Standard Pattern
 
@@ -226,7 +262,7 @@ def fetch_data(ticker: str) -> dict:
 
 ---
 
-## 6. Type Hints
+## 7. Type Hints
 
 ```python
 from typing import Optional, List, Dict
@@ -253,7 +289,7 @@ def get_sector_metrics(
 
 ---
 
-## 7. Docstrings
+## 8. Docstrings
 
 ### Function Docstring
 
@@ -305,7 +341,7 @@ class SectorProcessor:
 
 ---
 
-## 8. Import Order
+## 9. Import Order
 
 ```python
 # 1. Standard library
@@ -325,12 +361,12 @@ from config.schema_registry import SchemaRegistry
 
 # 4. Local - processors
 from PROCESSORS.core.shared.unified_mapper import UnifiedTickerMapper
-from PROCESSORS.fundamental.formulas import roe, gross_margin
+from PROCESSORS.transformers.financial import roe, gross_margin
 ```
 
 ---
 
-## 9. Unit Standards
+## 10. Unit Standards
 
 ### Storage Layer (Raw Values)
 
@@ -356,7 +392,7 @@ display_pe = f"{pe_ratio:.2f}x"                              # "15.23x"
 
 ---
 
-## 10. Git Commit Messages
+## 11. Git Commit Messages
 
 ```bash
 # Format: type(scope): description
@@ -378,56 +414,9 @@ refactor(sector): Extract scoring logic to separate module
 
 ---
 
-## 11. File Structure Template
-
-```python
-"""
-Module: sector_processor.py
-Purpose: Orchestrate sector-level FA+TA analysis
-
-Data Flow:
-    Fundamental Data → FA Aggregator → FA Scorer
-    Technical Data   → TA Aggregator → TA Scorer
-    FA + TA Scores   → Signal Generator → Output
-"""
-
-# Standard imports
-import logging
-from pathlib import Path
-from typing import Optional
-
-# Third-party
-import pandas as pd
-
-# Local
-from config.registries import MetricRegistry, SectorRegistry
-
-logger = logging.getLogger(__name__)
-
-
-class SectorProcessor:
-    """Main orchestrator for sector analysis."""
-
-    def __init__(self, output_dir: Path):
-        self.output_dir = output_dir
-        self.metric_registry = MetricRegistry()
-        self.sector_registry = SectorRegistry()
-
-    def run(self) -> pd.DataFrame:
-        """Execute full pipeline."""
-        ...
-
-
-if __name__ == "__main__":
-    processor = SectorProcessor(Path("DATA/processed/sector"))
-    result = processor.run()
-    print(f"Processed {len(result)} sectors")
-```
-
----
-
 ## Related Documents
 
 - [Project Overview](project-overview-pdr.md)
 - [Codebase Summary](codebase-summary.md)
 - [System Architecture](system-architecture.md)
+- [CLAUDE.md](../CLAUDE.md) - AI/Developer guidelines (CRITICAL)

@@ -192,14 +192,17 @@ class SectorBreadthAnalyzer:
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Convert date
-        df['date'] = pd.to_datetime(df['date']).dt.date
+        # Normalize date to pd.Timestamp for consistent comparison
+        df['date'] = pd.to_datetime(df['date'])
+        target_date = df['date'].iloc[0]
 
         # Append or create
         if output_path.exists():
             existing = pd.read_parquet(output_path)
+            # Normalize existing dates
+            existing['date'] = pd.to_datetime(existing['date'])
             # Remove duplicate date
-            existing = existing[existing['date'] != df['date'].iloc[0]]
+            existing = existing[existing['date'] != target_date]
             combined = pd.concat([existing, df], ignore_index=True)
             combined = combined.sort_values(['date', 'strength_score'], ascending=[True, False]).reset_index(drop=True)
             combined.to_parquet(output_path, index=False)

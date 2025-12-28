@@ -35,15 +35,35 @@ class OHLCVFormatter:
         Args:
             schema_path: Path to ohlcv_data_schema.json (auto-detects if None)
         """
+        # Default display formats (used when schema not found)
+        self.default_formats = {
+            'price': {'decimal_places': 2, 'currency_symbol': 'đ'},
+            'percentage': {'decimal_places': 2, 'suffix': '%'},
+            'ratio': {'decimal_places': 2},
+            'volume': {'format': 'integer'},
+            'market_cap': {'abbreviate': True}
+        }
+
         if schema_path is None:
-            # Auto-detect schema path
-            root = Path(__file__).resolve().parents[2]
-            schema_path = root / "calculated_results" / "schemas" / "ohlcv_data_schema.json"
+            # Auto-detect schema path (canonical v4.0.0)
+            root = Path(__file__).resolve().parents[3]
+            schema_path = root / "config" / "schemas" / "data" / "ohlcv_data_schema.json"
 
-        with open(schema_path, 'r', encoding='utf-8') as f:
-            self.schema = json.load(f)
-
-        self.display_formats = self.schema.get('display_formats', {})
+        # Try to load schema, use defaults if not found
+        if schema_path.exists():
+            try:
+                with open(schema_path, 'r', encoding='utf-8') as f:
+                    self.schema = json.load(f)
+                self.display_formats = self.schema.get('display_formats', {})
+            except Exception as e:
+                import logging
+                logging.warning(f"Failed to load schema from {schema_path}: {e}. Using defaults.")
+                self.display_formats = {}
+                self.schema = {'definitions': {'frequency_codes': {}}}
+        else:
+            # Schema not found, use defaults
+            self.display_formats = {}
+            self.schema = {'definitions': {'frequency_codes': {}}}
 
     def format_price(self, value: Union[float, int], include_currency: bool = True) -> str:
         """

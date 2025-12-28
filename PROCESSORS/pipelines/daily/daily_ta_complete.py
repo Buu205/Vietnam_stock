@@ -62,12 +62,27 @@ class CompleteTAUpdatePipeline:
 
     def calculate_market_breadth(self, df: pd.DataFrame, date=None) -> dict:
         """Calculate market breadth."""
+        # Normalize date column to date type
+        if df['date'].dtype != 'object':
+            df['date'] = pd.to_datetime(df['date']).dt.date
+        else:
+            df['date'] = pd.to_datetime(df['date']).dt.date
+        
         if date is None:
             date = df['date'].max()
+        else:
+            # Normalize input date to date object
+            if isinstance(date, str):
+                date = pd.to_datetime(date).date()
+            elif isinstance(date, pd.Timestamp):
+                date = date.date()
+            # If already date object, keep as is
 
+        # Filter by date (ensure both are date objects)
         day_df = df[df['date'] == date].copy()
 
         if len(day_df) == 0:
+            logger.warning(f"⚠️  No data found for date {date} in tech_df. Available dates: {df['date'].min()} to {df['date'].max()}")
             return None
 
         total_stocks = len(day_df)
@@ -153,10 +168,15 @@ class CompleteTAUpdatePipeline:
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         new_row = pd.DataFrame([breadth])
+        # Normalize date to pd.Timestamp
+        new_row['date'] = pd.to_datetime(new_row['date'])
 
         if output_path.exists():
             existing = pd.read_parquet(output_path)
-            existing = existing[existing['date'] != breadth['date']]
+            # Normalize existing dates
+            existing['date'] = pd.to_datetime(existing['date'])
+            target_date = pd.to_datetime(breadth['date'])
+            existing = existing[existing['date'] != target_date]
             combined = pd.concat([existing, new_row], ignore_index=True)
             combined = combined.sort_values('date').reset_index(drop=True)
             combined.to_parquet(output_path, index=False)
@@ -185,9 +205,34 @@ class CompleteTAUpdatePipeline:
             # Step 2: Technical Indicators
             logger.info("\n[2/9] Calculating technical indicators...")
             tech_df = self.tech_processor.run_full_processing(n_sessions=n_sessions)
+            
+            # Normalize tech_df date column
+            if tech_df['date'].dtype != 'object':
+                tech_df['date'] = pd.to_datetime(tech_df['date']).dt.date
+            else:
+                tech_df['date'] = pd.to_datetime(tech_df['date']).dt.date
 
+            # Set target date
             if date is None:
                 date = tech_df['date'].max()
+            else:
+                # Normalize date parameter
+                if isinstance(date, str):
+                    date = pd.to_datetime(date).date()
+                elif isinstance(date, pd.Timestamp):
+                    date = date.date()
+                
+                # Check if date exists in tech_df
+                if date not in tech_df['date'].values:
+                    logger.warning(f"⚠️  Date {date} not found in tech_df. Latest available: {tech_df['date'].max()}")
+                    # Use latest available date that is <= target date
+                    available_dates = tech_df[tech_df['date'] <= date]['date']
+                    if len(available_dates) > 0:
+                        date = available_dates.max()
+                        logger.info(f"   Using latest available date: {date}")
+                    else:
+                        date = tech_df['date'].max()
+                        logger.warning(f"   No data before target date. Using latest: {date}")
 
             # Step 3: Alerts
             logger.info("\n[3/9] Detecting alerts...")

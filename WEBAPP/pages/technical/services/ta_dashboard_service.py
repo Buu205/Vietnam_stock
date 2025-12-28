@@ -283,10 +283,17 @@ class TADashboardService:
             df = pd.read_parquet(vol_path)
             df['signal_type'] = 'volume_spike'
             df['type_label'] = 'Vol Spike ' + df['volume_ratio'].round(1).astype(str) + 'x'
-            df['direction'] = df['signal'].map({
-                'BULLISH': 'BUY', 'BUY': 'BUY',
-                'BEARISH': 'SELL', 'SELL': 'SELL'
-            }).fillna('NEUTRAL')
+            # Handle various signal formats: BULLISH, BEARISH, NOISE, WATCH, etc.
+            def map_vol_signal(sig):
+                if not isinstance(sig, str):
+                    return 'NEUTRAL'
+                sig = sig.upper()
+                if 'BULLISH' in sig or sig == 'BUY':
+                    return 'BUY'
+                elif 'BEARISH' in sig or sig == 'SELL':
+                    return 'SELL'
+                return 'NEUTRAL'
+            df['direction'] = df['signal'].apply(map_vol_signal)
             df['strength'] = df['confidence'].fillna(0.5)
             all_signals.append(df[['symbol', 'date', 'signal_type', 'type_label', 'direction', 'price', 'strength']])
 
@@ -299,10 +306,17 @@ class TADashboardService:
                 'BREAKOUT_UP': 'Breakout ↑',
                 'BREAKDOWN': 'Breakdown ↓'
             })
-            df['direction'] = df['signal'].map({
-                'BULLISH': 'BUY', 'BUY': 'BUY',
-                'BEARISH': 'SELL', 'SELL': 'SELL'
-            }).fillna('NEUTRAL')
+            # Handle various signal formats: BULLISH_BREAKOUT, BEARISH_BREAKDOWN, etc.
+            def map_breakout_signal(sig):
+                if not isinstance(sig, str):
+                    return 'NEUTRAL'
+                sig = sig.upper()
+                if 'BULLISH' in sig or 'UP' in sig or sig == 'BUY':
+                    return 'BUY'
+                elif 'BEARISH' in sig or 'DOWN' in sig or sig == 'SELL':
+                    return 'SELL'
+                return 'NEUTRAL'
+            df['direction'] = df['signal'].apply(map_breakout_signal)
             df['strength'] = 0.8  # Default strength
             all_signals.append(df[['symbol', 'date', 'signal_type', 'type_label', 'direction', 'price', 'strength']])
 

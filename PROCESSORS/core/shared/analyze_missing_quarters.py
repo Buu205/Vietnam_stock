@@ -13,9 +13,11 @@ logger = logging.getLogger(__name__)
 
 def analyze_missing_quarters():
     """Phân tích các quý bị thiếu"""
-    
-    calc_path = Path('calculated_results/fundamental')
-    processed_path = Path('data_warehouse/raw/fundamental/processed')
+
+    # Canonical v4.0.0 paths
+    base_path = Path(__file__).resolve().parents[3]
+    calc_path = base_path / 'DATA' / 'processed' / 'fundamental'
+    processed_path = base_path / 'DATA' / 'processed' / 'fundamental'
     
     # Đọc files
     company_input = processed_path / 'company_full.parquet'
