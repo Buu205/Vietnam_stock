@@ -60,7 +60,7 @@ python3 update_monthly_data.py --mode auto --month 2025-01 --name "January 2025"
 
 **Data Files:**
 - `bhx_raw_snapshots.parquet` - Cumulative raw database (all historical snapshots)
-- `bhx_monthly_tracking.parquet` - Processed monthly summary (province-level)
+- `bhx_monthly_tracking.parquet` - Monthly province-level tracking (20 rows × growing columns)
 
 **Deprecated:**
 - `fetch_bhx_stores.py` - Old version (creates multiple files)
@@ -91,11 +91,17 @@ python3 update_monthly_data.py --mode auto --month 2025-01 --name "January 2025"
 ├── Size: ~70 KB/month (Parquet compression)
 └── Purpose: Long-term storage, detailed analysis
 
-📂 bhx_monthly_tracking.parquet (PROCESSED SUMMARY)
-├── Monthly province-level aggregation
-├── Columns: province, continuing, new, total, pct_new, month, month_name
+📂 bhx_monthly_tracking.parquet (MONTHLY TRACKING)
+├── Province-level tracking (20 rows fixed, columns grow monthly)
+├── Columns: province_new, province_old, 31/12/2024, 29/12/2025, new_dec, YTD_dec, MOM_dec
+│   • province_new: Government standard name (single province)
+│   • province_old: BHX API name (merged provinces)
+│   • Date columns: Store counts per snapshot (31/12/2024, 29/12/2025, ...)
+│   • new_dec: New stores since December baseline
+│   • YTD_dec: Year-to-Date growth % (vs year-start baseline)
+│   • MOM_dec: Month-over-Month growth % (vs previous month)
 ├── Size: ~300 bytes/month
-└── Purpose: Quick trend analysis, growth tracking
+└── Purpose: Long-term province growth tracking with government mapping
 ```
 
 **Why This Design?**
@@ -120,16 +126,35 @@ python3 fetch_bhx_stores_refactored.py --history
 
 # Step 3: Update monthly tracking
 python3 update_monthly_data.py --mode auto --month 2025-02 --name "February 2025"
-# → Compares latest snapshot with previous month
+# → Adds new month column (e.g., 31/01/2025) with YTD/MOM calculations
 # → Updates bhx_monthly_tracking.parquet
 
 # Step 4: View monthly trends
 python3 -c "
 import pandas as pd
 df = pd.read_parquet('bhx_monthly_tracking.parquet')
-print(df.groupby('month')[['continuing', 'new', 'total']].sum())
+print(df[['province_new', '31/12/2024', '29/12/2025', 'YTD_dec', 'MOM_dec']])
 "
 ```
+
+### Growth Calculation Rules
+
+**Base Line (Fixed per Year):**
+- 2025: `31/12/2024` (baseline for all 2025 months)
+- 2026: `29/12/2025` (baseline for all 2026 months)
+- 2027: `31/12/2026` (baseline for all 2027 months)
+
+**Formulas:**
+- `new_dec = Current Month - December Baseline`
+- `YTD_dec = (Current Month - Year Start) / Year Start × 100`
+- `MOM_dec = (Current Month - Previous Month) / Previous Month × 100`
+
+**Example (January 2026):**
+- Base: `29/12/2025 = 2,547` (fixed for entire 2026)
+- Current: `31/01/2026 = 2,600`
+- `new_dec = 2600 - 2547 = 53`
+- `YTD_dec = (2600 - 2547) / 2547 × 100 = 2.08%`
+- `MOM_dec = (2600 - 2547) / 2547 × 100 = 2.08%` (January = YTD)
 
 ### Manual Data Entry (Alternative)
 
