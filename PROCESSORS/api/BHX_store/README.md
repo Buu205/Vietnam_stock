@@ -93,11 +93,12 @@ python3 update_monthly_data.py --mode auto --month 2025-01 --name "January 2025"
 
 📂 bhx_monthly_tracking.parquet (MONTHLY TRACKING)
 ├── Province-level tracking (20 rows fixed, columns grow monthly)
-├── Columns: province_new, province_old, 31/12/2024, 29/12/2025, new_dec, YTD_dec, MOM_dec
+├── Columns: province_new, province_old, 31/12/2024, 29/12/2025, new_dec, new_mom, YTD_dec, MOM_dec
 │   • province_new: Government standard name (single province)
 │   • province_old: BHX API name (merged provinces)
 │   • Date columns: Store counts per snapshot (31/12/2024, 29/12/2025, ...)
-│   • new_dec: New stores since December baseline
+│   • new_dec: New stores since December baseline (cumulative)
+│   • new_mom: New stores count vs previous month (incremental)
 │   • YTD_dec: Year-to-Date growth % (vs year-start baseline)
 │   • MOM_dec: Month-over-Month growth % (vs previous month)
 ├── Size: ~300 bytes/month
@@ -133,7 +134,7 @@ python3 update_monthly_data.py --mode auto --month 2025-02 --name "February 2025
 python3 -c "
 import pandas as pd
 df = pd.read_parquet('bhx_monthly_tracking.parquet')
-print(df[['province_new', '31/12/2024', '29/12/2025', 'YTD_dec', 'MOM_dec']])
+print(df[['province_new', '31/12/2024', '29/12/2025', 'new_dec', 'new_mom', 'YTD_dec', 'MOM_dec']])
 "
 ```
 
@@ -145,16 +146,27 @@ print(df[['province_new', '31/12/2024', '29/12/2025', 'YTD_dec', 'MOM_dec']])
 - 2027: `31/12/2026` (baseline for all 2027 months)
 
 **Formulas:**
-- `new_dec = Current Month - December Baseline`
-- `YTD_dec = (Current Month - Year Start) / Year Start × 100`
-- `MOM_dec = (Current Month - Previous Month) / Previous Month × 100`
+- `new_dec = Current Month - December Baseline` (cumulative new stores)
+- `new_mom = Current Month - Previous Month` (incremental new stores count)
+- `YTD_dec = (Current Month - Year Start) / Year Start × 100` (cumulative growth %)
+- `MOM_dec = (Current Month - Previous Month) / Previous Month × 100` (incremental growth %)
 
 **Example (January 2026):**
 - Base: `29/12/2025 = 2,547` (fixed for entire 2026)
 - Current: `31/01/2026 = 2,600`
-- `new_dec = 2600 - 2547 = 53`
+- `new_dec = 2600 - 2547 = 53 stores` (cumulative)
+- `new_mom = 2600 - 2547 = 53 stores` (January = baseline month)
 - `YTD_dec = (2600 - 2547) / 2547 × 100 = 2.08%`
 - `MOM_dec = (2600 - 2547) / 2547 × 100 = 2.08%` (January = YTD)
+
+**Example (February 2026):**
+- Base: `29/12/2025 = 2,547` (fixed)
+- Previous: `31/01/2026 = 2,600`
+- Current: `28/02/2026 = 2,660`
+- `new_dec = 2660 - 2547 = 113 stores` (cumulative from Dec)
+- `new_mom = 2660 - 2600 = 60 stores` (only Feb new stores)
+- `YTD_dec = (2660 - 2547) / 2547 × 100 = 4.44%` (cumulative)
+- `MOM_dec = (2660 - 2600) / 2600 × 100 = 2.31%` (Feb growth only)
 
 ### Manual Data Entry (Alternative)
 
