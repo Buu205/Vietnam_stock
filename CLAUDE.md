@@ -87,6 +87,40 @@ sector_reg = SectorRegistry()
 
 ---
 
+## 📝 Documentation Rules (Token Efficiency)
+
+**IMPORTANT: Ask user before creating new .md files!**
+
+### ❌ DON'T Create Markdown Files For:
+- API documentation (→ use code docstrings)
+- Implementation guides (→ put in README.md)
+- Troubleshooting tips (→ put in README.md)
+- Historical notes (→ use git commits)
+- Long tutorials (→ summarize in README.md)
+
+### ✅ DO Create Markdown Files For:
+- Project README.md (required, max ~200 lines)
+- `plans/*.md` (implementation plans only)
+- `docs/*.md` (major architectural docs only)
+
+### 💬 Always Ask First:
+```
+"I want to create [FILENAME.md] to document [TOPIC].
+This will be ~[X] lines. Should I:
+1. Create separate file?
+2. Add to README.md instead?
+3. Skip documentation (put in code comments)?"
+```
+
+### Token Savings Example:
+- **Before:** 4 .md files = ~22 KB = ~5,500 tokens wasted
+- **After:** 1 README.md = 2.4 KB = ~600 tokens
+- **Savings:** 80% token reduction
+
+**Rule:** Favor concise README.md over multiple verbose .md files.
+
+---
+
 ## ⚡ AI Workflow Guide
 
 **When working on a task, follow this sequence:**

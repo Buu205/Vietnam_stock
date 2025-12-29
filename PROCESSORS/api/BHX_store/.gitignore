@@ -1,0 +1,16 @@
+# Python cache
+*.pyc
+.DS_Store
+
+# Temporary analysis scripts
+verify_*.py
+test_*.py
+inspect_*.py
+
+# Old snapshot format (deprecated)
+bhx_stores_*.parquet
+province_stats_*.csv
+
+# Keep these files committed:
+# - bhx_raw_snapshots.parquet (cumulative database)
+# - bhx_monthly_tracking.parquet (monthly summary)
