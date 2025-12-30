@@ -54,7 +54,7 @@ Technical Dashboard's Stock Scanner tab (Tab 3) has critical issues affecting si
 9. ✅ **UI: Trend filter** - Filter by UPTREND/DOWNTREND/SIDEWAYS
 10. ✅ **UI: Trend badges** - ⬆⬆/⬆/↔/⬇/⬇⬇ icons on each row
 11. ✅ **UI: Single Stock Analysis** - Enter ticker → see trend + patterns + strategy
-12. ✅ **UI: Volume Analysis** - GTGD + Volume trend ratio in single stock view
+12. ✅ **UI: Trading Value Comparison** - GTGD + vs 1W + vs 3W + vs 1M in single stock view
 
 ## Constraints
 

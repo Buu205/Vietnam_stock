@@ -80,36 +80,49 @@ def classify_trend(sma20_pct, sma50_pct):
 
 **Special case:** Doji patterns → Always NEUTRAL (indecision, need confirmation)
 
-### 2.3 Volume Trend Analysis
+### 2.3 Trading Value Comparison (GTGD)
 
-**Data Source:** `basic_data.parquet` columns: `trading_value`, `expected_trading_value`
+**Data Source:** `basic_data.parquet` column: `trading_value`
+
+**Comparison Periods:**
+- **1W:** 5 trading days average
+- **3W:** 15 trading days average
+- **1M:** 22 trading days average
 
 **Formula:**
 ```python
-vol_ratio = trading_value / expected_trading_value
+avg_1w = ticker_data.head(5)['trading_value'].mean()
+avg_3w = ticker_data.head(15)['trading_value'].mean()
+avg_1m = ticker_data.head(22)['trading_value'].mean()
 
-# Classification:
-if vol_ratio >= 2.0:
-    status = 'TĂNG ĐỘT BIẾN'  # Spike - potential breakout
-elif vol_ratio >= 1.3:
-    status = 'TĂNG MẠNH'      # High volume - confirms trend
-elif vol_ratio >= 0.8:
-    status = 'BÌNH THƯỜNG'    # Normal volume
-elif vol_ratio >= 0.5:
-    status = 'GIẢM'           # Below average - weak conviction
-else:
-    status = 'RẤT THẤP'       # Very low - lack of interest
+tv_vs_1w = (today_trading_value / avg_1w - 1) * 100
+tv_vs_3w = (today_trading_value / avg_3w - 1) * 100
+tv_vs_1m = (today_trading_value / avg_1m - 1) * 100
 ```
 
-**Volume + Trend Matrix:**
-| Trend | Volume | Signal Quality | Interpretation |
-|-------|--------|----------------|----------------|
-| UPTREND | TĂNG ĐỘT BIẾN | ⭐⭐⭐ Excellent | Strong buying pressure |
-| UPTREND | TĂNG MẠNH | ⭐⭐ Good | Healthy trend |
-| UPTREND | BÌNH THƯỜNG | ⭐ OK | Normal continuation |
-| UPTREND | GIẢM | ⚠️ Warning | Momentum fading |
-| DOWNTREND | TĂNG ĐỘT BIẾN | ⭐⭐⭐ | Panic selling / Capitulation |
-| DOWNTREND | GIẢM | ⚠️ | May be bottoming |
+**Interpretation:**
+| Change | Color | Meaning |
+|--------|-------|---------|
+| > 0% | Green `#10B981` | Higher than average - increased interest |
+| = 0% | Gray `#64748B` | Normal activity |
+| < 0% | Red `#EF4444` | Lower than average - decreased interest |
+
+**Trading Value + Trend Matrix:**
+| Trend | GTGD vs 1W | Signal Quality | Interpretation |
+|-------|------------|----------------|----------------|
+| UPTREND | > +50% | ⭐⭐⭐ Excellent | Strong buying pressure, breakout potential |
+| UPTREND | +10% to +50% | ⭐⭐ Good | Healthy trend with volume confirmation |
+| UPTREND | -10% to +10% | ⭐ OK | Normal continuation |
+| UPTREND | < -10% | ⚠️ Warning | Momentum may be fading |
+| DOWNTREND | > +50% | ⭐⭐⭐ | Panic selling / Capitulation (potential reversal) |
+| DOWNTREND | < -10% | ⚠️ | Selling pressure decreasing, may be bottoming |
+
+**Example:** GAS on 2025-12-29
+- GTGD: 421.6 tỷ VND
+- vs 1W: +101% (double the weekly average)
+- vs 3W: +327% (3x the 3-week average)
+- vs 1M: +336% (3x the monthly average)
+- Interpretation: Significant volume spike, confirms STRONG_UP trend
 
 ### 2.4 Strategy Recommendations
 
@@ -178,8 +191,8 @@ STRATEGY_RECOMMENDATIONS = {
 │ ┌─────────────────────────────────────────────────────────────┐│
 │ │ PVD        ⬆⬆ STRONG UP                          28,500đ   ││
 │ │ ─────────────────────────────────────────────────────────── ││
-│ │ SMA20: +8.5%  │  SMA50: +14.9%  │  GTGD: 45.2 tỷ            ││
-│ │ Volume: ⬆ TĂNG MẠNH (1.5x)                                  ││
+│ │ SMA20: +8.5%  │  SMA50: +14.9%                              ││
+│ │ GTGD: 45.2 tỷ │ vs 1W: +25% │ vs 3W: +45% │ vs 1M: +60%    ││
 │ │ ─────────────────────────────────────────────────────────── ││
 │ │ Mẫu hình gần đây:                                           ││
 │ │ ├─ 23/12  hanging_man  → PULLBACK                           ││
@@ -218,18 +231,22 @@ STRATEGY_RECOMMENDATIONS = {
 **Components:**
 1. **Header:** Ticker + Trend badge + Current price
 2. **SMA Indicators:** SMA20% and SMA50% with color coding
-3. **Volume Indicators:** GTGD (tỷ VND) + Volume trend (ratio vs expected)
+3. **Trading Value Metrics:** GTGD (tỷ VND) + vs 1W + vs 3W + vs 1M
 4. **Recent Patterns:** Timeline of patterns with direction arrows
 5. **Strategy Box:** Action recommendation with explanation
 
-**Volume Trend Display:**
-| Status | Icon | Color | Meaning |
-|--------|------|-------|---------|
-| TĂNG ĐỘT BIẾN | ⬆⬆ | Green | Volume ≥ 2x expected |
-| TĂNG MẠNH | ⬆ | Light Green | Volume 1.3x-2x |
-| BÌNH THƯỜNG | ↔ | Gray | Volume 0.8x-1.3x |
-| GIẢM | ⬇ | Orange | Volume 0.5x-0.8x |
-| RẤT THẤP | ⬇⬇ | Red | Volume < 0.5x |
+**Trading Value Comparison Display:**
+| Column | Label | Color Logic | Meaning |
+|--------|-------|-------------|---------|
+| GTGD | Absolute value | Purple | Today's trading value in tỷ VND |
+| vs 1W | % vs 5-day avg | Green/Red | Comparison to 1-week average |
+| vs 3W | % vs 15-day avg | Green/Red | Comparison to 3-week average |
+| vs 1M | % vs 22-day avg | Green/Red | Comparison to 1-month average |
+
+**Color Coding:**
+- **Green `#10B981`:** Positive change (higher than average)
+- **Red `#EF4444`:** Negative change (lower than average)
+- **Gray `#64748B`:** Neutral (0%)
 
 ---
 
@@ -311,6 +328,7 @@ STRATEGY_RECOMMENDATIONS = {
 - [x] Trend badges display with correct icons/colors
 - [x] Trend filter works (UPTREND includes STRONG_UP)
 - [x] Single stock analysis shows correct data
+- [x] Trading value comparison works (vs 1W, 3W, 1M - verified with GAS: +101%, +327%, +336%)
 - [ ] Manual testing with live app (pending restart)
 
 ---

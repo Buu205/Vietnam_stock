@@ -1102,6 +1102,9 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
         sma20, sma50, price, trading_value, expected_value = 0, 0, 0, 0, 0
         trend = 'SIDEWAYS'
 
+        # Trading value comparisons
+        tv_vs_1w, tv_vs_3w, tv_vs_1m = 0, 0, 0
+
         if basic_path.exists():
             basic_df = pd.read_parquet(basic_path)
             ticker_basic = basic_df[basic_df['symbol'] == ticker].sort_values('date', ascending=False)
@@ -1112,7 +1115,18 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
                 sma50 = latest_basic.get('price_vs_sma50', 0) or 0
                 price = latest_basic.get('close', 0) or 0
                 trading_value = latest_basic.get('trading_value', 0) or 0
-                expected_value = latest_basic.get('expected_trading_value', 0) or 0
+
+                # Calculate trading value vs periods
+                avg_1w = ticker_basic.head(5)['trading_value'].mean()  # 5 days
+                avg_3w = ticker_basic.head(15)['trading_value'].mean()  # 15 days
+                avg_1m = ticker_basic.head(22)['trading_value'].mean()  # 22 days
+
+                if avg_1w > 0:
+                    tv_vs_1w = (trading_value / avg_1w - 1) * 100
+                if avg_3w > 0:
+                    tv_vs_3w = (trading_value / avg_3w - 1) * 100
+                if avg_1m > 0:
+                    tv_vs_1m = (trading_value / avg_1m - 1) * 100
 
                 # Classify trend from fresh data
                 if sma20 > 5 and sma50 > 5:
@@ -1125,23 +1139,6 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
                     trend = 'DOWNTREND'
                 else:
                     trend = 'SIDEWAYS'
-
-        # Volume trend analysis
-        if expected_value > 0 and not pd.isna(expected_value):
-            vol_ratio = trading_value / expected_value
-            if vol_ratio >= 2.0:
-                vol_status = ('TĂNG ĐỘT BIẾN', '#10B981', '⬆⬆')
-            elif vol_ratio >= 1.3:
-                vol_status = ('TĂNG MẠNH', '#22C55E', '⬆')
-            elif vol_ratio >= 0.8:
-                vol_status = ('BÌNH THƯỜNG', '#64748B', '↔')
-            elif vol_ratio >= 0.5:
-                vol_status = ('GIẢM', '#F59E0B', '⬇')
-            else:
-                vol_status = ('RẤT THẤP', '#EF4444', '⬇⬇')
-        else:
-            vol_ratio = 0
-            vol_status = ('Chưa có dữ liệu', '#64748B', '?')
 
         trend_icon = TREND_ICONS.get(trend, '?')
         trend_color = TREND_COLORS.get(trend, '#64748B')
@@ -1182,10 +1179,10 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
                 </span>
             </div>
 
-            <!-- SMA & Volume Indicators -->
+            <!-- SMA & Trading Value Indicators -->
             <div style="
                 display: flex;
-                gap: 24px;
+                gap: 20px;
                 padding: 12px 0;
                 border-top: 1px solid rgba(255,255,255,0.1);
                 border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -1193,29 +1190,39 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
                 flex-wrap: wrap;
             ">
                 <div>
-                    <span style="color: #8B5CF6; font-size: 0.75rem; text-transform: uppercase;">SMA20</span>
+                    <span style="color: #8B5CF6; font-size: 0.7rem; text-transform: uppercase;">SMA20</span>
                     <div style="color: {'#10B981' if sma20 > 0 else '#EF4444'}; font-size: 1rem; font-weight: 600; font-family: monospace;">
                         {'+' if sma20 > 0 else ''}{sma20:.1f}%
                     </div>
                 </div>
                 <div>
-                    <span style="color: #8B5CF6; font-size: 0.75rem; text-transform: uppercase;">SMA50</span>
+                    <span style="color: #8B5CF6; font-size: 0.7rem; text-transform: uppercase;">SMA50</span>
                     <div style="color: {'#10B981' if sma50 > 0 else '#EF4444'}; font-size: 1rem; font-weight: 600; font-family: monospace;">
                         {'+' if sma50 > 0 else ''}{sma50:.1f}%
                     </div>
                 </div>
-                <div style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 24px;">
-                    <span style="color: #8B5CF6; font-size: 0.75rem; text-transform: uppercase;">GTGD</span>
+                <div style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 20px;">
+                    <span style="color: #8B5CF6; font-size: 0.7rem; text-transform: uppercase;">GTGD</span>
                     <div style="color: #C4B5FD; font-size: 1rem; font-weight: 600; font-family: monospace;">
                         {trading_value/1e9:.1f} tỷ
                     </div>
                 </div>
                 <div>
-                    <span style="color: #8B5CF6; font-size: 0.75rem; text-transform: uppercase;">Volume</span>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <span style="color: {vol_status[1]}; font-size: 0.9rem;">{vol_status[2]}</span>
-                        <span style="color: {vol_status[1]}; font-size: 0.85rem; font-weight: 600;">{vol_status[0]}</span>
-                        {f'<span style="color: #64748B; font-size: 0.75rem;">({vol_ratio:.1f}x)</span>' if vol_ratio > 0 else ''}
+                    <span style="color: #8B5CF6; font-size: 0.7rem; text-transform: uppercase;">vs 1W</span>
+                    <div style="color: {'#10B981' if tv_vs_1w > 0 else '#EF4444' if tv_vs_1w < 0 else '#64748B'}; font-size: 0.9rem; font-weight: 600; font-family: monospace;">
+                        {'+' if tv_vs_1w > 0 else ''}{tv_vs_1w:.0f}%
+                    </div>
+                </div>
+                <div>
+                    <span style="color: #8B5CF6; font-size: 0.7rem; text-transform: uppercase;">vs 3W</span>
+                    <div style="color: {'#10B981' if tv_vs_3w > 0 else '#EF4444' if tv_vs_3w < 0 else '#64748B'}; font-size: 0.9rem; font-weight: 600; font-family: monospace;">
+                        {'+' if tv_vs_3w > 0 else ''}{tv_vs_3w:.0f}%
+                    </div>
+                </div>
+                <div>
+                    <span style="color: #8B5CF6; font-size: 0.7rem; text-transform: uppercase;">vs 1M</span>
+                    <div style="color: {'#10B981' if tv_vs_1m > 0 else '#EF4444' if tv_vs_1m < 0 else '#64748B'}; font-size: 0.9rem; font-weight: 600; font-family: monospace;">
+                        {'+' if tv_vs_1m > 0 else ''}{tv_vs_1m:.0f}%
                     </div>
                 </div>
             </div>
