@@ -95,11 +95,17 @@ DATA/processed/**/*.csv
 !DATA/processed/technical/sector_breadth/sector_breadth_daily.parquet
 !DATA/processed/technical/vnindex/vnindex_indicators.parquet
 
-# Technical - Alerts/Signals (4 files)
+# Technical - Alerts/Signals Daily (4 files)
 !DATA/processed/technical/alerts/daily/patterns_latest.parquet
 !DATA/processed/technical/alerts/daily/ma_crossover_latest.parquet
 !DATA/processed/technical/alerts/daily/volume_spike_latest.parquet
 !DATA/processed/technical/alerts/daily/breakout_latest.parquet
+
+# Technical - Alerts/Signals Historical (4 files) - for stock scanner multi-day view
+!DATA/processed/technical/alerts/historical/patterns_history.parquet
+!DATA/processed/technical/alerts/historical/ma_crossover_history.parquet
+!DATA/processed/technical/alerts/historical/volume_spike_history.parquet
+!DATA/processed/technical/alerts/historical/breakout_history.parquet
 
 # Technical - Money Flow (3 files)
 !DATA/processed/technical/money_flow/sector_money_flow_1d.parquet
