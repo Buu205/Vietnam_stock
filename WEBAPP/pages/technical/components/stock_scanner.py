@@ -200,7 +200,7 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
     # ============ QUICK FILTERS ============
     st.markdown("### Bộ lọc nhanh")
 
-    qcol1, qcol2, qcol3 = st.columns([2, 1, 1])
+    qcol1, qcol2, qcol3, qcol4 = st.columns([2, 1, 1, 1])
 
     with qcol1:
         search_symbols = st.text_input(
@@ -221,6 +221,22 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
         )
 
     with qcol3:
+        # Trend filter
+        trend_options = ['Tất cả', 'UPTREND', 'DOWNTREND', 'SIDEWAYS']
+        selected_trend = st.selectbox(
+            "Xu hướng",
+            trend_options,
+            format_func=lambda x: {
+                'Tất cả': 'Tất cả xu hướng',
+                'UPTREND': '⬆ Xu hướng tăng',
+                'DOWNTREND': '⬇ Xu hướng giảm',
+                'SIDEWAYS': '↔ Đi ngang'
+            }.get(x, x),
+            key="scanner_trend",
+            label_visibility="collapsed"
+        )
+
+    with qcol4:
         days_options = {1: "Hôm nay", 2: "2 ngày gần nhất", 5: "5 ngày", 10: "10 ngày"}
         selected_days = st.selectbox(
             "Thời gian",
@@ -233,7 +249,7 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
 
     # ============ ADVANCED FILTERS ============
     with st.expander("Bộ lọc nâng cao", expanded=False):
-        fcol1, fcol2, fcol3 = st.columns(3)
+        fcol1, fcol2, fcol3, fcol4 = st.columns(4)
 
         with fcol1:
             type_options = ['Tất cả'] + list(signals['signal_type'].unique()) if 'signal_type' in signals.columns else ['Tất cả']
@@ -245,11 +261,18 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
             )
 
         with fcol2:
-            direction_options = ['Tất cả', 'BUY', 'SELL', 'NEUTRAL']
+            direction_options = ['Tất cả', 'BUY', 'SELL', 'PULLBACK', 'BOUNCE', 'NEUTRAL']
             selected_direction = st.selectbox(
                 "Hướng",
                 direction_options,
-                format_func=lambda x: {'Tất cả': 'Tất cả', 'BUY': 'MUA', 'SELL': 'BÁN', 'NEUTRAL': 'TRUNG LẬP'}.get(x, x),
+                format_func=lambda x: {
+                    'Tất cả': 'Tất cả',
+                    'BUY': 'MUA ✅',
+                    'SELL': 'BÁN ✅',
+                    'PULLBACK': 'PULLBACK 🟠',
+                    'BOUNCE': 'BOUNCE 🟠',
+                    'NEUTRAL': 'THEO DÕI'
+                }.get(x, x),
                 key="scanner_direction"
             )
 
@@ -258,8 +281,18 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
                 "Điểm tối thiểu",
                 min_value=0,
                 max_value=100,
-                value=0,
+                value=50,  # Phase 3: Default 50 to filter weak signals
                 key="scanner_min_strength"
+            )
+
+        with fcol4:
+            min_value_bn = st.slider(
+                "GTGD (tỷ)",
+                min_value=0,
+                max_value=10,
+                value=0,  # No default filter
+                key="scanner_min_value",
+                help="Giá trị giao dịch tối thiểu (tỷ VND)"
             )
 
     # ============ APPLY FILTERS ============
@@ -270,7 +303,9 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
         selected_type if selected_type != 'Tất cả' else None,
         selected_direction if selected_direction != 'Tất cả' else None,
         min_strength,
-        selected_days
+        selected_days,
+        min_value_bn,  # Phase 3: Liquidity filter
+        selected_trend if selected_trend != 'Tất cả' else None  # Trend filter
     )
 
     st.markdown("---")
@@ -280,8 +315,13 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
 
     st.markdown("---")
 
-    # ============ SIGNAL TABLE with Progress Bar & Interpretation ============
-    _render_signal_table_enhanced(filtered)
+    # ============ SPLIT TABLES: MUA (left) | BÁN (right) ============
+    _render_split_tables(filtered)
+
+    st.markdown("---")
+
+    # ============ SINGLE STOCK ANALYSIS ============
+    _render_single_stock_analysis(signals)  # Use full signals for complete analysis
 
     # ============ PATTERN INTERPRETATION GUIDE ============
     if not filtered.empty:
@@ -304,7 +344,9 @@ def _apply_filters(
     signal_type: Optional[str],
     direction: Optional[str],
     min_strength: int,
-    days: int = 2
+    days: int = 2,
+    min_value_bn: float = 0,  # Phase 3: Liquidity filter
+    trend: Optional[str] = None  # Trend filter
 ) -> pd.DataFrame:
     """Apply all filters to signals dataframe."""
 
@@ -337,6 +379,15 @@ def _apply_filters(
     if direction and 'direction' in filtered.columns:
         filtered = filtered[filtered['direction'] == direction]
 
+    # Trend filter (UPTREND includes STRONG_UP, DOWNTREND includes STRONG_DOWN)
+    if trend and 'trend' in filtered.columns:
+        if trend == 'UPTREND':
+            filtered = filtered[filtered['trend'].isin(['UPTREND', 'STRONG_UP'])]
+        elif trend == 'DOWNTREND':
+            filtered = filtered[filtered['trend'].isin(['DOWNTREND', 'STRONG_DOWN'])]
+        elif trend == 'SIDEWAYS':
+            filtered = filtered[filtered['trend'] == 'SIDEWAYS']
+
     # Strength filter
     if min_strength > 0 and 'strength' in filtered.columns:
         strength_col = filtered['strength']
@@ -344,8 +395,30 @@ def _apply_filters(
             strength_col = strength_col * 100
         filtered = filtered[strength_col >= min_strength]
 
-    # Sort by date (newest first) then by strength
-    if 'date' in filtered.columns:
+    # Phase 3: Liquidity filter (GTGD)
+    if min_value_bn > 0 and 'trading_value' in filtered.columns:
+        min_value = min_value_bn * 1e9  # Convert billion to actual value
+        filtered = filtered[filtered['trading_value'] >= min_value]
+
+    # Sort by action priority (BUY first, then SELL, then PULLBACK/BOUNCE)
+    # Then by date (newest) and strength (highest)
+    if 'direction' in filtered.columns:
+        priority_map = {'BUY': 1, 'SELL': 2, 'PULLBACK': 3, 'BOUNCE': 4, 'NEUTRAL': 5}
+        filtered['_priority'] = filtered['direction'].map(priority_map).fillna(6)
+
+        if 'date' in filtered.columns:
+            filtered = filtered.sort_values(
+                ['date', '_priority', 'strength'],
+                ascending=[False, True, False]
+            )
+        else:
+            filtered = filtered.sort_values(
+                ['_priority', 'strength'],
+                ascending=[True, False]
+            )
+
+        filtered = filtered.drop(columns=['_priority'], errors='ignore')
+    elif 'date' in filtered.columns:
         filtered = filtered.sort_values(['date', 'strength'], ascending=[False, False])
 
     return filtered
@@ -512,6 +585,210 @@ def _get_pattern_interpretation(type_label: str, volume_context: str = None) -> 
         return PATTERN_INTERPRETATIONS.get('doji', '')
 
     return ''
+
+
+# ============================================================================
+# PHASE 4: SPLIT TABLES (MUA | BÁN)
+# ============================================================================
+
+def _hex_to_rgb(hex_color: str) -> str:
+    """Convert hex to RGB string for rgba()."""
+    hex_color = hex_color.lstrip('#')
+    r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    return f"{r}, {g}, {b}"
+
+
+def _get_score_gradient(score: int, is_buy: bool) -> str:
+    """Get gradient color based on score."""
+    if score >= 80:
+        return "linear-gradient(90deg, #10B981, #22C55E)" if is_buy else "linear-gradient(90deg, #EF4444, #F87171)"
+    elif score >= 60:
+        return "linear-gradient(90deg, #06B6D4, #22D3EE)"
+    elif score >= 45:
+        return "linear-gradient(90deg, #8B5CF6, #A78BFA)"
+    else:
+        return "linear-gradient(90deg, #64748B, #94A3B8)"
+
+
+def _get_score_text_color(score: int, is_buy: bool) -> str:
+    """Get text color based on score."""
+    if score >= 80:
+        return "#22C55E" if is_buy else "#F87171"
+    elif score >= 60:
+        return "#22D3EE"
+    elif score >= 45:
+        return "#A78BFA"
+    else:
+        return "#94A3B8"
+
+
+def _render_signal_table_compact(
+    df: pd.DataFrame,
+    title: str,
+    accent_color: str,
+    is_buy: bool = True
+) -> None:
+    """Render compact signal table with progress bars and trend badges."""
+    if df.empty:
+        st.caption(f"{title}: 0 tín hiệu")
+        return
+
+    count = len(df)
+    rgb = _hex_to_rgb(accent_color)
+
+    # Trend badge mapping
+    trend_badges = {
+        'STRONG_UP': ('⬆⬆', '#10B981'),
+        'UPTREND': ('⬆', '#22C55E'),
+        'SIDEWAYS': ('↔', '#64748B'),
+        'DOWNTREND': ('⬇', '#F59E0B'),
+        'STRONG_DOWN': ('⬇⬇', '#EF4444'),
+    }
+
+    # Header
+    header_html = f'''
+    <div style="
+        background: linear-gradient(135deg, rgba({rgb}, 0.15) 0%, rgba(0,0,0,0) 100%);
+        border: 1px solid rgba({rgb}, 0.3);
+        border-radius: 12px 12px 0 0;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    ">
+        <span style="color: {accent_color}; font-weight: 600; font-size: 0.85rem;">
+            {title}
+        </span>
+        <span style="
+            background: rgba({rgb}, 0.2);
+            color: {accent_color};
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-family: monospace;
+        ">{count}</span>
+    </div>
+    '''
+
+    # Check if trend column exists
+    has_trend = 'trend' in df.columns
+
+    # Table body
+    table_html = f'''
+    <div style="
+        background: rgba(26, 22, 37, 0.8);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+        max-height: 400px;
+        overflow-y: auto;
+    ">
+    <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr style="background: rgba(139, 92, 246, 0.1);">
+            <th style="padding: 8px 12px; text-align: left; color: #8B5CF6; font-size: 0.7rem; font-weight: 600; text-transform: uppercase;">Mã</th>
+            {'<th style="padding: 8px 6px; text-align: center; color: #8B5CF6; font-size: 0.7rem; font-weight: 600;">Trend</th>' if has_trend else ''}
+            <th style="padding: 8px 12px; text-align: left; color: #8B5CF6; font-size: 0.7rem; font-weight: 600; text-transform: uppercase;">Mẫu hình</th>
+            <th style="padding: 8px 12px; text-align: right; color: #8B5CF6; font-size: 0.7rem; font-weight: 600; text-transform: uppercase;">Điểm</th>
+        </tr>
+    </thead>
+    <tbody>
+    '''
+
+    for _, row in df.iterrows():
+        symbol = row.get('symbol', '-')
+        pattern = row.get('type_label', row.get('pattern_name', '-'))
+        strength = row.get('strength', 0)
+        if strength <= 1:
+            strength = int(strength * 100)
+        strength = int(strength)
+
+        bar_color = _get_score_gradient(strength, is_buy)
+        text_color = _get_score_text_color(strength, is_buy)
+
+        # Trend badge
+        trend = row.get('trend', '') if has_trend else ''
+        # Handle NaN/float values
+        if pd.isna(trend) or not isinstance(trend, str):
+            trend = ''
+        trend_icon, trend_color = trend_badges.get(trend, ('', '#64748B'))
+
+        trend_cell = f'''
+            <td style="padding: 8px 6px; text-align: center;">
+                <span style="color: {trend_color}; font-size: 0.9rem;" title="{trend}">{trend_icon}</span>
+            </td>
+        ''' if has_trend else ''
+
+        row_html = f'''
+        <tr style="background: rgba(26, 22, 37, 0.6); border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 8px 12px; color: #FFFFFF; font-weight: 600; font-family: monospace; font-size: 0.85rem;">
+                {symbol}
+            </td>
+            {trend_cell}
+            <td style="padding: 8px 12px; color: #C4B5FD; font-size: 0.8rem;">
+                {pattern}
+            </td>
+            <td style="padding: 8px 12px;">
+                <div style="display: flex; align-items: center; gap: 8px; justify-content: flex-end;">
+                    <div style="flex: 1; max-width: 50px; height: 6px; background: rgba(100,116,139,0.2); border-radius: 3px; overflow: hidden;">
+                        <div style="width: {strength}%; height: 100%; background: {bar_color}; border-radius: 3px;"></div>
+                    </div>
+                    <span style="color: {text_color}; font-weight: 700; font-size: 0.8rem; min-width: 24px; text-align: right; font-family: monospace;">
+                        {strength}
+                    </span>
+                </div>
+            </td>
+        </tr>
+        '''
+        table_html += row_html
+
+    table_html += '</tbody></table></div>'
+
+    st.html(header_html + table_html)
+
+
+def _render_split_tables(signals: pd.DataFrame) -> None:
+    """Render signal tables: MUA | BÁN | PULLBACK/BOUNCE."""
+    if signals.empty:
+        st.info("Không có tín hiệu phù hợp với bộ lọc")
+        return
+
+    # Split by direction
+    buy_signals = signals[signals['direction'] == 'BUY'].copy()
+    sell_signals = signals[signals['direction'] == 'SELL'].copy()
+    pullback_signals = signals[signals['direction'].isin(['PULLBACK', 'BOUNCE'])].copy()
+
+    # Sort by strength descending
+    buy_signals = buy_signals.sort_values('strength', ascending=False).head(30)
+    sell_signals = sell_signals.sort_values('strength', ascending=False).head(30)
+    pullback_signals = pullback_signals.sort_values('strength', ascending=False).head(30)
+
+    # Three columns layout
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        _render_signal_table_compact(
+            buy_signals,
+            title="MUA (Trend-aligned)",
+            accent_color="#10B981",
+            is_buy=True
+        )
+
+    with col2:
+        _render_signal_table_compact(
+            sell_signals,
+            title="BÁN (Trend-aligned)",
+            accent_color="#EF4444",
+            is_buy=False
+        )
+
+    with col3:
+        _render_signal_table_compact(
+            pullback_signals,
+            title="PULLBACK/BOUNCE",
+            accent_color="#F59E0B",  # Orange for counter-trend
+            is_buy=True  # Use warm colors
+        )
 
 
 def _render_signal_table_enhanced(signals: pd.DataFrame) -> None:
@@ -745,6 +1022,276 @@ def _render_signal_table_enhanced(signals: pd.DataFrame) -> None:
 
     # Render table using st.html() (Streamlit v1.33+)
     st.html(table_style + header_html + table_html)
+
+
+# ============================================================================
+# SINGLE STOCK ANALYSIS COMPONENT
+# ============================================================================
+
+TREND_ICONS = {
+    'STRONG_UP': '⬆⬆',
+    'UPTREND': '⬆',
+    'SIDEWAYS': '↔',
+    'DOWNTREND': '⬇',
+    'STRONG_DOWN': '⬇⬇',
+}
+
+TREND_COLORS = {
+    'STRONG_UP': '#10B981',
+    'UPTREND': '#22C55E',
+    'SIDEWAYS': '#64748B',
+    'DOWNTREND': '#F59E0B',
+    'STRONG_DOWN': '#EF4444',
+}
+
+STRATEGY_RECOMMENDATIONS = {
+    ('STRONG_UP', 'BUY'): ('MUA THÊM', 'Trend continuation mạnh'),
+    ('STRONG_UP', 'PULLBACK'): ('GIỮ', 'Pullback bình thường, chờ test support'),
+    ('UPTREND', 'BUY'): ('MUA', 'Trend following'),
+    ('UPTREND', 'PULLBACK'): ('GIỮ', 'Có thể pullback, set stop loss'),
+    ('SIDEWAYS', 'BUY'): ('MUA NHẸ', 'Range trading'),
+    ('SIDEWAYS', 'SELL'): ('BÁN NHẸ', 'Range trading'),
+    ('DOWNTREND', 'SELL'): ('BÁN', 'Trend following'),
+    ('DOWNTREND', 'BOUNCE'): ('CHỜ', 'Counter-trend risky'),
+    ('STRONG_DOWN', 'SELL'): ('BÁN/SHORT', 'Trend continuation'),
+    ('STRONG_DOWN', 'BOUNCE'): ('TRÁNH MUA', 'Counter-trend rất risky'),
+}
+
+
+def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
+    """Render Single Stock Analysis component.
+
+    Shows trend + pattern + strategy for individual stocks.
+    """
+    st.markdown("### Phân tích cổ phiếu")
+    st.caption("Nhập mã cổ phiếu để xem xu hướng và tín hiệu chi tiết")
+
+    # Input row
+    input_col, sector_col = st.columns([1, 1])
+
+    with input_col:
+        ticker_input = st.text_input(
+            "Mã cổ phiếu",
+            placeholder="VD: PVD, MWG, GAS",
+            key="single_stock_input",
+            label_visibility="collapsed"
+        )
+
+    with sector_col:
+        # Get unique tickers with trend data
+        if 'trend' in signals.columns:
+            available_tickers = signals['symbol'].unique().tolist()
+            ticker_count = len(available_tickers)
+            st.caption(f"{ticker_count} mã có dữ liệu phân tích")
+
+    # If user entered a ticker
+    if ticker_input and ticker_input.strip():
+        ticker = ticker_input.strip().upper()
+
+        # Filter signals for this ticker
+        ticker_signals = signals[signals['symbol'] == ticker].copy()
+
+        if ticker_signals.empty:
+            st.warning(f"Không có tín hiệu cho {ticker}")
+            return
+
+        # Load fresh data directly from basic_data (more reliable than JOIN)
+        from pathlib import Path
+        basic_path = Path("DATA/processed/technical/basic_data.parquet")
+
+        sma20, sma50, price, trading_value, expected_value = 0, 0, 0, 0, 0
+        trend = 'SIDEWAYS'
+
+        if basic_path.exists():
+            basic_df = pd.read_parquet(basic_path)
+            ticker_basic = basic_df[basic_df['symbol'] == ticker].sort_values('date', ascending=False)
+
+            if not ticker_basic.empty:
+                latest_basic = ticker_basic.iloc[0]
+                sma20 = latest_basic.get('price_vs_sma20', 0) or 0
+                sma50 = latest_basic.get('price_vs_sma50', 0) or 0
+                price = latest_basic.get('close', 0) or 0
+                trading_value = latest_basic.get('trading_value', 0) or 0
+                expected_value = latest_basic.get('expected_trading_value', 0) or 0
+
+                # Classify trend from fresh data
+                if sma20 > 5 and sma50 > 5:
+                    trend = 'STRONG_UP'
+                elif sma20 > 2 and sma50 > 2:
+                    trend = 'UPTREND'
+                elif sma20 < -5 and sma50 < -5:
+                    trend = 'STRONG_DOWN'
+                elif sma20 < -2 and sma50 < -2:
+                    trend = 'DOWNTREND'
+                else:
+                    trend = 'SIDEWAYS'
+
+        # Volume trend analysis
+        if expected_value > 0 and not pd.isna(expected_value):
+            vol_ratio = trading_value / expected_value
+            if vol_ratio >= 2.0:
+                vol_status = ('TĂNG ĐỘT BIẾN', '#10B981', '⬆⬆')
+            elif vol_ratio >= 1.3:
+                vol_status = ('TĂNG MẠNH', '#22C55E', '⬆')
+            elif vol_ratio >= 0.8:
+                vol_status = ('BÌNH THƯỜNG', '#64748B', '↔')
+            elif vol_ratio >= 0.5:
+                vol_status = ('GIẢM', '#F59E0B', '⬇')
+            else:
+                vol_status = ('RẤT THẤP', '#EF4444', '⬇⬇')
+        else:
+            vol_ratio = 0
+            vol_status = ('Chưa có dữ liệu', '#64748B', '?')
+
+        trend_icon = TREND_ICONS.get(trend, '?')
+        trend_color = TREND_COLORS.get(trend, '#64748B')
+        trend_label = str(trend).replace('_', ' ')
+
+        # Get recent patterns/signals
+        recent_patterns = ticker_signals.sort_values('date', ascending=False).head(5)
+
+        # Build analysis card HTML
+        card_html = f'''
+        <div style="
+            background: linear-gradient(135deg, rgba({_hex_to_rgb(trend_color)}, 0.15) 0%, rgba(26, 22, 37, 0.95) 100%);
+            border: 1px solid rgba({_hex_to_rgb(trend_color)}, 0.4);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin: 16px 0;
+        ">
+            <!-- Header: Ticker + Trend -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="
+                        color: #FFFFFF;
+                        font-size: 1.5rem;
+                        font-weight: 700;
+                        font-family: 'JetBrains Mono', monospace;
+                    ">{ticker}</span>
+                    <span style="
+                        background: rgba({_hex_to_rgb(trend_color)}, 0.2);
+                        color: {trend_color};
+                        padding: 6px 14px;
+                        border-radius: 20px;
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                    ">{trend_icon} {trend_label}</span>
+                </div>
+                <span style="color: #94A3B8; font-size: 0.9rem;">
+                    {price:,.0f}đ
+                </span>
+            </div>
+
+            <!-- SMA & Volume Indicators -->
+            <div style="
+                display: flex;
+                gap: 24px;
+                padding: 12px 0;
+                border-top: 1px solid rgba(255,255,255,0.1);
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                margin-bottom: 16px;
+                flex-wrap: wrap;
+            ">
+                <div>
+                    <span style="color: #8B5CF6; font-size: 0.75rem; text-transform: uppercase;">SMA20</span>
+                    <div style="color: {'#10B981' if sma20 > 0 else '#EF4444'}; font-size: 1rem; font-weight: 600; font-family: monospace;">
+                        {'+' if sma20 > 0 else ''}{sma20:.1f}%
+                    </div>
+                </div>
+                <div>
+                    <span style="color: #8B5CF6; font-size: 0.75rem; text-transform: uppercase;">SMA50</span>
+                    <div style="color: {'#10B981' if sma50 > 0 else '#EF4444'}; font-size: 1rem; font-weight: 600; font-family: monospace;">
+                        {'+' if sma50 > 0 else ''}{sma50:.1f}%
+                    </div>
+                </div>
+                <div style="border-left: 1px solid rgba(255,255,255,0.1); padding-left: 24px;">
+                    <span style="color: #8B5CF6; font-size: 0.75rem; text-transform: uppercase;">GTGD</span>
+                    <div style="color: #C4B5FD; font-size: 1rem; font-weight: 600; font-family: monospace;">
+                        {trading_value/1e9:.1f} tỷ
+                    </div>
+                </div>
+                <div>
+                    <span style="color: #8B5CF6; font-size: 0.75rem; text-transform: uppercase;">Volume</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="color: {vol_status[1]}; font-size: 0.9rem;">{vol_status[2]}</span>
+                        <span style="color: {vol_status[1]}; font-size: 0.85rem; font-weight: 600;">{vol_status[0]}</span>
+                        {f'<span style="color: #64748B; font-size: 0.75rem;">({vol_ratio:.1f}x)</span>' if vol_ratio > 0 else ''}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Patterns -->
+            <div style="margin-bottom: 16px;">
+                <span style="color: #8B5CF6; font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 8px;">
+                    Mẫu hình gần đây
+                </span>
+        '''
+
+        # Add pattern rows
+        for _, row in recent_patterns.iterrows():
+            pattern_date = row.get('date', '')
+            if isinstance(pattern_date, str):
+                date_str = pattern_date
+            else:
+                try:
+                    date_str = pattern_date.strftime('%d/%m')
+                except Exception:
+                    date_str = str(pattern_date)[:5]
+
+            pattern_name = row.get('type_label', row.get('pattern_name', '-'))
+            direction = row.get('direction', 'NEUTRAL')
+
+            dir_color = {
+                'BUY': '#10B981',
+                'SELL': '#EF4444',
+                'PULLBACK': '#F59E0B',
+                'BOUNCE': '#F59E0B',
+                'NEUTRAL': '#64748B'
+            }.get(direction, '#64748B')
+
+            card_html += f'''
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 6px 0;
+                    border-left: 2px solid rgba({_hex_to_rgb(dir_color)}, 0.5);
+                    padding-left: 12px;
+                    margin-left: 4px;
+                ">
+                    <span style="color: #64748B; font-size: 0.8rem; min-width: 40px;">{date_str}</span>
+                    <span style="color: #C4B5FD; font-size: 0.85rem;">{pattern_name}</span>
+                    <span style="color: {dir_color}; font-size: 0.8rem;">→ {direction}</span>
+                </div>
+            '''
+
+        # Strategy recommendation
+        latest_direction = recent_patterns.iloc[0].get('direction', 'NEUTRAL') if not recent_patterns.empty else 'NEUTRAL'
+        strategy = STRATEGY_RECOMMENDATIONS.get((trend, latest_direction), ('THEO DÕI', 'Chờ tín hiệu rõ hơn'))
+
+        card_html += f'''
+            </div>
+
+            <!-- Strategy -->
+            <div style="
+                background: rgba(139, 92, 246, 0.1);
+                border-radius: 8px;
+                padding: 12px 16px;
+            ">
+                <span style="color: #8B5CF6; font-size: 0.75rem; text-transform: uppercase;">Chiến lược</span>
+                <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px;">
+                    <span style="
+                        color: #FFFFFF;
+                        font-weight: 600;
+                        font-size: 1rem;
+                    ">{strategy[0]}</span>
+                    <span style="color: #94A3B8; font-size: 0.85rem;">{strategy[1]}</span>
+                </div>
+            </div>
+        </div>
+        '''
+
+        st.html(card_html)
 
 
 # ============================================================================

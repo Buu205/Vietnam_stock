@@ -66,6 +66,11 @@ def render_compact_status_bar(service: TADashboardService) -> None:
     try:
         state = service.get_market_state()
 
+        # Handle missing data
+        if state is None:
+            st.info("📊 Loading market data...")
+            return
+
         # Regime styling
         regime_styles = {
             'BULLISH': ('#10B981', 'rgba(16, 185, 129, 0.15)'),

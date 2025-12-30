@@ -407,7 +407,7 @@ def _render_sector_ranking_table(ranking: pd.DataFrame) -> None:
 
 
 def _render_money_flow_chart(money_flow: pd.DataFrame) -> None:
-    """Render money flow as horizontal bar chart."""
+    """Render diverging bar chart anchored at x=0 for money flow."""
 
     # Find the correct column
     flow_col = None
@@ -420,22 +420,11 @@ def _render_money_flow_chart(money_flow: pd.DataFrame) -> None:
         _render_empty_state("No money flow column found")
         return
 
-    # Sort by net flow
-    df = money_flow.sort_values(flow_col, ascending=True).tail(15)
+    # Sort by value ascending (smallest/negative at bottom, largest/positive at top)
+    df = money_flow.sort_values(flow_col, ascending=True)
 
-    # Colors
-    colors = ['#10B981' if x > 0 else '#EF4444' for x in df[flow_col]]
-
-    # Format values
-    max_val = abs(df[flow_col].max())
-    if max_val > 1e9:
-        text_format = lambda x: f"{x/1e9:+.0f}B"
-    elif max_val > 1e6:
-        text_format = lambda x: f"{x/1e6:+.0f}M"
-    elif max_val > 100:
-        text_format = lambda x: f"{x:+.0f}"
-    else:
-        text_format = lambda x: f"{x:+.1f}%"
+    # Diverging colors: Green for positive (right), Red for negative (left)
+    colors = ['#10B981' if x >= 0 else '#EF4444' for x in df[flow_col]]
 
     fig = go.Figure()
 
@@ -444,23 +433,36 @@ def _render_money_flow_chart(money_flow: pd.DataFrame) -> None:
         x=df[flow_col],
         orientation='h',
         marker_color=colors,
-        text=df[flow_col].apply(text_format),
+        text=[f"{x:+.1f}%" for x in df[flow_col]],
         textposition='outside',
         textfont=dict(size=10, color='#E2E8F0'),
-        hovertemplate='<b>%{y}</b>: %{x:,.0f}<extra></extra>'
+        hovertemplate='<b>%{y}</b>: %{x:+.2f}%<extra></extra>'
     ))
 
-    # Add zero line
-    fig.add_vline(x=0, line=dict(color='#64748B', width=1))
+    # Zero line anchor (white for visibility)
+    fig.add_vline(x=0, line=dict(color='#FFFFFF', width=1))
 
+    # Fixed height for 19 sectors
     layout = get_chart_layout(height=350)
-    layout['xaxis']['title'] = 'Net Flow'
+    layout['xaxis'] = dict(
+        title='Net Inflow/Outflow (%)',
+        tickformat='.1f',  # Format: 10.5 (1 decimal)
+        ticksuffix='%',
+        zeroline=True,
+        zerolinecolor='#FFFFFF',
+        zerolinewidth=1,
+        gridcolor='rgba(255,255,255,0.05)',
+        tickfont=dict(color='#94A3B8', size=10)
+    )
     layout['yaxis']['title'] = ''
     layout['showlegend'] = False
     layout['margin'] = dict(l=100, r=60, t=20, b=40)
 
     fig.update_layout(**layout)
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
+    # Caption
+    st.caption("*Dương (+): Tiền ròng chảy vào ngành | Âm (-): Tiền ròng chảy ra khỏi ngành*")
 
 
 def _render_stock_rs_heatmap(service: 'TADashboardService') -> None:

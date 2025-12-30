@@ -229,7 +229,7 @@ if not all_df.empty:
 # TABS (Session State Persisted)
 # ============================================================================
 active_tab = render_persistent_tabs(
-    ["📊 VN-Index", "📈 Valuation", "📋 Data"],
+    ["VN-Index", "Valuation", "Data"],
     "sector_active_tab"
 )
 
@@ -567,6 +567,48 @@ if active_tab == 0:
             else:
                 st.warning(f"No {selected_metric} data available for {selected_index}")
 
+        # =====================================================================
+        # DOWNLOAD ALL INDEX DATA (Excel)
+        # =====================================================================
+        st.markdown("---")
+        st.markdown("### Download Data")
+
+        # Prepare export data for all 3 indices
+        export_cols = ['date', 'scope', 'pe_ttm', 'pb']
+        available_cols = [c for c in export_cols if c in vnindex_df.columns]
+        export_df = vnindex_df[vnindex_df['scope'].isin(['VNINDEX', 'VNINDEX_EXCLUDE', 'BSC_INDEX'])][available_cols].copy()
+        export_df = export_df.sort_values(['scope', 'date'])
+
+        # Map scope names for cleaner export
+        scope_names = {'VNINDEX': 'VN-Index', 'VNINDEX_EXCLUDE': 'VN-Index (Exclude)', 'BSC_INDEX': 'BSC Index'}
+        export_df['scope'] = export_df['scope'].map(scope_names)
+        export_df['date'] = pd.to_datetime(export_df['date']).dt.strftime('%Y-%m-%d')
+
+        if not export_df.empty:
+            excel_buffer = BytesIO()
+            with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                # All data in one sheet
+                export_df.to_excel(writer, sheet_name='All_Indices', index=False)
+
+                # Separate sheets per index
+                for scope_raw, scope_name in scope_names.items():
+                    scope_data = vnindex_df[vnindex_df['scope'] == scope_raw][available_cols].copy()
+                    if not scope_data.empty:
+                        scope_data['date'] = pd.to_datetime(scope_data['date']).dt.strftime('%Y-%m-%d')
+                        scope_data = scope_data.sort_values('date')
+                        sheet_name = scope_name.replace(' ', '_').replace('(', '').replace(')', '')[:31]
+                        scope_data.to_excel(writer, sheet_name=sheet_name, index=False)
+
+            excel_buffer.seek(0)
+            st.download_button(
+                "📥 Download All Index Data (PE/PB) - Excel",
+                excel_buffer,
+                "vnindex_valuation_data.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
+            st.caption(f"Includes {len(export_df):,} rows for VN-Index, VN-Index (Exclude), BSC Index")
+
     else:
         st.warning("VNIndex data not available. Please run the daily valuation pipeline.")
 
@@ -576,7 +618,7 @@ if active_tab == 0:
 elif active_tab == 1:
     # Sub-tabs for Sector Overview (Session State Persisted)
     valuation_tab = render_persistent_tabs(
-        ["🕯️ Sector Comp", "📈 Sector Ind", "🕯️ Stock Comp", "📈 Stock Ind"],
+        ["Sector Comp", "Sector Ind", "Stock Comp", "Stock Ind"],
         "sector_tables_tab",
         style="secondary"
     )

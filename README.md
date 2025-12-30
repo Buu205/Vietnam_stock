@@ -90,58 +90,83 @@ python3 PROCESSORS/pipelines/run_all_daily_updates.py
 | **Security** | Brokerages (146) | Commission, AUM, trading vol, ROE, leverage | `security_financial_metrics.parquet` |
 | **Sector** | 19 sectors | PE, PB, PS, EV/EBITDA valuation by sector | `vnindex_valuation_*.parquet` |
 | **Valuation** | 457 stocks | PE/PB percentile, historical bands, z-score | `valuation/{pe,pb,ps,ev_ebitda}/` |
-| **Technical** | Price action | OHLC, MA, RSI, MACD, ADX, Stochastic, money flow | `technical/basic_data.parquet` |
+| **Technical** | Price action | Market breadth, regime detection, bottom signals, sector rotation, stock scanner | `technical/alerts/` |
 | **Forecast** | 93 stocks | BSC targets, EPS/revenue forecasts, ratings | `forecast/bsc/bsc_individual.parquet` |
 | **FX & Commodities** | Macro | USD/VND, interest rates, oil, gold prices | `macro_commodity_unified.parquet` |
 
 ---
 
-## 📊 Key Statistics
+## 🎯 Technical Analysis Dashboard
 
-| Metric | Value | Notes |
-|--------|-------|-------|
-| **Tickers** | 457 | All HNX, HSX stocks |
-| **Sectors** | 19 | Financial, Real Estate, Tech, Consumer, Energy, etc. |
-| **Entity Types** | 4 | COMPANY, BANK, INSURANCE, SECURITY |
-| **Raw Metrics** | 2,099+ | Vietnamese metric codes (CIS_*, CBS_*, BIS_*, etc.) |
-| **Calculated Metrics** | 40+ | ROE, ROA, margins, growth, ratios, NIM, NPL, CASA, etc. |
-| **Fundamental Records** | 19.9M+ | 2018-2025 quarterly financials |
-| **Valuation Records** | 792K+ | 2018-2025 daily PE/PB/PS/EV data |
-| **Technical Records** | 89K+ | 2020-2025 daily OHLCV + indicators |
-| **Historical Depth** | 7+ years | Quarterly fundamentals, daily technicals & valuations |
-| **Forecast Coverage** | 93 stocks | BSC Research analyst forecasts |
+Advanced market analysis with real-time signals and bottom detection:
+
+### Market Health Scoring
+**Weighted Market Score** = (MA50 breadth × 50%) + (MA20 breadth × 30%) + (MA100 breadth × 20%)
+- ✅ **≥ 60:** Green - Healthy market
+- ⚠️ **40-59:** Amber - Caution zone
+- ❌ **< 40:** Red - Bearish
+
+### Signal Matrix (9 Signals)
+| Signal | Condition | Action |
+|--------|-----------|--------|
+| **STRONG_BUY** | Extreme oversold pullback in uptrend (MA20 < 20%) | Deploy capital aggressively |
+| **BUY** | Normal pullback in uptrend (MA20 20-40%) | Scale in or new position |
+| **HOLD** | Healthy uptrend (MA20 40-80%) | Maintain position, trend good |
+| **WARNING** | Overbought conditions (MA20 > 80%) | Don't chase, take profits |
+| **SELL** | Bull trap in downtrend (MA20 > 70%) | Reduce exposure |
+| **DANGER** | Market crash (MA50 < 30%, MA20 < 20%, no higher low) | Stay in cash absolutely |
+| **WAIT** | Sideways/no trend detected | Observe, no entry point |
+| **ACCUMULATING** | Smart money entering (all MA < 30%, MA20 higher low forming) | Watch closely, prepare capital |
+| **EARLY_BUY** | Early reversal confirmed (MA20 ≥ 25%, both MA20/MA50 higher lows) | Test buy 10-20%, tight stop |
+
+### Bottom Detection System (3 Stages)
+1. **CAPITULATION** - Extreme panic (all MA < 25%, no higher low yet)
+2. **ACCUMULATING** - Smart money entering (all MA < 30%, MA20 forming higher low in 3-day window)
+3. **EARLY_REVERSAL** - Reversal confirmed (MA20 ≥ 25%, MA50 forming higher low in 5-day window)
+
+### Capital Allocation (Exposure Control)
+Based on market regime + breadth strength:
+- **0%** - Bearish regime (stay in cash)
+- **20%** - Heavy pullback (breadth < 25%)
+- **40%** - Conservative (breadth 25-40%)
+- **60%** - Moderate (breadth 40-55%)
+- **80%** - Heavy (breadth 55-70%)
+- **100%** - Full deployment (breadth ≥ 70%)
+
+### Components
+- **Market Overview:** VN-Index, regime detection (EMA9 vs EMA21), breadth zones, market score
+- **Sector Rotation:** RRG quadrants (LEADING/IMPROVING/WEAKENING/LAGGING), sector ranking, money flow
+- **Stock Scanner:** Candlestick patterns (20+ types), MA crossovers, volume spikes, breakouts with volume context
+- **Filter Bar:** Timeframe selector (30D-1Y), sector filter, signal type selector
+
+See [`docs/ta-dashboard-logic.md`](docs/ta-dashboard-logic.md) for complete formulas and decision trees.
 
 ---
 
-## 💾 Data Architecture
+## 📊 Data Coverage
 
-### 3-Layer Design
+| Metric | Coverage | Details |
+|--------|----------|---------|
+| **Tickers** | 457 | All HNX, HSX stocks |
+| **Sectors** | 19 | Financial, Real Estate, Tech, Consumer, Energy |
+| **Raw Metrics** | 2,099+ | Vietnamese metric codes with 40+ calculated formulas |
+| **Fundamentals** | 19.9M+ records | 2018-2025 quarterly by entity type |
+| **Valuation** | 792K+ records | 2018-2025 daily PE/PB/PS/EV historical |
+| **Technical** | 89K+ records | 2020-2025 daily indicators, alerts, breadth |
+| **Forecast** | 93 stocks | BSC Research quarterly targets & EPS |
 
-```
-INPUT LAYER (Raw)
-  CSV fundamentals (175 MB) → OHLCV data (56 MB) → News/Metadata
-       ↓
-PROCESSING LAYER (Pipelines)
-  Calculators (ROE, NIM, growth) → Indicators (MA, RSI, MACD)
-  Valuations (PE, PB, PS, EV) → Sector aggregation → Scoring
-       ↓
-OUTPUT LAYER (Processed)
-  Parquet files (229 MB) → Schema registry → Dashboards
-       ↓
-CONSUMPTION LAYER (Dashboards)
-  8 Streamlit pages + Services layer + Components library
-```
+---
 
-### Data Update Frequency
+## 💾 Data Pipeline
 
-| Type | Frequency | Pipeline |
-|------|-----------|----------|
-| OHLCV / Technical | Daily (overnight) | `daily_ohlcv_update.py` → `technical_processor.py` |
-| Valuation | Daily (after technicals) | `valuation/calculators/` |
-| Sector Analysis | Daily (after valuation) | `sector_processor.py` (FA + TA aggregators) |
-| Fundamentals | Quarterly (after statements released) | CSV → `run_all_calculators.py` |
-| Macro/Commodity | Daily | `macro_commodity_fetcher.py` |
-| BSC Forecast | Quarterly | Excel → `bsc_forecast_processor.py` |
+3-layer architecture: Raw CSV (175 MB) → Processing → Parquet output (229 MB)
+
+**Update Frequency:**
+- OHLCV & Technical: Daily (overnight)
+- Valuation & Sector: Daily (cascading)
+- Fundamentals: Quarterly
+- Macro/Commodity: Daily
+- BSC Forecast: Quarterly
 
 ---
 
@@ -233,67 +258,24 @@ Complete documentation structure in `./docs/`:
 
 ---
 
-## 💻 Technology Stack
+## 💻 Tech Stack
 
-| Layer | Technology | Version | Purpose |
-|-------|-----------|---------|---------|
-| **Frontend** | Streamlit | 1.36+ | Dashboard UI |
-| **Charts** | Plotly | Latest | Interactive visualizations |
-| **Backend** | Python | 3.13 | Data processing |
-| **Data Processing** | Pandas, NumPy | Latest | Analysis & transformations |
-| **Technical Analysis** | TA-Lib | Compiled | Indicators (RSI, MACD, etc.) |
-| **Fundamentals** | Custom calculators | v4.0.0 | Entity-specific metrics |
-| **Storage** | Parquet (Snappy) | Columnar | Efficient data format |
-| **Deployment** | Streamlit Cloud | Latest | Live dashboard hosting |
-
----
-
-## 📊 Performance Metrics
-
-- **Pipeline Duration:** ~45 minutes (full daily update)
-- **Dashboard Load Time:** <3 seconds (cached data)
-- **Data Compression:** 60-80% reduction (CSV → Parquet)
-- **Total Data Size:** 470 MB (raw + processed)
-- **Committed Data:** 83.2 MB (24 essential files for dashboard)
+**Frontend:** Streamlit (UI) + Plotly (charts)
+**Backend:** Python 3.13 + Pandas + TA-Lib
+**Storage:** Parquet (snappy compression)
+**Deployment:** Streamlit Cloud
 
 ---
 
 ## 📖 Development Guidelines
 
-**Before making code changes, read:**
-1. [`CLAUDE.md`](CLAUDE.md) - AI developer guidelines (3 tiers: Rules, Guides, Reference)
-2. [`.claude/rules/critical.md`](.claude/rules/critical.md) - Non-negotiable constraints
-3. [`.claude/guides/architecture.md`](.claude/guides/architecture.md) - System design
+Before coding: Read [`CLAUDE.md`](CLAUDE.md) + [`.claude/rules/critical.md`](.claude/rules/critical.md)
 
-**Key Principles:**
-- ✅ Always use registries (MetricRegistry, SectorRegistry, SchemaRegistry)
-- ✅ Use canonical paths (`DATA/raw/`, `DATA/processed/`)
-- ✅ Reuse existing calculators (don't duplicate logic)
-- ✅ Follow 3-tier documentation structure
-- ❌ Don't create new markdown files (update existing ones)
-- ❌ Don't use deprecated paths (data_warehouse, calculated_results)
-
----
-
-## 🔍 Status & Roadmap
-
-**Current Version:** v4.0.0 (40% complete)
-
-**Completed:**
-- ✅ Data pipeline (6-stage orchestration)
-- ✅ Registry system (100% centralized lookups)
-- ✅ PROCESSORS/ architecture (86+ files)
-- ✅ WEBAPP/ dashboard (8 pages)
-- ✅ Path migration (v4.0.0 standardization)
-
-**In Progress:**
-- 🔄 FA+TA sector analysis refactor
-- 🔄 Advanced dashboard features
-
-**Not Started:**
-- ⏳ Mobile responsiveness
-- ⏳ ML-based signals
-- ⏳ Real-time streaming
+**Key Rules:**
+- Use registries (MetricRegistry, SectorRegistry, SchemaRegistry)
+- Use canonical paths (`DATA/raw/`, `DATA/processed/`)
+- Reuse existing calculators, don't duplicate
+- Don't create new markdown files (update existing)
 
 ---
 

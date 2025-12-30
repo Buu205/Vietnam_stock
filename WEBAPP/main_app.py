@@ -77,14 +77,8 @@ security_page = st.Page(
 
 sector_page = st.Page(
     str(pages_dir / "sector" / "sector_dashboard.py"),
-    title="Valuation",
+    title="Sector & Valuation",
     icon=":material/pie_chart:"
-)
-
-valuation_page = st.Page(
-    str(pages_dir / "valuation" / "valuation_dashboard.py"),
-    title="Sector",
-    icon=":material/attach_money:"
 )
 
 fx_commodities_page = st.Page(
@@ -161,8 +155,8 @@ with st.sidebar:
         with c1:
             if st.button("🏢", key="nav_company", help="Company", use_container_width=True):
                 st.switch_page("pages/company/company_dashboard.py")
-            if st.button("💰", key="nav_valuation", help="Valuation", use_container_width=True):
-                st.switch_page("pages/valuation/valuation_dashboard.py")
+            if st.button("💰", key="nav_valuation", help="Sector & Valuation", use_container_width=True):
+                st.switch_page("pages/sector/sector_dashboard.py")
         with c2:
             if st.button("🏦", key="nav_bank", help="Bank", use_container_width=True):
                 st.switch_page("pages/bank/bank_dashboard.py")
