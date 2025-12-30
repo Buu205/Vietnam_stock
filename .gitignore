@@ -116,6 +116,11 @@ DATA/processed/**/*.csv
 !DATA/processed/valuation/ps/historical/historical_ps.parquet
 !DATA/processed/valuation/vnindex/vnindex_valuation_refined.parquet
 
+# Sector (3 files)
+!DATA/processed/sector/sector_valuation_metrics.parquet
+!DATA/processed/sector/sector_fundamental_metrics.parquet
+!DATA/processed/sector/sector_combined_scores.parquet
+
 # Forecast (3 files)
 !DATA/processed/forecast/bsc/bsc_individual.parquet
 !DATA/processed/forecast/bsc/bsc_sector_valuation.parquet
