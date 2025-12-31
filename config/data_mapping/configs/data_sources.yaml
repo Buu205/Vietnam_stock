@@ -1,0 +1,1000 @@
+# Data Sources Registry
+# Maps data file names to paths, schemas, and metadata
+# Version: 2.1.0 | Date: 2025-12-31
+# Coverage: 55 data sources (100% of DATA/processed/ + Technical Dashboard extras)
+
+version: "2.0"
+
+data_sources:
+  # ==========================================================================
+  # FUNDAMENTAL DATA - Processed Metrics
+  # ==========================================================================
+
+  bank_metrics:
+    path: "processed/fundamental/bank/bank_financial_metrics.parquet"
+    schema_columns:
+      - symbol
+      - report_date
+      - year
+      - quarter
+      - freq_code
+      - total_assets
+      - total_credit
+      - total_customer_deposit
+      - total_liabilities
+      - total_equity
+      - nim
+      - npl_ratio
+      - car
+      - casa_ratio
+      - cir
+      - roe
+      - roa
+    entity_type: bank
+    category: fundamental
+    update_freq: quarterly
+    cache_ttl: 86400
+
+  company_metrics:
+    path: "processed/fundamental/company/company_financial_metrics.parquet"
+    schema_columns:
+      - symbol
+      - report_date
+      - year
+      - quarter
+      - freq_code
+      - net_revenue
+      - cogs
+      - gross_profit
+      - sga
+      - ebit
+      - npatmi
+      - roe
+      - roa
+      - gross_profit_margin
+      - net_margin
+    entity_type: company
+    category: fundamental
+    update_freq: quarterly
+    cache_ttl: 86400
+
+  insurance_metrics:
+    path: "processed/fundamental/insurance/insurance_financial_metrics.parquet"
+    schema_columns:
+      - symbol
+      - report_date
+      - year
+      - quarter
+      - combined_ratio
+      - loss_ratio
+      - roe
+      - roa
+    entity_type: insurance
+    category: fundamental
+    update_freq: quarterly
+    cache_ttl: 86400
+
+  security_metrics:
+    path: "processed/fundamental/security/security_financial_metrics.parquet"
+    schema_columns:
+      - symbol
+      - report_date
+      - year
+      - quarter
+      - roe
+      - roa
+      - brokerage_income
+    entity_type: security
+    category: fundamental
+    update_freq: quarterly
+    cache_ttl: 86400
+
+  # ==========================================================================
+  # FUNDAMENTAL DATA - Raw Melted Format (for raw metric lookups)
+  # ==========================================================================
+
+  bank_full:
+    path: "processed/fundamental/bank_full.parquet"
+    schema_columns:
+      - SECURITY_CODE
+      - REPORT_DATE
+      - REPORTED_DATE
+      - FREQ_CODE
+      - AUDITED
+      - MONTH_IN_PERIOD
+      - METRIC_CODE
+      - METRIC_VALUE
+      - ENTITY_TYPE
+      - YEAR
+    entity_type: bank
+    category: fundamental_raw
+    update_freq: quarterly
+    cache_ttl: 86400
+
+  company_full:
+    path: "processed/fundamental/company_full.parquet"
+    schema_columns:
+      - SECURITY_CODE
+      - REPORT_DATE
+      - REPORTED_DATE
+      - FREQ_CODE
+      - AUDITED
+      - MONTH_IN_PERIOD
+      - METRIC_CODE
+      - METRIC_VALUE
+      - ENTITY_TYPE
+      - YEAR
+    entity_type: company
+    category: fundamental_raw
+    update_freq: quarterly
+    cache_ttl: 86400
+
+  insurance_full:
+    path: "processed/fundamental/insurance_full.parquet"
+    schema_columns:
+      - SECURITY_CODE
+      - REPORT_DATE
+      - REPORTED_DATE
+      - FREQ_CODE
+      - AUDITED
+      - MONTH_IN_PERIOD
+      - METRIC_CODE
+      - METRIC_VALUE
+      - ENTITY_TYPE
+      - YEAR
+    entity_type: insurance
+    category: fundamental_raw
+    update_freq: quarterly
+    cache_ttl: 86400
+
+  security_full:
+    path: "processed/fundamental/security_full.parquet"
+    schema_columns:
+      - SECURITY_CODE
+      - REPORT_DATE
+      - REPORTED_DATE
+      - FREQ_CODE
+      - AUDITED
+      - MONTH_IN_PERIOD
+      - METRIC_CODE
+      - METRIC_VALUE
+      - ENTITY_TYPE
+      - YEAR
+    entity_type: security
+    category: fundamental_raw
+    update_freq: quarterly
+    cache_ttl: 86400
+
+  # ==========================================================================
+  # MACRO DATA - Interest Rates & FX
+  # ==========================================================================
+
+  deposit_interest_rates:
+    path: "processed/fundamental/macro/deposit_interest_rates.parquet"
+    schema_columns:
+      - date
+      - datetime
+      - time
+      - rate_type
+      - rate_name
+      - value
+      - unit
+    entity_type: all
+    category: macro
+    update_freq: daily
+    cache_ttl: 3600
+
+  exchange_rates:
+    path: "processed/fundamental/macro/exchange_rates.parquet"
+    schema_columns:
+      - date
+      - datetime
+      - time
+      - rate_type
+      - rate_name
+      - value
+      - unit
+    entity_type: all
+    category: macro
+    update_freq: daily
+    cache_ttl: 3600
+
+  gov_bond_yields:
+    path: "processed/fundamental/macro/gov_bond_yields.parquet"
+    schema_columns:
+      - date
+      - datetime
+      - time
+      - rate_type
+      - rate_name
+      - unit
+      - open
+      - high
+      - low
+      - close
+    entity_type: all
+    category: macro
+    update_freq: daily
+    cache_ttl: 3600
+
+  interest_rates:
+    path: "processed/fundamental/macro/interest_rates.parquet"
+    schema_columns:
+      - date
+      - datetime
+      - time
+      - rate_type
+      - rate_name
+      - value
+      - unit
+    entity_type: all
+    category: macro
+    update_freq: daily
+    cache_ttl: 3600
+
+  macro_commodity:
+    path: "processed/macro_commodity/macro_commodity_unified.parquet"
+    schema_columns:
+      - date
+      - deposit_rate
+      - usd_vnd
+      - gold_price
+      - oil_price
+    entity_type: all
+    category: macro
+    update_freq: daily
+    cache_ttl: 3600
+    derived_from:
+      - deposit_interest_rates
+      - exchange_rates
+
+  # ==========================================================================
+  # SECTOR DATA
+  # ==========================================================================
+
+  sector_fundamental:
+    path: "processed/sector/sector_fundamental_metrics.parquet"
+    schema_columns:
+      - sector_code
+      - sector_name_vi
+      - report_date
+      - ticker_count
+      - entity_types
+      - total_revenue
+      - net_profit
+      - total_assets
+      - total_equity
+      - total_liabilities
+    entity_type: all
+    category: sector
+    update_freq: quarterly
+    cache_ttl: 86400
+
+  sector_valuation:
+    path: "processed/sector/sector_valuation_metrics.parquet"
+    schema_columns:
+      - sector
+      - pe_ttm
+      - pb_ttm
+    entity_type: all
+    category: sector
+    update_freq: daily
+    cache_ttl: 3600
+    derived_from:
+      - pe_historical
+      - pb_historical
+
+  # ==========================================================================
+  # VALUATION DATA - Historical
+  # ==========================================================================
+
+  pe_historical:
+    path: "processed/valuation/pe/historical/historical_pe.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - close_price
+      - ttm_earning_billion_vnd
+      - shares_outstanding
+      - eps
+      - pe_ratio
+      - sector
+    entity_type: all
+    category: valuation
+    update_freq: daily
+    cache_ttl: 3600
+
+  pb_historical:
+    path: "processed/valuation/pb/historical/historical_pb.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - close_price
+      - pb_ratio
+      - bvps
+    entity_type: all
+    category: valuation
+    update_freq: daily
+    cache_ttl: 3600
+
+  ps_historical:
+    path: "processed/valuation/ps/historical/historical_ps.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - close_price
+      - market_cap
+      - ttm_revenue_billion_vnd
+      - ps_ratio
+      - sector
+    entity_type: all
+    category: valuation
+    update_freq: daily
+    cache_ttl: 3600
+
+  ev_ebitda_historical:
+    path: "processed/valuation/ev_ebitda/historical/historical_ev_ebitda.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - close_price
+      - ev_billion_vnd
+      - ebitda_ttm_billion_vnd
+      - ev_ebitda
+      - sector
+    entity_type: all
+    category: valuation
+    update_freq: daily
+    cache_ttl: 3600
+
+  vnindex_valuation:
+    path: "processed/valuation/vnindex/vnindex_valuation_refined.parquet"
+    schema_columns:
+      - date
+      - pe_ttm
+      - pb
+      - scope
+      - pe_fwd_2025
+      - pe_fwd_2026
+    entity_type: all
+    category: valuation
+    update_freq: daily
+    cache_ttl: 3600
+
+  # ==========================================================================
+  # STOCK VALUATION - Individual Daily
+  # ==========================================================================
+
+  individual_pe:
+    path: "processed/stock_valuation/individual_pe.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - close_price
+      - ttm_earning_billion_vnd
+      - shares_outstanding
+      - eps
+      - pe_ratio
+      - sector
+    entity_type: all
+    category: stock_valuation
+    update_freq: daily
+    cache_ttl: 3600
+
+  individual_pb:
+    path: "processed/stock_valuation/individual_pb.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - close_price
+      - equity_billion_vnd
+      - shares_outstanding
+      - bps
+      - pb_ratio
+      - sector
+    entity_type: all
+    category: stock_valuation
+    update_freq: daily
+    cache_ttl: 3600
+
+  individual_ev_ebitda:
+    path: "processed/stock_valuation/individual_ev_ebitda.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - close_price
+      - ev_billion_vnd
+      - ebitda_ttm_billion_vnd
+      - ev_ebitda
+      - sector
+    entity_type: all
+    category: stock_valuation
+    update_freq: daily
+    cache_ttl: 3600
+
+  # ==========================================================================
+  # FORECAST DATA
+  # ==========================================================================
+
+  bsc_individual:
+    path: "processed/forecast/bsc/bsc_individual.parquet"
+    schema_columns:
+      - symbol
+      - target_price
+      - current_price
+      - upside_pct
+      - rating
+      - rev_2025f
+      - rev_2026f
+      - npatmi_2025f
+      - npatmi_2026f
+      - eps_2025f
+      - eps_2026f
+    entity_type: all
+    category: forecast
+    update_freq: daily
+    cache_ttl: 3600
+
+  bsc_combined:
+    path: "processed/forecast/bsc/bsc_combined.parquet"
+    schema_columns:
+      - symbol
+      - target_price
+      - current_price
+      - upside_pct
+      - rating
+      - rev_2025f
+      - rev_2026f
+      - npatmi_2025f
+      - npatmi_2026f
+      - eps_2025f
+    entity_type: all
+    category: forecast
+    update_freq: daily
+    cache_ttl: 3600
+
+  bsc_sector_valuation:
+    path: "processed/forecast/bsc/bsc_sector_valuation.parquet"
+    schema_columns:
+      - sector
+      - pe_fwd_2025
+      - pe_fwd_2026
+    entity_type: all
+    category: forecast
+    update_freq: daily
+    cache_ttl: 3600
+
+  vci_coverage:
+    path: "processed/forecast/VCI/vci_coverage_universe.parquet"
+    schema_columns:
+      - ticker
+      - sector
+      - projectedTsrPercentage
+      - rating
+      - marketCapVnd
+      - marketCapUsd
+      - targetPrice
+      - numberOfSharesMktCap
+      - pe_2025F
+      - pe_2026F
+    entity_type: all
+    category: forecast
+    update_freq: weekly
+    cache_ttl: 86400
+
+  # ==========================================================================
+  # TECHNICAL DATA - Base
+  # ==========================================================================
+
+  ohlcv_raw:
+    path: "raw/ohlcv/OHLCV_mktcap.parquet"
+    schema_columns:
+      - ticker
+      - date
+      - open
+      - high
+      - low
+      - close
+      - volume
+      - market_cap
+    entity_type: all
+    category: technical
+    update_freq: daily
+    cache_ttl: 3600
+
+  technical_basic:
+    path: "processed/technical/basic_data.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - open
+      - high
+      - low
+      - close
+      - volume
+      - market_cap
+      - sma_20
+      - sma_50
+      - sma_200
+      - rsi_14
+    entity_type: all
+    category: technical
+    update_freq: daily
+    cache_ttl: 300
+    derived_from:
+      - ohlcv_raw
+
+  vnindex_indicators:
+    path: "processed/technical/vnindex/vnindex_indicators.parquet"
+    schema_columns:
+      - date
+      - symbol
+      - open
+      - high
+      - low
+      - close
+      - volume
+      - sma_20
+    entity_type: all
+    category: technical
+    update_freq: daily
+    cache_ttl: 300
+
+  # ==========================================================================
+  # TECHNICAL DATA - Market Breadth & Regime
+  # ==========================================================================
+
+  market_breadth:
+    path: "processed/technical/market_breadth/market_breadth_daily.parquet"
+    schema_columns:
+      - date
+      - pct_above_sma20
+      - pct_above_sma50
+      - pct_above_sma200
+    entity_type: all
+    category: technical
+    update_freq: daily
+    cache_ttl: 300
+
+  sector_breadth:
+    path: "processed/technical/sector_breadth/sector_breadth_daily.parquet"
+    schema_columns:
+      - date
+      - sector_code
+      - total_stocks
+      - above_ma20
+      - above_ma50
+      - above_ma100
+      - above_ma200
+      - above_ma20_pct
+    entity_type: all
+    category: technical
+    update_freq: daily
+    cache_ttl: 300
+
+  market_regime:
+    path: "processed/technical/market_regime/market_regime_history.parquet"
+    schema_columns:
+      - date
+      - regime
+      - regime_score
+      - risk_level
+      - valuation_score
+      - breadth_score
+      - volume_score
+      - volatility_score
+    entity_type: all
+    category: technical
+    update_freq: daily
+    cache_ttl: 300
+
+  # ==========================================================================
+  # TECHNICAL DATA - Money Flow
+  # ==========================================================================
+
+  individual_money_flow:
+    path: "processed/technical/money_flow/individual_money_flow.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - open
+      - high
+      - low
+      - close
+      - volume
+      - resolution
+    entity_type: all
+    category: money_flow
+    update_freq: daily
+    cache_ttl: 300
+
+  sector_money_flow:
+    path: "processed/technical/money_flow/sector_money_flow.parquet"
+    schema_columns:
+      - date
+      - sector_code
+      - money_flow
+      - inflow_pct
+      - flow_signal
+      - stock_count
+      - top_contributors
+    entity_type: all
+    category: money_flow
+    update_freq: daily
+    cache_ttl: 300
+
+  sector_money_flow_1d:
+    path: "processed/technical/money_flow/sector_money_flow_1d.parquet"
+    schema_columns:
+      - date
+      - sector_code
+      - money_flow
+      - inflow_pct
+      - flow_signal
+    entity_type: all
+    category: money_flow
+    update_freq: daily
+    cache_ttl: 300
+
+  sector_money_flow_1w:
+    path: "processed/technical/money_flow/sector_money_flow_1w.parquet"
+    schema_columns:
+      - date
+      - sector_code
+      - money_flow
+      - inflow_pct
+      - flow_signal
+    entity_type: all
+    category: money_flow
+    update_freq: daily
+    cache_ttl: 300
+
+  sector_money_flow_1m:
+    path: "processed/technical/money_flow/sector_money_flow_1m.parquet"
+    schema_columns:
+      - date
+      - sector_code
+      - money_flow
+      - inflow_pct
+      - flow_signal
+    entity_type: all
+    category: money_flow
+    update_freq: daily
+    cache_ttl: 300
+
+  # ==========================================================================
+  # TECHNICAL DATA - RS Rating
+  # ==========================================================================
+
+  stock_rs_rating:
+    path: "processed/technical/rs_rating/stock_rs_rating_daily.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - sector_code
+      - rs_rating
+      - rs_score
+      - ret_3m
+      - ret_6m
+      - ret_9m
+    entity_type: all
+    category: technical
+    update_freq: daily
+    cache_ttl: 300
+
+  rs_rating_history:
+    path: "processed/technical/rs_rating/rs_rating_history_30d.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - sector_code
+      - rs_rating
+      - rs_score
+    entity_type: all
+    category: technical
+    update_freq: daily
+    cache_ttl: 300
+    description: "30-day RS Rating history for heatmap visualization"
+
+  # ==========================================================================
+  # TECHNICAL DATA - Market State & Dashboard
+  # ==========================================================================
+
+  market_state_latest:
+    path: "processed/technical/market/market_state_latest.parquet"
+    schema_columns:
+      - date
+      - vnindex_close
+      - vnindex_change_pct
+      - regime
+      - ema9
+      - ema21
+      - breadth_ma20_pct
+      - breadth_ma50_pct
+      - breadth_ma100_pct
+      - ad_ratio
+      - exposure_level
+      - divergence_type
+      - divergence_strength
+      - signal
+    entity_type: all
+    category: technical_dashboard
+    update_freq: daily
+    cache_ttl: 300
+    description: "Current market state (regime, breadth, exposure) for dashboard Tab 1"
+    derived_from:
+      - market_breadth
+      - market_regime
+      - vnindex_indicators
+
+  sector_ranking_latest:
+    path: "processed/technical/sector/ranking_latest.parquet"
+    schema_columns:
+      - sector_code
+      - date
+      - rank
+      - score
+      - rs_score
+      - money_flow_score
+      - breadth_score
+      - momentum_score
+      - trend
+    entity_type: all
+    category: technical_dashboard
+    update_freq: daily
+    cache_ttl: 300
+    description: "Current sector ranking for dashboard Tab 2"
+    derived_from:
+      - sector_breadth
+      - sector_money_flow
+
+  sector_rrg_latest:
+    path: "processed/technical/sector/rrg_latest.parquet"
+    schema_columns:
+      - sector_code
+      - date
+      - rs_ratio
+      - rs_momentum
+      - quadrant
+      - trend_direction
+      - days_in_quadrant
+    entity_type: all
+    category: technical_dashboard
+    update_freq: daily
+    cache_ttl: 300
+    description: "RRG (Relative Rotation Graph) coordinates for sector rotation analysis"
+    derived_from:
+      - sector_breadth
+
+  # ==========================================================================
+  # TECHNICAL DATA - Trading Lists
+  # ==========================================================================
+
+  buy_list_latest:
+    path: "processed/technical/lists/buy_list_latest.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - sector_code
+      - score
+      - entry_price
+      - stop_loss
+      - target_1
+      - target_2
+      - position_size_pct
+      - rs_rating
+      - signal_source
+    entity_type: all
+    category: trading_lists
+    update_freq: daily
+    cache_ttl: 300
+    description: "Top 10 buy candidates with position sizing"
+    derived_from:
+      - stock_rs_rating
+      - combined_alerts_latest
+      - market_state_latest
+
+  sell_list_latest:
+    path: "processed/technical/lists/sell_list_latest.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - sector_code
+      - sell_reason
+      - exit_price
+      - pnl_pct
+      - hold_days
+      - original_entry
+    entity_type: all
+    category: trading_lists
+    update_freq: daily
+    cache_ttl: 300
+    description: "Exit signals for current positions"
+    derived_from:
+      - stock_rs_rating
+      - combined_alerts_latest
+
+  # ==========================================================================
+  # TECHNICAL DATA - Alerts (Daily Latest)
+  # ==========================================================================
+
+  breakout_latest:
+    path: "processed/technical/alerts/daily/breakout_latest.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - alert_type
+      - price
+      - resistance_level
+      - volume_confirmed
+      - volume_ratio
+      - signal
+    entity_type: all
+    category: alerts
+    update_freq: daily
+    cache_ttl: 300
+
+  ma_crossover_latest:
+    path: "processed/technical/alerts/daily/ma_crossover_latest.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - alert_type
+      - ma_period
+      - price
+      - ma_value
+      - signal
+    entity_type: all
+    category: alerts
+    update_freq: daily
+    cache_ttl: 300
+
+  patterns_latest:
+    path: "processed/technical/alerts/daily/patterns_latest.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - alert_type
+      - pattern_name
+      - signal
+      - win_rate
+      - context_score
+      - context_details
+    entity_type: all
+    category: alerts
+    update_freq: daily
+    cache_ttl: 300
+
+  volume_spike_latest:
+    path: "processed/technical/alerts/daily/volume_spike_latest.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - alert_type
+      - volume
+      - avg_volume_20d
+      - volume_ratio
+      - price
+      - price_change_pct
+    entity_type: all
+    category: alerts
+    update_freq: daily
+    cache_ttl: 300
+
+  combined_alerts_latest:
+    path: "processed/technical/alerts/daily/combined_latest.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - alert_type
+      - price
+      - ma_trend
+      - rsi_14
+      - macd_signal
+      - overall_signal
+    entity_type: all
+    category: alerts
+    update_freq: daily
+    cache_ttl: 300
+
+  # ==========================================================================
+  # TECHNICAL DATA - Alerts (Historical)
+  # ==========================================================================
+
+  breakout_history:
+    path: "processed/technical/alerts/historical/breakout_history.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - alert_type
+      - price
+      - support_level
+      - volume_confirmed
+      - volume_ratio
+      - signal
+    entity_type: all
+    category: alerts_history
+    update_freq: daily
+    cache_ttl: 3600
+
+  ma_crossover_history:
+    path: "processed/technical/alerts/historical/ma_crossover_history.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - alert_type
+      - ma_period
+      - price
+      - ma_value
+      - signal
+    entity_type: all
+    category: alerts_history
+    update_freq: daily
+    cache_ttl: 3600
+
+  patterns_history:
+    path: "processed/technical/alerts/historical/patterns_history.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - alert_type
+      - pattern_name
+      - signal
+      - strength
+      - price
+      - win_rate
+    entity_type: all
+    category: alerts_history
+    update_freq: daily
+    cache_ttl: 3600
+
+  volume_spike_history:
+    path: "processed/technical/alerts/historical/volume_spike_history.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - alert_type
+      - volume
+      - avg_volume_20d
+      - volume_ratio
+      - price
+      - price_change_pct
+    entity_type: all
+    category: alerts_history
+    update_freq: daily
+    cache_ttl: 3600
+
+  combined_alerts_history:
+    path: "processed/technical/alerts/historical/combined_history.parquet"
+    schema_columns:
+      - symbol
+      - date
+      - alert_type
+      - price
+      - ma_trend
+      - rsi_14
+      - macd_signal
+      - overall_signal
+    entity_type: all
+    category: alerts_history
+    update_freq: daily
+    cache_ttl: 3600
+
+  # ==========================================================================
+  # MARKET INDICES
+  # ==========================================================================
+
+  market_indices:
+    path: "processed/market_indices/market_indices.parquet"
+    schema_columns:
+      - date
+      - index_code
+      - open
+      - high
+      - low
+      - close
+      - volume
+    entity_type: all
+    category: market
+    update_freq: daily
+    cache_ttl: 300

@@ -1,0 +1,99 @@
+# Dashboards Registry
+# Maps Streamlit pages to required data sources
+# Version: 1.0.0 | Date: 2025-12-31
+
+version: "1.0"
+
+dashboards:
+  bank_dashboard:
+    page_path: "WEBAPP/pages/bank/bank_dashboard.py"
+    data_sources:
+      - bank_metrics
+      - pe_historical
+      - pb_historical
+    services:
+      - BankService
+      - ValuationService
+    requires_ticker: true
+    cache_ttl: 3600
+
+  company_dashboard:
+    page_path: "WEBAPP/pages/company/company_dashboard.py"
+    data_sources:
+      - company_metrics
+      - pe_historical
+      - pb_historical
+    services:
+      - CompanyService
+      - ValuationService
+    requires_ticker: true
+    cache_ttl: 3600
+
+  security_dashboard:
+    page_path: "WEBAPP/pages/security/security_dashboard.py"
+    data_sources:
+      - security_metrics
+    services:
+      - SecurityService
+    requires_ticker: true
+    cache_ttl: 3600
+
+  sector_dashboard:
+    page_path: "WEBAPP/pages/sector/sector_dashboard.py"
+    data_sources:
+      - company_metrics
+      - bank_metrics
+      - sector_valuation
+      - vnindex_valuation
+    services:
+      - SectorService
+      - CompanyService
+      - BankService
+      - ValuationService
+    requires_ticker: false
+    cache_ttl: 7200
+
+  valuation_dashboard:
+    page_path: "WEBAPP/pages/valuation/valuation_dashboard.py"
+    data_sources:
+      - pe_historical
+      - pb_historical
+      - vnindex_valuation
+      - sector_valuation
+    services:
+      - ValuationService
+    requires_ticker: true
+    cache_ttl: 3600
+
+  technical_dashboard:
+    page_path: "WEBAPP/pages/technical/technical_dashboard.py"
+    data_sources:
+      - ohlcv_raw
+      - technical_basic
+      - market_breadth
+    services:
+      - TechnicalService
+    requires_ticker: true
+    cache_ttl: 300
+
+  forecast_dashboard:
+    page_path: "WEBAPP/pages/forecast/forecast_dashboard.py"
+    data_sources:
+      - bsc_individual
+      - bsc_sector_valuation
+      - pe_historical
+      - pb_historical
+    services:
+      - ForecastService
+      - ValuationService
+    requires_ticker: false
+    cache_ttl: 3600
+
+  fx_commodities_dashboard:
+    page_path: "WEBAPP/pages/fx_commodities/fx_commodities_dashboard.py"
+    data_sources:
+      - macro_commodity
+    services:
+      - FxService
+    requires_ticker: false
+    cache_ttl: 3600

@@ -1,0 +1,136 @@
+# Pipelines Registry
+# Maps pipeline scripts to their outputs and dependencies
+# Version: 1.0.0 | Date: 2025-12-31
+
+version: "1.0"
+
+pipelines:
+  # ==========================================================================
+  # OHLCV UPDATE (Step 1)
+  # ==========================================================================
+
+  ohlcv_updater:
+    script_path: "PROCESSORS/technical/ohlcv/ohlcv_daily_updater.py"
+    outputs:
+      - ohlcv_raw
+    dependencies: []
+    schedule: "daily"
+
+  # ==========================================================================
+  # FUNDAMENTAL CALCULATORS (Quarterly)
+  # ==========================================================================
+
+  bank_calculator:
+    script_path: "PROCESSORS/fundamental/calculators/bank_calculator.py"
+    outputs:
+      - bank_metrics
+    dependencies: []
+    schedule: "quarterly"
+
+  company_calculator:
+    script_path: "PROCESSORS/fundamental/calculators/company_calculator.py"
+    outputs:
+      - company_metrics
+    dependencies: []
+    schedule: "quarterly"
+
+  insurance_calculator:
+    script_path: "PROCESSORS/fundamental/calculators/insurance_calculator.py"
+    outputs:
+      - insurance_metrics
+    dependencies: []
+    schedule: "quarterly"
+
+  security_calculator:
+    script_path: "PROCESSORS/fundamental/calculators/security_calculator.py"
+    outputs:
+      - security_metrics
+    dependencies: []
+    schedule: "quarterly"
+
+  # ==========================================================================
+  # TECHNICAL ANALYSIS (Step 2)
+  # ==========================================================================
+
+  technical_processor:
+    script_path: "PROCESSORS/pipelines/daily/daily_ta_complete.py"
+    outputs:
+      - technical_basic
+      - market_breadth
+    dependencies:
+      - ohlcv_raw
+    schedule: "daily"
+
+  # ==========================================================================
+  # VALUATION CALCULATORS (Step 4)
+  # ==========================================================================
+
+  pe_calculator:
+    script_path: "PROCESSORS/valuation/calculators/vnindex_pe_calculator_optimized.py"
+    outputs:
+      - pe_historical
+      - vnindex_valuation
+    dependencies:
+      - ohlcv_raw
+      - company_metrics
+      - bank_metrics
+    schedule: "daily"
+
+  pb_calculator:
+    script_path: "PROCESSORS/valuation/calculators/vnindex_pb_calculator_optimized.py"
+    outputs:
+      - pb_historical
+    dependencies:
+      - ohlcv_raw
+      - company_metrics
+      - bank_metrics
+    schedule: "daily"
+
+  sector_valuation_calculator:
+    script_path: "PROCESSORS/sector/calculators/sector_valuation_calculator.py"
+    outputs:
+      - sector_valuation
+    dependencies:
+      - pe_historical
+      - pb_historical
+    schedule: "daily"
+
+  # ==========================================================================
+  # MACRO & COMMODITY (Step 3)
+  # ==========================================================================
+
+  macro_commodity_updater:
+    script_path: "PROCESSORS/pipelines/daily/daily_macro_commodity_update.py"
+    outputs:
+      - macro_commodity
+    dependencies: []
+    schedule: "daily"
+
+  # ==========================================================================
+  # FORECAST (Manual)
+  # ==========================================================================
+
+  bsc_forecast_processor:
+    script_path: "PROCESSORS/forecast/bsc_forecast_processor.py"
+    outputs:
+      - bsc_individual
+      - bsc_sector_valuation
+    dependencies: []
+    schedule: "manual"
+
+  # ==========================================================================
+  # UNIFIED DAILY UPDATE
+  # ==========================================================================
+
+  daily_update_all:
+    script_path: "PROCESSORS/pipelines/run_all_daily_updates.py"
+    outputs:
+      - ohlcv_raw
+      - technical_basic
+      - market_breadth
+      - pe_historical
+      - pb_historical
+      - vnindex_valuation
+      - macro_commodity
+    dependencies: []
+    schedule: "daily"

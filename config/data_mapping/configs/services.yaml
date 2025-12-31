@@ -1,0 +1,95 @@
+# Services Registry
+# Maps service classes to data sources they consume
+# Version: 1.0.0 | Date: 2025-12-31
+
+version: "1.0"
+
+services:
+  BankService:
+    service_path: "WEBAPP.services.bank_service"
+    data_sources:
+      - bank_metrics
+    entity_type: bank
+    methods:
+      - get_financial_data
+      - get_latest_metrics
+      - get_available_tickers
+      - get_peer_comparison
+
+  CompanyService:
+    service_path: "WEBAPP.services.company_service"
+    data_sources:
+      - company_metrics
+    entity_type: company
+    methods:
+      - get_financial_data
+      - get_latest_metrics
+      - get_available_tickers
+      - get_peer_comparison
+
+  SecurityService:
+    service_path: "WEBAPP.services.security_service"
+    data_sources:
+      - security_metrics
+    entity_type: security
+    methods:
+      - get_financial_data
+      - get_latest_metrics
+
+  ValuationService:
+    service_path: "WEBAPP.services.valuation_service"
+    data_sources:
+      - pe_historical
+      - pb_historical
+      - vnindex_valuation
+      - sector_valuation
+    entity_type: all
+    methods:
+      - get_ticker_pe
+      - get_ticker_pb
+      - get_vnindex_valuation
+      - get_sector_valuation
+
+  TechnicalService:
+    service_path: "WEBAPP.services.technical_service"
+    data_sources:
+      - ohlcv_raw
+      - technical_basic
+      - market_breadth
+    entity_type: all
+    methods:
+      - get_ohlcv
+      - get_indicators
+      - get_market_breadth
+
+  SectorService:
+    service_path: "WEBAPP.services.sector_service"
+    data_sources:
+      - sector_valuation
+      - company_metrics
+      - bank_metrics
+    entity_type: all
+    methods:
+      - get_sector_metrics
+      - get_sector_comparison
+
+  ForecastService:
+    service_path: "WEBAPP.services.forecast_service"
+    data_sources:
+      - bsc_individual
+      - bsc_sector_valuation
+      - pe_historical
+    entity_type: all
+    methods:
+      - get_forecast
+      - get_top_upside
+      - get_sector_with_pe_pb_ttm
+
+  FxService:
+    service_path: "WEBAPP.services.fx_service"
+    data_sources:
+      - macro_commodity
+    entity_type: all
+    methods:
+      - get_fx_rates
+      - get_commodity_prices
