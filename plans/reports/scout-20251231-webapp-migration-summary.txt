@@ -1,0 +1,176 @@
+WEBAPP SERVICES MIGRATION AUDIT - QUICK REFERENCE
+=================================================
+
+SCAN COMPLETED: 2025-12-31
+STATUS: 75% COMPLIANT - Ready for Phase 2
+
+KEY METRICS:
+- Total files scanned: 100+
+- Services using BaseService: 3 (COMPLETE)
+- Services needing migration: 6 (HIGH PRIORITY)
+- Hardcoded path issues: 6 (mostly HIGH severity)
+- Legacy imports: 2 files
+- Critical bugs: 1 (MacroCommodityLoader)
+
+SERVICES STATUS SUMMARY:
+========================
+
+✅ MIGRATED (3 services - 25% complete):
+  • BankService (/WEBAPP/services/bank_service.py)
+  • CompanyService (/WEBAPP/services/company_service.py)
+  • SecurityService (/WEBAPP/services/security_service.py)
+  All extend BaseService, use registry for paths, fully schema-validated
+
+❌ NEEDS MIGRATION (6 services - 50% remaining):
+  1. ForecastService (EASY - ~50 LOC) - Use registry for 7 parquet reads
+  2. TechnicalService (MEDIUM - ~165 LOC) - Map path patterns to registry
+  3. ValuationService (HARD - ~1000 LOC) - Keep caching, wrap in BaseService
+  4. SectorService (MEDIUM - ~343 LOC) - Add BaseService inheritance
+  5. FinancialMetricsLoader (SPECIAL) - Convert singleton to class + DuckDB layer
+  6. MacroCommodityLoader (CRITICAL) - Fix broken DataPaths.processed() call
+
+CRITICAL ISSUES:
+================
+
+1. BROKEN: /WEBAPP/services/macro_commodity_loader.py:34
+   - Calls non-existent DataPaths.processed() method
+   - Impact: Runtime error
+   - Fix: Use DataPaths.macro() or add commodity method
+
+2. DEPRECATED: /WEBAPP/services/financial_metrics_loader.py:20-21
+   - Uses old import paths: config.registries.sector_lookup
+   - Should be: config.registries
+   - Impact: May fail if paths change
+
+3. DEPRECATED: /WEBAPP/services/valuation_service.py:21-30
+   - Uses old import pattern with try/except
+   - Should use canonical import
+
+HARDCODED PATH ISSUES:
+======================
+
+HIGH SEVERITY (6 files):
+  • technical_service.py - Manual path construction (lines 32-37)
+  • valuation_service.py - 15+ hardcoded path patterns
+  • forecast_service.py - 7+ hardcoded paths
+  • sector_service.py - 4+ hardcoded paths  
+  • financial_metrics_loader.py - Uses get_fundamental_path() (GOOD)
+  • domains/technical/data_loading_technical.py - Mixed patterns
+
+ACCEPTABLE (80% compliant):
+  • All domain wrappers use DataPaths or helper functions
+  • All new services use BaseService + registry
+
+DIRECT PARQUET READS:
+====================
+
+Total found: 45+ instances
+Assessment: MOSTLY ACCEPTABLE (optimized for speed)
+
+Good patterns:
+  ✓ DuckDB queries with parameter binding
+  ✓ Cached reads with outlier filtering
+  ✓ Schema-aware column selection
+  ✓ Error handling for missing files
+
+Areas to improve:
+  ⚠ Some services lack schema validation
+  ⚠ No consistent error messaging
+  ⚠ Direct reads should use registry when possible
+
+INFRASTRUCTURE STATUS:
+====================
+
+✅ BaseService Framework (/WEBAPP/services/base_service.py)
+   - Production-ready
+   - Lazy-loads registry and path resolver
+   - Schema validation support
+   - Cache TTL configuration
+
+✅ DataPaths Centralization (/WEBAPP/core/data_paths.py)
+   - Single source of truth for all paths
+   - Methods: fundamental(), valuation(), technical(), macro(), forecast()
+   - Convenience functions: get_fundamental_path(), get_valuation_path(), etc.
+
+✅ Data Loading Utilities (/WEBAPP/core/data_loading.py)
+   - DuckDB optimization layer
+   - SymbolLoader integration (315 liquid tickers)
+   - Outlier filtering support
+   - Multi-entity schema support
+
+MIGRATION ROADMAP:
+==================
+
+PHASE 1 - CRITICAL FIXES (1-2 hours):
+  [ ] Fix MacroCommodityLoader DataPaths call (line 34)
+  [ ] Update FinancialMetricsLoader imports (lines 20-21)
+  [ ] Add missing DataPaths.commodity() method if needed
+
+PHASE 2 - SERVICE MIGRATION (4-6 hours):
+  [ ] Migrate ForecastService (simplest)
+  [ ] Migrate TechnicalService (medium)
+  [ ] Create ValuationServiceBase wrapper (complex)
+  [ ] Migrate SectorService (medium)
+  [ ] Refactor FinancialMetricsLoader singleton (special)
+
+PHASE 3 - DOMAIN HARMONIZATION (2-3 hours):
+  [ ] Standardize domain loader patterns
+  [ ] Fix technical domain inconsistencies
+  [ ] Document fallback patterns
+
+TOTAL EFFORT: 8-12 hours to complete full standardization
+
+UNRESOLVED QUESTIONS:
+====================
+
+1. ValuationService caching: Keep internal cache or use BaseService?
+2. FinancialMetricsLoader singleton: Why singleton? Need for testing?
+3. MacroCommodityLoader: Replace with DataPaths.macro() or add .commodity()?
+4. SectorService registry fallback: Optional graceful fallback or fail-fast?
+
+RECOMMENDATIONS:
+================
+
+Immediate (Next Sprint):
+  - Fix critical MacroCommodityLoader bug
+  - Update deprecated imports
+  - Add missing DataPaths methods
+
+Short Term (This Month):
+  - Migrate ForecastService and TechnicalService
+  - Create ValuationServiceBase wrapper
+  
+Medium Term (Ongoing):
+  - Standardize all domain loaders
+  - Convert FinancialMetricsLoader pattern
+  - Document BaseService extension patterns
+
+Quality Standards:
+  - All new services extend BaseService
+  - Use DataPaths for path resolution (no manual construction)
+  - Add schema validation to all parquet reads
+  - Document direct pd.read_parquet() with optimization comments
+
+FILES NEEDING UPDATES:
+======================
+
+CRITICAL (Do first):
+  1. /WEBAPP/services/macro_commodity_loader.py - Fix DataPaths call
+  2. /WEBAPP/services/financial_metrics_loader.py - Fix imports
+
+HIGH (Migrate):
+  3. /WEBAPP/services/forecast_service.py - Extend BaseService
+  4. /WEBAPP/services/technical_service.py - Extend BaseService
+  5. /WEBAPP/services/valuation_service.py - Create adapter
+  6. /WEBAPP/services/sector_service.py - Extend BaseService
+  7. /WEBAPP/services/financial_metrics_loader.py - Refactor + extend
+
+MEDIUM (Polish):
+  8. /WEBAPP/domains/technical/data_loading_technical.py - Standardize
+
+FULL AUDIT REPORT:
+==================
+See: /Users/buuphan/Dev/Vietnam_dashboard/plans/reports/scout-20251231-webapp-migration-audit.md
+
+This summary provides quick reference. Full report has detailed analysis,
+code examples, line-by-line issues, and implementation guidance.

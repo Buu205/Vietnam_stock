@@ -2,7 +2,7 @@
 
 **Project:** Vietnam Stock Dashboard
 **Version:** 4.0.0
-**Last Updated:** 2025-12-28
+**Last Updated:** 2025-12-31
 
 ---
 
@@ -80,6 +80,7 @@ Vietnamese stock market financial data dashboard providing comprehensive analysi
 ## 5. Feature Roadmap
 
 ### Completed (v4.0.0)
+- [x] **Data Mapping Registry** (v1.0.0) - Zero-hardcoded-paths design with YAML config (data_sources, services, pipelines, dashboards)
 - [x] Registry system (MetricRegistry: 2,099 metrics, SectorRegistry: 457 tickers, SchemaRegistry)
 - [x] Financial calculators (4 entity types with 56-59 columns output)
 - [x] Technical indicators pipeline (15+ TA-Lib indicators)
@@ -136,6 +137,40 @@ Vietnamese stock market financial data dashboard providing comprehensive analysi
 - **Market Regime:** 5 regimes with multi-factor scoring (valuation, breadth, volume, volatility, momentum)
 - **Money Flow:** CMF, MFI, OBV, AD, VPT at individual & sector level
 - **RS Rating:** IBD-style percentile (1-99) with 4-period weighting (3M: 40%, 6M: 20%, 9M: 20%, 12M: 20%)
+
+---
+
+## 6A. Registry Architecture (v1.0.0)
+
+### Data Mapping Registry - Zero-Hardcoded-Paths Design
+
+**Location:** `config/data_mapping/`
+
+**Core Components:**
+1. **entities.py** - Pure dataclasses: DataSource, PipelineOutput, DashboardConfig, ServiceBinding
+2. **registry.py** - Singleton DataMappingRegistry with path/schema/dependency lookups
+3. **resolver.py** - PathResolver (validation), DependencyResolver (impact analysis)
+4. **validator.py** - SchemaValidator, HealthChecker for data quality
+5. **configs/** - YAML files: data_sources, services, pipelines, dashboards
+
+**Key Benefits:**
+- Single source of truth for all data mappings (no hardcoded paths)
+- Automatic schema validation on data load
+- Dependency tracking for impact analysis (what breaks when source changes)
+- Services (BankService, CompanyService, etc.) extend BaseService for automatic registry integration
+- Config-driven extensibility via YAML
+
+**Usage Patterns:**
+```python
+# Simple lookup
+from config.data_mapping import get_data_path
+path = get_data_path("bank_metrics")
+
+# Full registry + impact analysis
+from config.data_mapping import get_registry, DependencyResolver
+registry = get_registry()
+impact = DependencyResolver().get_impact_chain("ohlcv_raw")
+```
 
 ---
 

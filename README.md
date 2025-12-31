@@ -10,15 +10,15 @@ Vietnamese stock market financial data platform for 457 tickers across 19 sector
 
 ## 📊 Features
 
-Multi-layered financial analysis platform with unified registry system, 6-stage daily pipeline, and comprehensive dashboards:
+Multi-layered platform: 4 entity types, 457 tickers, 19 sectors, 6-stage daily pipeline
 
 | Feature | Coverage | Details |
 |---------|----------|---------|
-| **Fundamental Analysis** | 4 entity types | Company (2,246), Bank (57), Insurance (34), Security (154) |
-| **Technical Analysis** | 457 tickers | OHLCV, 10+ indicators, alerts, money flow, breadth |
-| **Valuation** | PE, PB, PS, EV/EBITDA | TTM + Forward (2025-2026), 7+ years history |
-| **Sector Analysis** | 19 sectors | FA+TA scoring with aggregated metrics |
-| **BSC Forecast** | 93 stocks | Target prices, ratings, EPS/revenue forecasts |
+| **Fundamental** | 4 types | Company, Bank, Insurance, Security metrics |
+| **Technical** | 457 tickers | OHLCV, 10+ indicators, alerts, breadth |
+| **Valuation** | PE/PB/PS/EV | TTM + Forward, 7+ years history |
+| **Sector** | 19 sectors | FA+TA scoring with aggregation |
+| **BSC Forecast** | 93 stocks | Target prices, ratings, EPS forecasts |
 
 ---
 
@@ -83,16 +83,16 @@ python3 PROCESSORS/pipelines/run_all_daily_updates.py
 
 ## 📋 Dashboard Pages (8 Total)
 
-| Page | Entity Focus | Key Metrics | Data Source |
-|------|-------------|-----------|-------------|
-| **Company** | Non-financial companies | Revenue, margins (ROE/ROA), growth, ratios | `company_financial_metrics.parquet` |
-| **Bank** | 57 Vietnamese banks | NIM, CAR, NPL, CASA, LDR, CIR, LLCR | `bank_financial_metrics.parquet` |
-| **Security** | Brokerages (146) | Commission, AUM, trading vol, ROE, leverage | `security_financial_metrics.parquet` |
-| **Sector** | 19 sectors | PE, PB, PS, EV/EBITDA valuation by sector | `vnindex_valuation_*.parquet` |
-| **Valuation** | 457 stocks | PE/PB percentile, historical bands, z-score | `valuation/{pe,pb,ps,ev_ebitda}/` |
-| **Technical** | Price action | Market breadth, regime detection, bottom signals, sector rotation, stock scanner | `technical/alerts/` |
-| **Forecast** | 93 stocks | BSC targets, EPS/revenue forecasts, ratings | `forecast/bsc/bsc_individual.parquet` |
-| **FX & Commodities** | Macro | USD/VND, interest rates, oil, gold prices | `macro_commodity_unified.parquet` |
+| Page | Focus | Key Metrics |
+|------|-------|-------------|
+| **Company** | Companies | Revenue, ROE, margins, growth |
+| **Bank** | Banks (57) | NIM, CAR, NPL, CASA, LDR |
+| **Security** | Brokerages (146) | Commission, AUM, ROE, leverage |
+| **Sector** | 19 sectors | PE, PB, PS, EV/EBITDA valuation |
+| **Valuation** | 457 stocks | PE/PB percentile, z-score bands |
+| **Technical** | Price action | Breadth, regime, patterns, scanner |
+| **Forecast** | 93 stocks | BSC targets, EPS, ratings |
+| **FX & Commodities** | Macro | USD/VND, rates, oil, gold |
 
 ---
 
@@ -201,18 +201,41 @@ schema_reg = SchemaRegistry()
 formatted = schema_reg.format_price(25750.5)  # "25,750.50đ"
 ```
 
+### Data Mapping Registry (v1.0.0 - NEW)
+
+Clean architecture registry for zero-hardcoded-paths design:
+
+```python
+from config.data_mapping import get_registry, get_data_path, DependencyResolver
+
+# Simple path lookup (recommended)
+path = get_data_path("bank_metrics")  # Returns: DATA/processed/fundamental/bank/...
+
+# Full registry access
+registry = get_registry()
+sources = registry.get_sources_for_dashboard("bank_dashboard")
+
+# Impact analysis (dependency chain)
+resolver = DependencyResolver()
+impact = resolver.get_impact_chain("ohlcv_raw")  # Shows all dependent data
+```
+
+**Structure:** 5 Python modules + 4 YAML configs
+- `entities.py` - Dataclasses (DataSource, PipelineOutput, etc.)
+- `registry.py` - Singleton registry with lookup methods
+- `resolver.py` - PathResolver, DependencyResolver for impact analysis
+- `validator.py` - SchemaValidator, HealthChecker for data quality
+- `configs/` - YAML files: data_sources, services, pipelines, dashboards
+
+**Benefits:** Single source of truth for data mappings, schema validation, dependency tracking, automatic path resolution in services.
+
 ### Data Path Standards (v4.0.0)
 ```python
-# Canonical paths - ALWAYS use these
 from pathlib import Path
-
-# ✅ Manual construction (standard)
-path = Path("DATA/processed/fundamental/company/company_financial_metrics.parquet")
-df = pd.read_parquet(path)
-
-# ✅ Helper function (recommended)
 from PROCESSORS.core.config.paths import get_data_path
-path = get_data_path("processed", "fundamental", "company", "company_financial_metrics.parquet")
+
+# Standard: DATA/processed/ or DATA/raw/ paths
+path = Path("DATA/processed/fundamental/company/company_financial_metrics.parquet")
 df = pd.read_parquet(path)
 ```
 
@@ -234,15 +257,13 @@ python3 PROCESSORS/pipelines/run_all_daily_updates.py --only valuation
 
 ## 📚 Documentation
 
-Complete documentation structure in `./docs/`:
-
-| Document | Purpose | Details |
-|----------|---------|---------|
-| [project-overview-pdr.md](docs/project-overview-pdr.md) | Vision & requirements | Project goals, PDR, roadmap |
-| [system-architecture.md](docs/system-architecture.md) | System design | Data flow, components, integration |
-| [codebase-summary.md](docs/codebase-summary.md) | Code structure | Module breakdown, key classes |
-| [code-standards.md](docs/code-standards.md) | Style guide | Naming, imports, patterns |
-| [CLAUDE.md](CLAUDE.md) | AI guidelines | Rules, patterns, workflows |
+| Doc | Purpose |
+|-----|---------|
+| [project-overview-pdr.md](docs/project-overview-pdr.md) | Goals, PDR, roadmap |
+| [system-architecture.md](docs/system-architecture.md) | Data flow, components |
+| [codebase-summary.md](docs/codebase-summary.md) | Code structure |
+| [code-standards.md](docs/code-standards.md) | Style guide |
+| [CLAUDE.md](CLAUDE.md) | AI guidelines |
 
 ---
 

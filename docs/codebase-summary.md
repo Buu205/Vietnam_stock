@@ -364,6 +364,18 @@ DATA/
 
 ```
 config/
+├── data_mapping/            # Data Mapping Registry (NEW v1.0.0) (5 modules + YAML)
+│   ├── __init__.py          # Public exports (17 items)
+│   ├── entities.py          # Dataclasses (DataSource, PipelineOutput, DashboardConfig, ServiceBinding)
+│   ├── registry.py          # DataMappingRegistry singleton (YAML loader, lookup methods)
+│   ├── resolver.py          # PathResolver (validation), DependencyResolver (impact analysis)
+│   ├── validator.py         # SchemaValidator, HealthChecker, ValidationResult
+│   └── configs/             # YAML configuration files
+│       ├── data_sources.yaml    # 18 data sources with paths, schemas, metadata
+│       ├── services.yaml        # 8 services mapped to data sources
+│       ├── pipelines.yaml       # 14 pipelines with outputs & dependencies
+│       └── dashboards.yaml      # 8 dashboards mapped to sources & services
+│
 ├── registries/              # Registry classes (Python)
 │   ├── __init__.py
 │   ├── metric_lookup.py     # MetricRegistry class (2,099 metrics)
@@ -421,6 +433,11 @@ config/
 
 | Class | File | Purpose |
 |-------|------|---------|
+| DataMappingRegistry | `data_mapping/registry.py` | Singleton YAML loader (data_sources, pipelines, dashboards, services) - zero hardcoded paths |
+| PathResolver | `data_mapping/resolver.py` | Path validation & resolution via registry |
+| DependencyResolver | `data_mapping/resolver.py` | Impact analysis (what breaks when source changes) |
+| SchemaValidator | `data_mapping/validator.py` | Schema validation against YAML definitions |
+| HealthChecker | `data_mapping/validator.py` | Data quality health checks (missing files, schema mismatches) |
 | MetricRegistry | `registries/metric_lookup.py` | Metric code lookup (2,099 metrics, Vietnamese to English mapping) |
 | SectorRegistry | `registries/sector_lookup.py` | Ticker-sector mapping (457 tickers, 19 sectors, 4 entity types) |
 | SchemaRegistry | `schema_registry.py` | Data formatting (format_price, format_percent, format_market_cap) |

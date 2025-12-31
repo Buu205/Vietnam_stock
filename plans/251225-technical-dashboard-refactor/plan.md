@@ -1,8 +1,10 @@
 # Technical Dashboard Refactor Plan
 
 **Date:** 2025-12-25
+**Updated:** 2025-12-31 (Registry Integration)
 **Status:** Ready for Implementation
 **Reference:** [TA Systematic Trading System](../251224-ta-systematic-trading-system/plan.md)
+**Dependency:** [Data Mapping Registry](../251231-data-mapping-registry/plan.md) ✅ Completed
 
 ---
 
@@ -67,10 +69,26 @@ WEBAPP/pages/technical/
 │   ├── sector_rotation.py     # Tab 2: RRG chart, sector ranking
 │   ├── stock_scanner.py       # Tab 3: Signal scanner
 │   └── trading_lists.py       # Tab 4: Buy/Sell lists
-├── services/
-│   └── ta_dashboard_service.py  # Data service for all tabs
 └── __init__.py
+
+# Service layer (centralized - DO NOT create page-specific services)
+WEBAPP/services/
+└── technical_service.py       # ✅ Already has all methods for 4 tabs
+    # Methods available:
+    # - get_market_state()      → Tab 1
+    # - get_market_breadth()    → Tab 1
+    # - get_market_regime()     → Tab 1
+    # - get_sector_ranking()    → Tab 2
+    # - get_sector_rrg()        → Tab 2
+    # - get_money_flow()        → Tab 2
+    # - get_rs_rating()         → Tab 3
+    # - get_alerts()            → Tab 3
+    # - get_buy_list()          → Tab 4
+    # - get_sell_list()         → Tab 4
 ```
+
+> **IMPORTANT:** Use `TechnicalService` from `WEBAPP/services/`.
+> DO NOT create `ta_dashboard_service.py` - all methods already exist.
 
 ---
 
@@ -135,41 +153,60 @@ class MarketState:
 
 ## Dependencies
 
-### Data Files (Optimized Structure)
+### Data Files (Registry-Managed)
 
-```
-DATA/processed/technical/
-├── market/                          # Market-level (load first, small)
-│   ├── market_state_latest.parquet  # Single row, current state
-│   ├── breadth_daily.parquet        # 180 days for chart
-│   └── vnindex_indicators.parquet   # VN-Index data
-│
-├── sector/                          # Sector-level (medium)
-│   ├── ranking_latest.parquet       # Current ranking (19 rows)
-│   ├── rrg_latest.parquet           # RRG coordinates (19 rows)
-│   ├── money_flow_1d.parquet        # Daily flow (19 rows)
-│   └── breadth_daily.parquet        # Sector breadth history
-│
-├── stock/                           # Stock-level (lazy load)
-│   ├── signals/
-│   │   └── combined_latest.parquet  # Today's signals only
-│   ├── rs_rating/
-│   │   ├── latest.parquet           # Current RS (all stocks, 1 day)
-│   │   └── history_30d.parquet      # 30-day history for heatmap
-│   └── lists/
-│       ├── buy_list_latest.parquet  # Top 10 candidates
-│       └── sell_list_latest.parquet # Exit signals
-│
-└── alerts/                          # Alerts (existing)
-    └── daily/
-        └── combined_latest.parquet
+All paths are managed via `DataMappingRegistry` in `config/data_mapping/configs/data_sources.yaml`.
+
+| Registry Key | Path | Tab | Status |
+|--------------|------|-----|--------|
+| `market_state_latest` | `processed/technical/market/market_state_latest.parquet` | 1 | 🔨 Need pipeline |
+| `market_breadth` | `processed/technical/market_breadth/market_breadth_daily.parquet` | 1 | ✅ Exists |
+| `vnindex_indicators` | `processed/technical/vnindex/vnindex_indicators.parquet` | 1 | ✅ Exists |
+| `market_regime` | `processed/technical/market_regime/market_regime_history.parquet` | 1 | ✅ Exists |
+| `sector_ranking_latest` | `processed/technical/sector/ranking_latest.parquet` | 2 | 🔨 Need pipeline |
+| `sector_rrg_latest` | `processed/technical/sector/rrg_latest.parquet` | 2 | 🔨 Need pipeline |
+| `sector_money_flow_1d` | `processed/technical/money_flow/sector_money_flow_1d.parquet` | 2 | ✅ Exists |
+| `sector_breadth` | `processed/technical/sector_breadth/sector_breadth_daily.parquet` | 2 | ✅ Exists |
+| `stock_rs_rating` | `processed/technical/rs_rating/stock_rs_rating_daily.parquet` | 3 | ✅ Exists |
+| `rs_rating_history` | `processed/technical/rs_rating/rs_rating_history_30d.parquet` | 3 | 🔨 Need pipeline |
+| `combined_alerts_latest` | `processed/technical/alerts/daily/combined_latest.parquet` | 3 | ✅ Exists |
+| `buy_list_latest` | `processed/technical/lists/buy_list_latest.parquet` | 4 | 🔨 Need pipeline |
+| `sell_list_latest` | `processed/technical/lists/sell_list_latest.parquet` | 4 | 🔨 Need pipeline |
+
+### Service Usage
+
+```python
+from WEBAPP.services import TechnicalService
+
+@st.cache_resource
+def get_service():
+    return TechnicalService()
+
+# Tab 1: Market Overview
+service = get_service()
+market_state = service.get_market_state()
+breadth = service.get_market_breadth()
+regime = service.get_market_regime()
+
+# Tab 2: Sector Rotation
+ranking = service.get_sector_ranking()
+rrg = service.get_sector_rrg()
+money_flow = service.get_money_flow(scope="sector")
+
+# Tab 3: Stock Scanner
+rs_data = service.get_rs_rating()
+alerts = service.get_alerts(latest_only=True)
+
+# Tab 4: Trading Lists
+buy_list = service.get_buy_list()
+sell_list = service.get_sell_list()
 ```
 
 ### Load Strategy
 
-| Tab | Files Loaded | Est. Size | Load Time |
-|-----|--------------|-----------|-----------|
-| Market Overview | market/* | ~500KB | <200ms |
-| Sector Rotation | sector/*, stock/rs_rating/* | ~2MB | <500ms |
-| Stock Scanner | stock/signals/* | ~1MB | <300ms |
-| Trading Lists | stock/lists/* | ~100KB | <100ms |
+| Tab | TechnicalService Methods | Est. Size | Load Time |
+|-----|--------------------------|-----------|-----------|
+| Market Overview | `get_market_state()`, `get_market_breadth()`, `get_market_regime()` | ~500KB | <200ms |
+| Sector Rotation | `get_sector_ranking()`, `get_sector_rrg()`, `get_money_flow()` | ~2MB | <500ms |
+| Stock Scanner | `get_rs_rating()`, `get_alerts()` | ~1MB | <300ms |
+| Trading Lists | `get_buy_list()`, `get_sell_list()` | ~100KB | <100ms |

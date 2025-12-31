@@ -1,0 +1,319 @@
+================================================================================
+DATA DIRECTORY - COMPLETE FILE INVENTORY
+================================================================================
+Date: 2025-12-31
+Total Files: 54 Parquet files
+Total Size: ~230 MB
+Registry Coverage: 26% (14/54 files)
+
+================================================================================
+REGISTERED FILES (14/54) - 26% COVERAGE
+================================================================================
+
+✓ FUNDAMENTAL (4 files)
+  ├── bank_metrics
+  │   └── DATA/processed/fundamental/bank/bank_financial_metrics.parquet
+  ├── company_metrics
+  │   └── DATA/processed/fundamental/company/company_financial_metrics.parquet
+  ├── insurance_metrics
+  │   └── DATA/processed/fundamental/insurance/insurance_financial_metrics.parquet
+  └── security_metrics
+      └── DATA/processed/fundamental/security/security_financial_metrics.parquet
+
+✓ VALUATION (4 files)
+  ├── pe_historical
+  │   └── DATA/processed/valuation/pe/historical/historical_pe.parquet
+  ├── pb_historical
+  │   └── DATA/processed/valuation/pb/historical/historical_pb.parquet
+  ├── vnindex_valuation
+  │   └── DATA/processed/valuation/vnindex/vnindex_valuation_refined.parquet
+  └── [MISSING: ps_historical, ev_ebitda_historical, individual_multiples]
+
+✓ TECHNICAL (2 files)
+  ├── technical_basic
+  │   └── DATA/processed/technical/basic_data.parquet
+  ├── market_breadth
+  │   └── DATA/processed/technical/market_breadth/market_breadth_daily.parquet
+  └── [MISSING: 22 other technical sources!]
+
+✓ SECTOR (1 file)
+  ├── sector_valuation
+  │   └── DATA/processed/sector/sector_valuation_metrics.parquet
+  └── [MISSING: sector_fundamental_metrics]
+
+✓ MACRO (1 file)
+  ├── macro_commodity
+  │   └── DATA/processed/macro_commodity/macro_commodity_unified.parquet
+  └── [MISSING: individual macro indicators]
+
+✓ FORECAST (2 files)
+  ├── bsc_individual
+  │   └── DATA/processed/forecast/bsc/bsc_individual.parquet
+  ├── bsc_sector_valuation
+  │   └── DATA/processed/forecast/bsc/bsc_sector_valuation.parquet
+  └── [MISSING: bsc_combined, vci_coverage_universe]
+
+✓ RAW (1 file)
+  ├── ohlcv_raw
+  │   └── DATA/raw/ohlcv/OHLCV_mktcap.parquet
+  └── [MISSING: news_raw versions]
+
+================================================================================
+ORPHANED FILES (40/54) - 74% UNREGISTERED
+================================================================================
+
+🔴 CRITICAL PRIORITY (5 files)
+
+DELETE (1):
+  ✗ DATA/processed/valuation/ev_ebitda/historical/ev_ebitda_historical_test.parquet
+
+REGISTER IMMEDIATELY (4):
+  ⊕ DATA/processed/valuation/ps/historical/historical_ps.parquet
+  ⊕ DATA/processed/sector/sector_fundamental_metrics.parquet
+  ⊕ DATA/processed/fundamental/macro/deposit_interest_rates.parquet
+  ⊕ DATA/processed/fundamental/macro/exchange_rates.parquet
+  ⊕ DATA/processed/fundamental/macro/gov_bond_yields.parquet
+  ⊕ DATA/processed/fundamental/macro/interest_rates.parquet
+
+────────────────────────────────────────────────────────────────────────────
+
+🟠 HIGH PRIORITY (26 files - REGISTER THIS WEEK)
+
+FUNDAMENTAL (2):
+  DATA/processed/fundamental/company_full.parquet
+  DATA/processed/fundamental/bank_full.parquet
+
+TECHNICAL ALERTS (10):
+  DAILY SNAPSHOTS:
+    DATA/processed/technical/alerts/daily/breakout_latest.parquet
+    DATA/processed/technical/alerts/daily/combined_latest.parquet
+    DATA/processed/technical/alerts/daily/ma_crossover_latest.parquet
+    DATA/processed/technical/alerts/daily/patterns_latest.parquet
+    DATA/processed/technical/alerts/daily/volume_spike_latest.parquet
+  
+  HISTORICAL:
+    DATA/processed/technical/alerts/historical/breakout_history.parquet
+    DATA/processed/technical/alerts/historical/combined_history.parquet
+    DATA/processed/technical/alerts/historical/ma_crossover_history.parquet
+    DATA/processed/technical/alerts/historical/patterns_history.parquet
+    DATA/processed/technical/alerts/historical/volume_spike_history.parquet
+
+MONEY FLOW (5):
+  DATA/processed/technical/money_flow/individual_money_flow.parquet
+  DATA/processed/technical/money_flow/sector_money_flow.parquet
+  DATA/processed/technical/money_flow/sector_money_flow_1d.parquet
+  DATA/processed/technical/money_flow/sector_money_flow_1m.parquet
+  DATA/processed/technical/money_flow/sector_money_flow_1w.parquet
+
+MARKET INDICATORS (5):
+  DATA/processed/technical/market_regime/market_regime_history.parquet
+  DATA/processed/technical/rs_rating/stock_rs_rating_daily.parquet
+  DATA/processed/technical/sector_breadth/sector_breadth_daily.parquet
+  DATA/processed/technical/vnindex/vnindex_indicators.parquet
+  DATA/processed/forecast/VCI/vci_coverage_universe.parquet
+
+VALUATION MULTIPLES (3):
+  DATA/processed/stock_valuation/individual_pe.parquet
+  DATA/processed/stock_valuation/individual_pb.parquet
+  DATA/processed/stock_valuation/individual_ev_ebitda.parquet
+
+VALUATION (1):
+  DATA/processed/valuation/ev_ebitda/historical/historical_ev_ebitda.parquet
+
+────────────────────────────────────────────────────────────────────────────
+
+🟡 MEDIUM PRIORITY (5 files - AUDIT & DECIDE)
+
+FUNDAMENTAL "FULL" COPIES (4):
+  ? DATA/processed/fundamental/company_full.parquet
+  ? DATA/processed/fundamental/insurance_full.parquet
+  ? DATA/processed/fundamental/security_full.parquet
+  ? DATA/processed/fundamental/bank_full.parquet
+  
+  QUESTION: Working copies, backups, or legacy? (Can be removed?)
+
+FORECAST VARIANTS (1):
+  ? DATA/processed/forecast/bsc/bsc_combined.parquet
+  
+  QUESTION: Actively used or can be removed?
+
+────────────────────────────────────────────────────────────────────────────
+
+🟢 LOW PRIORITY (4 files - CONSOLIDATE)
+
+NEWS RAW DATA (4 snapshots):
+  DATA/raw/news/news_raw_20251127_102844.parquet
+  DATA/raw/news/news_raw_20251127_103110.parquet
+  DATA/raw/news/news_raw_20251127_103804.parquet
+  DATA/raw/news/news_raw_20251128_074622.parquet
+  
+  RECOMMENDATION: Implement versioning or rolling window strategy
+
+================================================================================
+DIRECTORY STRUCTURE & SIZES
+================================================================================
+
+DATA/
+├── metadata/                                   (Not audited - JSON files)
+│
+├── processed/                                  ~230 MB total
+│   ├── fundamental/                            116 MB (44% registered)
+│   │   ├── company/
+│   │   │   ├── company_financial_metrics.parquet (✓ REGISTERED)
+│   │   │   └── company_full.parquet            (✗ ORPHANED)
+│   │   ├── bank/
+│   │   │   ├── bank_financial_metrics.parquet  (✓ REGISTERED)
+│   │   │   └── bank_full.parquet               (✗ ORPHANED)
+│   │   ├── insurance/
+│   │   │   ├── insurance_financial_metrics.parquet (✓ REGISTERED)
+│   │   │   └── insurance_full.parquet          (✗ ORPHANED)
+│   │   ├── security/
+│   │   │   ├── security_financial_metrics.parquet (✓ REGISTERED)
+│   │   │   └── security_full.parquet           (✗ ORPHANED)
+│   │   └── macro/                              (⊕ UNREGISTERED)
+│   │       ├── deposit_interest_rates.parquet
+│   │       ├── exchange_rates.parquet
+│   │       ├── gov_bond_yields.parquet
+│   │       └── interest_rates.parquet
+│   │
+│   ├── valuation/                              46 MB (50% registered)
+│   │   ├── pe/historical/
+│   │   │   └── historical_pe.parquet           (✓ REGISTERED)
+│   │   ├── pb/historical/
+│   │   │   └── historical_pb.parquet           (✓ REGISTERED)
+│   │   ├── ps/historical/
+│   │   │   └── historical_ps.parquet           (⊕ CRITICAL)
+│   │   ├── ev_ebitda/historical/
+│   │   │   ├── historical_ev_ebitda.parquet    (⊕ HIGH PRIORITY)
+│   │   │   └── ev_ebitda_historical_test.parquet (✗ DELETE)
+│   │   └── vnindex/
+│   │       └── vnindex_valuation_refined.parquet (✓ REGISTERED)
+│   │
+│   ├── stock_valuation/                        32 MB (0% registered)
+│   │   ├── individual_pe.parquet               (⊕ HIGH PRIORITY)
+│   │   ├── individual_pb.parquet               (⊕ HIGH PRIORITY)
+│   │   └── individual_ev_ebitda.parquet        (⊕ HIGH PRIORITY)
+│   │
+│   ├── technical/                              27 MB (8% registered!)
+│   │   ├── basic_data.parquet                  (✓ REGISTERED)
+│   │   ├── market_breadth/
+│   │   │   └── market_breadth_daily.parquet    (✓ REGISTERED)
+│   │   ├── alerts/
+│   │   │   ├── daily/
+│   │   │   │   ├── breakout_latest.parquet     (⊕ HIGH PRIORITY)
+│   │   │   │   ├── combined_latest.parquet     (⊕ HIGH PRIORITY)
+│   │   │   │   ├── ma_crossover_latest.parquet (⊕ HIGH PRIORITY)
+│   │   │   │   ├── patterns_latest.parquet     (⊕ HIGH PRIORITY)
+│   │   │   │   └── volume_spike_latest.parquet (⊕ HIGH PRIORITY)
+│   │   │   └── historical/
+│   │   │       ├── breakout_history.parquet    (⊕ HIGH PRIORITY)
+│   │   │       ├── combined_history.parquet    (⊕ HIGH PRIORITY)
+│   │   │       ├── ma_crossover_history.parquet (⊕ HIGH PRIORITY)
+│   │   │       ├── patterns_history.parquet    (⊕ HIGH PRIORITY)
+│   │   │       └── volume_spike_history.parquet (⊕ HIGH PRIORITY)
+│   │   ├── money_flow/
+│   │   │   ├── individual_money_flow.parquet   (⊕ HIGH PRIORITY)
+│   │   │   ├── sector_money_flow.parquet       (⊕ HIGH PRIORITY)
+│   │   │   ├── sector_money_flow_1d.parquet    (⊕ HIGH PRIORITY)
+│   │   │   ├── sector_money_flow_1m.parquet    (⊕ HIGH PRIORITY)
+│   │   │   └── sector_money_flow_1w.parquet    (⊕ HIGH PRIORITY)
+│   │   ├── market_regime/
+│   │   │   └── market_regime_history.parquet   (⊕ HIGH PRIORITY)
+│   │   ├── rs_rating/
+│   │   │   └── stock_rs_rating_daily.parquet   (⊕ HIGH PRIORITY)
+│   │   ├── sector_breadth/
+│   │   │   └── sector_breadth_daily.parquet    (⊕ HIGH PRIORITY)
+│   │   ├── vnindex/
+│   │   │   └── vnindex_indicators.parquet      (⊕ HIGH PRIORITY)
+│   │   └── alerts/weekly/                      (EMPTY)
+│   │
+│   ├── sector/                                 7.3 MB (50% registered)
+│   │   ├── sector_valuation_metrics.parquet    (✓ REGISTERED)
+│   │   └── sector_fundamental_metrics.parquet  (⊕ CRITICAL)
+│   │
+│   ├── macro_commodity/                        400 KB (100% registered)
+│   │   └── macro_commodity_unified.parquet     (✓ REGISTERED)
+│   │
+│   ├── forecast/                               312 KB (50% registered)
+│   │   ├── bsc/
+│   │   │   ├── bsc_individual.parquet          (✓ REGISTERED)
+│   │   │   ├── bsc_sector_valuation.parquet    (✓ REGISTERED)
+│   │   │   └── bsc_combined.parquet            (? MEDIUM PRIORITY)
+│   │   └── VCI/
+│   │       └── vci_coverage_universe.parquet   (⊕ HIGH PRIORITY)
+│   │
+│   └── market_indices/                         0 B (EMPTY)
+│
+└── raw/                                        Small
+    ├── ohlcv/
+    │   └── OHLCV_mktcap.parquet                (✓ REGISTERED)
+    ├── news/
+    │   ├── news_raw_20251127_102844.parquet    (⊕ LOW PRIORITY)
+    │   ├── news_raw_20251127_103110.parquet    (⊕ LOW PRIORITY)
+    │   ├── news_raw_20251127_103804.parquet    (⊕ LOW PRIORITY)
+    │   └── news_raw_20251128_074622.parquet    (⊕ LOW PRIORITY)
+    ├── fundamental/csv/                        (CSV files - not counted)
+    ├── Metric_code/                            (CSV files - not counted)
+    └── commodity/                              (CSV files - not counted)
+
+================================================================================
+LEGEND
+================================================================================
+
+✓ REGISTERED        - In data_sources.yaml, with path & schema defined
+⊕ CRITICAL/HIGH     - Should be registered immediately
+? MEDIUM            - Need audit before decision (keep/remove/register?)
+⊕ LOW              - Nice to have, or low urgency
+✗ DELETE            - Orphaned test file, should be removed
+━ EMPTY             - No files, cleanup candidate
+
+================================================================================
+SUMMARY STATISTICS
+================================================================================
+
+By Category:
+  Fundamental: 4 registered + 5 orphaned = 9 total (44% coverage)
+  Valuation: 4 registered + 4 orphaned = 8 total (50% coverage)
+  Technical: 2 registered + 22 orphaned = 24 total (8% coverage) ⚠️
+  Sector: 1 registered + 1 orphaned = 2 total (50% coverage)
+  Macro: 1 registered + 5 orphaned = 6 total (17% coverage) ⚠️
+  Forecast: 2 registered + 2 orphaned = 4 total (50% coverage)
+  Raw: 1 registered + 4 orphaned = 5 total (20% coverage) ⚠️
+  ───────────────────────────────────────────────────
+  TOTAL: 14 registered + 40 orphaned = 54 total (26% coverage) ⚠️
+
+By Size:
+  Total data: ~230 MB
+  Potential waste (duplicates): ~37 MB (16% of total)
+
+By Priority:
+  Delete: 1 file
+  Critical register: 4 files (5 with macro) 
+  High priority: 26 files
+  Medium: 5 files
+  Low: 4 files
+
+================================================================================
+NEXT STEPS (See reports for details)
+================================================================================
+
+TODAY:
+  1. Delete ev_ebitda_historical_test.parquet
+  2. Review "*_full.parquet" purpose
+  3. Decide macro strategy
+
+THIS WEEK:
+  1. Add 11 critical sources to registry
+  2. Update dashboards with technical sources
+  3. Create DATA/README.md
+
+THIS MONTH:
+  1. Complete technical registry (all 22 files)
+  2. Audit duplicates
+  3. Establish data governance
+
+================================================================================
+Report Generated: 2025-12-31
+Audit Duration: ~30 minutes
+Status: COMPLETE - Ready for stakeholder review
+================================================================================

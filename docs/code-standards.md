@@ -2,7 +2,7 @@
 
 **Project:** Vietnam Stock Dashboard
 **Python Version:** 3.13
-**Last Updated:** 2025-12-28
+**Last Updated:** 2025-12-31
 
 ---
 
@@ -94,7 +94,47 @@ DATA/
 
 ---
 
-## 3. Registry Usage (CRITICAL)
+## 3. Data Mapping Registry (v1.0.0 - NEW)
+
+### Zero-Hardcoded-Paths Pattern
+
+Use DataMappingRegistry for all data path lookups:
+
+```python
+# Simple path lookup (recommended)
+from config.data_mapping import get_data_path
+path = get_data_path("bank_metrics")  # Returns full path from registry
+
+# Full registry for service bindings
+from config.data_mapping import get_registry
+registry = get_registry()
+sources = registry.get_sources_for_service("BankService")
+
+# Dependency analysis (impact chain)
+from config.data_mapping import DependencyResolver
+resolver = DependencyResolver()
+impact = resolver.get_impact_chain("ohlcv_raw")  # What depends on this?
+```
+
+### BaseService Integration (Services Extend This)
+
+All WEBAPP services extend BaseService for automatic registry integration:
+
+```python
+from WEBAPP.services.base_service import BaseService
+
+class BankService(BaseService):
+    DATA_SOURCE = "bank_metrics"  # Define data source
+    ENTITY_TYPE = "bank"
+
+    def get_data(self):
+        df = self.load_data()  # Uses registry path automatically
+        return self.validate_schema(df)
+```
+
+---
+
+## 4. Registry Usage (CRITICAL)
 
 ### Import Pattern (Canonical)
 

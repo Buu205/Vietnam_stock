@@ -1,0 +1,264 @@
+================================================================================
+DATA REGISTRY AUDIT - EXECUTIVE SUMMARY
+================================================================================
+Date: 2025-12-31
+Scope: Complete DATA directory vs data_mapping registry
+Duration: ~30 minutes
+
+================================================================================
+CRITICAL FINDINGS
+================================================================================
+
+1. REGISTRY COVERAGE: Only 26% (14 of 54 files registered)
+   - Registered files: 14
+   - Orphaned files: 40 (74% unregistered!)
+   - Empty directories: 1
+   - Potential duplicates: 3 major sets
+   
+2. WORST CATEGORY: Technical Analysis (8% coverage)
+   - Total technical files: 24
+   - Registered: 2 (basic_data, market_breadth)
+   - Orphaned: 22 (alerts, money flow, indicators)
+   - Impact: Stock scanner & technical dashboards may lack registry support
+
+3. ACTIONABLE ISSUES:
+   - 1 orphaned TEST file should be deleted
+   - 10+ files should be immediately registered
+   - 3+ file sets need deduplication audit
+   - 4 files in deprecated directory needing consolidation
+
+================================================================================
+ORPHANED FILES BY PRIORITY
+================================================================================
+
+CRITICAL (5 files - DELETE or REGISTER TODAY):
+  ✗ ev_ebitda_historical_test.parquet → DELETE (test artifact)
+  ✓ historical_ps.parquet → REGISTER as "ps_historical"
+  ✓ sector_fundamental_metrics.parquet → REGISTER immediately
+  ✓ {deposit,exchange,gov_bond,interest}_rates.parquet (4x) → REGISTER or consolidate
+
+HIGH PRIORITY (26 files - REGISTER THIS WEEK):
+  ✓ 10x technical alerts (daily/historical)
+  ✓ 5x money_flow metrics (individual/sector/timeframes)
+  ✓ 5x market indicators (regime, breadth, RS rating, VN-Index, VCI)
+  ✓ 3x individual valuation multiples (PE/PB/EV-EBITDA)
+
+MEDIUM PRIORITY (5 files - AUDIT & DECIDE):
+  ? 4x "*_full.parquet" files (clarify purpose vs "*_metrics")
+  ? 1x "bsc_combined.parquet" (register or remove?)
+
+LOW PRIORITY (4 files - CONSOLIDATE):
+  ≈ 4x news_raw snapshots (consolidate versioning)
+
+================================================================================
+FILES IN DATA BUT NOT REGISTERED (40 TOTAL)
+================================================================================
+
+FUNDAMENTAL (5 orphaned):
+  • bank_full.parquet
+  • company_full.parquet  
+  • insurance_full.parquet
+  • security_full.parquet
+  • (+ 4 macro indicators in fundamental/macro/)
+
+VALUATION (4 orphaned):
+  • individual_pe.parquet
+  • individual_pb.parquet
+  • individual_ev_ebitda.parquet
+  • ev_ebitda_historical_test.parquet [DELETE THIS]
+
+TECHNICAL (22 orphaned - 92% of all orphaned!):
+  • 10x stock scanner alerts (daily+historical)
+  • 5x money flow analysis metrics
+  • 5x market indicators (regime, breadth, RS, VN-Index, VCI)
+
+SECTOR (1 orphaned):
+  • sector_fundamental_metrics.parquet
+
+FORECAST (2 orphaned):
+  • bsc_combined.parquet
+  • vci_coverage_universe.parquet
+
+RAW (4 orphaned):
+  • 4x news_raw snapshots (versioned)
+
+================================================================================
+REGISTRY ENTRIES THAT EXIST (14 TOTAL)
+================================================================================
+
+FUNDAMENTAL (4):
+  ✓ bank_metrics
+  ✓ company_metrics
+  ✓ insurance_metrics
+  ✓ security_metrics
+
+VALUATION (4):
+  ✓ pe_historical
+  ✓ pb_historical
+  ✓ vnindex_valuation
+  ✓ (missing: ps_historical, ev_ebitda_historical, individual_multiples)
+
+TECHNICAL (2):
+  ✓ technical_basic
+  ✓ market_breadth
+  ✓ (missing: 22 other technical sources!)
+
+MACRO/COMMODITY (1):
+  ✓ macro_commodity
+  ✓ (missing: individual macro indicators)
+
+SECTOR (1):
+  ✓ sector_valuation
+  ✓ (missing: sector_fundamental)
+
+FORECAST (2):
+  ✓ bsc_individual
+  ✓ bsc_sector_valuation
+  ✓ (missing: bsc_combined?, vci_coverage)
+
+RAW (1):
+  ✓ ohlcv_raw
+  ✓ (missing: news_raw)
+
+================================================================================
+DUPLICATE/CONFLICT ANALYSIS
+================================================================================
+
+SET #1: Individual PE Ratios (Possible duplicate)
+  Registered: valuation/pe/historical/historical_pe.parquet
+  Orphaned:   stock_valuation/individual_pe.parquet
+  Status:     Need schema audit - are they identical?
+
+SET #2: Individual PB Ratios (Possible duplicate)
+  Registered: valuation/pb/historical/historical_pb.parquet
+  Orphaned:   stock_valuation/individual_pb.parquet
+  Status:     Need schema audit
+
+SET #3: Entity "Full" vs "Metrics" Copies (Unclear purpose)
+  Registered: fundamental/{entity}/financial_metrics.parquet
+  Orphaned:   fundamental/{entity}_full.parquet
+  Status:     Are "*_full" working copies, backups, or legacy?
+
+SET #4: Macro Consolidated vs Individual
+  Registered: macro_commodity_unified.parquet (1 file)
+  Orphaned:   4 separate macro indicators
+  Status:     Should these be 1 unified source or 4 separate registrations?
+
+================================================================================
+RECOMMENDATIONS - IMMEDIATE ACTIONS
+================================================================================
+
+TODAY (1-2 hours):
+  1. Delete: /DATA/processed/valuation/ev_ebitda/historical/ev_ebitda_historical_test.parquet
+  2. Investigate: Purpose of "*_full.parquet" files (code review)
+  3. Decision: Macro indicators - consolidate or separate registrations?
+
+THIS WEEK:
+  1. Add 11 new data sources to data_sources.yaml:
+     - ps_historical
+     - sector_fundamental_metrics
+     - 4x macro indicators (or 1 consolidated)
+     - 5x technical alert sources (or 2 consolidated)
+     - 1x vci_coverage_universe
+  
+  2. Update dashboards.yaml with technical sources (stock_scanner page)
+  
+  3. Create DATA/README.md documenting:
+     - Directory structure
+     - Orphaned files & rationale
+     - Duplication notes
+
+THIS MONTH:
+  1. Complete technical registry (all 22 orphaned technical files)
+  2. Audit & consolidate duplicates
+  3. Pipeline documentation (map which scripts output each file)
+
+================================================================================
+DIRECTORY SIZE ANALYSIS
+================================================================================
+
+116 MB   fundamental/      ← Entity metrics + full copies (includes duplicates)
+46 MB    valuation/        ← PE/PB/PS/EV-EBITDA historical multiples
+32 MB    stock_valuation/  ← Individual multiples (orphaned, potential duplicates)
+27 MB    technical/        ← Mostly orphaned (alerts, money flow, indicators)
+7.3 MB   sector/           ← 2 files (1 registered, 1 orphaned)
+400 KB   macro_commodity/  ← Unified macro data
+312 KB   forecast/         ← BSC + VCI forecasts
+0 B      market_indices/   ← Empty (legacy? remove?)
+
+TOTAL: ~230 MB data
+
+WASTE ESTIMATE: If stock_valuation & some technical are true duplicates:
+  Potential savings: 32 MB + ~5 MB technical alerts = 37 MB (16% of total)
+
+================================================================================
+QUESTIONS FOR STAKEHOLDER
+================================================================================
+
+1. Purpose of "*_full.parquet" files?
+   Are these:
+   - Working copies for development?
+   - Backup/archive versions?
+   - Complete (unfiltered) data vs. filtered metrics?
+   - Legacy and can be removed?
+
+2. Individual valuation multiples vs. historical?
+   - Are stock_valuation/individual_* truly different from valuation/*/historical/?
+   - Or are they redundant?
+   - Should we consolidate?
+
+3. Macro indicators - unified or separate?
+   - Keep 1 macro_commodity_unified.parquet?
+   - Or register 4 separate economic indicators?
+
+4. Technical files & stock scanner?
+   - Which dashboards/services use the 22 orphaned technical files?
+   - Should they be consolidated?
+
+5. VCI & BSC variants?
+   - Is forecast/VCI actively used?
+   - Is bsc_combined actively maintained?
+
+6. News raw data?
+   - Keep all 4 dated snapshots?
+   - Or implement versioning/rolling window?
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Read this summary + full audit report (scout-20251231-data-audit.md)
+
+2. Quick decisions:
+   - Delete test file? YES
+   - Add 11 critical sources to registry? YES
+   - Audit duplicates before proceeding? RECOMMENDED
+
+3. Schedule follow-up:
+   - Code review: 30 min (audit "*_full" & duplicates)
+   - Registration updates: 1 hour
+   - Pipeline documentation: 1-2 hours
+
+4. Assign owner:
+   - Data governance policy
+   - Registry maintenance
+   - Pipeline documentation
+
+================================================================================
+REPORTS GENERATED
+================================================================================
+
+1. scout-20251231-data-audit.md
+   - Full 70+ line audit report with all details
+
+2. scout-20251231-orphaned-files-quick-ref.csv
+   - CSV of all 40 orphaned files with priority/action
+
+3. scout-20251231-summary.txt
+   - This file - quick reference for decisions
+
+All files in: /plans/reports/
+
+================================================================================
+END SUMMARY
+================================================================================

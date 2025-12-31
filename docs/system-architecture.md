@@ -2,7 +2,7 @@
 
 **Project:** Vietnam Stock Dashboard
 **Architecture Version:** 4.0.0
-**Last Updated:** 2025-12-28
+**Last Updated:** 2025-12-31
 
 ---
 
@@ -112,6 +112,26 @@
 │            │ • Chart configs   │                                │
 │            └───────────────────┘                                │
 │                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │      DataMappingRegistry (v1.0.0 - NEW)                 │   │
+│  │          Zero-Hardcoded-Paths Design                    │   │
+│  ├──────────────────────────────────────────────────────────┤   │
+│  │ • 5 Python modules (entities, registry, resolver, etc)  │   │
+│  │ • 4 YAML configs (data_sources, services, pipelines)    │   │
+│  │ • Single source of truth for all data mappings          │   │
+│  │ • Services (BankService, etc.) → BaseService            │   │
+│  │ • DependencyResolver: impact analysis (what breaks?)    │   │
+│  │ • SchemaValidator: data quality checks                  │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                          │                                       │
+│                          ▼                                       │
+│         ┌─────────────────────────────┐                          │
+│         │   Services (BankService,    │                          │
+│         │   CompanyService, etc.)     │                          │
+│         │   Extend BaseService        │                          │
+│         │   Auto registry path lookup │                          │
+│         └─────────────────────────────┘                          │
+│                                                                  │
 └─────────────────────────────────────────────────────────────────┘
                               │
               ┌───────────────┼───────────────┐
@@ -125,7 +145,77 @@
 
 ---
 
-## 3. Data Processing Pipeline (6 Steps)
+## 3. Data Mapping Registry Architecture (v1.0.0)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   DATA MAPPING REGISTRY                          │
+│              (config/data_mapping/ - 5 modules)                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────┐        │
+│  │           YAML Configuration Files                   │        │
+│  ├─────────────────────────────────────────────────────┤        │
+│  │ • data_sources.yaml (18 sources: bank_metrics, etc)│        │
+│  │ • services.yaml (8 services → data sources)         │        │
+│  │ • pipelines.yaml (14 pipelines + dependencies)      │        │
+│  │ • dashboards.yaml (8 dashboards → sources)          │        │
+│  └─────────────────────────────────────────────────────┘        │
+│                          │                                       │
+│  ┌───────────────────────▼───────────────────────────┐          │
+│  │         DataMappingRegistry (Singleton)           │          │
+│  │              registry.py                          │          │
+│  ├──────────────────────────────────────────────────┤          │
+│  │ • Load YAML configs on init                       │          │
+│  │ • Lookup methods:                                 │          │
+│  │   - get_path(source_name)                         │          │
+│  │   - get_sources_for_dashboard()                   │          │
+│  │   - get_sources_for_service()                     │          │
+│  └──────────────────────────────────────────────────┘          │
+│     │                       │                                    │
+│     ▼                       ▼                                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │PathResolver  │  │DependencyRe- │  │SchemaVali-   │          │
+│  │(validation)  │  │solver        │  │dator         │          │
+│  │              │  │(impact       │  │(validation)  │          │
+│  │Validates     │  │analysis)     │  │              │          │
+│  │paths exist   │  │What depends  │  │Validates     │          │
+│  │& accessible  │  │on this?      │  │schemas       │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │        Usage Pattern: Zero-Hardcoded-Paths             │  │
+│  ├──────────────────────────────────────────────────────────┤  │
+│  │                                                          │  │
+│  │  Simple:  path = get_data_path("bank_metrics")         │  │
+│  │                                                          │  │
+│  │  Full:    registry = get_registry()                     │  │
+│  │           sources = registry.get_sources_for_dashboard()│  │
+│  │                                                          │  │
+│  │  Analysis: resolver = DependencyResolver()             │  │
+│  │            impact = resolver.get_impact_chain()        │  │
+│  │                                                          │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │     BaseService: Services Extend This For Auto Registry │  │
+│  ├──────────────────────────────────────────────────────────┤  │
+│  │                                                          │  │
+│  │  class BankService(BaseService):                        │  │
+│  │      DATA_SOURCE = "bank_metrics"  # Just define this  │  │
+│  │                                                          │  │
+│  │      def get_data(self):                                │  │
+│  │          df = self.load_data()  # Uses registry path   │  │
+│  │          return df                                      │  │
+│  │                                                          │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 4. Data Processing Pipeline (6 Steps)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -211,7 +301,7 @@
 
 ---
 
-## 4. Session State Architecture (CRITICAL)
+## 5. Session State Architecture (CRITICAL)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -253,7 +343,7 @@
 
 ---
 
-## 5. Technical Analysis Pipeline (9 Steps)
+## 6. Technical Analysis Pipeline (9 Steps)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -362,7 +452,7 @@
 
 ---
 
-## 6. Fundamental Data Flow
+## 7. Fundamental Data Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -440,7 +530,7 @@ BSC CSV Files (Q3/2025, 20 files)
 
 ---
 
-## 7. Valuation Calculation
+## 8. Valuation Calculation
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -486,7 +576,7 @@ Inputs:
 
 ---
 
-## 8. Sector Analysis
+## 9. Sector Analysis
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -571,7 +661,7 @@ Inputs:
 
 ---
 
-## 9. API Client Architecture
+## 10. API Client Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -619,7 +709,7 @@ Inputs:
 
 ---
 
-## 10. MCP Server Architecture
+## 11. MCP Server Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -668,7 +758,7 @@ Inputs:
 
 ---
 
-## 11. Component Interactions
+## 12. Component Interactions
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -709,7 +799,7 @@ User Request (Streamlit UI)
 
 ---
 
-## 12. Deployment Architecture
+## 13. Deployment Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
