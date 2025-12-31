@@ -1,9 +1,9 @@
 # Data Sources Registry
 # Maps data file names to paths, schemas, and metadata
-# Version: 2.1.0 | Date: 2025-12-31
-# Coverage: 55 data sources (100% of DATA/processed/ + Technical Dashboard extras)
+# Version: 2.2.0 | Date: 2025-12-31
+# Coverage: 57 data sources (+2 forecast history for P2)
 
-version: "2.0"
+version: "2.2"
 
 data_sources:
   # ==========================================================================
@@ -479,6 +479,43 @@ data_sources:
       - pe_2026F
     entity_type: all
     category: forecast
+    update_freq: weekly
+    cache_ttl: 86400
+
+  # Forecast History (P2 - Accuracy Tracking)
+  bsc_forecast_history:
+    path: "processed/forecast/bsc/history/forecast_history.parquet"
+    schema_columns:
+      - ticker
+      - snapshot_date
+      - source
+      - npatmi_forecast_2025
+      - npatmi_forecast_2026
+      - target_price
+      - rating
+      - pe_fwd_2025
+      - pe_fwd_2026
+      - sector
+    entity_type: all
+    category: forecast_history
+    update_freq: daily
+    cache_ttl: 3600
+
+  vci_forecast_history:
+    path: "processed/forecast/vci/history/forecast_history.parquet"
+    schema_columns:
+      - ticker
+      - snapshot_date
+      - source
+      - npatmi_forecast_2025
+      - npatmi_forecast_2026
+      - target_price
+      - rating
+      - pe_fwd_2025
+      - pe_fwd_2026
+      - sector
+    entity_type: all
+    category: forecast_history
     update_freq: weekly
     cache_ttl: 86400
 

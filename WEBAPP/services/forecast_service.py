@@ -2,7 +2,7 @@
 Forecast Service - Data Loading Layer
 ======================================
 
-Service for loading BSC Forecast data from parquet files.
+Service for loading BSC & VCI Forecast data from parquet files.
 Uses DataMappingRegistry for path resolution.
 
 Usage:
@@ -11,10 +11,12 @@ Usage:
     service = ForecastService()
     individual = service.get_individual_stocks()
     sectors = service.get_sector_valuation()
+    vci = service.get_vci_consensus()  # P2
+    comparison = service.get_bsc_vs_vci_comparison()  # P2
 
 Author: AI Assistant
 Date: 2025-12-31
-Version: 2.0.0 (Registry Integration)
+Version: 2.1.0 (VCI Integration for P2)
 """
 
 import pandas as pd
@@ -395,3 +397,146 @@ class ForecastService(BaseService):
         result = result.sort_values('opportunity_score', ascending=False)
 
         return result
+
+    # =========================================================================
+    # P1: Achievement Summary
+    # =========================================================================
+
+    def get_achievement_summary(self) -> Dict[str, Dict]:
+        """
+        Get achievement summary for 3 clickable cards.
+
+        Categories:
+        - STRONG BUY: rating == 'STRONG BUY'
+        - BUY: rating == 'BUY'
+        - HOLD/SELL: rating in ['HOLD', 'SELL', 'REDUCE']
+
+        Returns:
+            Dict with counts and avg upside per category
+        """
+        df = self.get_individual_stocks()
+
+        if df.empty:
+            return {
+                'strong_buy': {'count': 0, 'avg_upside': 0, 'stocks': []},
+                'buy': {'count': 0, 'avg_upside': 0, 'stocks': []},
+                'hold_sell': {'count': 0, 'avg_upside': 0, 'stocks': []},
+            }
+
+        # Strong Buy
+        strong_buy = df[df['rating'] == 'STRONG BUY']
+        # Buy
+        buy = df[df['rating'] == 'BUY']
+        # Hold/Sell
+        hold_sell = df[df['rating'].isin(['HOLD', 'SELL', 'REDUCE', 'UNDERPERFORM'])]
+
+        return {
+            'strong_buy': {
+                'count': len(strong_buy),
+                'avg_upside': strong_buy['upside_pct'].mean() if len(strong_buy) > 0 else 0,
+                'stocks': strong_buy['symbol'].tolist()[:10]  # Top 10
+            },
+            'buy': {
+                'count': len(buy),
+                'avg_upside': buy['upside_pct'].mean() if len(buy) > 0 else 0,
+                'stocks': buy['symbol'].tolist()[:10]
+            },
+            'hold_sell': {
+                'count': len(hold_sell),
+                'avg_upside': hold_sell['upside_pct'].mean() if len(hold_sell) > 0 else 0,
+                'stocks': hold_sell['symbol'].tolist()[:10]
+            },
+        }
+
+    # =========================================================================
+    # P2: VCI Integration
+    # =========================================================================
+
+    def get_vci_consensus(self) -> pd.DataFrame:
+        """
+        Load VCI coverage universe data.
+
+        Returns:
+            DataFrame with VCI forecasts (ticker, target_price, rating, pe_fwd, etc.)
+        """
+        file_path = self._get_path("vci_coverage")
+
+        if not file_path.exists():
+            return pd.DataFrame()
+
+        df = pd.read_parquet(file_path)
+
+        # Normalize column names
+        if 'ticker' in df.columns:
+            df = df.rename(columns={'ticker': 'symbol'})
+
+        return df
+
+    def get_bsc_vs_vci_comparison(self) -> pd.DataFrame:
+        """
+        Compare BSC vs VCI forecasts for overlapping tickers.
+
+        Returns:
+            DataFrame with BSC and VCI forecasts side by side
+        """
+        bsc_df = self.get_individual_stocks()
+        vci_df = self.get_vci_consensus()
+
+        if bsc_df.empty or vci_df.empty:
+            return pd.DataFrame()
+
+        # Rename VCI columns with suffix
+        vci_cols = {
+            'targetPrice': 'vci_target_price',
+            'rating': 'vci_rating',
+            'pe_2025F': 'vci_pe_2025',
+            'pe_2026F': 'vci_pe_2026',
+            'projectedTsrPercentage': 'vci_upside_pct',
+        }
+        vci_renamed = vci_df.rename(columns=vci_cols)
+
+        # Select relevant columns
+        vci_selected = vci_renamed[['symbol'] + [c for c in vci_cols.values() if c in vci_renamed.columns]]
+
+        # Merge on symbol
+        merged = bsc_df.merge(vci_selected, on='symbol', how='inner')
+
+        # Calculate differences
+        if 'target_price' in merged.columns and 'vci_target_price' in merged.columns:
+            merged['target_diff_pct'] = (merged['target_price'] - merged['vci_target_price']) / merged['vci_target_price'] * 100
+
+        if 'upside_pct' in merged.columns and 'vci_upside_pct' in merged.columns:
+            merged['upside_diff'] = merged['upside_pct'] - merged['vci_upside_pct']
+
+        # Determine consensus status
+        def get_consensus_status(row):
+            if 'vci_rating' not in row or pd.isna(row.get('vci_rating')):
+                return 'NO_VCI_DATA'
+            bsc_bullish = row.get('rating', '') in ['STRONG BUY', 'BUY']
+            vci_bullish = str(row.get('vci_rating', '')).upper() in ['BUY', 'OUTPERFORM', 'OVERWEIGHT']
+            if bsc_bullish and vci_bullish:
+                return 'ALIGNED'
+            elif bsc_bullish and not vci_bullish:
+                return 'BSC_BULL'
+            elif not bsc_bullish and vci_bullish:
+                return 'VCI_BULL'
+            else:
+                return 'ALIGNED_BEARISH'
+
+        merged['consensus_status'] = merged.apply(get_consensus_status, axis=1)
+
+        return merged
+
+    def get_consensus_summary(self) -> Dict[str, int]:
+        """
+        Get consensus status distribution.
+
+        Returns:
+            Dict with status -> count
+        """
+        df = self.get_bsc_vs_vci_comparison()
+
+        if df.empty or 'consensus_status' not in df.columns:
+            return {}
+
+        return df['consensus_status'].value_counts().to_dict()
