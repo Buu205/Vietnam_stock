@@ -3,20 +3,32 @@
 Complete Daily TA Update Pipeline
 ==================================
 
-Full technical analysis update workflow:
-1. Load OHLCV data (last 200 sessions)
-2. Calculate technical indicators (MA, RSI, MACD, etc.)
-3. Detect alerts (MA crossover, volume spike, breakout, patterns)
-4. Calculate money flow (individual + sector)
-5. Calculate market breadth
-6. Save all outputs
+Full technical analysis update workflow (14 steps):
+
+Core Indicators (Steps 1-9):
+1. VN-Index Analysis (trend, RSI, support/resistance)
+2. Technical Indicators (MA, RSI, MACD, Bollinger)
+3. Alerts (MA crossover, volume spike, breakout, patterns)
+4. Money Flow (individual stocks)
+5. Sector Money Flow (1D, 1W, 1M)
+6. Market Breadth (% above MA)
+7. Sector Breadth (per sector MA stats)
+8. Market Regime (BULLISH/NEUTRAL/BEARISH)
+9. RS Rating (IBD-style 1-99)
+
+Dashboard Outputs (Steps 10-14):
+10. RS Rating 30d History (heatmap data)
+11. Market State (combined regime + breadth + vnindex)
+12. Sector Ranking (composite scoring)
+13. RRG Coordinates (Relative Rotation Graph)
+14. Trading Lists (Buy/Sell signals)
 
 Usage:
-    python3 PROCESSORS/technical/pipelines/daily_complete_ta_update.py
-    python3 PROCESSORS/technical/pipelines/daily_complete_ta_update.py --sessions 200
+    python3 PROCESSORS/pipelines/daily/daily_ta_complete.py
+    python3 PROCESSORS/pipelines/daily/daily_ta_complete.py --sessions 200
 
 Author: Claude Code
-Date: 2025-12-15
+Date: 2025-12-31 (v2.1.0 - added dashboard calculators)
 """
 
 import sys
@@ -37,6 +49,11 @@ from PROCESSORS.technical.indicators.sector_breadth import SectorBreadthAnalyzer
 from PROCESSORS.technical.indicators.market_regime import MarketRegimeDetector
 from PROCESSORS.technical.indicators.vnindex_analyzer import VNIndexAnalyzer
 from PROCESSORS.technical.indicators.rs_rating import RSRatingCalculator
+# Dashboard-specific calculators (v2.1.0)
+from PROCESSORS.technical.indicators.market_state_calculator import MarketStateCalculator
+from PROCESSORS.technical.indicators.sector_ranking_calculator import SectorRankingCalculator
+from PROCESSORS.technical.indicators.rrg_calculator import RRGCalculator
+from PROCESSORS.technical.indicators.trading_list_generator import TradingListGenerator
 
 logging.basicConfig(
     level=logging.INFO,
@@ -59,6 +76,11 @@ class CompleteTAUpdatePipeline:
         self.market_regime = MarketRegimeDetector()
         self.vnindex_analyzer = VNIndexAnalyzer()
         self.rs_rating_calc = RSRatingCalculator()
+        # Dashboard-specific calculators
+        self.market_state_calc = MarketStateCalculator()
+        self.sector_ranking_calc = SectorRankingCalculator()
+        self.rrg_calc = RRGCalculator()
+        self.trading_list_gen = TradingListGenerator()
 
     def calculate_market_breadth(self, df: pd.DataFrame, date=None) -> dict:
         """Calculate market breadth."""
@@ -199,11 +221,11 @@ class CompleteTAUpdatePipeline:
 
         try:
             # Step 1: VN-Index Analysis
-            logger.info("\n[1/9] Analyzing VN-Index...")
+            logger.info("\n[1/14] Analyzing VN-Index...")
             vnindex_df = self.vnindex_analyzer.run_full_analysis(n_sessions=500)
 
             # Step 2: Technical Indicators
-            logger.info("\n[2/9] Calculating technical indicators...")
+            logger.info("\n[2/14] Calculating technical indicators...")
             tech_df = self.tech_processor.run_full_processing(n_sessions=n_sessions)
             
             # Normalize tech_df date column
@@ -235,43 +257,74 @@ class CompleteTAUpdatePipeline:
                         logger.warning(f"   No data before target date. Using latest: {date}")
 
             # Step 3: Alerts
-            logger.info("\n[3/9] Detecting alerts...")
+            logger.info("\n[3/14] Detecting alerts...")
             alerts = self.alert_detector.detect_all_alerts(date=date, n_sessions=n_sessions)
             self.save_alerts(alerts, date)
 
             # Step 4: Money Flow
-            logger.info("\n[4/9] Calculating money flow...")
+            logger.info("\n[4/14] Calculating money flow...")
             money_flow_df = self.money_flow_analyzer.calculate_all_money_flow(n_sessions=n_sessions)
             self.money_flow_analyzer.save_money_flow(money_flow_df)
 
             # Step 5: Sector Money Flow (Multi-Timeframe)
-            logger.info("\n[5/9] Calculating sector money flow (1D, 1W, 1M)...")
+            logger.info("\n[5/14] Calculating sector money flow (1D, 1W, 1M)...")
             sector_mf_results = self.sector_money_flow.calculate_multi_timeframe_flow(date=date)
             self.sector_money_flow.save_multi_timeframe_flow(sector_mf_results)
 
             # Step 6: Market Breadth
-            logger.info("\n[6/9] Calculating market breadth...")
+            logger.info("\n[6/14] Calculating market breadth...")
             breadth = self.calculate_market_breadth(tech_df, date)
             if breadth:
                 self.save_market_breadth(breadth)
 
             # Step 7: Sector Breadth
-            logger.info("\n[7/9] Calculating sector breadth...")
+            logger.info("\n[7/14] Calculating sector breadth...")
             sector_breadth_df = self.sector_breadth.calculate_sector_breadth(date=date)
             if not sector_breadth_df.empty:
                 self.sector_breadth.save_sector_breadth(sector_breadth_df)
 
             # Step 8: Market Regime
-            logger.info("\n[8/9] Detecting market regime...")
+            logger.info("\n[8/14] Detecting market regime...")
             regime_data = self.market_regime.detect_regime(date=date)
             if regime_data:
                 self.market_regime.save_regime_history(regime_data)
 
             # Step 9: RS Rating (IBD-style)
-            logger.info("\n[9/9] Calculating RS Rating...")
+            logger.info("\n[9/14] Calculating RS Rating...")
             rs_rating_path = self.rs_rating_calc.run_and_save()
             rs_latest = self.rs_rating_calc.get_latest()
             rs_count = len(rs_latest) if rs_latest is not None else 0
+
+            # Step 10: RS Rating 30d History (for dashboard heatmap)
+            logger.info("\n[10/14] Generating RS Rating 30d history...")
+            rs_history_path = self.rs_rating_calc.save_history_30d()
+            logger.info(f"  ✅ RS Rating history saved")
+
+            # Step 11: Market State (combines regime + breadth + vnindex)
+            logger.info("\n[11/14] Calculating market state...")
+            market_state_df = self.market_state_calc.run(date=str(date) if date else None)
+            if not market_state_df.empty:
+                logger.info(f"  ✅ Market state: {market_state_df['signal'].iloc[0]}, exposure: {market_state_df['exposure_level'].iloc[0]}%")
+
+            # Step 12: Sector Ranking
+            logger.info("\n[12/14] Calculating sector ranking...")
+            sector_ranking_df = self.sector_ranking_calc.run(date=str(date) if date else None)
+            if not sector_ranking_df.empty:
+                top_sector = sector_ranking_df.iloc[0]
+                logger.info(f"  ✅ Top sector: {top_sector['sector_code']} (score: {top_sector['score']:.1f})")
+
+            # Step 13: RRG (Relative Rotation Graph)
+            logger.info("\n[13/14] Calculating RRG coordinates...")
+            rrg_df = self.rrg_calc.run(date=str(date) if date else None)
+            if not rrg_df.empty:
+                leading = rrg_df[rrg_df['quadrant'] == 'LEADING']['sector_code'].tolist()
+                logger.info(f"  ✅ LEADING sectors: {', '.join(leading[:3]) if leading else 'None'}")
+
+            # Step 14: Trading Lists (Buy/Sell)
+            logger.info("\n[14/14] Generating trading lists...")
+            buy_list, sell_list = self.trading_list_gen.run(date=str(date) if date else None)
+            logger.info(f"  ✅ Buy list: {len(buy_list)} candidates")
+            logger.info(f"  ✅ Sell list: {len(sell_list)} signals")
 
             # Summary
             elapsed = (datetime.now() - start_time).total_seconds()
@@ -329,6 +382,16 @@ class CompleteTAUpdatePipeline:
                 logger.info(f"  Top 5:")
                 for _, row in top5_rs.iterrows():
                     logger.info(f"    {row['symbol']}: RS {row['rs_rating']}")
+
+            # Dashboard Outputs Summary
+            logger.info(f"\n--- Dashboard Outputs ---")
+            if not market_state_df.empty:
+                logger.info(f"  Market State: {market_state_df['signal'].iloc[0]} (exposure: {market_state_df['exposure_level'].iloc[0]}%)")
+            if not sector_ranking_df.empty:
+                logger.info(f"  Sector Ranking: {len(sector_ranking_df)} sectors ranked")
+            if not rrg_df.empty:
+                logger.info(f"  RRG: {len(rrg_df)} sectors positioned")
+            logger.info(f"  Trading Lists: {len(buy_list)} buys, {len(sell_list)} sells")
 
             logger.info(f"\nProcessing time: {elapsed:.1f}s")
             logger.info("=" * 80)

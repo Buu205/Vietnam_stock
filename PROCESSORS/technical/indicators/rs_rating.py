@@ -268,6 +268,30 @@ class RSRatingCalculator:
         """Get latest RS Rating for all stocks."""
         return get_latest_rs_rating()
 
+    def save_history_30d(self) -> Optional[Path]:
+        """
+        Save last 30 days of RS Rating history for dashboard heatmap.
+        Output: rs_rating_history_30d.parquet
+
+        Used by Technical Dashboard Tab 3: Stock Scanner.
+        """
+        df = load_rs_rating(days=30)
+        if df is None:
+            logger.warning("No RS Rating data to export for 30d history")
+            return None
+
+        # Select only essential columns for heatmap
+        cols = ['symbol', 'date', 'sector_code', 'rs_rating', 'rs_score']
+        df = df[[c for c in cols if c in df.columns]].copy()
+
+        # Save
+        output_path = OUTPUT_DIR / "rs_rating_history_30d.parquet"
+        df.to_parquet(output_path, index=False)
+        logger.info(f"  Saved 30d RS Rating history to {output_path}")
+        logger.info(f"  {df['symbol'].nunique()} symbols, {df['date'].nunique()} days")
+
+        return output_path
+
 
 if __name__ == "__main__":
     # Quick test
