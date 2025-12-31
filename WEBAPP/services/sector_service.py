@@ -3,40 +3,40 @@ Sector Service - Data Loading Layer
 ====================================
 
 Service for loading sector analysis data combining valuation and registry.
+Uses DataMappingRegistry for path resolution.
 
 Usage:
     from WEBAPP.services.sector_service import SectorService
 
     service = SectorService()
     df = service.get_sector_valuation()
+
+Author: AI Assistant
+Date: 2025-12-31
+Version: 2.0.0 (Registry Integration)
 """
 
 import pandas as pd
 from pathlib import Path
 from typing import Optional, List, Dict
 
+from .base_service import BaseService
 
-class SectorService:
+
+class SectorService(BaseService):
     """Service layer for Sector analysis data."""
+
+    DATA_SOURCE = "sector_valuation"
+    ENTITY_TYPE = "all"
 
     def __init__(self, data_root: Optional[Path] = None):
         """
         Initialize SectorService.
 
         Args:
-            data_root: Root data directory (defaults to PROJECT_ROOT/DATA)
+            data_root: Root data directory (for testing, defaults to registry path)
         """
-        if data_root is None:
-            current_file = Path(__file__).resolve()
-            project_root = current_file.parents[2]
-            data_root = project_root / "DATA"
-
-        self.data_root = data_root
-        self.data_path = data_root / "processed" / "valuation"
-        self.sector_data_path = data_root / "processed" / "sector"
-        self.project_root = current_file.parents[2] if data_root is None else data_root.parent
-
-        # Try to load sector registry
+        super().__init__(data_root)
         self._sector_registry = None
         self._load_registry()
 
@@ -47,6 +47,22 @@ class SectorService:
             self._sector_registry = SectorRegistry()
         except Exception as e:
             print(f"Warning: Could not load SectorRegistry - {e}")
+
+    def _get_path(self, source_name: str) -> Path:
+        """Get path for a data source via registry."""
+        try:
+            path_str = self.registry.get_path(source_name)
+            if self._data_root:
+                relative_str = str(path_str).replace("DATA/", "")
+                return self._data_root / relative_str
+            return self.project_root / path_str
+        except KeyError:
+            # Fallback to hardcoded path
+            if source_name == "sector_valuation":
+                return self.data_root / "processed" / "sector" / "sector_valuation_metrics.parquet"
+            elif source_name == "vnindex_valuation":
+                return self.data_root / "processed" / "valuation" / "vnindex" / "vnindex_valuation_refined.parquet"
+            return self.data_root / "processed" / f"{source_name}.parquet"
 
     def get_sector_valuation(self, date: Optional[str] = None, sectors_only: bool = False) -> pd.DataFrame:
         """
@@ -61,8 +77,8 @@ class SectorService:
         """
         all_dfs = []
 
-        # Load sector data from sector_valuation_metrics.parquet
-        sector_file = self.sector_data_path / "sector_valuation_metrics.parquet"
+        # Load sector data via registry
+        sector_file = self._get_path("sector_valuation")
 
         if sector_file.exists():
             sector_df = pd.read_parquet(sector_file)
@@ -87,9 +103,9 @@ class SectorService:
 
             all_dfs.append(sector_df)
 
-        # Load market index data from vnindex files (VNINDEX, BSC_INDEX, VNINDEX_EXCLUDE)
+        # Load market index data via registry
         if not sectors_only:
-            vnindex_file = self.data_path / "vnindex" / "vnindex_valuation_refined.parquet"
+            vnindex_file = self._get_path("vnindex_valuation")
 
             if vnindex_file.exists():
                 vnindex_df = pd.read_parquet(vnindex_file)
@@ -131,15 +147,15 @@ class SectorService:
             except Exception:
                 pass
 
-        # Get from sector_valuation_metrics.parquet (canonical source)
-        sector_file = self.sector_data_path / "sector_valuation_metrics.parquet"
+        # Get from sector_valuation_metrics.parquet via registry
+        sector_file = self._get_path("sector_valuation")
 
         if sector_file.exists():
             df = pd.read_parquet(sector_file, columns=['sector_code'])
             return sorted(df['sector_code'].unique().tolist())
 
         # Fallback: get from vnindex valuation data
-        parquet_file = self.data_path / "vnindex" / "vnindex_valuation_refined.parquet"
+        parquet_file = self._get_path("vnindex_valuation")
 
         if not parquet_file.exists():
             return []
@@ -288,8 +304,8 @@ class SectorService:
         market_indices = ['VNINDEX', 'VNINDEX_EXCLUDE', 'BSC_INDEX']
 
         if sector in market_indices:
-            # Load from vnindex file for market indices
-            vnindex_file = self.data_path / "vnindex" / "vnindex_valuation_refined.parquet"
+            # Load from vnindex file via registry
+            vnindex_file = self._get_path("vnindex_valuation")
 
             if not vnindex_file.exists():
                 return pd.DataFrame()
@@ -308,8 +324,8 @@ class SectorService:
 
             return df
 
-        # For sectors: Load from sector_valuation_metrics.parquet
-        sector_file = self.sector_data_path / "sector_valuation_metrics.parquet"
+        # For sectors: Load from sector_valuation_metrics.parquet via registry
+        sector_file = self._get_path("sector_valuation")
 
         if sector_file.exists():
             df = pd.read_parquet(sector_file)

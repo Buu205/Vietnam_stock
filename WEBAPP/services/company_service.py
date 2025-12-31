@@ -3,19 +3,26 @@ Company Service - Data Loading Layer
 ====================================
 
 Service for loading company financial data from parquet files.
+Uses DataMappingRegistry for path resolution.
 
 Usage:
     from WEBAPP.services.company_service import CompanyService
 
     service = CompanyService()
     df = service.get_financial_data("VNM", "Quarterly")
+
+Author: AI Assistant
+Date: 2025-12-31
+Version: 2.0.0 (Registry Integration)
 """
 
 import pandas as pd
 from pathlib import Path
 from typing import Optional, Dict, List
 
-# Column groups for efficient data loading (Option B - column selection)
+from .base_service import BaseService
+
+# Column groups for efficient data loading
 COLUMN_GROUPS = {
     'meta': ['symbol', 'report_date', 'year', 'quarter', 'freq_code'],
     'income_statement': [
@@ -49,32 +56,21 @@ COLUMN_GROUPS = {
 }
 
 
-class CompanyService:
+class CompanyService(BaseService):
     """Service layer for Company financial data."""
+
+    DATA_SOURCE = "company_metrics"
+    ENTITY_TYPE = "company"
 
     def __init__(self, data_root: Optional[Path] = None):
         """
         Initialize CompanyService.
 
         Args:
-            data_root: Root data directory (defaults to PROJECT_ROOT/DATA)
+            data_root: Root data directory (for testing, defaults to registry path)
         """
-        if data_root is None:
-            # Auto-detect project root
-            current_file = Path(__file__).resolve()
-            project_root = current_file.parents[2]  # Go up to project root
-            data_root = project_root / "DATA"
-
-        self.data_root = data_root
-        self.data_path = data_root / "processed" / "fundamental" / "company"
+        super().__init__(data_root)
         self._master_symbols = None
-
-        # Check if path exists
-        if not self.data_path.exists():
-            raise FileNotFoundError(
-                f"Company data path not found: {self.data_path}\n"
-                f"Please ensure DATA/processed/fundamental/company/ exists."
-            )
 
     def _load_master_symbols(self) -> List[str]:
         """Load master symbols filtered list for COMPANY entity."""
@@ -83,10 +79,8 @@ class CompanyService:
 
         import json
 
-        # Try config/metadata first, then DATA/metadata
-        project_root = self.data_root.parent
         locations = [
-            project_root / "config" / "metadata" / "master_symbols.json",
+            self.project_root / "config" / "metadata" / "master_symbols.json",
             self.data_root / "metadata" / "master_symbols.json",
         ]
 
@@ -94,7 +88,6 @@ class CompanyService:
             if master_file.exists():
                 with open(master_file) as f:
                     data = json.load(f)
-                # Get COMPANY symbols only
                 self._master_symbols = data.get('symbols_by_entity', {}).get('COMPANY', [])
                 return self._master_symbols
 
@@ -112,7 +105,7 @@ class CompanyService:
         Load financial data for a company ticker.
 
         Args:
-            ticker: Stock symbol (e.g., "VNM", "ACB")
+            ticker: Stock symbol (e.g., "VNM", "FPT")
             period: "Quarterly", "Yearly", or "TTM"
             limit: Maximum number of records to return (most recent)
             table_type: Column group to load - "all", "income_statement",
@@ -120,32 +113,22 @@ class CompanyService:
 
         Returns:
             DataFrame with financial metrics sorted by date
-
-        Example:
-            >>> service = CompanyService()
-            >>> df = service.get_financial_data("VNM", "Quarterly", limit=8)
-            >>> print(df[['report_date', 'net_revenue', 'npatmi']].tail())
-
-            # Load only income statement columns for efficiency
-            >>> df_is = service.get_financial_data("VNM", "Quarterly", table_type="income_statement")
         """
-        # Load from parquet
-        parquet_file = self.data_path / "company_financial_metrics.parquet"
-
-        if not parquet_file.exists():
-            raise FileNotFoundError(
-                f"Company metrics file not found: {parquet_file}\n"
-                f"Please run the company calculator first."
-            )
-
         # Determine columns to load
         columns = None
         if table_type != "all" and table_type in COLUMN_GROUPS:
-            # Get requested columns, filter to only those that exist in file
-            all_parquet_cols = pd.read_parquet(parquet_file, columns=[]).columns.tolist()
-            columns = [c for c in COLUMN_GROUPS[table_type] if c in all_parquet_cols]
+            columns = COLUMN_GROUPS[table_type]
 
-        df = pd.read_parquet(parquet_file, columns=columns)
+        # Use base class - gets path from registry
+        try:
+            df = self.load_data(columns=columns, validate_schema=False)
+        except Exception:
+            # Fallback: load all columns if specified columns don't exist
+            df = self.load_data(validate_schema=False)
+            if columns:
+                existing_cols = [c for c in columns if c in df.columns]
+                if existing_cols:
+                    df = df[existing_cols]
 
         # Filter by ticker
         df = df[df['symbol'] == ticker].copy()
@@ -158,53 +141,22 @@ class CompanyService:
             df = df[df['freq_code'] == 'Q']
         elif period == "Yearly":
             df = df[df['freq_code'] == 'Y']
-        # For TTM, keep all rows (TTM columns already in data)
 
-        # Sort by date
         df = df.sort_values('report_date')
 
-        # Limit records if specified
         if limit:
             df = df.tail(limit)
 
         return df
 
     def get_latest_metrics(self, ticker: str) -> Dict:
-        """
-        Get latest quarter metrics for a ticker.
-
-        Args:
-            ticker: Stock symbol
-
-        Returns:
-            Dictionary with latest metrics
-
-        Example:
-            >>> service = CompanyService()
-            >>> latest = service.get_latest_metrics("VNM")
-            >>> print(f"Revenue: {latest['net_revenue']:.1f}B VND")
-        """
+        """Get latest quarter metrics for a ticker."""
         df = self.get_financial_data(ticker, "Quarterly", limit=1)
         return df.iloc[-1].to_dict() if not df.empty else {}
 
     def get_available_tickers(self) -> List[str]:
-        """
-        Get list of available company tickers (filtered by master_symbols for liquidity).
-
-        Returns:
-            Sorted list of ticker symbols
-
-        Example:
-            >>> service = CompanyService()
-            >>> tickers = service.get_available_tickers()
-            >>> print(f"Found {len(tickers)} companies")
-        """
-        parquet_file = self.data_path / "company_financial_metrics.parquet"
-
-        if not parquet_file.exists():
-            return []
-
-        df = pd.read_parquet(parquet_file, columns=['symbol'])
+        """Get list of available company tickers (filtered by master_symbols for liquidity)."""
+        df = self.load_data(columns=['symbol'], validate_schema=False)
         all_tickers = set(df['symbol'].unique().tolist())
 
         # Filter by master symbols (liquid tickers only)
@@ -216,27 +168,13 @@ class CompanyService:
         return sorted(all_tickers)
 
     def get_peer_comparison(self, ticker: str) -> pd.DataFrame:
-        """
-        Get peer comparison data (latest quarter for ticker and peers).
-
-        Args:
-            ticker: Stock symbol
-
-        Returns:
-            DataFrame with latest metrics for ticker and peers
-
-        Example:
-            >>> service = CompanyService()
-            >>> peers_df = service.get_peer_comparison("VNM")
-            >>> print(peers_df[['symbol', 'net_revenue', 'roe']])
-        """
+        """Get peer comparison data (latest quarter for ticker and peers)."""
         try:
             from config.registries import SectorRegistry
 
             sector_reg = SectorRegistry()
             peers = sector_reg.get_peers(ticker)
 
-            # Load data for all peers
             dfs = []
             for peer in peers:
                 peer_df = self.get_financial_data(peer, "Quarterly", limit=1)

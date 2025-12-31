@@ -3,6 +3,7 @@ Valuation Service - Data Loading Layer
 ======================================
 
 Service for loading PE/PB/EV-EBITDA valuation data from parquet files.
+Uses DataMappingRegistry for path resolution.
 
 Usage:
     from WEBAPP.services.valuation_service import ValuationService
@@ -10,6 +11,10 @@ Usage:
     service = ValuationService()
     df = service.get_valuation_data(scope="VNINDEX")
     ticker_df = service.get_ticker_valuation("VNM")
+
+Author: AI Assistant
+Date: 2025-12-31
+Version: 2.0.0 (Registry Integration)
 """
 
 import pandas as pd
@@ -17,12 +22,9 @@ import numpy as np
 from pathlib import Path
 from typing import Optional, List, Dict
 
-# Import SectorRegistry for industry sector mapping
-import sys
-project_root = Path(__file__).resolve().parents[2]
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
+from .base_service import BaseService
 
+# Import SectorRegistry for industry sector mapping
 try:
     from config.registries.sector_lookup import SectorRegistry
     SECTOR_REGISTRY = SectorRegistry()
@@ -37,8 +39,11 @@ from WEBAPP.core.valuation_config import (
 )
 
 
-class ValuationService:
+class ValuationService(BaseService):
     """Service layer for Valuation data (PE, PB, EV/EBITDA)."""
+
+    DATA_SOURCE = "pe_historical"
+    ENTITY_TYPE = "all"
 
     # Tickers to exclude (outliers with unreliable data)
     EXCLUDED_TICKERS = [
@@ -51,7 +56,6 @@ class ValuationService:
     ]
 
     # Use centralized outlier rules from valuation_config
-    # Alias for backward compatibility
     OUTLIER_RULES = {
         k: {
             'max_value': v['max'],
@@ -66,28 +70,39 @@ class ValuationService:
         Initialize ValuationService.
 
         Args:
-            data_root: Root data directory (defaults to PROJECT_ROOT/DATA)
+            data_root: Root data directory (for testing, defaults to registry path)
         """
-        if data_root is None:
-            current_file = Path(__file__).resolve()
-            project_root = current_file.parents[2]
-            data_root = project_root / "DATA"
-
-        self.data_path = data_root / "processed" / "valuation"
+        super().__init__(data_root)
         self._pe_df = None
         self._pb_df = None
         self._ev_ebitda_df = None
+        self._ps_df = None
 
-        if not self.data_path.exists():
-            raise FileNotFoundError(
-                f"Valuation data path not found: {self.data_path}\n"
-                f"Please ensure DATA/processed/valuation/ exists."
-            )
+    def _get_path(self, source_name: str) -> Path:
+        """Get path for a data source via registry."""
+        try:
+            path_str = self.registry.get_path(source_name)
+            if self._data_root:
+                relative_str = str(path_str).replace("DATA/", "")
+                return self._data_root / relative_str
+            return self.project_root / path_str
+        except KeyError:
+            # Fallback to hardcoded path for backward compatibility
+            fallback_paths = {
+                "pe_historical": "processed/valuation/pe/historical/historical_pe.parquet",
+                "pb_historical": "processed/valuation/pb/historical/historical_pb.parquet",
+                "ps_historical": "processed/valuation/ps/historical/historical_ps.parquet",
+                "ev_ebitda_historical": "processed/valuation/ev_ebitda/historical/historical_ev_ebitda.parquet",
+                "vnindex_valuation": "processed/valuation/vnindex/vnindex_valuation_refined.parquet",
+            }
+            if source_name in fallback_paths:
+                return self.data_root / fallback_paths[source_name]
+            return self.data_root / "processed" / "valuation" / f"{source_name}.parquet"
 
     def _load_pe_data(self) -> pd.DataFrame:
         """Load PE historical data (cached)."""
         if self._pe_df is None:
-            pe_file = self.data_path / "pe" / "historical" / "historical_pe.parquet"
+            pe_file = self._get_path("pe_historical")
             if pe_file.exists():
                 self._pe_df = pd.read_parquet(pe_file)
                 self._pe_df['date'] = pd.to_datetime(self._pe_df['date'])
@@ -98,7 +113,7 @@ class ValuationService:
     def _load_pb_data(self) -> pd.DataFrame:
         """Load PB historical data (cached)."""
         if self._pb_df is None:
-            pb_file = self.data_path / "pb" / "historical" / "historical_pb.parquet"
+            pb_file = self._get_path("pb_historical")
             if pb_file.exists():
                 self._pb_df = pd.read_parquet(pb_file)
                 self._pb_df['date'] = pd.to_datetime(self._pb_df['date'])
@@ -109,7 +124,7 @@ class ValuationService:
     def _load_ev_ebitda_data(self) -> pd.DataFrame:
         """Load EV/EBITDA historical data (cached)."""
         if self._ev_ebitda_df is None:
-            ev_file = self.data_path / "ev_ebitda" / "historical" / "historical_ev_ebitda.parquet"
+            ev_file = self._get_path("ev_ebitda_historical")
             if ev_file.exists():
                 self._ev_ebitda_df = pd.read_parquet(ev_file)
                 self._ev_ebitda_df['date'] = pd.to_datetime(self._ev_ebitda_df['date'])
@@ -119,8 +134,8 @@ class ValuationService:
 
     def _load_ps_data(self) -> pd.DataFrame:
         """Load P/S (Price-to-Sales) historical data (cached)."""
-        if not hasattr(self, '_ps_df') or self._ps_df is None:
-            ps_file = self.data_path / "ps" / "historical" / "historical_ps.parquet"
+        if self._ps_df is None:
+            ps_file = self._get_path("ps_historical")
             if ps_file.exists():
                 self._ps_df = pd.read_parquet(ps_file)
                 self._ps_df['date'] = pd.to_datetime(self._ps_df['date'])
@@ -163,7 +178,7 @@ class ValuationService:
             limit: Optional limit on number of records
 
         Returns:
-            Dict with 'pe', 'pb', 'ev_ebitda' DataFrames
+            Dict with 'pe', 'pb', 'ps', 'ev_ebitda' DataFrames
         """
         start_date = pd.Timestamp(f"{start_year}-01-01")
 
@@ -229,7 +244,7 @@ class ValuationService:
 
         Args:
             sector: Sector name (COMPANY, BANK, INSURANCE, SECURITY)
-            metric: 'pe_ratio', 'pb_ratio', or 'ev_ebitda'
+            metric: 'pe_ratio', 'pb_ratio', 'ps_ratio', or 'ev_ebitda'
             start_year: Start year
 
         Returns:
@@ -239,16 +254,12 @@ class ValuationService:
 
         if metric == 'pe_ratio':
             df = self._load_pe_data()
-            value_col = 'pe_ratio'
         elif metric == 'pb_ratio':
             df = self._load_pb_data()
-            value_col = 'pb_ratio'
         elif metric == 'ps_ratio':
             df = self._load_ps_data()
-            value_col = 'ps_ratio'
         elif metric == 'ev_ebitda':
             df = self._load_ev_ebitda_data()
-            value_col = 'ev_ebitda'
         else:
             return pd.DataFrame()
 
@@ -273,7 +284,7 @@ class ValuationService:
 
         Args:
             sector: Sector name
-            metric: 'pe_ratio', 'pb_ratio', or 'ev_ebitda'
+            metric: 'pe_ratio', 'pb_ratio', 'ps_ratio', or 'ev_ebitda'
 
         Returns:
             DataFrame with stats per ticker (current, median, percentile, status)
@@ -284,14 +295,13 @@ class ValuationService:
             return pd.DataFrame()
 
         # Determine value column
-        if metric == 'pe_ratio':
-            value_col = 'pe_ratio'
-        elif metric == 'pb_ratio':
-            value_col = 'pb_ratio'
-        elif metric == 'ps_ratio':
-            value_col = 'ps_ratio'
-        else:
-            value_col = 'ev_ebitda'
+        value_col_map = {
+            'pe_ratio': 'pe_ratio',
+            'pb_ratio': 'pb_ratio',
+            'ps_ratio': 'ps_ratio',
+            'ev_ebitda': 'ev_ebitda'
+        }
+        value_col = value_col_map.get(metric, 'pe_ratio')
 
         stats_data = []
         for ticker in df['symbol'].unique():
@@ -368,12 +378,7 @@ class ValuationService:
         Returns:
             DataFrame with PE/PB metrics sorted by date
         """
-        # Try new file with sectors first
-        parquet_file = self.data_path / "vnindex" / "vnindex_valuation_with_sectors.parquet"
-
-        if not parquet_file.exists():
-            # Fallback to old file
-            parquet_file = self.data_path / "vnindex" / "vnindex_valuation_refined.parquet"
+        parquet_file = self._get_path("vnindex_valuation")
 
         if not parquet_file.exists():
             raise FileNotFoundError(
@@ -385,11 +390,9 @@ class ValuationService:
 
         # Filter by scope - try with SECTOR: prefix first for sector names
         if 'scope' in df.columns:
-            # Check if scope matches directly
             if scope in df['scope'].unique():
                 df = df[df['scope'] == scope].copy()
             else:
-                # Try with SECTOR: prefix
                 sector_scope = f"SECTOR:{scope}"
                 if sector_scope in df['scope'].unique():
                     df = df[df['scope'] == sector_scope].copy()
@@ -403,7 +406,6 @@ class ValuationService:
         if 'date' in df.columns:
             df['date'] = pd.to_datetime(df['date'])
 
-            # Apply date filters
             if start_date:
                 df = df[df['date'] >= start_date]
             if end_date:
@@ -423,11 +425,7 @@ class ValuationService:
 
     def get_all_scopes(self) -> List[str]:
         """Get list of available scopes (VNINDEX + sectors)."""
-        # Try new file with sectors first
-        parquet_file = self.data_path / "vnindex" / "vnindex_valuation_with_sectors.parquet"
-
-        if not parquet_file.exists():
-            parquet_file = self.data_path / "vnindex" / "vnindex_valuation_refined.parquet"
+        parquet_file = self._get_path("vnindex_valuation")
 
         if not parquet_file.exists():
             return []
@@ -460,11 +458,7 @@ class ValuationService:
         Returns:
             DataFrame with one row per sector
         """
-        # Try new file with sectors first
-        parquet_file = self.data_path / "vnindex" / "vnindex_valuation_with_sectors.parquet"
-
-        if not parquet_file.exists():
-            parquet_file = self.data_path / "vnindex" / "vnindex_valuation_refined.parquet"
+        parquet_file = self._get_path("vnindex_valuation")
 
         if not parquet_file.exists():
             return pd.DataFrame()
@@ -477,7 +471,6 @@ class ValuationService:
             if date:
                 df = df[df['date'] == date]
             else:
-                # Get latest date for each scope
                 df = df.loc[df.groupby('scope')['date'].idxmax()]
 
         # Filter only sector scopes and clean names
@@ -493,28 +486,11 @@ class ValuationService:
         ticker: Optional[str] = None,
         limit: Optional[int] = 252
     ) -> pd.DataFrame:
-        """
-        Get historical PE data from pe/ folder.
+        """Get historical PE data."""
+        df = self._load_pe_data()
 
-        Args:
-            ticker: Optional ticker filter
-            limit: Number of days (default 252 = 1 year)
-
-        Returns:
-            DataFrame with historical PE
-        """
-        pe_path = self.data_path / "pe" / "historical"
-
-        if not pe_path.exists():
+        if df.empty:
             return pd.DataFrame()
-
-        files = list(pe_path.glob("*.parquet"))
-        if not files:
-            return pd.DataFrame()
-
-        # Get latest file
-        latest_file = max(files, key=lambda x: x.stat().st_mtime)
-        df = pd.read_parquet(latest_file)
 
         if ticker and 'symbol' in df.columns:
             df = df[df['symbol'] == ticker]
@@ -529,27 +505,11 @@ class ValuationService:
         ticker: Optional[str] = None,
         limit: Optional[int] = 252
     ) -> pd.DataFrame:
-        """
-        Get historical PB data from pb/ folder.
+        """Get historical PB data."""
+        df = self._load_pb_data()
 
-        Args:
-            ticker: Optional ticker filter
-            limit: Number of days (default 252 = 1 year)
-
-        Returns:
-            DataFrame with historical PB
-        """
-        pb_path = self.data_path / "pb" / "historical"
-
-        if not pb_path.exists():
+        if df.empty:
             return pd.DataFrame()
-
-        files = list(pb_path.glob("*.parquet"))
-        if not files:
-            return pd.DataFrame()
-
-        latest_file = max(files, key=lambda x: x.stat().st_mtime)
-        df = pd.read_parquet(latest_file)
 
         if ticker and 'symbol' in df.columns:
             df = df[df['symbol'] == ticker]
@@ -563,7 +523,6 @@ class ValuationService:
     # UNIFIED METRIC INTERFACE
     # ========================================================================
 
-    # Metric configuration - maps display names to data columns and files
     METRIC_CONFIG = {
         'PE': {
             'value_col': 'pe_ratio',
@@ -606,7 +565,7 @@ class ValuationService:
         Unified method to get any metric data for ticker or sector.
 
         Args:
-            metric: 'PE', 'PB', or 'EV_EBITDA'
+            metric: 'PE', 'PB', 'PS', or 'EV_EBITDA'
             ticker: Single ticker (e.g., 'VNM')
             sector: Sector filter (e.g., 'BANK', 'COMPANY')
             start_year: Start year for historical data
@@ -644,7 +603,7 @@ class ValuationService:
         Get statistical summary for a metric on a ticker.
 
         Args:
-            metric: 'PE', 'PB', or 'EV_EBITDA'
+            metric: 'PE', 'PB', 'PS', or 'EV_EBITDA'
             ticker: Stock symbol
             start_year: Start year
 
@@ -713,7 +672,7 @@ class ValuationService:
 
         Args:
             sector: Sector name (BANK, COMPANY, INSURANCE, SECURITY)
-            metric: 'PE', 'PB', or 'EV_EBITDA'
+            metric: 'PE', 'PB', 'PS', or 'EV_EBITDA'
             start_year: Start year
 
         Returns:
@@ -783,40 +742,19 @@ class ValuationService:
     # ========================================================================
 
     def get_industry_sectors(self) -> List[str]:
-        """
-        Get list of all industry sectors from SectorRegistry.
-
-        Returns:
-            List of sector names (e.g., ['Ngân hàng', 'Bất động sản', ...])
-        """
+        """Get list of all industry sectors from SectorRegistry."""
         if SECTOR_REGISTRY is None:
             return []
         return SECTOR_REGISTRY.get_all_sectors()
 
     def get_tickers_by_industry(self, industry_sector: str) -> List[str]:
-        """
-        Get all tickers in an industry sector.
-
-        Args:
-            industry_sector: Industry sector name (e.g., 'Ngân hàng')
-
-        Returns:
-            List of tickers in that industry
-        """
+        """Get all tickers in an industry sector."""
         if SECTOR_REGISTRY is None:
             return []
         return SECTOR_REGISTRY.get_tickers_by_sector(industry_sector)
 
     def get_ticker_industry(self, ticker: str) -> Optional[str]:
-        """
-        Get industry sector for a ticker.
-
-        Args:
-            ticker: Stock symbol
-
-        Returns:
-            Industry sector name or None
-        """
+        """Get industry sector for a ticker."""
         if SECTOR_REGISTRY is None:
             return None
         info = SECTOR_REGISTRY.get_ticker(ticker)
@@ -833,7 +771,7 @@ class ValuationService:
 
         Args:
             industry_sector: Industry sector name (e.g., 'Ngân hàng', 'Bất động sản')
-            metric: 'PE', 'PB', or 'EV_EBITDA'
+            metric: 'PE', 'PB', 'PS', or 'EV_EBITDA'
             start_year: Start year
 
         Returns:
@@ -860,14 +798,16 @@ class ValuationService:
 
         start_date = pd.Timestamp(f"{start_year}-01-01")
         df = df[df['date'] >= start_date].copy()
-
-        # Filter to only tickers in this industry (excluding outliers)
         df = df[df['symbol'].isin(tickers)]
 
         if df.empty:
             return []
 
         value_col = config['value_col']
+        rules = self.OUTLIER_RULES.get(metric, self.OUTLIER_RULES['PE'])
+        max_val = rules['max_value']
+        min_val = rules['min_value']
+        mult_limit = rules['multiplier_limit']
 
         results = []
         for ticker in df['symbol'].unique():
@@ -876,13 +816,6 @@ class ValuationService:
             if len(ticker_data) < 20:
                 continue
 
-            # Get outlier rules for this metric
-            rules = self.OUTLIER_RULES.get(metric, self.OUTLIER_RULES['PE'])
-            max_val = rules['max_value']
-            min_val = rules['min_value']
-            mult_limit = rules['multiplier_limit']
-
-            # Filter outliers using rules
             median_val = ticker_data.median()
             upper_limit = min(max_val, median_val * mult_limit) if median_val > 0 else max_val
             clean_data = ticker_data[(ticker_data > min_val) & (ticker_data <= upper_limit)]
@@ -893,30 +826,25 @@ class ValuationService:
             if len(clean_data) < 10:
                 continue
 
-            # Additional check: skip if data variance is too extreme (likely bad data)
-            if clean_data.std() / clean_data.mean() > 2.0:  # CV > 200%
+            # Skip if data variance is too extreme
+            if clean_data.std() / clean_data.mean() > 2.0:
                 continue
 
-            # Get current value - use last valid (non-outlier) value from clean_data
             raw_current = ticker_data.iloc[-1]
-
-            # If raw current is an outlier, use the most recent value within clean range
             p95 = clean_data.quantile(0.95)
             p5 = clean_data.quantile(0.05)
 
             if raw_current > p95 * 1.5 or raw_current < p5 * 0.5 or raw_current > max_val:
-                # Current is extreme outlier - use latest value within reasonable range
                 valid_recent = ticker_data[(ticker_data <= p95 * 1.2) & (ticker_data <= max_val)]
                 if len(valid_recent) > 0:
                     current = valid_recent.iloc[-1]
                 else:
-                    current = raw_current  # Fallback
+                    current = raw_current
             else:
                 current = raw_current
 
             percentile = np.sum(clean_data <= current) / len(clean_data) * 100
 
-            # Determine status
             if percentile <= 10:
                 status = "Very Cheap"
             elif percentile <= 25:
@@ -959,7 +887,6 @@ class ValuationService:
         Returns:
             DataFrame with full historical data for all tickers in sector
         """
-        # Get tickers in this industry
         if industry_sector == "Tất cả":
             tickers = self.get_all_tickers()
         else:
@@ -968,10 +895,8 @@ class ValuationService:
         if not tickers:
             return pd.DataFrame()
 
-        # Remove excluded tickers
         tickers = [t for t in tickers if t not in self.EXCLUDED_TICKERS]
 
-        # Load metric data
         if metric not in self.METRIC_CONFIG:
             return pd.DataFrame()
 
@@ -984,8 +909,6 @@ class ValuationService:
 
         start_date = pd.Timestamp(f"{start_year}-01-01")
         df = df[df['date'] >= start_date].copy()
-
-        # Filter to only tickers in this industry
         df = df[df['symbol'].isin(tickers)]
 
         # Add industry info

@@ -3,43 +3,41 @@ Security Service - Data Loading Layer
 =====================================
 
 Service for loading securities/brokerage company financial data from parquet files.
+Uses DataMappingRegistry for path resolution.
 
 Usage:
     from WEBAPP.services.security_service import SecurityService
 
     service = SecurityService()
     df = service.get_financial_data("SSI", "Quarterly")
+
+Author: AI Assistant
+Date: 2025-12-31
+Version: 2.0.0 (Registry Integration)
 """
 
 import pandas as pd
 from pathlib import Path
 from typing import Optional, Dict, List
 
+from .base_service import BaseService
 
-class SecurityService:
+
+class SecurityService(BaseService):
     """Service layer for Securities/Brokerage company financial data."""
+
+    DATA_SOURCE = "security_metrics"
+    ENTITY_TYPE = "security"
 
     def __init__(self, data_root: Optional[Path] = None):
         """
         Initialize SecurityService.
 
         Args:
-            data_root: Root data directory (defaults to PROJECT_ROOT/DATA)
+            data_root: Root data directory (for testing, defaults to registry path)
         """
-        if data_root is None:
-            current_file = Path(__file__).resolve()
-            project_root = current_file.parents[2]
-            data_root = project_root / "DATA"
-
-        self.data_root = data_root
-        self.data_path = data_root / "processed" / "fundamental" / "security"
+        super().__init__(data_root)
         self._master_symbols = None
-
-        if not self.data_path.exists():
-            raise FileNotFoundError(
-                f"Security data path not found: {self.data_path}\n"
-                f"Please ensure DATA/processed/fundamental/security/ exists."
-            )
 
     def _load_master_symbols(self) -> List[str]:
         """Load master symbols filtered list for SECURITY entity."""
@@ -48,10 +46,8 @@ class SecurityService:
 
         import json
 
-        # Try config/metadata first, then DATA/metadata
-        project_root = self.data_root.parent
         locations = [
-            project_root / "config" / "metadata" / "master_symbols.json",
+            self.project_root / "config" / "metadata" / "master_symbols.json",
             self.data_root / "metadata" / "master_symbols.json",
         ]
 
@@ -82,20 +78,16 @@ class SecurityService:
         Returns:
             DataFrame with financial metrics sorted by date
         """
-        parquet_file = self.data_path / "security_financial_metrics.parquet"
+        # Use base class load_data() - gets path from registry
+        df = self.load_data(validate_schema=False)
 
-        if not parquet_file.exists():
-            raise FileNotFoundError(
-                f"Security metrics file not found: {parquet_file}\n"
-                f"Please run the security calculator first."
-            )
-
-        df = pd.read_parquet(parquet_file)
+        # Filter by ticker
         df = df[df['symbol'] == ticker].copy()
 
         if df.empty:
             return pd.DataFrame()
 
+        # Filter by period
         if period == "Quarterly":
             df = df[df['freq_code'] == 'Q']
         elif period == "Yearly":
@@ -115,12 +107,7 @@ class SecurityService:
 
     def get_available_tickers(self) -> List[str]:
         """Get list of available securities company tickers (filtered by master_symbols for liquidity)."""
-        parquet_file = self.data_path / "security_financial_metrics.parquet"
-
-        if not parquet_file.exists():
-            return []
-
-        df = pd.read_parquet(parquet_file, columns=['symbol'])
+        df = self.load_data(columns=['symbol'], validate_schema=False)
         all_tickers = set(df['symbol'].unique().tolist())
 
         # Filter by master symbols (liquid tickers only)

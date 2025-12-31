@@ -3,6 +3,7 @@ Forecast Service - Data Loading Layer
 ======================================
 
 Service for loading BSC Forecast data from parquet files.
+Uses DataMappingRegistry for path resolution.
 
 Usage:
     from WEBAPP.services.forecast_service import ForecastService
@@ -10,30 +11,46 @@ Usage:
     service = ForecastService()
     individual = service.get_individual_stocks()
     sectors = service.get_sector_valuation()
+
+Author: AI Assistant
+Date: 2025-12-31
+Version: 2.0.0 (Registry Integration)
 """
 
 import pandas as pd
 from pathlib import Path
 from typing import Optional, Dict, List
 
+from .base_service import BaseService
 
-class ForecastService:
+
+class ForecastService(BaseService):
     """Service layer for BSC Forecast data."""
+
+    DATA_SOURCE = "bsc_individual"
+    ENTITY_TYPE = "all"
 
     def __init__(self, data_root: Optional[Path] = None):
         """
         Initialize ForecastService.
 
         Args:
-            data_root: Root data directory (defaults to PROJECT_ROOT/DATA)
+            data_root: Root data directory (for testing, defaults to registry path)
         """
-        if data_root is None:
-            current_file = Path(__file__).resolve()
-            project_root = current_file.parents[2]
-            data_root = project_root / "DATA"
+        super().__init__(data_root)
 
-        self.data_root = data_root
-        self.data_path = data_root / "processed" / "forecast" / "bsc"
+    def _get_path(self, source_name: str) -> Path:
+        """Get path for a data source via registry."""
+        try:
+            path_str = self.registry.get_path(source_name)
+            if self._data_root:
+                # Use override path for testing
+                relative_str = str(path_str).replace("DATA/", "")
+                return self._data_root / relative_str
+            return self.project_root / path_str
+        except KeyError:
+            # Fallback to hardcoded path
+            return self.data_root / "processed" / "forecast" / "bsc" / f"{source_name}.parquet"
 
     def get_individual_stocks(self) -> pd.DataFrame:
         """
@@ -42,7 +59,7 @@ class ForecastService:
         Returns:
             DataFrame with 92 stocks and all metrics
         """
-        file_path = self.data_path / "bsc_individual.parquet"
+        file_path = self._get_path("bsc_individual")
 
         if not file_path.exists():
             return pd.DataFrame()
@@ -62,7 +79,7 @@ class ForecastService:
         Returns:
             DataFrame with 15 BSC sectors
         """
-        file_path = self.data_path / "bsc_sector_valuation.parquet"
+        file_path = self._get_path("bsc_sector_valuation")
 
         if not file_path.exists():
             return pd.DataFrame()
@@ -82,7 +99,7 @@ class ForecastService:
         Returns:
             DataFrame with individual stocks + sector PE/PB
         """
-        file_path = self.data_path / "bsc_combined.parquet"
+        file_path = self._get_path("bsc_combined")
 
         if not file_path.exists():
             return pd.DataFrame()
@@ -228,9 +245,9 @@ class ForecastService:
         if sector_df.empty or individual_df.empty:
             return sector_df
 
-        # Load PE/PB TTM for BSC symbols
-        pe_ttm_path = self.data_root / "processed" / "valuation" / "pe" / "historical" / "historical_pe.parquet"
-        pb_ttm_path = self.data_root / "processed" / "valuation" / "pb" / "historical" / "historical_pb.parquet"
+        # Load PE/PB TTM via registry
+        pe_ttm_path = self._get_path("pe_historical")
+        pb_ttm_path = self._get_path("pb_historical")
 
         if not pe_ttm_path.exists():
             return sector_df
