@@ -105,6 +105,37 @@ def render_valuation_matrix(
     bsc_2026_vals = [bsc_forward_2026.get(s) for s in symbols]
     vci_2026_vals = [vci_forward_2026.get(s) if vci_forward_2026 else None for s in symbols]
 
+    # Overlap detection: if values are within 5% of TTM, use wider X offset
+    OVERLAP_THRESHOLD_PCT = 0.05  # 5%
+    X_OFFSET_NORMAL = 0.1    # Normal offset
+    X_OFFSET_OVERLAP = 0.18  # Wider offset when overlapping
+
+    def calc_x_offsets(i: int, ttm: float, bsc: float, vci: float) -> tuple:
+        """Calculate X offsets based on value proximity (<5% = overlap)."""
+        if ttm is None or ttm <= 0:
+            return i, i - X_OFFSET_NORMAL, i + X_OFFSET_NORMAL
+
+        threshold = ttm * OVERLAP_THRESHOLD_PCT
+        distances = []
+        if bsc and bsc > 0:
+            distances.append(abs(ttm - bsc))
+        if vci and vci > 0:
+            distances.append(abs(ttm - vci))
+        if bsc and vci and bsc > 0 and vci > 0:
+            distances.append(abs(bsc - vci))
+
+        # If any pair is closer than 5%, use wider offset
+        min_dist = min(distances) if distances else float('inf')
+        offset = X_OFFSET_OVERLAP if min_dist < threshold else X_OFFSET_NORMAL
+
+        return i, i - offset, i + offset  # ttm_x, bsc_x, vci_x
+
+    # Pre-calculate X positions for all stocks
+    x_positions = [
+        calc_x_offsets(i, current_vals[i], bsc_2026_vals[i], vci_2026_vals[i])
+        for i in range(len(symbols))
+    ]
+
     # Status colors
     status_colors = {
         'Very Cheap': '#22C55E',
@@ -167,11 +198,12 @@ def render_valuation_matrix(
         customdata=symbols
     ))
 
-    # BSC 2026F markers - diamond, offset left
+    # BSC 2026F markers - diamond, dynamic offset left
     bsc_x, bsc_y, bsc_hover = [], [], []
     for i, (sym, fwd) in enumerate(zip(symbols, bsc_2026_vals)):
         if fwd is not None and fwd > 0:
-            bsc_x.append(i - 0.1)  # Small offset left
+            _, bsc_offset_x, _ = x_positions[i]  # Use pre-calculated offset
+            bsc_x.append(bsc_offset_x)
             bsc_y.append(fwd)
             trailing = current_vals[i]
             change = ((fwd - trailing) / trailing * 100) if trailing > 0 else 0
@@ -193,11 +225,12 @@ def render_valuation_matrix(
             customdata=bsc_hover
         ))
 
-    # VCI 2026F markers - triangle, offset right
+    # VCI 2026F markers - triangle, dynamic offset right
     vci_x, vci_y, vci_hover = [], [], []
     for i, (sym, fwd) in enumerate(zip(symbols, vci_2026_vals)):
         if fwd is not None and fwd > 0:
-            vci_x.append(i + 0.1)  # Small offset right
+            _, _, vci_offset_x = x_positions[i]  # Use pre-calculated offset
+            vci_x.append(vci_offset_x)
             vci_y.append(fwd)
             trailing = current_vals[i]
             change = ((fwd - trailing) / trailing * 100) if trailing > 0 else 0
