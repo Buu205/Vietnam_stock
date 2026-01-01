@@ -80,7 +80,7 @@ fig = pcb.bar_line_combo(
 )
 
 # Display
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width='stretch')
 ```
 
 ---
@@ -398,7 +398,7 @@ fig = pcb.bar_line_combo(
 )
 
 # Display
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width='stretch')
 ```
 
 ---
@@ -441,7 +441,7 @@ metric_card_row([
 
 # Display chart
 fig = pcb.line_chart(data, 'quarter', ['net_revenue'], 'Revenue')
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width='stretch')
 ```
 
 ---
@@ -558,9 +558,9 @@ peers = sector_reg.get_peers('VNM')
 
 ## 💡 Tips
 
-1. **Always use `use_container_width=True`** for responsive charts:
+1. **Always use `width='stretch'`** for responsive charts:
    ```python
-   st.plotly_chart(fig, use_container_width=True)
+   st.plotly_chart(fig, width='stretch')
    ```
 
 2. **Cache data loading** to avoid redundant reads:
