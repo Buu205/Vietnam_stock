@@ -105,15 +105,19 @@ def render_valuation_matrix(
     bsc_2026_vals = [bsc_forward_2026.get(s) for s in symbols]
     vci_2026_vals = [vci_forward_2026.get(s) if vci_forward_2026 else None for s in symbols]
 
-    # Overlap detection: if values are within 5% of TTM, use wider X offset
+    # Overlap detection: if values are within 5% of TTM, apply X offset to separate
     OVERLAP_THRESHOLD_PCT = 0.05  # 5%
-    X_OFFSET_NORMAL = 0.1    # Normal offset
-    X_OFFSET_OVERLAP = 0.18  # Wider offset when overlapping
+    X_OFFSET = 0.15  # Offset when overlapping
 
     def calc_x_offsets(i: int, ttm: float, bsc: float, vci: float) -> tuple:
-        """Calculate X offsets based on value proximity (<5% = overlap)."""
+        """
+        Calculate X offsets based on value proximity.
+        - If difference < 5%: offset markers horizontally to separate
+        - If difference >= 5% or no data: all markers on same X (no offset)
+        """
+        # No TTM data: all on same line
         if ttm is None or ttm <= 0:
-            return i, i - X_OFFSET_NORMAL, i + X_OFFSET_NORMAL
+            return i, i, i
 
         threshold = ttm * OVERLAP_THRESHOLD_PCT
         distances = []
@@ -124,11 +128,18 @@ def render_valuation_matrix(
         if bsc and vci and bsc > 0 and vci > 0:
             distances.append(abs(bsc - vci))
 
-        # If any pair is closer than 5%, use wider offset
-        min_dist = min(distances) if distances else float('inf')
-        offset = X_OFFSET_OVERLAP if min_dist < threshold else X_OFFSET_NORMAL
+        # No comparison data: all on same line
+        if not distances:
+            return i, i, i
 
-        return i, i - offset, i + offset  # ttm_x, bsc_x, vci_x
+        # Check if any pair is closer than 5%
+        min_dist = min(distances)
+        if min_dist < threshold:
+            # Overlap detected: apply offset to separate
+            return i, i - X_OFFSET, i + X_OFFSET
+        else:
+            # No overlap: all on same X line
+            return i, i, i
 
     # Pre-calculate X positions for all stocks
     x_positions = [
