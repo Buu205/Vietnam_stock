@@ -193,7 +193,7 @@ sort_options = {
 sort_by = st.sidebar.selectbox("Sort By", options=list(sort_options.keys()), index=0)
 
 st.sidebar.markdown("---")
-if st.sidebar.button("Refresh Data", use_container_width=True):
+if st.sidebar.button("Refresh Data", width='stretch'):
     st.cache_data.clear()
     st.rerun()
 

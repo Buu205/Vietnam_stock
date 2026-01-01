@@ -107,7 +107,7 @@ limit = st.sidebar.slider(
     help="How many periods to display"
 )
 
-if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
+if st.sidebar.button("🔄 Refresh Data", width='stretch'):
     st.cache_data.clear()
     st.rerun()
 
@@ -284,7 +284,7 @@ if active_tab == 0:
                     fig.update_yaxes(title_text="B VND", secondary_y=False)
                     fig.update_yaxes(title_text="YoY %", secondary_y=True, showgrid=False)
 
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
                 else:
                     st.info(f"{name} data not available")
 
@@ -354,7 +354,7 @@ if active_tab == 0:
                     fig.update_layout(**layout)
                     fig.update_yaxes(title_text="%", secondary_y=False)
 
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
                 else:
                     st.info(f"{name} data not available")
 
@@ -394,7 +394,7 @@ if active_tab == 0:
                 gridcolor='rgba(160, 174, 192, 0.08)',
                 title_font=dict(color=CHART_COLORS['primary'])
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.info("ROE/ROA data not available")
 
@@ -417,7 +417,7 @@ if active_tab == 0:
             layout['legend'] = dict(orientation="h", y=-0.15, x=0.5, xanchor='center', font=dict(color='#FFFFFF'))
             layout['yaxis']['title'] = "Billion VND"
             fig.update_layout(**layout)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.info("Balance sheet data not available")
 
@@ -472,7 +472,7 @@ if active_tab == 0:
         layout['legend'] = dict(orientation="h", y=-0.12, x=0.5, xanchor='center', font=dict(color='#FFFFFF'))
         layout['yaxis']['title'] = "Billion VND"
         fig.update_layout(**layout)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
     else:
         st.info("Cash flow data not available")
 
@@ -496,7 +496,7 @@ if active_tab == 0:
             layout['yaxis']['title'] = "Depreciation Rate (%)"
             layout['showlegend'] = False
             fig.update_layout(**layout)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
             st.caption("📊 Tỷ lệ khấu hao tích lũy / Nguyên giá TSCĐ")
 
         with col2:
@@ -514,7 +514,7 @@ if active_tab == 0:
             layout['yaxis']['title'] = "CIP Rate (%)"
             layout['showlegend'] = False
             fig.update_layout(**layout)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
             st.caption("📊 Tỷ lệ XDCB dở dang / Tổng tài sản")
 
 # ============================================================================
@@ -544,7 +544,7 @@ elif active_tab == 1:
         data=csv_data,
         file_name=f"{ticker}_financial_data.csv",
         mime="text/csv",
-        use_container_width=True
+        width='stretch'
     )
 
 # ============================================================================

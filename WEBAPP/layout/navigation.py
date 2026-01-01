@@ -26,7 +26,7 @@ def render_top_nav():
             with cols[i]:
                 # Check if this is the current page to highlight (optional, hard to detect perfectly in Streamlit)
                 # For now, just render simple buttons
-                if st.button(label, key=f"nav_{label}", use_container_width=True):
+                if st.button(label, key=f"nav_{label}", width='stretch'):
                     st.switch_page(page)
         
         st.markdown("---")

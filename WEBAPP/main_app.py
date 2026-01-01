@@ -153,14 +153,14 @@ with st.sidebar:
         st.success(f"**{ticker}**", icon="✅")
         c1, c2 = st.columns(2)
         with c1:
-            if st.button("🏢", key="nav_company", help="Company", use_container_width=True):
+            if st.button("🏢", key="nav_company", help="Company", width='stretch'):
                 st.switch_page("pages/company/company_dashboard.py")
-            if st.button("💰", key="nav_valuation", help="Sector & Valuation", use_container_width=True):
+            if st.button("💰", key="nav_valuation", help="Sector & Valuation", width='stretch'):
                 st.switch_page("pages/sector/sector_dashboard.py")
         with c2:
-            if st.button("🏦", key="nav_bank", help="Bank", use_container_width=True):
+            if st.button("🏦", key="nav_bank", help="Bank", width='stretch'):
                 st.switch_page("pages/bank/bank_dashboard.py")
-            if st.button("📉", key="nav_technical", help="Technical", use_container_width=True):
+            if st.button("📉", key="nav_technical", help="Technical", width='stretch'):
                 st.switch_page("pages/technical/technical_dashboard.py")
 
 # ============================================================================

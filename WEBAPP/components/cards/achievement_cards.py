@@ -345,7 +345,7 @@ def render_achievement_cards_interactive(
             if st.button(
                 f"Filter {config['label']}" if st.session_state[filter_key] != cat else "✓ Selected",
                 key=f'{key_prefix}_btn_{cat}',
-                use_container_width=True,
+                width='stretch',
                 type='primary' if is_active else 'secondary'
             ):
                 st.session_state[filter_key] = cat
@@ -354,7 +354,7 @@ def render_achievement_cards_interactive(
     # Clear filter button
     with cols[3]:
         st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True)
-        if st.button("Clear", key=f'{key_prefix}_clear_filter', use_container_width=True):
+        if st.button("Clear", key=f'{key_prefix}_clear_filter', width='stretch'):
             st.session_state[filter_key] = 'all'
             st.rerun()
 

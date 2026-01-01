@@ -213,7 +213,7 @@ with st.sidebar.expander("Quick Select by Group"):
 
 # Refresh button
 st.sidebar.markdown("---")
-if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
+if st.sidebar.button("🔄 Refresh Data", width='stretch'):
     st.cache_data.clear()
     st.rerun()
 
@@ -387,7 +387,7 @@ with st.expander("📋 View Raw Data", expanded=False):
 
     df_display = df_display.rename(columns=rename_map)
 
-    st.dataframe(df_display, use_container_width=True, hide_index=True)
+    st.dataframe(df_display, width='stretch', hide_index=True)
 
     # Download button
     csv = df_display.to_csv(index=False).encode('utf-8')
@@ -396,7 +396,7 @@ with st.expander("📋 View Raw Data", expanded=False):
         csv,
         "bank_explorer_data.csv",
         "text/csv",
-        use_container_width=True
+        width='stretch'
     )
 
 # ============================================================================

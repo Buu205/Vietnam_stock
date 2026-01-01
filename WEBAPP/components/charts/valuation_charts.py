@@ -115,7 +115,7 @@ def distribution_candlestick(
     Example:
         >>> stats = valuation_service.get_industry_candle_data('Ngân hàng', 'PE')
         >>> fig = distribution_candlestick(stats, metric_label='PE')
-        >>> st.plotly_chart(fig, use_container_width=True)
+        >>> st.plotly_chart(fig, width='stretch')
     """
     if not data:
         fig = go.Figure()
@@ -499,7 +499,7 @@ def line_with_statistical_bands(
     Example:
         >>> history = sector_service.get_sector_history('Ngân hàng')
         >>> fig, stats = line_with_statistical_bands(history, value_col='pe_ttm')
-        >>> st.plotly_chart(fig, use_container_width=True)
+        >>> st.plotly_chart(fig, width='stretch')
         >>> st.metric("Z-Score", format_zscore(stats['z_score']))
     """
     if df.empty or value_col not in df.columns:
@@ -734,7 +734,7 @@ def histogram_with_stats(
     Example:
         >>> pe_data = sector_df['pe_ttm'].dropna()
         >>> fig = histogram_with_stats(pe_data, metric_label='PE', current_value=12.5)
-        >>> st.plotly_chart(fig, use_container_width=True)
+        >>> st.plotly_chart(fig, width='stretch')
     """
     config = get_chart_config('histogram')
     height = height or config.height

@@ -103,7 +103,7 @@ limit = st.sidebar.slider(
 )
 
 # Refresh button
-if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
+if st.sidebar.button("🔄 Refresh Data", width='stretch'):
     st.cache_data.clear()
     st.rerun()
 
@@ -239,7 +239,7 @@ if active_tab == 0:
                 barmode='stack',
                 yaxis_title="Billion VND"
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.info("Revenue breakdown data not available")
 
@@ -263,7 +263,7 @@ if active_tab == 0:
                 **get_chart_layout("Return Metrics (TTM %)"),
                 yaxis_title="%"
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.info("ROE/ROA data not available")
 
@@ -291,7 +291,7 @@ if active_tab == 0:
                 **get_chart_layout("Portfolio Allocation"),
                 showlegend=True
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.info("Portfolio data not available")
 
@@ -314,7 +314,7 @@ if active_tab == 0:
                 **get_chart_layout("Profit Margins (%)"),
                 yaxis_title="%"
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.info("Margin data not available")
 
@@ -336,7 +336,7 @@ if active_tab == 0:
                 **get_chart_layout("Cost-to-Income Ratio (%)"),
                 yaxis_title="%"
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.info("CIR data not available")
 
@@ -355,7 +355,7 @@ if active_tab == 0:
                 **get_chart_layout("Leverage Ratio"),
                 yaxis_title="x"
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.info("Leverage data not available")
 
@@ -452,7 +452,7 @@ elif active_tab == 1:
         df.to_csv(index=False).encode('utf-8'),
         f"{ticker}_security_data.csv",
         "text/csv",
-        use_container_width=True
+        width='stretch'
     )
 
 # ============================================================================

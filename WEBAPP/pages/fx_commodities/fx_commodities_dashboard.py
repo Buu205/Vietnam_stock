@@ -314,7 +314,7 @@ if active_tab == 0:
                     unit=group['unit'],
                     height=500
                 )
-                st.plotly_chart(fig_macro, use_container_width=True)
+                st.plotly_chart(fig_macro, width='stretch')
 
                 # Performance Table
                 st.markdown("### 📊 Performance Summary")
@@ -439,7 +439,7 @@ if active_tab == 0:
                     )
                     fig_exchange.update_layout(**layout)
 
-                    st.plotly_chart(fig_exchange, use_container_width=True)
+                    st.plotly_chart(fig_exchange, width='stretch')
 
                     # Show spread metrics
                     st.markdown("### 📈 Latest Values & Spread")
@@ -508,7 +508,7 @@ if active_tab == 0:
                     )
                     fig_single.update_layout(**layout)
 
-                    st.plotly_chart(fig_single, use_container_width=True)
+                    st.plotly_chart(fig_single, width='stretch')
 
                     # Latest value
                     latest = series.iloc[-1]
@@ -554,7 +554,7 @@ if active_tab == 0:
                 )
                 fig_bond.update_layout(**layout)
 
-                st.plotly_chart(fig_bond, use_container_width=True)
+                st.plotly_chart(fig_bond, width='stretch')
 
                 # Performance table
                 st.markdown("### 📊 Performance Summary")
@@ -700,7 +700,7 @@ elif active_tab == 1:
                         fig.update_yaxes(title_text=f"{COMMODITY_LABELS.get(symbol2, symbol2)} ({unit2})",
                                         secondary_y=True, title_font=dict(color=CHART_COLORS['tertiary']))
 
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
 
                     # Performance table
                     st.markdown("### 📊 Performance Summary")
@@ -757,7 +757,7 @@ elif active_tab == 1:
                         )
                         fig.update_layout(**layout)
 
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width='stretch')
 
                         # Latest value metrics
                         latest = series.iloc[-1]

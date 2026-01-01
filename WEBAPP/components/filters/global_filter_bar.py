@@ -158,7 +158,7 @@ def render_global_filters(
     # Refresh button
     if show_refresh:
         with cols[col_idx]:
-            if st.button("Refresh", key=f'{key_prefix}_refresh', use_container_width=True, type="secondary"):
+            if st.button("Refresh", key=f'{key_prefix}_refresh', width='stretch', type="secondary"):
                 st.cache_data.clear()
                 result['refresh'] = True
             else:
@@ -171,7 +171,7 @@ def render_global_filters(
             result['export'] = st.button(
                 "Export",
                 key=f'{key_prefix}_export',
-                use_container_width=True,
+                width='stretch',
                 type="secondary"
             )
 

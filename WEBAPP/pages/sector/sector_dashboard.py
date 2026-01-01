@@ -240,7 +240,7 @@ if active_tab == 0:
     # Load vnindex data
     @st.cache_data(ttl=3600)
     def load_vnindex_data():
-        vnindex_file = service.data_path / "vnindex" / "vnindex_valuation_refined.parquet"
+        vnindex_file = service.data_root / "processed" / "valuation" / "vnindex" / "vnindex_valuation_refined.parquet"
         if vnindex_file.exists():
             df = pd.read_parquet(vnindex_file)
             df['date'] = pd.to_datetime(df['date'])
@@ -367,7 +367,7 @@ if active_tab == 0:
             for trace in fig_compare.data:
                 trace.update(hovertemplate=f'<b>{trace.name}</b><br>{selected_metric}: %{{y:.2f}}x<extra></extra>')
 
-            st.plotly_chart(fig_compare, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig_compare, width='stretch', config={'displayModeBar': False})
         else:
             st.info(f"**{selected_metric}** is not available for Market Indices. Only PE and PB are tracked.")
 
@@ -450,7 +450,7 @@ if active_tab == 0:
                 y_range=y_range,
                 title=None
             )
-            st.plotly_chart(fig_candle, use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(fig_candle, width='stretch', config={'displayModeBar': False})
 
             # Legend (HTML styled, no emojis)
             st.markdown(render_valuation_legend(), unsafe_allow_html=True)
@@ -549,7 +549,7 @@ if active_tab == 0:
                             ),
                             hovermode='x unified'
                         )
-                        st.plotly_chart(fig_line, use_container_width=True, config={'displayModeBar': False})
+                        st.plotly_chart(fig_line, width='stretch', config={'displayModeBar': False})
 
                 with col_hist:
                     # Histogram
@@ -563,7 +563,7 @@ if active_tab == 0:
                         current_value=current_val,
                         title="Distribution"
                     )
-                    st.plotly_chart(fig_hist, use_container_width=True, config={'displayModeBar': False})
+                    st.plotly_chart(fig_hist, width='stretch', config={'displayModeBar': False})
             else:
                 st.warning(f"No {selected_metric} data available for {selected_index}")
 
@@ -605,7 +605,7 @@ if active_tab == 0:
                 excel_buffer,
                 "vnindex_valuation_data.xlsx",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True
+                width='stretch'
             )
             st.caption(f"Includes {len(export_df):,} rows for VN-Index, VN-Index (Exclude), BSC Index")
 
@@ -772,7 +772,7 @@ elif active_tab == 1:
 
                 fig_candle.update_layout(**layout)
 
-                st.plotly_chart(fig_candle, use_container_width=True, config={'displayModeBar': False})
+                st.plotly_chart(fig_candle, width='stretch', config={'displayModeBar': False})
 
                 # Legend (5 levels - HTML styled, no emojis)
                 st.markdown(render_valuation_legend(), unsafe_allow_html=True)
@@ -807,7 +807,7 @@ elif active_tab == 1:
                         excel_buffer,
                         f"{selected_metric.lower().replace(' ', '_')}_valuation_matrix_sectors.xlsx",
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        use_container_width=True
+                        width='stretch'
                     )
             else:
                 st.warning("Not enough historical data for distribution analysis")
@@ -848,7 +848,7 @@ elif active_tab == 1:
                         title=f"{selected_sector} - {selected_metric}"
                     )
                     if fig_sector:
-                        st.plotly_chart(fig_sector, use_container_width=True)
+                        st.plotly_chart(fig_sector, width='stretch')
                     else:
                         st.warning(f"Not enough valid data for {selected_sector}")
 
@@ -867,7 +867,7 @@ elif active_tab == 1:
                             current_value=current_val,
                             title="Distribution"
                         )
-                        st.plotly_chart(fig_hist, use_container_width=True)
+                        st.plotly_chart(fig_hist, width='stretch')
 
                 # Stats cards
                 if stats_sector:
@@ -988,7 +988,7 @@ elif active_tab == 1:
                         y_range=y_range,
                         title=f"{selected_metric} Distribution: {stock_comp_sector} Stocks"
                     )
-                    st.plotly_chart(fig_stock_candle, use_container_width=True, config={'displayModeBar': False})
+                    st.plotly_chart(fig_stock_candle, width='stretch', config={'displayModeBar': False})
 
                     # Legend (5 levels - HTML styled, no emojis)
                     st.markdown(render_valuation_legend(), unsafe_allow_html=True)
@@ -1019,7 +1019,7 @@ elif active_tab == 1:
                         excel_buffer,
                         f"{stock_comp_sector.lower().replace(' ', '_')}_stocks_{selected_metric.lower().replace(' ', '_')}.xlsx",
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        use_container_width=True
+                        width='stretch'
                     )
                 else:
                     st.warning(f"Not enough data for stocks in {stock_comp_sector}")
@@ -1072,7 +1072,7 @@ elif active_tab == 1:
                                 title=f"{selected_stock} - {selected_metric}"
                             )
                             if fig_stock:
-                                st.plotly_chart(fig_stock, use_container_width=True)
+                                st.plotly_chart(fig_stock, width='stretch')
                             else:
                                 st.warning(f"Not enough valid data for {selected_stock}")
 
@@ -1091,7 +1091,7 @@ elif active_tab == 1:
                                     current_value=current_val,
                                     title="Distribution"
                                 )
-                                st.plotly_chart(fig_hist, use_container_width=True)
+                                st.plotly_chart(fig_hist, width='stretch')
 
                         # Stats cards
                         if stats_stock:
@@ -1170,7 +1170,7 @@ elif active_tab == 2:
             excel_buffer,
             "sector_valuation.xlsx",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
+            width='stretch'
         )
 
 # Footer

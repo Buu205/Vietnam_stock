@@ -375,7 +375,7 @@ def render_sidebar_filters(
         result['refresh'] = st.sidebar.button(
             "Refresh Data",
             key=f"{key_prefix}refresh",
-            use_container_width=True
+            width='stretch'
         )
     else:
         result['refresh'] = False

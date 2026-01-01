@@ -269,7 +269,7 @@ def render_persistent_tabs(
             if st.button(
                 clean_name,
                 key=f"{state_key}_btn_{idx}",
-                use_container_width=True,
+                width='stretch',
                 type="primary" if is_active else "secondary"
             ):
                 st.session_state[state_key] = idx

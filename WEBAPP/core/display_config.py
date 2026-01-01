@@ -144,7 +144,7 @@ class DisplayConfigManager:
         configs = {
             'financial_summary': {
                 'height': 400,
-                'use_container_width': True,
+                'width': 'stretch',
                 'column_config': {
                     'report_date': st.column_config.DateColumn(
                         "Report Date",
@@ -155,7 +155,7 @@ class DisplayConfigManager:
             },
             'valuation': {
                 'height': 500,
-                'use_container_width': True,
+                'width': 'stretch',
                 'column_config': {
                     'date': st.column_config.DateColumn(
                         "Date",
@@ -166,7 +166,7 @@ class DisplayConfigManager:
             },
             'technical': {
                 'height': 300,
-                'use_container_width': True,
+                'width': 'stretch',
                 'column_config': {
                     'date': st.column_config.DateColumn(
                         "Date",
@@ -177,7 +177,7 @@ class DisplayConfigManager:
             },
             'default': {
                 'height': 400,
-                'use_container_width': True
+                'width': 'stretch'
             }
         }
         

@@ -187,7 +187,7 @@ def _render_rrg_with_options(service: 'TADashboardService') -> None:
     # ============ RENDER CHART ============
     if rrg_data is not None and not rrg_data.empty:
         fig = _create_rrg_chart(rrg_data, entity_col=entity_col, show_trail=(trail_days > 0))
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        st.plotly_chart(fig, width='stretch', config={'displayModeBar': False})
 
         # Quadrant summary
         _render_rrg_summary(rrg_data, entity_col)
@@ -459,7 +459,7 @@ def _render_money_flow_chart(money_flow: pd.DataFrame) -> None:
     layout['margin'] = dict(l=100, r=60, t=20, b=40)
 
     fig.update_layout(**layout)
-    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    st.plotly_chart(fig, width='stretch', config={'displayModeBar': False})
 
     # Caption
     st.caption("*Dương (+): Tiền ròng chảy vào ngành | Âm (-): Tiền ròng chảy ra khỏi ngành*")
@@ -610,7 +610,7 @@ def _render_stock_rs_heatmap(service: 'TADashboardService') -> None:
     ''', unsafe_allow_html=True)
 
     # Render chart with fixed dimensions (no use_container_width)
-    st.plotly_chart(fig, use_container_width=False, config={'displayModeBar': False})
+    st.plotly_chart(fig, width='content', config={'displayModeBar': False})
 
     st.markdown('</div>', unsafe_allow_html=True)
 

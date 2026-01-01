@@ -107,7 +107,7 @@ def render_income_statement_chart(df: pd.DataFrame, height: int = 450):
     )
 
     # Render
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 
 def render_margins_chart(df: pd.DataFrame, height: int = 400):
@@ -175,7 +175,7 @@ def render_margins_chart(df: pd.DataFrame, height: int = 400):
     fig.update_xaxes(showgrid=True, gridcolor='rgba(128,128,128,0.1)')
     fig.update_yaxes(showgrid=True, gridcolor='rgba(128,128,128,0.1)', tickformat='.2f')
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 
 def render_roe_roa_chart(df: pd.DataFrame, height: int = 400):
@@ -377,7 +377,7 @@ def render_roe_roa_chart(df: pd.DataFrame, height: int = 400):
     # Render with animation
     st.plotly_chart(
         fig,
-        use_container_width=True,
+        width='stretch',
         config={
             'displayModeBar': True,
             'displaylogo': False,
@@ -455,7 +455,7 @@ def render_balance_sheet_chart(df: pd.DataFrame, height: int = 400):
     fig.update_xaxes(showgrid=True, gridcolor='rgba(128,128,128,0.1)')
     fig.update_yaxes(showgrid=True, gridcolor='rgba(128,128,128,0.1)', tickformat=',.0f')
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 
 def render_cash_flow_chart(df: pd.DataFrame, height: int = 400):
@@ -540,7 +540,7 @@ def render_cash_flow_chart(df: pd.DataFrame, height: int = 400):
     fig.update_xaxes(showgrid=True, gridcolor='rgba(128,128,128,0.1)')
     fig.update_yaxes(showgrid=True, gridcolor='rgba(128,128,128,0.1)', tickformat=',.0f')
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 
 def render_peer_comparison_chart(
@@ -603,4 +603,4 @@ def render_peer_comparison_chart(
     fig.update_xaxes(showgrid=True, gridcolor='rgba(128,128,128,0.1)')
     fig.update_yaxes(showgrid=False)
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')

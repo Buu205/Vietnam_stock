@@ -447,7 +447,7 @@ def _render_breadth_chart(history) -> None:
         row=2, col=1
     )
 
-    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    st.plotly_chart(fig, width='stretch', config={'displayModeBar': False})
 
     # Legend caption with two rows
     st.markdown(f'''

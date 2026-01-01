@@ -54,19 +54,19 @@ def render_main_nav():
         cols = st.columns(4)
 
         with cols[0]:
-            if st.button("📊 Fundamental Analysis", key="nav_fa", use_container_width=True):
+            if st.button("📊 Fundamental Analysis", key="nav_fa", width='stretch'):
                 st.switch_page("pages/1_fundamental/company_analysis.py")
 
         with cols[1]:
-            if st.button("💰 Valuation", key="nav_valuation", use_container_width=True):
+            if st.button("💰 Valuation", key="nav_valuation", width='stretch'):
                 st.switch_page("pages/2_valuation/valuation_dashboard.py")
 
         with cols[2]:
-            if st.button("📈 Technical", key="nav_technical", use_container_width=True):
+            if st.button("📈 Technical", key="nav_technical", width='stretch'):
                 st.switch_page("pages/3_technical/stock_technical.py")
 
         with cols[3]:
-            if st.button("🔍 Intelligence", key="nav_intelligence", use_container_width=True):
+            if st.button("🔍 Intelligence", key="nav_intelligence", width='stretch'):
                 st.switch_page("pages/4_intelligence/analyst_forecasts.py")
 
     st.divider()

@@ -13,7 +13,7 @@ Usage:
     from WEBAPP.components.charts import PlotlyChartBuilder as pcb
 
     fig = pcb.bar_line_combo(df, 'quarter', 'revenue', 'revenue_ma4', 'Revenue Trend')
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 """
 
 import plotly.graph_objects as go
@@ -30,7 +30,7 @@ class PlotlyChartBuilder:
     Centralized chart building với consistent styling.
 
     Design Principles:
-    1. All charts responsive (use_container_width=True)
+    1. All charts responsive (width='stretch')
     2. Consistent color palette (Brand-aligned)
     3. Vietnamese labels support
     4. Auto-formatting (numbers, dates, percentages)
@@ -104,7 +104,7 @@ class PlotlyChartBuilder:
             ...     title='Revenue Trend',
             ...     y_axis_title='VND (billions)'
             ... )
-            >>> st.plotly_chart(fig, use_container_width=True)
+            >>> st.plotly_chart(fig, width='stretch')
         """
         try:
             if colors is None:
@@ -276,7 +276,7 @@ class PlotlyChartBuilder:
             ...     bar_name='Revenue',
             ...     line_name='MA4 Trend'
             ... )
-            >>> st.plotly_chart(fig, use_container_width=True)
+            >>> st.plotly_chart(fig, width='stretch')
         """
         try:
             if bar_color is None:
@@ -370,7 +370,7 @@ class PlotlyChartBuilder:
             ...     df=pe_df,  # Must have: date, open, high, low, close
             ...     title='PE Ratio Candlestick - ACB'
             ... )
-            >>> st.plotly_chart(fig, use_container_width=True)
+            >>> st.plotly_chart(fig, width='stretch')
         """
         try:
             required_cols = ['date', 'open', 'high', 'low', 'close']
@@ -746,7 +746,7 @@ def valuation_box_with_markers(
         >>> pe_fwd = dict(zip(bsc_df['symbol'], bsc_df['pe_fwd_2025']))
         >>>
         >>> fig = valuation_box_with_markers(stats, pe_fwd, title='Bank PE: TTM vs 2025F')
-        >>> st.plotly_chart(fig, use_container_width=True)
+        >>> st.plotly_chart(fig, width='stretch')
     """
     if not stats_data:
         fig = go.Figure()

@@ -99,7 +99,7 @@ def render_bsc_universal_tab(
             excel_data,
             "bsc_forecast_universal.xlsx",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
+            width='stretch'
         )
     else:
         st.info("No stocks match the selected filters.")

@@ -134,7 +134,7 @@ limit = st.sidebar.slider(
 st.sidebar.markdown("---")
 
 # Refresh button
-if st.sidebar.button("🔄 Refresh Data", use_container_width=True):
+if st.sidebar.button("🔄 Refresh Data", width='stretch'):
     st.cache_data.clear()
     st.rerun()
 
@@ -342,19 +342,19 @@ selected_metrics = st.multiselect(
 # Quick select buttons in horizontal layout
 quick_col1, quick_col2, quick_col3, quick_col4 = st.columns(4)
 with quick_col1:
-    if st.button("🎯 Key Performance", use_container_width=True):
+    if st.button("🎯 Key Performance", width='stretch'):
         st.session_state['selected_metrics'] = ["NIM", "CIR", "NPL", "ROE", "ROA", "LLCR", "Provision/Loan"]
         st.rerun()
 with quick_col2:
-    if st.button("📈 Growth Focus", use_container_width=True):
+    if st.button("📈 Growth Focus", width='stretch'):
         st.session_state['selected_metrics'] = ["Credit Growth", "Deposit Growth", "Loan Growth", "NII Growth", "NPATMI Growth", "ROE", "NIM", "NPL"]
         st.rerun()
 with quick_col3:
-    if st.button("💰 All Metrics", use_container_width=True):
+    if st.button("💰 All Metrics", width='stretch'):
         st.session_state['selected_metrics'] = list(AVAILABLE_METRICS.keys())
         st.rerun()
 with quick_col4:
-    if st.button("🔄 Reset Default", use_container_width=True):
+    if st.button("🔄 Reset Default", width='stretch'):
         st.session_state['selected_metrics'] = DEFAULT_METRICS
         st.rerun()
 
@@ -482,7 +482,7 @@ if active_tab == 0:
                     fig.update_yaxes(title_text="B VND", secondary_y=False)
                     fig.update_yaxes(title_text="YoY %", secondary_y=True, showgrid=False)
 
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width='stretch')
                 else:
                     st.info(f"{name} data not available")
 
@@ -685,7 +685,7 @@ elif active_tab == 1:
         df.to_csv(index=False).encode('utf-8'),
         f"{ticker}_bank_data.csv",
         "text/csv",
-        use_container_width=True
+        width='stretch'
     )
 
 # ============================================================================
