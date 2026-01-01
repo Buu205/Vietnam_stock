@@ -1,7 +1,8 @@
 # Implementation Plan: Forecast Dashboard Refactor
 
 **Plan ID:** 2025-12-30-forecast-dashboard-refactor
-**Status:** Ready for Implementation
+**Status:** Implementation in Progress
+**Updated:** 2025-12-31 (Registry Integration Complete)
 **Estimated Effort:** 3-4 days
 
 ---
@@ -43,12 +44,28 @@ Use cases:                          Use cases:
 
 ### Implementation Phases
 
-| Phase | Focus | Key Deliverables |
-|-------|-------|------------------|
-| **P1** | Core UX | Unified table + Sticky columns + Achievement cards |
-| **P2** | VCI Integration | BSC vs VCI comparison tab + Scatter/Bar charts |
-| **P3** | Visual Polish | Enhanced box chart (2025/2026 markers) + BSC Universal row |
-| **P4** | Advanced (Future) | Accuracy tracking + Revision Momentum + StarMine |
+| Phase | Focus | Key Deliverables | Status |
+|-------|-------|------------------|--------|
+| **P0** | Registry Integration | Data paths + Service methods | ✅ Done |
+| **P1** | Core UX | Unified table + Sticky columns + Achievement cards | 🔜 Ready |
+| **P2** | VCI Integration | BSC vs VCI comparison tab + Scatter/Bar charts | 🔜 Ready |
+| **P3** | Visual Polish | Enhanced box chart (2025/2026 markers) + BSC Universal row | ⏳ Pending |
+| **P4** | Advanced (Future) | Accuracy tracking + Revision Momentum + StarMine | ⏳ Future |
+
+### Phase 0: Registry Integration ✅ COMPLETED (2025-12-31)
+
+**Data Mapping Registry** (`config/data_mapping/configs/data_sources.yaml`):
+- ✅ `bsc_forecast` - BSC latest forecast data
+- ✅ `bsc_sector_valuation` - BSC sector valuation
+- ✅ `vci_coverage` - VCI coverage universe
+- ✅ `bsc_forecast_history` - BSC forecast history (P4)
+- ✅ `vci_forecast_history` - VCI forecast history (P4)
+
+**ForecastService Methods** (`WEBAPP/services/forecast_service.py`):
+- ✅ `get_achievement_summary()` - 3 achievement card data (P1)
+- ✅ `get_vci_consensus()` - Load VCI data (P2)
+- ✅ `get_bsc_vs_vci_comparison()` - Merge BSC + VCI (P2)
+- ✅ `get_consensus_summary()` - Consensus status counts (P2)
 
 ### Files to Create/Modify
 
@@ -62,6 +79,7 @@ Use cases:                          Use cases:
 **Modify:**
 - `WEBAPP/pages/forecast/forecast_dashboard.py` (remove sub-tabs, add consensus tab, use filter bar)
 - `PROCESSORS/api/vietcap/fetch_vci_forecast.py` (add snapshot hook)
+- `WEBAPP/services/forecast_service.py` - ✅ VCI methods added (P0 complete)
 
 ---
 
@@ -1521,14 +1539,15 @@ TREND INDICATOR EXAMPLES:
 
 **Goal:** Eliminate tab switching, add quick insights
 
-| Task | File | Effort |
-|------|------|--------|
-| 1.1 Create unified stock table component | `WEBAPP/components/tables/unified_forecast_table.py` | 2h |
-| 1.2 Refactor Tab 0 (Individual) to use unified table | `forecast_dashboard.py` | 1h |
-| 1.3 Remove sub-tabs from Individual | `forecast_dashboard.py` | 0.5h |
-| 1.4 Create achievement cards component | `WEBAPP/components/cards/achievement_cards.py` | 1.5h |
-| 1.5 Integrate cards into Tab 2 (Achievement) | `forecast_dashboard.py` | 1h |
-| 1.6 Add card click filtering | `session_state.py` + `forecast_dashboard.py` | 1h |
+| Task | File | Effort | Status |
+|------|------|--------|--------|
+| 1.0 Add achievement_summary service method | `forecast_service.py` | 0.5h | ✅ Done (P0) |
+| 1.1 Create unified stock table component | `WEBAPP/components/tables/unified_forecast_table.py` | 2h | 🔜 |
+| 1.2 Refactor Tab 0 (Individual) to use unified table | `forecast_dashboard.py` | 1h | 🔜 |
+| 1.3 Remove sub-tabs from Individual | `forecast_dashboard.py` | 0.5h | 🔜 |
+| 1.4 Create achievement cards component | `WEBAPP/components/cards/achievement_cards.py` | 1.5h | 🔜 |
+| 1.5 Integrate cards into Tab 2 (Achievement) | `forecast_dashboard.py` | 1h | 🔜 |
+| 1.6 Add card click filtering | `session_state.py` + `forecast_dashboard.py` | 1h | 🔜 |
 
 **Deliverables:**
 - ✅ Single unified stock table (no sub-tabs)
@@ -1541,15 +1560,15 @@ TREND INDICATOR EXAMPLES:
 
 **Goal:** Add consensus comparison capability
 
-| Task | File | Effort |
-|------|------|--------|
-| 2.1 Add VCI data loading to ForecastService | `forecast_service.py` | 1h |
-| 2.2 Create BSC-VCI merge function | `forecast_service.py` | 1.5h |
-| 2.3 Create consensus comparison table | `components/tables/consensus_table.py` | 1.5h |
-| 2.4 Create BSC vs VCI scatter chart | `components/charts/consensus_charts.py` | 1.5h |
-| 2.5 Create sector NPATMI comparison bar | `components/charts/consensus_charts.py` | 1h |
-| 2.6 Add Tab 3 (Consensus) to dashboard | `forecast_dashboard.py` | 1.5h |
-| 2.7 Update session state for consensus tab | `session_state.py` | 0.5h |
+| Task | File | Effort | Status |
+|------|------|--------|--------|
+| 2.1 Add VCI data loading to ForecastService | `forecast_service.py` | 1h | ✅ Done (P0) |
+| 2.2 Create BSC-VCI merge function | `forecast_service.py` | 1.5h | ✅ Done (P0) |
+| 2.3 Create consensus comparison table | `components/tables/consensus_table.py` | 1.5h | 🔜 |
+| 2.4 Create BSC vs VCI scatter chart | `components/charts/consensus_charts.py` | 1.5h | 🔜 |
+| 2.5 Create sector NPATMI comparison bar | `components/charts/consensus_charts.py` | 1h | 🔜 |
+| 2.6 Add Tab 3 (Consensus) to dashboard | `forecast_dashboard.py` | 1.5h | 🔜 |
+| 2.7 Update session state for consensus tab | `session_state.py` | 0.5h | 🔜 |
 
 **Deliverables:**
 - ✅ BSC vs VCI comparison table

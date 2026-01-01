@@ -293,23 +293,15 @@ def render_rating_badges(df, rating_col: str = 'rating') -> str:
         'STRONG SELL': ('rgba(239, 68, 68, 0.2)', '#EF4444'),
     }
 
-    html = '<div style="display: flex; gap: 8px; margin-bottom: 12px;">'
-
+    badges = []
     for rating, (bg, color) in badge_styles.items():
         count = counts.get(rating, 0)
         if count > 0:
-            html += f'''
-            <span style="
-                background: {bg};
-                color: {color};
-                padding: 4px 10px;
-                border-radius: 12px;
-                font-size: 11px;
-                font-weight: 600;
-            ">
-                {rating}: {count}
-            </span>
-            '''
+            badge = (
+                f'<span style="background:{bg};color:{color};padding:4px 10px;'
+                f'border-radius:12px;font-size:11px;font-weight:600;">'
+                f'{rating}: {count}</span>'
+            )
+            badges.append(badge)
 
-    html += '</div>'
-    return html
+    return f'<div style="display:flex;gap:8px;margin-bottom:12px;">{"".join(badges)}</div>'

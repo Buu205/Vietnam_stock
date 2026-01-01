@@ -16,18 +16,18 @@ import streamlit as st
 import pandas as pd
 import sys
 from pathlib import Path
-from io import BytesIO
 
 project_root = Path(__file__).resolve().parents[3]
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from WEBAPP.services.forecast_service import ForecastService
-from WEBAPP.core.styles import get_page_style, get_table_style, render_styled_table
+from WEBAPP.core.styles import get_page_style, get_table_style
 from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
 
 # Tab modules (modularized for maintainability)
 from WEBAPP.pages.forecast.tabs.bsc_universal_tab import render_bsc_universal_tab
+from WEBAPP.pages.forecast.tabs.sector_tab import render_sector_tab
 from WEBAPP.pages.forecast.tabs.achievement_tab import render_achievement_tab
 from WEBAPP.pages.forecast.tabs.consensus_tab import render_consensus_tab
 
@@ -320,122 +320,10 @@ if active_tab == 0:
 
 
 # ============================================================================
-# TAB 2: SECTOR VALUATION TABLE
+# TAB 1: SECTOR VALUATION (Table + Valuation Matrix Chart)
 # ============================================================================
 elif active_tab == 1:
-    st.markdown("### Sector Forward Valuation")
-    st.markdown("*PE/PB Forward 2025-2026 aggregated by ICB L2 sector classification*")
-
-    if not sector_df.empty:
-        # Sub-tabs for different views of sector data (Session State Persisted)
-        sector_tab = render_persistent_tabs(
-            ["Valuation View", "Growth View"],
-            "forecast_sector_tab",
-            style="secondary"
-        )
-
-        if sector_tab == 0:
-            st.markdown("#### PE/PB Forward by Sector")
-            # Create display dataframe - Valuation focus
-            sector_display = pd.DataFrame()
-            sector_display['Sector'] = sector_df['sector']
-            sector_display['Stocks'] = sector_df['symbol_count'].astype(int)
-            sector_display['Mkt Cap'] = sector_df['total_market_cap'].apply(format_market_cap)
-            sector_display['PE 25F'] = sector_df['pe_fwd_2025'].apply(lambda x: format_number(x, 1, 'x'))
-            sector_display['PE 26F'] = sector_df['pe_fwd_2026'].apply(lambda x: format_number(x, 1, 'x'))
-            sector_display['PB 25F'] = sector_df['pb_fwd_2025'].apply(lambda x: format_number(x, 2, 'x'))
-            sector_display['PB 26F'] = sector_df['pb_fwd_2026'].apply(lambda x: format_number(x, 2, 'x'))
-            sector_display['Avg Upside'] = sector_df['avg_upside_pct'].apply(format_upside)
-            sector_display['Avg ROE 25F'] = sector_df['avg_roe_2025f'].apply(lambda x: format_number(x * 100 if pd.notna(x) else None, 1, '%'))
-
-            # Add Total Earning Growth columns
-            if 'total_earning_growth_2025' in sector_df.columns:
-                sector_display['Earn Gr 25'] = sector_df['total_earning_growth_2025'].apply(format_growth)
-            if 'total_earning_growth_2026' in sector_df.columns:
-                sector_display['Earn Gr 26'] = sector_df['total_earning_growth_2026'].apply(format_growth)
-
-            # Render styled table with BSC Universal row highlighted
-            st.markdown(render_styled_table(sector_display, highlight_first_col=True, highlight_row='BSC Universal'), unsafe_allow_html=True)
-
-        elif sector_tab == 1:
-            st.markdown("#### Revenue & Profit Growth by Sector (YoY)")
-            st.markdown("*Tăng trưởng doanh thu và LNST trung bình theo ngành, chỉ tính các mã BSC coverage*")
-
-            # Create display dataframe - Growth focus
-            sector_growth = pd.DataFrame()
-            sector_growth['Sector'] = sector_df['sector']
-            sector_growth['Stocks'] = sector_df['symbol_count'].astype(int)
-            sector_growth['Mkt Cap'] = sector_df['total_market_cap'].apply(format_market_cap)
-
-            # Revenue growth columns
-            if 'avg_rev_growth_2025' in sector_df.columns:
-                sector_growth['Rev Gr 25F'] = sector_df['avg_rev_growth_2025'].apply(format_growth)
-            if 'avg_rev_growth_2026' in sector_df.columns:
-                sector_growth['Rev Gr 26F'] = sector_df['avg_rev_growth_2026'].apply(format_growth)
-
-            # Profit growth columns (average)
-            if 'avg_npatmi_growth_2025' in sector_df.columns:
-                sector_growth['Profit Gr 25F'] = sector_df['avg_npatmi_growth_2025'].apply(format_growth)
-            if 'avg_npatmi_growth_2026' in sector_df.columns:
-                sector_growth['Profit Gr 26F'] = sector_df['avg_npatmi_growth_2026'].apply(format_growth)
-
-            # Total Earning Growth columns (aggregated sector total)
-            if 'total_earning_growth_2025' in sector_df.columns:
-                sector_growth['Tot Earn Gr 25'] = sector_df['total_earning_growth_2025'].apply(format_growth)
-            if 'total_earning_growth_2026' in sector_df.columns:
-                sector_growth['Tot Earn Gr 26'] = sector_df['total_earning_growth_2026'].apply(format_growth)
-
-            sector_growth['Avg ROE 25F'] = sector_df['avg_roe_2025f'].apply(lambda x: format_number(x * 100 if pd.notna(x) else None, 1, '%'))
-            sector_growth['Avg Upside'] = sector_df['avg_upside_pct'].apply(format_upside)
-
-            # Render styled table with BSC Universal highlighted
-            st.markdown(render_styled_table(sector_growth, highlight_first_col=True, highlight_row='BSC Universal'), unsafe_allow_html=True)
-
-            # Legend
-            st.markdown("""
-            **Giải thích:**
-            - **Rev Gr 25F**: Tăng trưởng doanh thu TB 2024 → 2025 (forecast)
-            - **Rev Gr 26F**: Tăng trưởng doanh thu TB 2025F → 2026F
-            - **Profit Gr 25F**: Tăng trưởng LNST TB 2024 → 2025 (forecast)
-            - **Profit Gr 26F**: Tăng trưởng LNST TB 2025F → 2026F
-            - **Tot Earn Gr 25**: Tổng tăng trưởng lợi nhuận ngành 2024 → 2025
-            - **Tot Earn Gr 26**: Tổng tăng trưởng lợi nhuận ngành 2025F → 2026F
-            - **BSC Universal**: Tổng hợp toàn bộ 92+ mã trong BSC coverage
-            """)
-
-        # Summary metrics
-        st.markdown("---")
-        st.markdown("### Sector Summary")
-
-        total_market_cap = sector_df['total_market_cap'].sum()
-        avg_pe = sector_df['pe_fwd_2025'].median()
-        avg_pb = sector_df['pb_fwd_2025'].median()
-
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.metric("Total Sectors", len(sector_df))
-        with col2:
-            st.metric("Total Mkt Cap", format_market_cap(total_market_cap))
-        with col3:
-            st.metric("Median PE 25F", f"{avg_pe:.1f}x" if pd.notna(avg_pe) else "N/A")
-        with col4:
-            st.metric("Median PB 25F", f"{avg_pb:.2f}x" if pd.notna(avg_pb) else "N/A")
-
-        # Download button - Excel format
-        excel_buffer = BytesIO()
-        with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
-            sector_df.to_excel(writer, index=False, sheet_name='Sector Valuation')
-        excel_data = excel_buffer.getvalue()
-
-        st.download_button(
-            "📥 Download Sector Valuation Data (Excel)",
-            excel_data,
-            "bsc_forecast_sector.xlsx",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
-        )
-    else:
-        st.info("No sector valuation data available.")
+    render_sector_tab(sector_df, df, service)
 
 
 # ============================================================================

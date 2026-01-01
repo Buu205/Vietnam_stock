@@ -485,15 +485,28 @@ class ForecastService(BaseService):
         if bsc_df.empty or vci_df.empty:
             return pd.DataFrame()
 
-        # Rename VCI columns with suffix
+        # Rename VCI columns with suffix (comprehensive for reuse)
         vci_cols = {
             'targetPrice': 'vci_target_price',
             'rating': 'vci_rating',
             'pe_2025F': 'vci_pe_2025',
             'pe_2026F': 'vci_pe_2026',
+            'pb_2025F': 'vci_pb_2025',
+            'pb_2026F': 'vci_pb_2026',
+            'npatmi_2025F': 'vci_npatmi_2025',
+            'npatmi_2026F': 'vci_npatmi_2026',
+            'npatmiGrowth_2025F': 'vci_npatmi_growth_2025',
+            'npatmiGrowth_2026F': 'vci_npatmi_growth_2026',
+            'roe_2025F': 'vci_roe_2025',
+            'roe_2026F': 'vci_roe_2026',
             'projectedTsrPercentage': 'vci_upside_pct',
         }
         vci_renamed = vci_df.rename(columns=vci_cols)
+
+        # Convert VCI NPATMI from raw VND to billions (to match BSC units)
+        for col in ['vci_npatmi_2025', 'vci_npatmi_2026']:
+            if col in vci_renamed.columns:
+                vci_renamed[col] = vci_renamed[col] / 1e9
 
         # Select relevant columns
         vci_selected = vci_renamed[['symbol'] + [c for c in vci_cols.values() if c in vci_renamed.columns]]

@@ -71,18 +71,38 @@ CONSENSUS_TABLE_STYLE = """
     text-align: right;
 }
 
-.consensus-table th.group-bsc {
-    background: rgba(0, 155, 135, 0.15);
+.consensus-table th.text-center {
+    text-align: center;
+}
+
+/* Group header row styling */
+.consensus-table tr.header-group th {
+    border-bottom: 2px solid rgba(139, 92, 246, 0.5);
+    font-size: 12px;
+}
+
+.consensus-table tr.header-sub th {
+    font-size: 10px;
+    padding: 6px 8px;
+    color: #CBD5E1;
+}
+
+/* Group colors - apply to both header rows */
+.consensus-table th.group-bsc,
+.consensus-table tr.header-sub th.group-bsc {
+    background: rgba(0, 155, 135, 0.15) !important;
     border-bottom-color: rgba(0, 155, 135, 0.3);
 }
 
-.consensus-table th.group-vci {
-    background: rgba(245, 158, 11, 0.15);
+.consensus-table th.group-vci,
+.consensus-table tr.header-sub th.group-vci {
+    background: rgba(245, 158, 11, 0.15) !important;
     border-bottom-color: rgba(245, 158, 11, 0.3);
 }
 
-.consensus-table th.group-delta {
-    background: rgba(59, 130, 246, 0.15);
+.consensus-table th.group-delta,
+.consensus-table tr.header-sub th.group-delta {
+    background: rgba(59, 130, 246, 0.15) !important;
     border-bottom-color: rgba(59, 130, 246, 0.3);
 }
 
@@ -226,24 +246,16 @@ def format_price(val) -> str:
 
 def consensus_comparison_table(
     df: pd.DataFrame,
-    show_rating: bool = True
+    show_rating: bool = True,
+    year: str = "2025F"
 ) -> str:
     """
     Render BSC vs VCI consensus comparison table.
 
     Args:
-        df: DataFrame with columns:
-            - symbol: Stock ticker
-            - sector: Sector name
-            - bsc_npatmi_2025: BSC NPATMI forecast
-            - bsc_target: BSC target price
-            - bsc_rating: BSC rating (optional)
-            - vci_npatmi_2025: VCI NPATMI forecast
-            - vci_target: VCI target price
-            - npatmi_delta_pct: NPATMI difference %
-            - target_delta_pct: Target price difference %
-            - consensus_status: ALIGNED/BSC_BULL/VCI_BULL
+        df: DataFrame with columns including bsc_npatmi_display, vci_npatmi_display
         show_rating: Show BSC rating column
+        year: "2025F" or "2026F" - determines which NPATMI data to display
 
     Returns:
         HTML table string
@@ -255,20 +267,32 @@ def consensus_comparison_table(
     html += '<div class="consensus-scroll-wrapper">'
     html += '<table class="consensus-table">'
 
-    # Header row
-    html += '<thead><tr>'
-    html += '<th>Symbol</th>'
-    html += '<th>Sector</th>'
-    html += '<th class="text-right group-bsc">BSC NPATMI</th>'
-    html += '<th class="text-right group-bsc">BSC Target</th>'
+    # Header rows - 2 rows with group labels
+    year_label = year.replace('F', '')  # "2025F" -> "2025"
+    rating_colspan = 1 if show_rating else 0
+
+    html += '<thead>'
+    # Row 1: Group headers
+    html += '<tr class="header-group">'
+    html += f'<th rowspan="2">Symbol</th>'
+    html += f'<th rowspan="2">Sector</th>'
     if show_rating:
-        html += '<th class="group-bsc">Rating</th>'
-    html += '<th class="text-right group-vci">VCI NPATMI</th>'
-    html += '<th class="text-right group-vci">VCI Target</th>'
-    html += '<th class="text-right group-delta">Δ NPATMI</th>'
-    html += '<th class="text-right group-delta">Δ Target</th>'
-    html += '<th>Status</th>'
-    html += '</tr></thead>'
+        html += f'<th rowspan="2" class="group-bsc">Rating</th>'
+    html += f'<th colspan="2" class="text-center group-bsc">BSC Forecast</th>'
+    html += f'<th colspan="2" class="text-center group-vci">VCI Forecast</th>'
+    html += f'<th colspan="2" class="text-center group-delta">Δ% (BSC - VCI)</th>'
+    html += f'<th rowspan="2">Status</th>'
+    html += '</tr>'
+    # Row 2: Sub-headers
+    html += '<tr class="header-sub">'
+    html += f'<th class="text-right group-bsc">NPATMI {year_label}</th>'
+    html += '<th class="text-right group-bsc">Target</th>'
+    html += f'<th class="text-right group-vci">NPATMI {year_label}</th>'
+    html += '<th class="text-right group-vci">Target</th>'
+    html += '<th class="text-right group-delta">NPATMI</th>'
+    html += '<th class="text-right group-delta">Target</th>'
+    html += '</tr>'
+    html += '</thead>'
 
     # Body rows
     html += '<tbody>'
@@ -276,29 +300,36 @@ def consensus_comparison_table(
         symbol = row.get('symbol', '-')
         sector = row.get('sector', '-')
 
-        # BSC columns
-        bsc_npatmi = format_billions(row.get('bsc_npatmi_2025', row.get('npatmi_forecast_2025')))
-        bsc_target = format_price(row.get('bsc_target', row.get('target_price_bsc')))
-        bsc_rating = row.get('bsc_rating', row.get('rating', '-'))
+        # BSC columns - use display columns if available (year-aware), fallback to original
+        bsc_npatmi_val = row.get('bsc_npatmi_display', row.get('npatmi_2025f', row.get('bsc_npatmi_2025')))
+        bsc_npatmi = format_billions(bsc_npatmi_val)
+        bsc_target_val = row.get('target_price', row.get('bsc_target'))
+        bsc_target = format_price(bsc_target_val)
+        bsc_rating = row.get('rating', row.get('bsc_rating', '-'))
 
-        # VCI columns
-        vci_npatmi = format_billions(row.get('vci_npatmi_2025', row.get('vci_npatmi_forecast_2025')))
-        vci_target = format_price(row.get('vci_target', row.get('target_price_vci')))
+        # VCI columns - use display columns if available (year-aware), fallback to original
+        vci_npatmi_val = row.get('vci_npatmi_display', row.get('vci_npatmi_2025'))
+        vci_npatmi = format_billions(vci_npatmi_val)
+        vci_target_val = row.get('vci_target_price', row.get('vci_target'))
+        vci_target = format_price(vci_target_val)
 
-        # Delta columns
-        npatmi_delta = format_delta(row.get('npatmi_delta_pct', row.get('npatmi_diff_pct')))
-        target_delta = format_delta(row.get('target_delta_pct', row.get('target_diff_pct')))
+        # Use pre-calculated delta from consensus_tab
+        npatmi_delta_val = row.get('npatmi_delta_pct')
+        npatmi_delta = format_delta(npatmi_delta_val)
 
-        # Status
-        status = format_consensus_status(row.get('consensus_status', 'ALIGNED'))
+        target_delta_val = row.get('target_diff_pct', row.get('target_delta_pct'))
+        target_delta = format_delta(target_delta_val)
+
+        # Status - use display_status if available (year-aware)
+        status = format_consensus_status(row.get('display_status', row.get('consensus_status', 'ALIGNED')))
 
         html += '<tr>'
         html += f'<td><b style="color: #00C9AD;">{symbol}</b></td>'
         html += f'<td>{sector if pd.notna(sector) else "-"}</td>'
-        html += f'<td class="text-right">{bsc_npatmi}</td>'
-        html += f'<td class="text-right">{bsc_target}</td>'
         if show_rating:
             html += f'<td>{bsc_rating}</td>'
+        html += f'<td class="text-right">{bsc_npatmi}</td>'
+        html += f'<td class="text-right">{bsc_target}</td>'
         html += f'<td class="text-right">{vci_npatmi}</td>'
         html += f'<td class="text-right">{vci_target}</td>'
         html += f'<td class="text-right">{npatmi_delta}</td>'
@@ -323,29 +354,19 @@ def render_consensus_summary(summary: dict) -> str:
     Returns:
         HTML string for summary cards
     """
-    html = '<div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">'
-
+    cards = []
     for status, config in CONSENSUS_STATUS.items():
         count = summary.get(status, 0)
-        html += f'''
-        <div style="
-            background: {config['bg']};
-            border: 1px solid {config['color']}40;
-            border-radius: 8px;
-            padding: 12px 16px;
-            min-width: 120px;
-        ">
-            <div style="color: {config['color']}; font-weight: 700; font-size: 11px; margin-bottom: 4px;">
-                {config['label']}
-            </div>
-            <div style="color: {config['color']}; font-size: 24px; font-weight: 700; font-family: monospace;">
-                {count}
-            </div>
-            <div style="color: #64748B; font-size: 10px;">
-                {config['desc']}
-            </div>
-        </div>
-        '''
+        card = (
+            f'<div style="background:{config["bg"]};border:1px solid {config["color"]}40;'
+            f'border-radius:8px;padding:12px 16px;min-width:120px;">'
+            f'<div style="color:{config["color"]};font-weight:700;font-size:11px;margin-bottom:4px;">'
+            f'{config["label"]}</div>'
+            f'<div style="color:{config["color"]};font-size:24px;font-weight:700;font-family:monospace;">'
+            f'{count}</div>'
+            f'<div style="color:#64748B;font-size:10px;">{config["desc"]}</div>'
+            f'</div>'
+        )
+        cards.append(card)
 
-    html += '</div>'
-    return html
+    return f'<div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">{"".join(cards)}</div>'

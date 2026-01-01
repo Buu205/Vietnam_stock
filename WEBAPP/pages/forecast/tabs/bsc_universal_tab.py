@@ -68,8 +68,8 @@ def render_bsc_universal_tab(
         if col in filtered_df.columns:
             filtered_df = filtered_df.sort_values(col, ascending=asc, na_position='last')
 
-    # Rating badges summary
-    st.markdown(render_rating_badges(filtered_df), unsafe_allow_html=True)
+    # Rating badges summary - use st.html() for complex HTML (per ui-errors-lessons-learned.md)
+    st.html(render_rating_badges(filtered_df))
 
     # Extended toggle
     show_extended = st.toggle("Show Extended Columns", key="bsc_show_extended", value=False)
