@@ -357,6 +357,71 @@ validate_paths(input_path, output_path)
 
 ---
 
+## Deployment Data Files (Streamlit Cloud)
+
+**IMPORTANT:** These parquet files MUST be committed to GitHub for Streamlit Cloud deployment.
+
+### Required Files for Webapp
+
+```bash
+# Use this command to add all required webapp data:
+git add -f DATA/processed/**/*.parquet
+
+# Or selectively add specific categories:
+git add -f DATA/processed/forecast/bsc/*.parquet
+git add -f DATA/processed/forecast/VCI/*.parquet
+git add -f DATA/processed/fundamental/**/*.parquet
+git add -f DATA/processed/technical/**/*.parquet
+git add -f DATA/processed/valuation/**/*.parquet
+git add -f DATA/processed/sector/*.parquet
+git add -f DATA/processed/macro_commodity/*.parquet
+```
+
+### Files by Category
+
+| Category | Files | Required | Notes |
+|----------|-------|----------|-------|
+| **Forecast BSC** | `bsc_individual.parquet`, `bsc_combined.parquet`, `bsc_sector_valuation.parquet` | ✅ Yes | BSC analyst forecasts |
+| **Forecast VCI** | `vci_coverage_universe.parquet` | ✅ Yes | VCI consensus data |
+| **Fundamental** | `company_financial_metrics.parquet`, `bank_financial_metrics.parquet`, etc. | ✅ Yes | Financial metrics |
+| **Technical** | All files in `technical/` | ✅ Yes | TA indicators, alerts, money flow |
+| **Valuation** | `historical_pe.parquet`, `historical_pb.parquet`, etc. | ✅ Yes | PE/PB/EV ratios |
+| **Sector** | `sector_valuation_metrics.parquet` | ✅ Yes | Sector aggregates |
+| **Macro** | `macro_commodity_unified.parquet` | ✅ Yes | Macro indicators |
+
+### Files NOT to Commit (Local Only)
+
+```bash
+# These are large database dumps - keep local only:
+DATA/processed/fundamental/company_full.parquet    # ~85MB
+DATA/processed/fundamental/bank_full.parquet       # ~40MB
+DATA/processed/fundamental/insurance_full.parquet  # ~20MB
+DATA/processed/fundamental/security_full.parquet   # ~15MB
+
+# Test files:
+DATA/processed/**/*_test.parquet
+```
+
+### Adding New Data Sources
+
+When adding new data for webapp:
+
+1. **Add to registry:** Update `config/data_mapping/configs/data_sources.yaml`
+2. **Commit file:** `git add -f DATA/processed/path/to/new_file.parquet`
+3. **Update this doc:** Add to table above
+
+### Check Current Tracked Files
+
+```bash
+# List all tracked parquet files:
+git ls-files DATA/processed/ | grep ".parquet"
+
+# Check file sizes:
+git ls-files DATA/processed/ | grep ".parquet" | xargs -I{} sh -c 'echo "$(du -h {} | cut -f1) {}"'
+```
+
+---
+
 ## Environment Variables
 
 ```bash
