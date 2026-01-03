@@ -36,7 +36,7 @@ from WEBAPP.components.filters.forecast_filter_bar import (
 from WEBAPP.pages.forecast.tabs.bsc_universal_tab import render_bsc_universal_tab
 from WEBAPP.pages.forecast.tabs.sector_tab import render_sector_tab
 from WEBAPP.pages.forecast.tabs.achievement_tab import render_achievement_tab
-from WEBAPP.pages.forecast.tabs.consensus_tab import render_consensus_tab
+from WEBAPP.pages.forecast.tabs.bsc_vs_consensus_tab import render_bsc_vs_consensus_tab
 
 # Inject premium styles
 st.markdown(get_page_style(), unsafe_allow_html=True)
@@ -298,10 +298,10 @@ elif active_tab == 2:
 
 
 # ============================================================================
-# TAB 3: CONSENSUS (BSC vs VCI Comparison) - NEW
+# TAB 3: BSC vs CONSENSUS (Premium Comparison UI)
 # ============================================================================
 elif active_tab == 3:
-    render_consensus_tab(service)
+    render_bsc_vs_consensus_tab()
 
 
 # Footer

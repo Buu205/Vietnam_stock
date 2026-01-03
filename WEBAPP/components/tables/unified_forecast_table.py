@@ -196,7 +196,7 @@ UNIFIED_TABLE_STYLE = """
     width: 100%;
     border-collapse: collapse;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
+    font-size: 14px;
     background: rgba(26, 22, 37, 0.5);
     border-radius: 8px;
     overflow: hidden;
@@ -205,12 +205,12 @@ UNIFIED_TABLE_STYLE = """
 .unified-forecast-table th {
     background: rgba(139, 92, 246, 0.15);
     color: #E8E8E8;
-    padding: 10px 8px;
+    padding: 12px 10px;
     text-align: left;
     font-weight: 600;
     border-bottom: 1px solid rgba(139, 92, 246, 0.3);
     white-space: nowrap;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .unified-forecast-table th.text-right {
@@ -233,7 +233,7 @@ UNIFIED_TABLE_STYLE = """
 }
 
 .unified-forecast-table td {
-    padding: 8px;
+    padding: 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     color: #94A3B8;
 }
