@@ -26,6 +26,11 @@ PAGE_STATE_DEFAULTS: Dict[str, Dict[str, Any]] = {
         'global_ticker_search': '',
         'quick_search_ticker': None,
         'search_select': None,
+        # Cross-page sync state (Fundamental → Forecast/Technical)
+        'sync_last_ticker': None,       # "ACB"
+        'sync_last_entity': None,       # "BANK", "COMPANY", "SECURITY"
+        'sync_last_sector': None,       # "Ngân hàng"
+        'sync_timestamp': None,         # datetime when set
     },
     'company': {
         'selected_ticker': 'VNM',
@@ -264,10 +269,8 @@ def render_persistent_tabs(
     for idx, (col, name) in enumerate(zip(cols, tab_names)):
         with col:
             is_active = (idx == active_tab)
-            # Clean emoji prefixes for cleaner look
-            clean_name = name.lstrip('📊📈📋🔄🎯💰🛢️⚙️🛡️ ')
             if st.button(
-                clean_name,
+                name,
                 key=f"{state_key}_btn_{idx}",
                 width='stretch',
                 type="primary" if is_active else "secondary"
@@ -276,3 +279,52 @@ def render_persistent_tabs(
                 st.rerun()
 
     return active_tab
+
+
+# ============================================================================
+# CROSS-PAGE SYNC HELPERS
+# ============================================================================
+
+def set_synced_ticker(ticker: str, entity_type: str, sector: str = None) -> None:
+    """
+    Set the synced ticker for cross-page navigation.
+    Called when user selects a ticker in Fundamental pages.
+
+    Args:
+        ticker: Stock symbol (e.g., "ACB")
+        entity_type: Entity type ("BANK", "COMPANY", "SECURITY")
+        sector: Optional sector name
+    """
+    from datetime import datetime
+    st.session_state['sync_last_ticker'] = ticker
+    st.session_state['sync_last_entity'] = entity_type
+    st.session_state['sync_last_sector'] = sector
+    st.session_state['sync_timestamp'] = datetime.now()
+
+
+def get_synced_ticker() -> Optional[str]:
+    """Get the last synced ticker, or None if not set."""
+    return st.session_state.get('sync_last_ticker')
+
+
+def get_synced_entity() -> Optional[str]:
+    """Get the entity type of synced ticker."""
+    return st.session_state.get('sync_last_entity')
+
+
+def get_synced_sector() -> Optional[str]:
+    """Get the sector of synced ticker."""
+    return st.session_state.get('sync_last_sector')
+
+
+def clear_synced_ticker() -> None:
+    """Clear the synced ticker state."""
+    st.session_state['sync_last_ticker'] = None
+    st.session_state['sync_last_entity'] = None
+    st.session_state['sync_last_sector'] = None
+    st.session_state['sync_timestamp'] = None
+
+
+def has_synced_ticker() -> bool:
+    """Check if there's a synced ticker."""
+    return st.session_state.get('sync_last_ticker') is not None

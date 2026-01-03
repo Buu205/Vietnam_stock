@@ -19,7 +19,7 @@ class DisplaySettings:
         """Setup Streamlit page configuration."""
         st.set_page_config(
             page_title="VN Finance Dashboard",
-            page_icon="📊",
+            page_icon=":material/analytics:",
             layout="wide",
             initial_sidebar_state="expanded",
             menu_items={

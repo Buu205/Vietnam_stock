@@ -471,7 +471,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  ❌ {entity}: Error - {e}")
     
-    print("\n💰 Valuation paths:")
+    print("\nValuation paths:")
     for metric in ['pe', 'pb', 'ev_ebitda']:
         try:
             path = DataPaths.valuation(metric)
@@ -480,7 +480,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"  ❌ {metric}: Error - {e}")
     
-    print("\n📊 Macro paths:")
+    print("\nMacro paths:")
     for indicator in ['deposit_interest', 'exchange_rates', 'gov_bond_yields', 'interest_rates']:
         try:
             path = DataPaths.macro(indicator)
