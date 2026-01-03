@@ -24,7 +24,7 @@ def render_valuation_metrics(pe_ratio: float, pb_ratio: float, ev_ebitda_ratio: 
         ev_ebitda_rank: EV/EBITDA percentile rank
         overall_valuation: Overall valuation classification
     """
-    st.markdown("### 📊 Tóm tắt định giá hiện tại")
+    st.markdown("### Tóm tắt định giá hiện tại")
     
     # Create columns for metrics
     col1, col2, col3, col4, col5 = st.columns(5)
@@ -84,7 +84,7 @@ def render_financial_summary(financial_data: Dict[str, Any]) -> None:
     # Format the data
     formatted_data = format_summary_data(financial_data)
     
-    st.markdown("### 💰 Tóm tắt tài chính")
+    st.markdown("### Tóm tắt tài chính")
     
     # Group metrics by category
     revenue_metrics = {k: v for k, v in formatted_data.items() 

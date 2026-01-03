@@ -33,7 +33,7 @@ from WEBAPP.core.styles import (
 # ============================================================================
 st.set_page_config(
     page_title="Bank Explorer | VN Market",
-    page_icon="🏦",
+    page_icon=":material/account_balance:",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -103,7 +103,7 @@ BANK_TYPES = {
 # ============================================================================
 # HEADER
 # ============================================================================
-st.title("🏦 Bank Explorer")
+st.title("Bank Explorer")
 st.markdown("**Interactive multi-metric analysis for Vietnamese banks**")
 st.markdown("---")
 
@@ -142,7 +142,7 @@ available_tickers = sorted(df_all['symbol'].unique().tolist())
 # ============================================================================
 # SIDEBAR - FILTERS
 # ============================================================================
-st.sidebar.markdown("## 📊 Selection Panel")
+st.sidebar.markdown("## Selection Panel")
 
 # Selection mode
 selection_mode = st.sidebar.radio(
@@ -182,7 +182,7 @@ num_periods = st.sidebar.number_input(
 st.sidebar.markdown("---")
 
 # Metric selection with groups
-st.sidebar.markdown("## 📈 Select Metrics")
+st.sidebar.markdown("## Select Metrics")
 
 # Flatten metrics for multiselect
 all_metrics = {}
@@ -213,7 +213,7 @@ with st.sidebar.expander("Quick Select by Group"):
 
 # Refresh button
 st.sidebar.markdown("---")
-if st.sidebar.button("🔄 Refresh Data", width='stretch'):
+if st.sidebar.button("Refresh Data", width='stretch'):
     st.cache_data.clear()
     st.rerun()
 
@@ -373,7 +373,7 @@ for row in range(rows_needed):
 # DATA TABLE
 # ============================================================================
 st.markdown("---")
-with st.expander("📋 View Raw Data", expanded=False):
+with st.expander("View Raw Data", expanded=False):
     # Prepare display columns
     display_cols = ['symbol', 'period_label'] + [all_metrics[m]['col'] for m in selected_metrics if all_metrics[m]['col'] in df_filtered.columns]
 
@@ -392,7 +392,7 @@ with st.expander("📋 View Raw Data", expanded=False):
     # Download button
     csv = df_display.to_csv(index=False).encode('utf-8')
     st.download_button(
-        "📥 Download CSV",
+        "Download CSV",
         csv,
         "bank_explorer_data.csv",
         "text/csv",

@@ -14,7 +14,7 @@ def build_sidebar(symbols: List[str]) -> Tuple[str, int, str]:
     Tabs: 'Standard', 'Financial Tables', 'Valuation'
     """
     with st.sidebar:
-        st.header("📊 Configuration")
+        st.header("Configuration")
 
         selected_symbol = st.selectbox(
             "Select Company",
@@ -23,14 +23,14 @@ def build_sidebar(symbols: List[str]) -> Tuple[str, int, str]:
             help="Choose a company to analyze",
         )
 
-        st.header("⚙️ Data Settings")
+        st.header("Data Settings")
         years = st.slider(
             "Years of Historical Data",
             min_value=1, max_value=10, value=5,
             help="Select number of years of historical data to display",
         )
 
-        st.header("🚀 Quick Navigation")
+        st.header("Quick Navigation")
         active_tab = st.radio(
             "Go to",
             options=["Standard", "Financial Tables", "Valuation"],

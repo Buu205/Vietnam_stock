@@ -23,32 +23,17 @@ if str(project_root) not in sys.path:
 
 from WEBAPP.services.forecast_service import ForecastService
 from WEBAPP.core.styles import get_page_style, get_table_style
-from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
+from WEBAPP.core.session_state import (
+    init_page_state, render_persistent_tabs,
+    get_synced_ticker, get_synced_entity, clear_synced_ticker, has_synced_ticker
+)
+from WEBAPP.core.trading_rules import RATING_COLORS, RATING_BG_COLORS
 
 # Tab modules (modularized for maintainability)
 from WEBAPP.pages.forecast.tabs.bsc_universal_tab import render_bsc_universal_tab
 from WEBAPP.pages.forecast.tabs.sector_tab import render_sector_tab
 from WEBAPP.pages.forecast.tabs.achievement_tab import render_achievement_tab
 from WEBAPP.pages.forecast.tabs.consensus_tab import render_consensus_tab
-
-# Rating color mapping
-RATING_COLORS = {
-    'STRONG BUY': '#00C9AD',  # Bright teal
-    'BUY': '#009B87',         # Brand teal
-    'HOLD': '#FFC132',        # Brand gold
-    'SELL': '#E63946',        # Red
-    'STRONG SELL': '#9D0208', # Dark red
-    'N/A': '#64748B',         # Gray
-}
-
-RATING_BG_COLORS = {
-    'STRONG BUY': 'rgba(0, 201, 173, 0.15)',
-    'BUY': 'rgba(0, 155, 135, 0.15)',
-    'HOLD': 'rgba(255, 193, 50, 0.15)',
-    'SELL': 'rgba(230, 57, 70, 0.15)',
-    'STRONG SELL': 'rgba(157, 2, 8, 0.15)',
-    'N/A': 'rgba(100, 116, 139, 0.15)',
-}
 
 # Inject premium styles
 st.markdown(get_page_style(), unsafe_allow_html=True)
@@ -216,6 +201,21 @@ with col4:
     median_pe = stats['median_pe_fwd_2025']
     pe_display = f"{median_pe:.1f}x" if median_pe and median_pe > 0 else "N/A"
     st.metric("Median PE 25F", pe_display)
+
+# Sync indicator - show if user navigated from Fundamental pages
+synced_ticker = None
+if has_synced_ticker():
+    synced_ticker = get_synced_ticker()
+    entity = get_synced_entity()
+    entity_label = {'BANK': 'Bank', 'COMPANY': 'Company', 'SECURITY': 'Security'}.get(entity, entity)
+
+    sync_col1, sync_col2 = st.columns([6, 1])
+    with sync_col1:
+        st.info(f"Viewing: **{synced_ticker}** (from {entity_label} page)")
+    with sync_col2:
+        if st.button("Clear", key="forecast_clear_sync"):
+            clear_synced_ticker()
+            st.rerun()
 
 st.markdown("---")
 

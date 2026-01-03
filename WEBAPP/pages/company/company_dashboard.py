@@ -36,6 +36,7 @@ from WEBAPP.core.styles import (
     render_styled_table, get_table_style
 )
 from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
+from WEBAPP.components.filters.fundamental_filter_bar import render_fundamental_filters
 
 # ============================================================================
 # STYLES
@@ -54,13 +55,10 @@ init_page_state('company')
 # ============================================================================
 st.title("Company Analysis")
 st.markdown("**Comprehensive fundamental analysis for Vietnamese equities**")
-st.markdown("---")
 
 # ============================================================================
-# SIDEBAR - FILTERS
+# INITIALIZE SERVICE & HEADER FILTERS
 # ============================================================================
-st.sidebar.markdown("## Filters")
-
 try:
     service = CompanyService()
     available_tickers = service.get_available_tickers()
@@ -74,42 +72,17 @@ except FileNotFoundError as e:
     st.info("Run: `python3 PROCESSORS/fundamental/calculators/run_company_calculator.py`")
     st.stop()
 
-# Ticker selector - check for Quick Search pre-selection
-default_ticker = st.session_state.get('quick_search_ticker', None)
-if default_ticker and default_ticker in available_tickers:
-    default_index = available_tickers.index(default_ticker)
-    # Clear the quick search after using it
-    st.session_state['quick_search_ticker'] = None
-else:
-    default_index = 0 if available_tickers else None
-
-ticker = st.sidebar.selectbox(
-    "Select Company",
-    options=available_tickers,
-    index=default_index,
-    help="Choose a company to analyze"
+# Header filter bar (replaces sidebar filters)
+filters = render_fundamental_filters(
+    service=service,
+    entity_type='company',
+    mode='basic'
 )
+ticker = filters['ticker']
+period = filters['period']
+limit = filters['num_periods']
 
-# Period selector
-period = st.sidebar.selectbox(
-    "Period",
-    options=["Quarterly", "Yearly"],
-    index=0,
-    help="Select data frequency"
-)
-
-# Limit
-limit = st.sidebar.slider(
-    "Number of periods",
-    min_value=4,
-    max_value=20,
-    value=12,
-    help="How many periods to display"
-)
-
-if st.sidebar.button("🔄 Refresh Data", width='stretch'):
-    st.cache_data.clear()
-    st.rerun()
+st.markdown("---")
 
 # ============================================================================
 # LOAD DATA
@@ -184,7 +157,7 @@ st.markdown("---")
 # ============================================================================
 # MAIN TABS: Charts | Tables (Session State Persisted)
 # ============================================================================
-active_tab = render_persistent_tabs(["📈 Charts", "📋 Tables"], "company_active_tab")
+active_tab = render_persistent_tabs(["Charts", "Tables"], "company_active_tab")
 
 # ============================================================================
 # CHARTS TAB
@@ -200,35 +173,15 @@ if active_tab == 0:
         if col in chart_df.columns:
             chart_df[col] = chart_df[col] / 1e9
 
-    # Helper function for MA4 YoY Growth calculation using FULL historical data
-    def compute_ma4_yoy_full(col_name: str) -> pd.Series:
-        """
-        Compute MA4 YoY Growth % based on TTM using FULL historical data.
-        Then align to displayed quarters for continuous line from first bar.
-
-        Logic:
-        - TTM current = Sum of last 4 quarters
-        - TTM previous = Sum of same 4 quarters from previous year (shift 4)
-        - MA4 YoY = (TTM current / TTM previous - 1) * 100%
-        """
-        # Calculate on full data
-        full_series = pd.to_numeric(df_full[col_name], errors='coerce')
-        ttm_current = full_series.rolling(window=4, min_periods=4).sum()
-        ttm_prev = ttm_current.shift(4)
-        ma4_full = (ttm_current / ttm_prev - 1) * 100.0
-
-        # Create mapping from period_label to MA4 value
-        df_full['_temp_period'] = df_full.apply(
-            lambda r: f"{int(r.get('quarter', 0))}Q{str(int(r['year']))[-2:]}" if period == 'Quarterly' else str(int(r['year'])),
-            axis=1
-        )
-        ma4_map = dict(zip(df_full['_temp_period'], ma4_full))
-
-        # Align to displayed quarters
-        ma4_aligned = [ma4_map.get(q, None) for q in chart_df['period_label'].tolist()]
-        ma4_display = pd.Series(ma4_aligned, dtype=float).interpolate(limit_direction='both')
-
-        return ma4_display
+    # Mapping from chart column to pre-calculated YoY growth column in parquet
+    YOY_COLUMN_MAP = {
+        'net_revenue': 'net_revenue_growth_yoy',
+        'gross_profit': 'gross_profit_growth_yoy',
+        'ebitda': 'ebitda_growth_yoy',
+        'npatmi': 'npatmi_growth_yoy',
+        'operating_cf': 'operating_cf_growth_yoy',
+        'fcf': 'fcf_growth_yoy',
+    }
 
     # ========================================================================
     # INCOME STATEMENT - 4 Bar Charts with MA4 YoY Lines
@@ -263,8 +216,9 @@ if active_tab == 0:
                         secondary_y=False
                     )
 
-                    # MA4 YoY Growth % line (secondary y-axis) - calculated from FULL data
-                    ma4_yoy = compute_ma4_yoy_full(col)
+                    # MA4 YoY Growth % line (secondary y-axis) - from pre-calculated parquet
+                    yoy_col = YOY_COLUMN_MAP.get(col)
+                    ma4_yoy = df[yoy_col] if yoy_col and yoy_col in df.columns else pd.Series([np.nan] * len(df))
                     fig.add_trace(
                         go.Scatter(
                             x=chart_df['period_label'],
@@ -301,17 +255,13 @@ if active_tab == 0:
         ("Net Margin", "net_margin", CHART_COLORS['tertiary']),
     ]
 
-    def compute_ma4_margin_full(col_name: str) -> pd.Series:
-        """Compute simple 4-quarter moving average for margin metrics using FULL data."""
-        full_series = pd.to_numeric(df_full[col_name], errors='coerce')
-        ma4_full = full_series.rolling(window=4, min_periods=1).mean()
-
-        # Map to displayed quarters
-        ma4_map = dict(zip(df_full['_temp_period'], ma4_full))
-        ma4_aligned = [ma4_map.get(q, None) for q in chart_df['period_label'].tolist()]
-        ma4_display = pd.Series(ma4_aligned, dtype=float).interpolate(limit_direction='both')
-
-        return ma4_display
+    # Mapping from margin column to pre-calculated MA4 column in parquet
+    MARGIN_MA4_MAP = {
+        'gross_profit_margin': 'gross_profit_margin_ma4',
+        'ebit_margin': 'ebit_margin_ma4',
+        'ebitda_margin': 'ebitda_margin_ma4',
+        'net_margin': 'net_margin_ma4',
+    }
 
     # 2 charts per row
     for row_start in range(0, len(margin_items), 2):
@@ -334,8 +284,9 @@ if active_tab == 0:
                         secondary_y=False
                     )
 
-                    # MA4 line (same axis, just smoothed trend) - calculated from FULL data
-                    ma4 = compute_ma4_margin_full(col)
+                    # MA4 line (same axis, just smoothed trend) - from pre-calculated parquet
+                    ma4_col = MARGIN_MA4_MAP.get(col)
+                    ma4 = df[ma4_col] if ma4_col and ma4_col in df.columns else pd.Series([np.nan] * len(df))
                     fig.add_trace(
                         go.Scatter(
                             x=chart_df['period_label'],
@@ -497,7 +448,7 @@ if active_tab == 0:
             layout['showlegend'] = False
             fig.update_layout(**layout)
             st.plotly_chart(fig, width='stretch')
-            st.caption("📊 Tỷ lệ khấu hao tích lũy / Nguyên giá TSCĐ")
+            st.caption("Tỷ lệ khấu hao tích lũy / Nguyên giá TSCĐ")
 
         with col2:
             fig = go.Figure()
@@ -515,7 +466,7 @@ if active_tab == 0:
             layout['showlegend'] = False
             fig.update_layout(**layout)
             st.plotly_chart(fig, width='stretch')
-            st.caption("📊 Tỷ lệ XDCB dở dang / Tổng tài sản")
+            st.caption("Tỷ lệ XDCB dở dang / Tổng tài sản")
 
 # ============================================================================
 # TABLES TAB
@@ -540,7 +491,7 @@ elif active_tab == 1:
     st.markdown("### Export Data")
     csv_data = df.to_csv(index=False).encode('utf-8')
     st.download_button(
-        label="📥 Download Full Dataset (CSV)",
+        label="Download Full Dataset (CSV)",
         data=csv_data,
         file_name=f"{ticker}_financial_data.csv",
         mime="text/csv",
@@ -551,4 +502,4 @@ elif active_tab == 1:
 # FOOTER
 # ============================================================================
 st.markdown("---")
-st.caption(f"💾 Data: `DATA/processed/fundamental/company/` | 📊 {ticker} | 📝 {len(df)} records")
+st.caption(f"Data: Company Metrics | Ticker: **{ticker}** | Records: {len(df)}")

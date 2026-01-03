@@ -68,7 +68,7 @@ def render_compact_status_bar(service: TADashboardService) -> None:
 
         # Handle missing data
         if state is None:
-            st.info("📊 Loading market data...")
+            st.info("Loading market data...")
             return
 
         # Regime styling

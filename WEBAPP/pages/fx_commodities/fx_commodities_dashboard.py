@@ -125,13 +125,13 @@ COMMODITY_LABELS = {
 
 # Interest rate chart groups (shared Y-axis, % unit)
 INTEREST_RATE_GROUPS = {
-    "💰 Lãi suất huy động": {
+    "Lãi suất huy động": {
         'symbols': ['ls_huy_dong_1_3_thang', 'ls_huy_dong_6_9_thang', 'ls_huy_dong_13_thang'],
         'colors': [CHART_COLORS['primary'], CHART_COLORS['secondary'], CHART_COLORS['tertiary']],
         'unit': '%',
         'title': 'Lãi suất huy động theo kỳ hạn'
     },
-    "🏦 Lãi suất liên ngân hàng": {
+    "Lãi suất liên ngân hàng": {
         'symbols': ['ls_qua_dem_lien_ngan_hang', 'ls_lien_ngan_hang_ky_han_1_tuan', 'ls_lien_ngan_hang_ky_han_2_tuan'],
         'colors': [CHART_COLORS['positive'], CHART_COLORS['primary'], CHART_COLORS['secondary']],
         'unit': '%',
@@ -249,7 +249,7 @@ st.markdown("*Macro economic indicators, exchange rates, and commodity prices*")
 # SIDEBAR: Time Range Filter
 # ============================================================================
 with st.sidebar:
-    st.markdown("### ⏱️ Time Range")
+    st.markdown("### Time Range")
     days = st.selectbox(
         "Select Period",
         options=[30, 90, 180, 365, 730],
@@ -261,7 +261,7 @@ with st.sidebar:
 # TABS: Macro & FX | Commodities (Session State Persisted)
 # ============================================================================
 active_tab = render_persistent_tabs(
-    ["📊 Macro & FX", "🛢️ Commodities"],
+    ["Macro & FX", "Commodities"],
     "fx_active_tab"
 )
 
@@ -278,7 +278,7 @@ if active_tab == 0:
         macro_df = macro_loader.get_macro()
 
     if macro_df.empty:
-        st.warning("⚠️ No macro data available. Please run the daily update pipeline.")
+        st.warning("No macro data available. Please run the daily update pipeline.")
     else:
         # Get canonical symbols from actual data
         macro_symbols_raw = macro_df['symbol'].unique().tolist()
@@ -292,7 +292,7 @@ if active_tab == 0:
         # Selector for indicator type
         macro_type = st.radio(
             "Select Category",
-            options=["💰 Lãi suất huy động", "🏦 Lãi suất liên ngân hàng", "💱 Tỷ giá USD", "📜 Trái phiếu CP"],
+            options=["Lãi suất huy động", "Lãi suất liên ngân hàng", "Tỷ giá USD", "Trái phiếu CP"],
             horizontal=True
         )
 
@@ -317,7 +317,7 @@ if active_tab == 0:
                 st.plotly_chart(fig_macro, width='stretch')
 
                 # Performance Table
-                st.markdown("### 📊 Performance Summary")
+                st.markdown("### Performance Summary")
                 perf_data = []
                 for symbol in available_symbols:
                     actual_symbol = get_actual_symbol(symbol)
@@ -338,26 +338,26 @@ if active_tab == 0:
         # =============================================
         # EXCHANGE RATE: Dual pair comparisons
         # =============================================
-        elif macro_type == "💱 Tỷ giá USD":
+        elif macro_type == "Tỷ giá USD":
             exchange_dual_axis_pairs = {
-                "💱 USD: Chính thức vs Tự do": (
+                "USD: Chính thức vs Tự do": (
                     'ty_gia_usd_trung_tam', 'ty_gia_usd_tu_do_ban_ra',
                     'Trung tâm (SBV)', 'Tự do (Thị trường)'
                 ),
-                "🏦 USD: Ngân hàng vs Tự do": (
+                "USD: Ngân hàng vs Tự do": (
                     'ty_gia_usd_nhtm_ban_ra', 'ty_gia_usd_tu_do_ban_ra',
                     'NHTM bán ra', 'Tự do bán ra'
                 ),
-                "📊 Biên độ: Sàn vs Trần": (
+                "Biên độ: Sàn vs Trần": (
                     'ty_gia_san', 'ty_gia_tran',
                     'Giá sàn', 'Giá trần'
                 ),
             }
 
             exchange_individual = {
-                "📌 USD Trung tâm (SBV)": 'ty_gia_usd_trung_tam',
-                "🏛️ USD NHTM bán ra": 'ty_gia_usd_nhtm_ban_ra',
-                "💵 USD Tự do bán ra": 'ty_gia_usd_tu_do_ban_ra',
+                "USD Trung tâm (SBV)": 'ty_gia_usd_trung_tam',
+                "USD NHTM bán ra": 'ty_gia_usd_nhtm_ban_ra',
+                "USD Tự do bán ra": 'ty_gia_usd_tu_do_ban_ra',
             }
 
             all_exchange_options = list(exchange_dual_axis_pairs.keys()) + list(exchange_individual.keys())
@@ -442,7 +442,7 @@ if active_tab == 0:
                     st.plotly_chart(fig_exchange, width='stretch')
 
                     # Show spread metrics
-                    st.markdown("### 📈 Latest Values & Spread")
+                    st.markdown("### Latest Values & Spread")
                     latest1 = series1.iloc[-1]['value']
                     latest2 = series2.iloc[-1]['value']
                     spread = latest2 - latest1
@@ -457,7 +457,7 @@ if active_tab == 0:
                         st.metric("Spread (Chênh lệch)", f"{spread:+,.0f} VND", f"{spread_pct:+.2f}%")
 
                     # Performance table
-                    st.markdown("### 📊 Performance Summary")
+                    st.markdown("### Performance Summary")
                     perf_data = []
                     for sym in [symbol1, symbol2]:
                         actual_sym = get_actual_symbol(sym)
@@ -521,7 +521,7 @@ if active_tab == 0:
         # =============================================
         # BONDS: Government bond yield
         # =============================================
-        elif macro_type == "📜 Trái phiếu CP":
+        elif macro_type == "Trái phiếu CP":
             bond_symbol = 'vn_gov_bond_5y'
             actual_symbol = get_actual_symbol(bond_symbol)
             series = filter_series_by_days(macro_loader.get_series(actual_symbol), days)
@@ -557,7 +557,7 @@ if active_tab == 0:
                 st.plotly_chart(fig_bond, width='stretch')
 
                 # Performance table
-                st.markdown("### 📊 Performance Summary")
+                st.markdown("### Performance Summary")
                 changes = calculate_period_changes(series, 'value')
                 perf_data = [{
                     'symbol': bond_symbol,
@@ -703,7 +703,7 @@ elif active_tab == 1:
                     st.plotly_chart(fig, width='stretch')
 
                     # Performance table
-                    st.markdown("### 📊 Performance Summary")
+                    st.markdown("### Performance Summary")
                     perf_data = []
                     for sym, unit in [(symbol1, unit1), (symbol2, unit2)]:
                         series = commodity_loader.get_series(sym)
@@ -777,7 +777,7 @@ elif active_tab == 1:
                             st.metric("Date", latest['date'].strftime('%Y-%m-%d') if pd.notna(latest['date']) else '-')
 
                         # Performance table
-                        st.markdown("### 📊 Performance Summary")
+                        st.markdown("### Performance Summary")
                         changes = calculate_period_changes(series, value_col)
                         perf_data = [{
                             'symbol': symbol,
@@ -794,4 +794,4 @@ elif active_tab == 1:
 # FOOTER
 # ============================================================================
 st.markdown("---")
-st.caption(f"📊 Data: Macro & Commodities | 🕐 Last updated: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M')}")
+st.caption(f"Data: Macro & Commodities | Last updated: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M')}")

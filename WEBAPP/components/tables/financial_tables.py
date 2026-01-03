@@ -279,7 +279,7 @@ def render_income_statement_table(df: pd.DataFrame, period_type: str = 'Quarterl
         df, INCOME_STATEMENT_METRICS, period_type
     )
 
-    st.caption(f"📊 Showing {num_metrics} metrics across {num_periods} {period_type.lower()} periods")
+    st.caption(f"Showing {num_metrics} metrics across {num_periods} {period_type.lower()} periods")
 
     # Use styled HTML table instead of st.dataframe for better dark theme support
     html_table = render_styled_table(pivot_df, highlight_first_col=True)
@@ -310,7 +310,7 @@ def render_balance_sheet_table(df: pd.DataFrame, period_type: str = 'Quarterly')
         df, available_metrics, period_type
     )
 
-    st.caption(f"📊 Showing {num_metrics} metrics across {num_periods} {period_type.lower()} periods")
+    st.caption(f"Showing {num_metrics} metrics across {num_periods} {period_type.lower()} periods")
 
     # Use styled HTML table instead of st.dataframe for better dark theme support
     html_table = render_styled_table(pivot_df, highlight_first_col=True)
@@ -341,7 +341,7 @@ def render_cash_flow_table(df: pd.DataFrame, period_type: str = 'Quarterly') -> 
         df, available_metrics, period_type
     )
 
-    st.caption(f"📊 Showing {num_metrics} metrics across {num_periods} {period_type.lower()} periods")
+    st.caption(f"Showing {num_metrics} metrics across {num_periods} {period_type.lower()} periods")
 
     # Use styled HTML table instead of st.dataframe for better dark theme support
     html_table = render_styled_table(pivot_df, highlight_first_col=True)

@@ -69,8 +69,8 @@ pg = st.navigation({
 
 | Section | Pages | Icons |
 |---------|-------|-------|
-| **Fundamental** | Company, Bank, Security | 🏢 🏦 📈 |
-| **Analysis** | Sector, Valuation, Technical | 🌐 💰 📉 |
+| **Fundamental** | Company, Bank, Security | - |
+| **Analysis** | Sector, Valuation, Technical | - |
 
 ---
 
@@ -175,7 +175,7 @@ df = service.get_financial_data(ticker, period, limit=100)
 #### Tabs Structure
 
 ```
-📈 Charts
+Charts
 ├── Income Statement (4 bar charts with MA4 YoY lines)
 │   ├── Revenue (net_revenue)
 │   ├── Gross Profit (gross_profit)
@@ -193,7 +193,7 @@ df = service.get_financial_data(ticker, period, limit=100)
     ├── Depreciation Rate
     └── CIP Rate
 
-📋 Tables
+Tables
 ├── Income Statement (pivot table)
 ├── Balance Sheet (pivot table)
 └── Cash Flow (pivot table)
@@ -322,7 +322,7 @@ AVAILABLE_METRICS = {
 #### Tabs Structure
 
 ```
-📊 Charts
+Charts
 ├── Selected Metrics Grid (dynamic, 2 per row)
 │   └── Line charts for trends (NIM, ROE, ROA, Growth metrics)
 │   └── Bar charts for others
@@ -333,7 +333,7 @@ AVAILABLE_METRICS = {
     ├── PBT (pbt)
     └── NPATMI (npatmi)
 
-📋 Tables
+Tables
 ├── Size (total_assets, total_credit, etc.)
 ├── Income Statement (nii, toi, noii, opex, etc.)
 ├── Growth (YoY and YTD metrics)
@@ -391,7 +391,7 @@ DATA/processed/fundamental/security/security_financial_metrics.parquet
 #### Tabs Structure
 
 ```
-📊 Charts
+Charts
 ├── Row 1 (2 columns)
 │   ├── Revenue Mix (stacked bar)
 │   │   └── income_fvtpl, income_htm, income_afs, income_loans, brokerage_fee
@@ -405,7 +405,7 @@ DATA/processed/fundamental/security/security_financial_metrics.parquet
 │   ├── CIR (bar with reference line y=50)
 │   └── Leverage Trend (line with fill)
 
-📋 Tables
+Tables
 ├── Income Statement
 │   └── total_revenue, brokerage_fee, investment_revenue, gross_profit, opex, net_profit
 ├── Balance Sheet Summary
@@ -453,8 +453,8 @@ service = SectorService()
 #### Tabs Structure
 
 ```
-🕯️ All Sectors Distribution
-├── Radio: "📊 Sectors" | "📈 Market Indices"
+All Sectors Distribution
+├── Radio: "Sectors" | "Market Indices"
 ├── Sectors: Candlestick distribution chart
 │   └── Whiskers: P5-P95
 │   └── Body: P25-P75
@@ -463,7 +463,7 @@ service = SectorService()
 └── Market Indices: Combined line chart
     └── VNINDEX, VNINDEX_EXCLUDE, BSC_INDEX
 
-📈 Individual Analysis
+Individual Analysis
 ├── Scope selector: Market Indices | Sectors
 ├── Combined view (all 3 indices) OR Single scope
 └── Line chart with statistical bands
@@ -474,7 +474,7 @@ service = SectorService()
     ├── Mean line (blue, dashed)
     └── ±1σ, ±2σ reference lines
 
-📋 Data
+Data
 ├── Sector Valuation Overview table
 └── Sector Composition table
 ```
@@ -523,13 +523,13 @@ Multiple parquet files via ValuationService
 #### Tabs Structure
 
 ```
-📊 Sector Comparison
+Sector Comparison
 ├── Candlestick chart (same as Sector dashboard)
 ├── Premium Statistics Table (custom HTML)
 │   └── Ticker, Current, Median, Percentile bar, Status badge
 └── Download Excel button
 
-📈 Individual Analysis
+Individual Analysis
 ├── Large trend chart (600px height)
 │   ├── ±2 SD band
 │   ├── ±1 SD band
@@ -582,15 +582,15 @@ DATA/processed/technical/basic_data.parquet
 | Position | Metric | Column | Interpretation |
 |----------|--------|--------|----------------|
 | 1 | Close Price | `close` | % change |
-| 2 | RSI (14) | `rsi_14` | 🔴/>70, 🟢/<30, ⚪/else |
-| 3 | Price vs SMA50 | `price_vs_sma50` | 📈/>0, 📉/<0 |
-| 4 | ADX (14) | `adx_14` | 💪/>25, 😴/<25 |
-| 5 | MACD | `macd` vs `macd_signal` | 🟢/🔴 |
+| 2 | RSI (14) | `rsi_14` | Overbought >70, Oversold <30 |
+| 3 | Price vs SMA50 | `price_vs_sma50` | Above/Below SMA |
+| 4 | ADX (14) | `adx_14` | Strong >25, Weak <25 |
+| 5 | MACD | `macd` vs `macd_signal` | Bullish/Bearish |
 
 #### Tabs Structure
 
 ```
-📊 Price & Volume
+Price & Volume
 ├── OHLC Candlestick chart
 │   ├── Candlestick (green: #00D4AA, red: #FF6B6B)
 │   ├── SMA 20 (#5B8DEF)
@@ -601,7 +601,7 @@ DATA/processed/technical/basic_data.parquet
 ├── MA Signal Summary table
 └── Trend Analysis table
 
-📈 Oscillators
+Oscillators
 ├── RSI (14)
 │   ├── Line with fill
 │   ├── Overbought zone (70-100, red)
@@ -613,7 +613,7 @@ DATA/processed/technical/basic_data.parquet
 ├── Stochastic Oscillator (%K, %D)
 └── CCI (20)
 
-📋 Data
+Data
 ├── Price & Moving Averages table
 ├── Volatility table
 ├── Momentum Indicators table
@@ -793,7 +793,7 @@ st.markdown(render_styled_table(df), unsafe_allow_html=True)
 |---------|------|
 | 2 columns | `st.columns(2)` |
 | 4 metric cards | `st.columns(4)` |
-| Tabs | `st.tabs(["📊 Charts", "📋 Tables"])` |
+| Tabs | `render_persistent_tabs(["Charts", "Tables"], "page_active_tab")` |
 | Nested tabs | Inside tab, use another `st.tabs()` |
 
 ---

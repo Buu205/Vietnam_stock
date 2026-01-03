@@ -31,6 +31,7 @@ from WEBAPP.core.styles import (
     render_styled_table, get_table_style
 )
 from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
+from WEBAPP.components.filters.fundamental_filter_bar import render_fundamental_filters
 
 # ============================================================================
 # PAGE CONFIG & STYLES
@@ -78,13 +79,10 @@ DEFAULT_METRICS = ["NIM", "CIR", "NPL", "ROE", "ROA", "LLCR", "Provision/Loan", 
 # ============================================================================
 st.title("Bank Analysis")
 st.markdown("**Comprehensive analysis for Vietnamese banking sector**")
-st.markdown("---")
 
 # ============================================================================
-# SIDEBAR - FILTERS
+# INITIALIZE SERVICE & HEADER FILTERS
 # ============================================================================
-st.sidebar.markdown("## Filters")
-
 try:
     service = BankService()
     available_tickers = service.get_available_tickers()
@@ -98,45 +96,17 @@ except FileNotFoundError as e:
     st.info("Run: `python3 PROCESSORS/fundamental/calculators/run_bank_calculator.py`")
     st.stop()
 
-# Ticker selector - check for Quick Search pre-selection
-default_ticker = st.session_state.get('quick_search_ticker', None)
-if default_ticker and default_ticker in available_tickers:
-    default_index = available_tickers.index(default_ticker)
-    # Clear the quick search after using it
-    st.session_state['quick_search_ticker'] = None
-else:
-    default_index = 0 if available_tickers else None
-
-ticker = st.sidebar.selectbox(
-    "Select Bank",
-    options=available_tickers,
-    index=default_index,
-    help="Choose a bank to analyze"
+# Header filter bar (replaces sidebar filters)
+filters = render_fundamental_filters(
+    service=service,
+    entity_type='bank',
+    mode='basic'
 )
+ticker = filters['ticker']
+period = filters['period']
+limit = filters['num_periods']
 
-# Period selector
-period = st.sidebar.selectbox(
-    "Period",
-    options=["Quarterly", "Yearly"],
-    index=0,
-    help="Select data frequency"
-)
-
-# Limit
-limit = st.sidebar.slider(
-    "Number of periods",
-    min_value=4,
-    max_value=20,
-    value=12,
-    help="How many periods to display"
-)
-
-st.sidebar.markdown("---")
-
-# Refresh button
-if st.sidebar.button("🔄 Refresh Data", width='stretch'):
-    st.cache_data.clear()
-    st.rerun()
+st.markdown("---")
 
 # ============================================================================
 # LOAD DATA
@@ -316,7 +286,7 @@ st.markdown("---")
 # ============================================================================
 # METRIC SELECTOR (Horizontal in main page)
 # ============================================================================
-st.markdown("### 📊 Select Metrics")
+st.markdown("### Select Metrics")
 st.markdown(
     """<style>
     .stMultiSelect [data-baseweb="tag"] {
@@ -342,19 +312,19 @@ selected_metrics = st.multiselect(
 # Quick select buttons in horizontal layout
 quick_col1, quick_col2, quick_col3, quick_col4 = st.columns(4)
 with quick_col1:
-    if st.button("🎯 Key Performance", width='stretch'):
+    if st.button("Key Performance", width='stretch'):
         st.session_state['selected_metrics'] = ["NIM", "CIR", "NPL", "ROE", "ROA", "LLCR", "Provision/Loan"]
         st.rerun()
 with quick_col2:
-    if st.button("📈 Growth Focus", width='stretch'):
+    if st.button("Growth Focus", width='stretch'):
         st.session_state['selected_metrics'] = ["Credit Growth", "Deposit Growth", "Loan Growth", "NII Growth", "NPATMI Growth", "ROE", "NIM", "NPL"]
         st.rerun()
 with quick_col3:
-    if st.button("💰 All Metrics", width='stretch'):
+    if st.button("All Metrics", width='stretch'):
         st.session_state['selected_metrics'] = list(AVAILABLE_METRICS.keys())
         st.rerun()
 with quick_col4:
-    if st.button("🔄 Reset Default", width='stretch'):
+    if st.button("Reset Default", width='stretch'):
         st.session_state['selected_metrics'] = DEFAULT_METRICS
         st.rerun()
 
@@ -363,7 +333,7 @@ st.markdown("---")
 # ============================================================================
 # TABS (Session State Persisted)
 # ============================================================================
-active_tab = render_persistent_tabs(["📊 Charts", "📋 Tables"], "bank_active_tab")
+active_tab = render_persistent_tabs(["Charts", "Tables"], "bank_active_tab")
 
 # ============================================================================
 # TAB 1: CHARTS - Dynamic based on selection
@@ -411,30 +381,14 @@ if active_tab == 0:
         ("NPATMI", "npatmi", CHART_COLORS['positive']),
     ]
 
-    def compute_ma4_yoy_full(col_name: str) -> pd.Series:
-        """
-        Compute MA4 YoY Growth % based on TTM using FULL historical data.
-        Then align to displayed quarters for continuous line from first bar.
-
-        Logic:
-        - TTM current = Sum of last 4 quarters
-        - TTM previous = Sum of same 4 quarters from previous year (shift 4)
-        - MA4 YoY = (TTM current / TTM previous - 1) * 100%
-        """
-        # Calculate on full data
-        full_series = pd.to_numeric(df_full[col_name], errors='coerce')
-        ttm_current = full_series.rolling(window=4, min_periods=4).sum()
-        ttm_prev = ttm_current.shift(4)
-        ma4_full = (ttm_current / ttm_prev - 1) * 100.0
-
-        # Create mapping from period_label to MA4 value
-        ma4_map = dict(zip(df_full['period_label'], ma4_full))
-
-        # Align to displayed quarters
-        ma4_aligned = [ma4_map.get(q, None) for q in df['period_label'].tolist()]
-        ma4_display = pd.Series(ma4_aligned, dtype=float).interpolate(limit_direction='both')
-
-        return ma4_display
+    # Mapping from chart column to pre-calculated YoY growth column in parquet
+    YOY_COLUMN_MAP = {
+        'nii': 'nii_growth_yoy',
+        'toi': 'toi_growth_yoy',
+        'ppop': 'ppop_growth_yoy',
+        'pbt': 'pbt_growth_yoy',
+        'npatmi': 'npatmi_growth_yoy',
+    }
 
     # 2 charts per row
     chart_idx = 0
@@ -461,8 +415,9 @@ if active_tab == 0:
                         secondary_y=False
                     )
 
-                    # MA4 YoY Growth % line (secondary y-axis) - calculated from FULL data
-                    ma4_yoy = compute_ma4_yoy_full(col)
+                    # MA4 YoY Growth % line (secondary y-axis) - from pre-calculated parquet
+                    yoy_col = YOY_COLUMN_MAP.get(col)
+                    ma4_yoy = df[yoy_col] if yoy_col and yoy_col in df.columns else pd.Series([np.nan] * len(df))
                     fig.add_trace(
                         go.Scatter(
                             x=df['period_label'],
@@ -494,7 +449,7 @@ if active_tab == 0:
 elif active_tab == 1:
     # Sub-tabs for organized tables (Session State Persisted)
     tables_tab = render_persistent_tabs(
-        ["📊 Size", "💰 Income", "📈 Growth", "🛡️ Quality", "⚙️ Efficiency"],
+        ["Size", "Income", "Growth", "Quality", "Efficiency"],
         "bank_tables_tab",
         style="secondary"
     )
@@ -681,7 +636,7 @@ elif active_tab == 1:
     # Download button
     st.markdown("---")
     st.download_button(
-        "📥 Download Data (CSV)",
+        "Download Data (CSV)",
         df.to_csv(index=False).encode('utf-8'),
         f"{ticker}_bank_data.csv",
         "text/csv",

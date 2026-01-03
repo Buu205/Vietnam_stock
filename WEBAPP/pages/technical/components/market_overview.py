@@ -21,132 +21,14 @@ from plotly.subplots import make_subplots
 from typing import TYPE_CHECKING
 
 from WEBAPP.core.styles import get_chart_layout, CHART_COLORS, TRADING_CHART_COLORS
+from WEBAPP.core.trading_constants import MARKET_SCORE_WEIGHTS, BREADTH_TIMEFRAMES, DEFAULT_BREADTH_TIMEFRAME
+from WEBAPP.core.trading_rules import (
+    REGIME_STYLES, SIGNAL_STYLES, BREADTH_COLORS,
+    SIGNAL_MATRIX, BOTTOM_STAGES
+)
 
 if TYPE_CHECKING:
     from ..services.ta_dashboard_service import TADashboardService
-
-
-# ============================================================================
-# DESIGN CONSTANTS
-# ============================================================================
-
-REGIME_STYLES = {
-    'BULLISH': {'color': '#10B981', 'bg': 'rgba(16, 185, 129, 0.15)', 'border': '#10B981'},
-    'BEARISH': {'color': '#EF4444', 'bg': 'rgba(239, 68, 68, 0.15)', 'border': '#EF4444'},
-    'NEUTRAL': {'color': '#F59E0B', 'bg': 'rgba(245, 158, 11, 0.15)', 'border': '#F59E0B'},
-}
-
-SIGNAL_STYLES = {
-    'RISK_ON': {'color': '#10B981', 'bg': 'rgba(16, 185, 129, 0.15)'},
-    'RISK_OFF': {'color': '#EF4444', 'bg': 'rgba(239, 68, 68, 0.15)'},
-    'CAUTION': {'color': '#F59E0B', 'bg': 'rgba(245, 158, 11, 0.15)'},
-}
-
-BREADTH_COLORS = {
-    'ma20': '#8B5CF6',  # Purple (short-term)
-    'ma50': '#06B6D4',  # Cyan (medium-term)
-    'ma100': '#F59E0B', # Amber (long-term)
-}
-
-# Weighted Market Health Score (4-8 week swing trading strategy)
-MARKET_SCORE_WEIGHTS = {
-    'ma50': 0.5,   # Trend backbone (50%)
-    'ma20': 0.3,   # Timing/Trigger (30%)
-    'ma100': 0.2,  # Safety filter (20%)
-}
-
-# Signal Matrix Styles (No emojis - clean professional design)
-SIGNAL_MATRIX = {
-    'STRONG_BUY': {
-        'label': 'STRONG BUY',
-        'subtitle': 'Deep Pullback',
-        'action': 'Giải ngân mạnh. Rũ bỏ hoàn hảo.',
-        'color': '#059669',
-        'bg': 'rgba(5, 150, 105, 0.15)',
-    },
-    'BUY': {
-        'label': 'BUY',
-        'subtitle': 'Normal Pullback',
-        'action': 'Mua gia tăng hoặc mở vị thế mới.',
-        'color': '#10B981',
-        'bg': 'rgba(16, 185, 129, 0.15)',
-    },
-    'HOLD': {
-        'label': 'HOLD',
-        'subtitle': 'Riding Trend',
-        'action': 'Nắm giữ danh mục. Trend vẫn tốt.',
-        'color': '#3B82F6',
-        'bg': 'rgba(59, 130, 246, 0.15)',
-    },
-    'WARNING': {
-        'label': 'WARNING',
-        'subtitle': 'Overheated',
-        'action': 'Không mua đuổi. Canh chốt lời margin.',
-        'color': '#F59E0B',
-        'bg': 'rgba(245, 158, 11, 0.15)',
-    },
-    'SELL': {
-        'label': 'SELL',
-        'subtitle': 'Bull Trap',
-        'action': 'Bán hạ tỷ trọng. Đây là bẫy tăng giá.',
-        'color': '#DC2626',
-        'bg': 'rgba(220, 38, 38, 0.15)',
-    },
-    'DANGER': {
-        'label': 'DANGER',
-        'subtitle': 'Market Crash',
-        'action': 'Đứng ngoài tuyệt đối. Không bắt đáy.',
-        'color': '#7F1D1D',
-        'bg': 'rgba(127, 29, 29, 0.2)',
-    },
-    'WAIT': {
-        'label': 'WAIT',
-        'subtitle': 'No Trend',
-        'action': 'Quan sát. Chưa có điểm vào an toàn.',
-        'color': '#64748B',
-        'bg': 'rgba(100, 116, 139, 0.15)',
-    },
-    # Bottom Detection Signals
-    'ACCUMULATING': {
-        'label': 'ACCUMULATING',
-        'subtitle': 'Smart Money Entering',
-        'action': 'Theo dõi sát. Smart money đang tích lũy. Chuẩn bị vốn.',
-        'color': '#6366F1',  # Indigo
-        'bg': 'rgba(99, 102, 241, 0.15)',
-    },
-    'EARLY_BUY': {
-        'label': 'EARLY BUY',
-        'subtitle': 'Early Reversal',
-        'action': 'Test mua 10-20% danh mục. Stop-loss chặt dưới đáy gần nhất.',
-        'color': '#22D3EE',  # Cyan
-        'bg': 'rgba(34, 211, 238, 0.15)',
-    },
-}
-
-# Bottom Formation Stages for indicator display
-BOTTOM_STAGES = {
-    'CAPITULATION': {
-        'label': 'CAPITULATION',
-        'description': 'Hoảng loạn bán tháo',
-        'condition': 'Tất cả MA < 25%, chưa tạo đáy cao hơn',
-        'color': '#7F1D1D',
-        'icon': '1',
-    },
-    'ACCUMULATING': {
-        'label': 'ACCUMULATING',
-        'description': 'Smart money đang vào',
-        'condition': 'Tất cả MA < 30%, MA20 tạo đáy cao hơn (3d) và đang tăng',
-        'color': '#6366F1',
-        'icon': '2',
-    },
-    'EARLY_REVERSAL': {
-        'label': 'EARLY REVERSAL',
-        'description': 'Đảo chiều sớm',
-        'condition': 'MA20 ≥ 25% + Higher Low, MA50 tạo đáy cao hơn (5d)',
-        'color': '#22D3EE',
-        'icon': '3',
-    },
-}
 
 
 def render_market_overview(service: 'TADashboardService') -> None:
@@ -172,11 +54,9 @@ def render_market_overview(service: 'TADashboardService') -> None:
     st.markdown("---")
 
     # ============ BREADTH LINE CHART ============
-    timeframe_options = {"3M": 63, "6M": 126, "9M": 189, "1Y": 252}
-
     # Initialize session state
     if "breadth_tf" not in st.session_state:
-        st.session_state.breadth_tf = "6M"
+        st.session_state.breadth_tf = DEFAULT_BREADTH_TIMEFRAME
 
     col_title, col_tf = st.columns([3, 1])
     with col_title:
@@ -184,14 +64,14 @@ def render_market_overview(service: 'TADashboardService') -> None:
     with col_tf:
         selected_tf = st.selectbox(
             "Timeframe",
-            options=list(timeframe_options.keys()),
-            index=list(timeframe_options.keys()).index(st.session_state.breadth_tf),
+            options=list(BREADTH_TIMEFRAMES.keys()),
+            index=list(BREADTH_TIMEFRAMES.keys()).index(st.session_state.breadth_tf),
             key="breadth_timeframe_select",
             label_visibility="collapsed"
         )
         st.session_state.breadth_tf = selected_tf
 
-    days = timeframe_options[selected_tf]
+    days = BREADTH_TIMEFRAMES[selected_tf]
     history = service.get_breadth_history(days=days)
     _render_breadth_chart(history)
 
@@ -629,9 +509,9 @@ def _render_breadth_gauges(state) -> None:
             </div>
             <!-- Higher Lows Detection Info -->
             <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
-                <!-- MA20 Higher Low (3-day window) -->
+                <!-- MA20 Higher Low (7-day window) -->
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #8B5CF6; font-size: 0.65rem; width: 75px;">MA20 (3d):</span>
+                    <span style="color: #8B5CF6; font-size: 0.65rem; width: 75px;">MA20 (7d):</span>
                     <span style="color: #64748B; font-size: 0.65rem;">Low trước</span>
                     <span style="color: #94A3B8; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">{state.ma20_prev_low:.1f}%</span>
                     <span style="color: {'#10B981' if state.ma20_higher_low else '#EF4444'}; font-size: 0.7rem;">{'→' if not state.ma20_higher_low else '↗'}</span>
@@ -639,9 +519,9 @@ def _render_breadth_gauges(state) -> None:
                     <span style="color: {'#10B981' if state.ma20_higher_low else '#E2E8F0'}; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{state.ma20_recent_low:.1f}%</span>
                     <span style="color: {'#10B981' if state.ma20_higher_low else '#64748B'}; font-size: 0.65rem; font-weight: 600;">{'✓ Higher Low' if state.ma20_higher_low else ''}</span>
                 </div>
-                <!-- MA50 Higher Low (5-day window) -->
+                <!-- MA50 Higher Low (9-day window) -->
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #06B6D4; font-size: 0.65rem; width: 75px;">MA50 (5d):</span>
+                    <span style="color: #06B6D4; font-size: 0.65rem; width: 75px;">MA50 (9d):</span>
                     <span style="color: #64748B; font-size: 0.65rem;">Low trước</span>
                     <span style="color: #94A3B8; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">{state.ma50_prev_low:.1f}%</span>
                     <span style="color: {'#10B981' if state.ma50_higher_low else '#EF4444'}; font-size: 0.7rem;">{'→' if not state.ma50_higher_low else '↗'}</span>

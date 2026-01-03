@@ -19,63 +19,11 @@ import plotly.graph_objects as go
 from typing import TYPE_CHECKING, Optional
 
 from WEBAPP.core.styles import get_chart_layout, BAR_COLORS
+from WEBAPP.core.trading_constants import BSC_UNIVERSE, WATCHLISTS
+from WEBAPP.core.trading_rules import QUADRANT_COLORS, QUADRANT_BG, QUADRANT_TRAIL
 
 if TYPE_CHECKING:
     from ..services.ta_dashboard_service import TADashboardService
-
-
-# ============================================================================
-# DESIGN CONSTANTS
-# ============================================================================
-
-QUADRANT_COLORS = {
-    'LEADING': '#10B981',     # Emerald Green
-    'WEAKENING': '#F59E0B',   # Amber
-    'LAGGING': '#EF4444',     # Red
-    'IMPROVING': '#06B6D4',   # Cyan
-}
-
-QUADRANT_BG = {
-    'LEADING': 'rgba(16, 185, 129, 0.15)',
-    'WEAKENING': 'rgba(245, 158, 11, 0.15)',
-    'LAGGING': 'rgba(239, 68, 68, 0.15)',
-    'IMPROVING': 'rgba(6, 182, 212, 0.15)',
-}
-
-# Trail colors with alpha for RRG lines
-QUADRANT_TRAIL = {
-    'LEADING': 'rgba(16, 185, 129, 0.25)',
-    'WEAKENING': 'rgba(245, 158, 11, 0.25)',
-    'LAGGING': 'rgba(239, 68, 68, 0.25)',
-    'IMPROVING': 'rgba(6, 182, 212, 0.25)',
-    'UNKNOWN': 'rgba(100, 116, 139, 0.25)',
-}
-
-# BSC Universe - Default stock list for Stock RRG mode
-BSC_UNIVERSE = [
-    'VCB', 'ACB', 'TCB', 'MBB', 'CTG', 'BID', 'STB', 'HDB', 'VPB', 'TPB',
-    'SSI', 'VCI', 'HCM', 'VND', 'SHS',
-    'VHM', 'VIC', 'NVL', 'KDH', 'DXG', 'PDR',
-    'FPT', 'CMG',
-    'VNM', 'MSN', 'MWG', 'PNJ', 'DGW',
-    'HPG', 'HSG', 'NKG', 'GVR', 'DPM', 'DCM',
-    'GAS', 'PLX', 'PVD', 'PVS',
-    'POW', 'REE', 'PC1',
-    'HVN', 'VJC', 'GMD',
-]
-
-# Predefined watchlists
-WATCHLISTS = {
-    'BSC Universe': BSC_UNIVERSE,
-    'VN30': ['VCB', 'VHM', 'VIC', 'VNM', 'HPG', 'FPT', 'GAS', 'MSN', 'MWG', 'TCB',
-             'ACB', 'MBB', 'CTG', 'BID', 'VPB', 'STB', 'HDB', 'TPB', 'VJC', 'PLX',
-             'POW', 'REE', 'SSI', 'VND', 'GVR', 'SAB', 'BCM', 'VRE', 'PDR', 'KDH'],
-    'Banking': ['VCB', 'ACB', 'TCB', 'MBB', 'CTG', 'BID', 'STB', 'HDB', 'VPB', 'TPB',
-                'EIB', 'LPB', 'MSB', 'OCB', 'SHB'],
-    'Securities': ['SSI', 'VCI', 'HCM', 'VND', 'SHS', 'MBS', 'VIX', 'BSI', 'CTS', 'FTS'],
-    'Real Estate': ['VHM', 'VIC', 'NVL', 'KDH', 'DXG', 'PDR', 'NLG', 'CEO', 'HDG', 'DIG'],
-    'Technology': ['FPT', 'CMG', 'VGI', 'FOX'],
-}
 
 
 def render_sector_rotation(service: 'TADashboardService') -> None:

@@ -601,7 +601,7 @@ if active_tab == 0:
 
             excel_buffer.seek(0)
             st.download_button(
-                "📥 Download All Index Data (PE/PB) - Excel",
+                "Download All Index Data (PE/PB) - Excel",
                 excel_buffer,
                 "vnindex_valuation_data.xlsx",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -803,7 +803,7 @@ elif active_tab == 1:
                     dist_df_raw.to_excel(excel_buffer, index=False, engine='openpyxl')
                     excel_buffer.seek(0)
                     st.download_button(
-                        f"📥 Download {selected_metric} Valuation Matrix (Excel)",
+                        f"Download {selected_metric} Valuation Matrix (Excel)",
                         excel_buffer,
                         f"{selected_metric.lower().replace(' ', '_')}_valuation_matrix_sectors.xlsx",
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1015,7 +1015,7 @@ elif active_tab == 1:
                     stock_df_raw.to_excel(excel_buffer, index=False, engine='openpyxl')
                     excel_buffer.seek(0)
                     st.download_button(
-                        f"📥 Download {stock_comp_sector} Stock Data (Excel)",
+                        f"Download {stock_comp_sector} Stock Data (Excel)",
                         excel_buffer,
                         f"{stock_comp_sector.lower().replace(' ', '_')}_stocks_{selected_metric.lower().replace(' ', '_')}.xlsx",
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1166,7 +1166,7 @@ elif active_tab == 2:
         sector_df.to_excel(excel_buffer, index=False, engine='openpyxl')
         excel_buffer.seek(0)
         st.download_button(
-            "📥 Download Sector Data (Excel)",
+            "Download Sector Data (Excel)",
             excel_buffer,
             "sector_valuation.xlsx",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

@@ -15,10 +15,7 @@ import streamlit as st
 import pandas as pd
 from typing import Dict, List, Optional, Tuple
 
-# Achievement thresholds
-BEAT_THRESHOLD = 0.85  # > 85%
-MEET_THRESHOLD = 0.65  # 65-85%
-# MISS: < 65%
+from WEBAPP.core.trading_constants import BEAT_THRESHOLD, MEET_THRESHOLD
 
 # Card styling
 CARD_COLORS = {

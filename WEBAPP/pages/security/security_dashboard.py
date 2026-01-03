@@ -31,6 +31,7 @@ from WEBAPP.core.styles import (
     render_styled_table, get_table_style
 )
 from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
+from WEBAPP.components.filters.fundamental_filter_bar import render_fundamental_filters
 
 # ============================================================================
 # PAGE CONFIG & STYLES
@@ -49,13 +50,10 @@ init_page_state('security')
 # ============================================================================
 st.title("Securities/Brokerage Analysis")
 st.markdown("**Comprehensive analysis for Vietnamese brokerage companies**")
-st.markdown("---")
 
 # ============================================================================
-# SIDEBAR - FILTERS
+# INITIALIZE SERVICE & HEADER FILTERS
 # ============================================================================
-st.sidebar.markdown("## Filters")
-
 try:
     service = SecurityService()
     available_tickers = service.get_available_tickers()
@@ -69,43 +67,17 @@ except FileNotFoundError as e:
     st.info("Run: `python3 PROCESSORS/fundamental/calculators/run_security_calculator.py`")
     st.stop()
 
-# Ticker selector - check for Quick Search pre-selection
-default_ticker = st.session_state.get('quick_search_ticker', None)
-if default_ticker and default_ticker in available_tickers:
-    default_index = available_tickers.index(default_ticker)
-    # Clear the quick search after using it
-    st.session_state['quick_search_ticker'] = None
-else:
-    default_index = 0 if available_tickers else None
-
-ticker = st.sidebar.selectbox(
-    "Select Brokerage",
-    options=available_tickers,
-    index=default_index,
-    help="Choose a brokerage to analyze"
+# Header filter bar (replaces sidebar filters)
+filters = render_fundamental_filters(
+    service=service,
+    entity_type='security',
+    mode='basic'
 )
+ticker = filters['ticker']
+period = filters['period']
+limit = filters['num_periods']
 
-# Period selector
-period = st.sidebar.selectbox(
-    "Period",
-    options=["Quarterly", "Yearly"],
-    index=0,
-    help="Select data frequency"
-)
-
-# Limit
-limit = st.sidebar.slider(
-    "Number of periods",
-    min_value=4,
-    max_value=20,
-    value=12,
-    help="How many periods to display"
-)
-
-# Refresh button
-if st.sidebar.button("🔄 Refresh Data", width='stretch'):
-    st.cache_data.clear()
-    st.rerun()
+st.markdown("---")
 
 # ============================================================================
 # LOAD DATA
@@ -209,7 +181,7 @@ st.markdown("---")
 # ============================================================================
 # TABS (Session State Persisted)
 # ============================================================================
-active_tab = render_persistent_tabs(["📊 Charts", "📋 Tables"], "security_active_tab")
+active_tab = render_persistent_tabs(["Charts", "Tables"], "security_active_tab")
 
 # ============================================================================
 # TAB 1: CHARTS
@@ -448,7 +420,7 @@ elif active_tab == 1:
     # Download button
     st.markdown("---")
     st.download_button(
-        "📥 Download Data (CSV)",
+        "Download Data (CSV)",
         df.to_csv(index=False).encode('utf-8'),
         f"{ticker}_security_data.csv",
         "text/csv",
