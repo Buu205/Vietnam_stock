@@ -162,3 +162,7 @@ DATA/processed/forecast/*.xlsm
 # API Token cache (expires regularly, should not be committed)
 PROCESSORS/api/*/vietcap_token.json
 **/vietcap_token.json
+# Consensus report extraction scripts and data
+concensus_report/raw_extracts/extract_forecast_from_pdf.py
+concensus_report/raw_extracts/*.json
+concensus_report/raw_extracts/*.txt
