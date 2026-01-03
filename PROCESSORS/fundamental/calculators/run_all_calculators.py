@@ -333,7 +333,29 @@ class CompanyCalculator(EntityCalculator):
         df['bvps'] = self.safe_divide(df['total_equity'], shares)
 
         # TTM metrics
-        df = self.calculate_ttm(df, ['net_revenue', 'npatmi', 'operating_cf'])
+        df = self.calculate_ttm(df, ['net_revenue', 'npatmi', 'operating_cf', 'gross_profit', 'ebitda', 'fcf'])
+
+        # =============================================================
+        # YoY Growth columns (TTM-based) - Added for platform-agnostic
+        # =============================================================
+        df = df.sort_values(['SECURITY_CODE', 'REPORT_DATE'] if 'REPORT_DATE' in df.columns else ['SECURITY_CODE', 'report_date'])
+
+        ttm_growth_cols = ['net_revenue_ttm', 'gross_profit_ttm', 'ebitda_ttm', 'npatmi_ttm', 'operating_cf_ttm', 'fcf_ttm']
+        for col in ttm_growth_cols:
+            if col in df.columns:
+                base_name = col.replace('_ttm', '')
+                prev_ttm = df.groupby('SECURITY_CODE')[col].shift(4)
+                df[f'{base_name}_growth_yoy'] = self.safe_divide(df[col] - prev_ttm, np.abs(prev_ttm), 100)
+
+        # =============================================================
+        # MA4 Smoothed Margin columns - Added for platform-agnostic
+        # =============================================================
+        margin_cols = ['gross_profit_margin', 'ebit_margin', 'ebitda_margin', 'net_margin']
+        for col in margin_cols:
+            if col in df.columns:
+                df[f'{col}_ma4'] = df.groupby('SECURITY_CODE')[col].transform(
+                    lambda x: x.rolling(window=4, min_periods=1).mean()
+                )
 
         return df
 
@@ -363,6 +385,14 @@ class CompanyCalculator(EntityCalculator):
 
             # TTM Metrics
             'net_revenue_ttm', 'npatmi_ttm', 'operating_cf_ttm',
+            'gross_profit_ttm', 'ebitda_ttm', 'fcf_ttm',
+
+            # YoY Growth (TTM-based, %)
+            'net_revenue_growth_yoy', 'gross_profit_growth_yoy', 'ebitda_growth_yoy',
+            'npatmi_growth_yoy', 'operating_cf_growth_yoy', 'fcf_growth_yoy',
+
+            # MA4 Smoothed Margins (%)
+            'gross_profit_margin_ma4', 'ebit_margin_ma4', 'ebitda_margin_ma4', 'net_margin_ma4',
 
             # Liquidity Ratios
             'current_ratio', 'quick_ratio', 'cash_ratio',
@@ -945,12 +975,24 @@ class SecurityCalculator(EntityCalculator):
         )
 
         # TTM
-        df = self.calculate_ttm(df, ['total_revenue', 'npatmi'])
+        df = self.calculate_ttm(df, ['total_revenue', 'npatmi', 'pbt'])
 
         # Per share
         charter = df.get('charter_capital', pd.Series([1]*len(df))).fillna(1) / 10000
         df['eps'] = self.safe_divide(df['npatmi'], charter)
         df['bvps'] = self.safe_divide(df['total_equity'], charter)
+
+        # =============================================================
+        # YoY Growth columns (TTM-based) - Added for platform-agnostic
+        # =============================================================
+        df = df.sort_values(['SECURITY_CODE', 'REPORT_DATE'] if 'REPORT_DATE' in df.columns else ['SECURITY_CODE', 'report_date'])
+
+        ttm_growth_cols = ['total_revenue_ttm', 'npatmi_ttm', 'pbt_ttm']
+        for col in ttm_growth_cols:
+            if col in df.columns:
+                base_name = col.replace('_ttm', '')
+                prev_ttm = df.groupby('SECURITY_CODE')[col].shift(4)
+                df[f'{base_name}_growth_yoy'] = self.safe_divide(df[col] - prev_ttm, np.abs(prev_ttm), 100)
 
         return df
 
@@ -965,7 +1007,9 @@ class SecurityCalculator(EntityCalculator):
             'total_liabilities', 'margin_payable', 'total_equity',
             'cir', 'brokerage_ratio', 'margin_ratio', 'proprietary_ratio',
             'roe', 'roa', 'net_margin', 'leverage', 'margin_lending_ratio',
-            'total_revenue_ttm', 'npatmi_ttm', 'eps', 'bvps'
+            'total_revenue_ttm', 'npatmi_ttm', 'pbt_ttm',
+            'total_revenue_growth_yoy', 'npatmi_growth_yoy', 'pbt_growth_yoy',
+            'eps', 'bvps'
         ]
         available_cols = [c for c in output_cols if c in df.columns]
         return df[available_cols].copy()
