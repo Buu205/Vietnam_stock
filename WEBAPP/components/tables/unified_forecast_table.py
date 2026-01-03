@@ -23,25 +23,34 @@ from typing import Optional
 # COLUMN DEFINITIONS
 # =============================================================================
 
-CORE_COLUMNS = ['symbol', 'sector', 'rating', 'upside_pct']
-VALUATION_COLUMNS = ['pe_fwd_2025', 'pe_fwd_2026', 'pb_fwd_2025', 'pe_delta']
+# Sticky columns (always visible when scrolling horizontally)
+CORE_COLUMNS = ['symbol', 'sector', 'upside_pct']
+
+# PE/PB forward valuations with delta (change from 2025→2026)
+VALUATION_COLUMNS = ['pe_fwd_2025', 'pe_fwd_2026', 'pe_delta', 'pb_fwd_2025', 'pb_fwd_2026', 'pb_delta']
+
 EARNINGS_COLUMNS = ['npatmi_2025f', 'npatmi_2026f', 'npatmi_growth_yoy_2026']
-EXTENDED_COLUMNS = ['rev_2025f', 'rev_2026f', 'roe_2025f', 'target_price', 'market_cap']
+
+# Extended: Rating moved here (less critical for quick scan) + detailed metrics
+EXTENDED_COLUMNS = ['rating', 'rev_2025f', 'rev_2026f', 'rev_growth_yoy_2026', 'roe_2025f', 'target_price', 'market_cap']
 
 COLUMN_LABELS = {
     'symbol': 'Symbol',
     'sector': 'Sector',
-    'rating': 'Rating',
     'upside_pct': 'Upside',
     'pe_fwd_2025': 'PE 25F',
     'pe_fwd_2026': 'PE 26F',
-    'pb_fwd_2025': 'PB 25F',
     'pe_delta': 'Δ PE',
+    'pb_fwd_2025': 'PB 25F',
+    'pb_fwd_2026': 'PB 26F',
+    'pb_delta': 'Δ PB',
     'npatmi_2025f': 'NPATMI 25F',
     'npatmi_2026f': 'NPATMI 26F',
     'npatmi_growth_yoy_2026': 'Gr 26F',
+    'rating': 'Rating',
     'rev_2025f': 'Rev 25F',
     'rev_2026f': 'Rev 26F',
+    'rev_growth_yoy_2026': 'Rev Gr 26F',
     'roe_2025f': 'ROE 25F',
     'target_price': 'Target',
     'market_cap': 'Mkt Cap',
@@ -49,9 +58,10 @@ COLUMN_LABELS = {
 
 # Alignment by column type
 RIGHT_ALIGN_COLS = [
-    'upside_pct', 'pe_fwd_2025', 'pe_fwd_2026', 'pb_fwd_2025', 'pe_delta',
+    'upside_pct', 'pe_fwd_2025', 'pe_fwd_2026', 'pe_delta',
+    'pb_fwd_2025', 'pb_fwd_2026', 'pb_delta',
     'npatmi_2025f', 'npatmi_2026f', 'npatmi_growth_yoy_2026',
-    'rev_2025f', 'rev_2026f', 'roe_2025f', 'target_price', 'market_cap'
+    'rev_2025f', 'rev_2026f', 'rev_growth_yoy_2026', 'roe_2025f', 'target_price', 'market_cap'
 ]
 
 
@@ -103,6 +113,14 @@ def format_pe_delta(val) -> str:
     return f'<span class="{color_class}">{val:+.1f}%</span>'
 
 
+def format_pb_delta(val) -> str:
+    """Format PB delta with color (negative = green = cheaper in 2026, positive = red)."""
+    if pd.isna(val):
+        return '-'
+    color_class = 'upside-positive' if val < 0 else 'upside-negative'
+    return f'<span class="{color_class}">{val:+.1f}%</span>'
+
+
 def format_billions(val) -> str:
     """Format value in billions VND."""
     if pd.isna(val) or val == 0:
@@ -148,17 +166,20 @@ def format_market_cap(val) -> str:
 COLUMN_FORMATTERS = {
     'symbol': lambda x: f'<b style="color: #00C9AD;">{x}</b>',
     'sector': lambda x: x if pd.notna(x) else '-',
-    'rating': format_rating_badge,
     'upside_pct': format_upside,
     'pe_fwd_2025': format_pe,
     'pe_fwd_2026': format_pe,
-    'pb_fwd_2025': format_pb,
     'pe_delta': format_pe_delta,
+    'pb_fwd_2025': format_pb,
+    'pb_fwd_2026': format_pb,
+    'pb_delta': format_pb_delta,
     'npatmi_2025f': format_billions,
     'npatmi_2026f': format_billions,
     'npatmi_growth_yoy_2026': format_growth,
+    'rating': format_rating_badge,
     'rev_2025f': format_billions,
     'rev_2026f': format_billions,
+    'rev_growth_yoy_2026': format_growth,
     'roe_2025f': format_roe,
     'target_price': format_price,
     'market_cap': format_market_cap,
@@ -256,43 +277,62 @@ UNIFIED_TABLE_STYLE = """
     margin-bottom: 1rem;
     border-radius: 8px;
     border: 1px solid rgba(139, 92, 246, 0.2);
+    position: relative;  /* Required for sticky to work */
 }
 
 /* Z-Index Scale: z-0 base, z-10 sticky cols, z-20 header, z-30 corners */
 
-/* Sticky header row */
-.unified-forecast-table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: rgba(26, 22, 37, 0.98);
+/* Sticky header row - MUST be opaque and use !important */
+.unified-forecast-table thead {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 20 !important;
 }
 
-/* Sticky Symbol column (1st) */
+.unified-forecast-table thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 20 !important;
+    /* Solid base + gradient overlay for visual effect */
+    background: linear-gradient(135deg, #2D1F4A 0%, #1A2535 100%) !important;
+}
+
+/* Sticky Column 1: Symbol */
 .unified-forecast-table th:nth-child(1),
 .unified-forecast-table td:nth-child(1) {
-    position: sticky;
-    left: 0;
-    background: rgba(26, 22, 37, 0.98);
-    z-index: 10;
+    position: sticky !important;
+    left: 0 !important;
+    background: #1A1625 !important;
+    z-index: 10 !important;
     min-width: 70px;
 }
 
-/* Sticky Price column (2nd) - with shadow */
+/* Sticky Column 2: Sector */
 .unified-forecast-table th:nth-child(2),
 .unified-forecast-table td:nth-child(2) {
-    position: sticky;
-    left: 70px;
-    background: rgba(26, 22, 37, 0.98);
-    z-index: 10;
-    min-width: 80px;
+    position: sticky !important;
+    left: 70px !important;
+    background: #1A1625 !important;
+    z-index: 10 !important;
+    min-width: 100px;
+}
+
+/* Sticky Column 3: Upside - with shadow separator */
+.unified-forecast-table th:nth-child(3),
+.unified-forecast-table td:nth-child(3) {
+    position: sticky !important;
+    left: 170px !important;
+    background: #1A1625 !important;
+    z-index: 10 !important;
+    min-width: 70px;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Corner cells (header + sticky column intersection) */
+/* Corner cells (header + sticky column intersection) - highest z-index */
 .unified-forecast-table thead th:nth-child(1),
-.unified-forecast-table thead th:nth-child(2) {
-    z-index: 30;
+.unified-forecast-table thead th:nth-child(2),
+.unified-forecast-table thead th:nth-child(3) {
+    z-index: 30 !important;
 }
 
 /* Row hover with cursor pointer */
@@ -301,21 +341,24 @@ UNIFIED_TABLE_STYLE = """
     transition: background-color 200ms ease;
 }
 
-/* Mobile: single sticky column only */
+/* Mobile: only Symbol sticky */
 @media (max-width: 768px) {
     .table-scroll-wrapper {
         max-height: 500px;
     }
 
     .unified-forecast-table th:nth-child(2),
-    .unified-forecast-table td:nth-child(2) {
-        position: relative;
-        left: auto;
-        box-shadow: none;
+    .unified-forecast-table td:nth-child(2),
+    .unified-forecast-table th:nth-child(3),
+    .unified-forecast-table td:nth-child(3) {
+        position: relative !important;
+        left: auto !important;
+        box-shadow: none !important;
     }
 
-    .unified-forecast-table thead th:nth-child(2) {
-        z-index: 20;
+    .unified-forecast-table thead th:nth-child(2),
+    .unified-forecast-table thead th:nth-child(3) {
+        z-index: 20 !important;
     }
 }
 </style>
@@ -351,11 +394,18 @@ def unified_forecast_table(
     if df.empty:
         return '<p style="color: #94A3B8;">No data available</p>'
 
+    df = df.copy()
+
     # Calculate PE delta if not present
     if 'pe_delta' not in df.columns and 'pe_fwd_2025' in df.columns and 'pe_fwd_2026' in df.columns:
-        df = df.copy()
         df['pe_delta'] = ((df['pe_fwd_2026'] - df['pe_fwd_2025']) / df['pe_fwd_2025'] * 100).where(
             df['pe_fwd_2025'] > 0, None
+        )
+
+    # Calculate PB delta if not present
+    if 'pb_delta' not in df.columns and 'pb_fwd_2025' in df.columns and 'pb_fwd_2026' in df.columns:
+        df['pb_delta'] = ((df['pb_fwd_2026'] - df['pb_fwd_2025']) / df['pb_fwd_2025'] * 100).where(
+            df['pb_fwd_2025'] > 0, None
         )
 
     # Build column list

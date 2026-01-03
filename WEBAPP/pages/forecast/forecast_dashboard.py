@@ -28,6 +28,9 @@ from WEBAPP.core.session_state import (
     get_synced_ticker, get_synced_entity, clear_synced_ticker, has_synced_ticker
 )
 from WEBAPP.core.trading_rules import RATING_COLORS, RATING_BG_COLORS
+from WEBAPP.components.filters.forecast_filter_bar import (
+    render_filter_bar, SORT_OPTIONS
+)
 
 # Tab modules (modularized for maintainability)
 from WEBAPP.pages.forecast.tabs.bsc_universal_tab import render_bsc_universal_tab
@@ -142,45 +145,8 @@ if df.empty:
     st.code("python3 PROCESSORS/pipelines/daily_bsc_forecast.py", language="bash")
     st.stop()
 
-# Sidebar filters
-st.sidebar.markdown("## Filters")
-
-# Rating filter
-all_ratings = ['STRONG BUY', 'BUY', 'HOLD', 'SELL', 'N/A']
-available_ratings = df['rating'].unique().tolist() if 'rating' in df.columns else []
-rating_filter = st.sidebar.multiselect(
-    "Rating",
-    options=[r for r in all_ratings if r in available_ratings],
-    default=[r for r in ['STRONG BUY', 'BUY', 'HOLD'] if r in available_ratings]
-)
-
-# Sector filter
-all_sectors = ['All'] + service.get_sectors_list()
-sector_filter = st.sidebar.selectbox(
-    "Sector",
-    options=all_sectors,
-    index=0
-)
-
-# Sort by
-sort_options = {
-    "Upside % (High to Low)": ("upside_pct", False),
-    "Upside % (Low to High)": ("upside_pct", True),
-    "PE FWD 2025 (Low to High)": ("pe_fwd_2025", True),
-    "PE FWD 2025 (High to Low)": ("pe_fwd_2025", False),
-    "Market Cap (High to Low)": ("market_cap", False),
-    "Market Cap (Low to High)": ("market_cap", True),
-    "Sector (A-Z)": ("sector", True),
-    "Sector (Z-A)": ("sector", False),
-    "Profit Growth 26F (High to Low)": ("npatmi_growth_yoy_2026", False),
-    "Revenue 25F (High to Low)": ("rev_2025f", False),
-}
-sort_by = st.sidebar.selectbox("Sort By", options=list(sort_options.keys()), index=0)
-
-st.sidebar.markdown("---")
-if st.sidebar.button("Refresh Data", width='stretch'):
-    st.cache_data.clear()
-    st.rerun()
+# Get sectors list for tab filters
+sectors_list = service.get_sectors_list()
 
 # Metric cards
 stats = service.get_summary_stats()
@@ -313,9 +279,7 @@ if active_tab == 0:
     render_bsc_universal_tab(
         df=df,
         service=service,
-        rating_filter=rating_filter,
-        sector_filter=sector_filter,
-        sort_by=sort_by
+        sectors_list=sectors_list
     )
 
 

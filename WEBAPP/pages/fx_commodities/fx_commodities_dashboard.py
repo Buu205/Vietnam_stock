@@ -26,6 +26,7 @@ from WEBAPP.components.tables.performance_table import (
     build_performance_table, calculate_period_changes, get_top_movers
 )
 from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
+from WEBAPP.components.filters.fx_filter_bar import render_fx_filter_bar
 
 logger = logging.getLogger(__name__)
 
@@ -246,16 +247,10 @@ st.title("FX & Commodities")
 st.markdown("*Macro economic indicators, exchange rates, and commodity prices*")
 
 # ============================================================================
-# SIDEBAR: Time Range Filter
+# HEADER FILTER BAR (replaces sidebar)
 # ============================================================================
-with st.sidebar:
-    st.markdown("### Time Range")
-    days = st.selectbox(
-        "Select Period",
-        options=[30, 90, 180, 365, 730],
-        format_func=lambda x: {30: "1 Month", 90: "3 Months", 180: "6 Months", 365: "1 Year", 730: "2 Years"}[x],
-        index=2
-    )
+filters = render_fx_filter_bar(key_prefix='fx')
+days = filters['days']
 
 # ============================================================================
 # TABS: Macro & FX | Commodities (Session State Persisted)

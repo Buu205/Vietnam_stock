@@ -593,28 +593,23 @@ def _render_bottom_stage_indicator(state) -> None:
     # Progress line position (0-100%)
     progress_pct = ((current_pos - 1) / 3) * 100
 
-    st.markdown(f'''
+    # Build HTML content without comments (comments can cause rendering issues)
+    html_content = f'''
     <div style="margin-top: 12px; background: rgba(0,0,0,0.4); border: 1px solid {stage_info['color']}40; border-radius: 12px; overflow: hidden;">
-        <!-- Header -->
         <div style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between;">
             <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="width: 8px; height: 8px; background: {stage_info['color']}; border-radius: 50%; animation: pulse 2s infinite;"></div>
+                <div style="width: 8px; height: 8px; background: {stage_info['color']}; border-radius: 50%;"></div>
                 <span style="color: #E2E8F0; font-size: 0.8rem; font-weight: 600;">BOTTOM FORMATION DETECTED</span>
             </div>
             <div style="background: {stage_info['color']}20; border: 1px solid {stage_info['color']}40; border-radius: 6px; padding: 4px 10px;">
                 <span style="color: {stage_info['color']}; font-size: 0.75rem; font-weight: 700;">{stage_info['label']}</span>
             </div>
         </div>
-
-        <!-- Stage Progress -->
         <div style="padding: 16px;">
-            <!-- Progress Track -->
             <div style="position: relative; margin-bottom: 8px;">
                 <div style="height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px;"></div>
                 <div style="position: absolute; top: 0; left: 0; height: 3px; width: {progress_pct}%; background: linear-gradient(90deg, #7F1D1D, #6366F1, #22D3EE); border-radius: 2px;"></div>
             </div>
-
-            <!-- Stage Dots -->
             <div style="display: flex; justify-content: space-between; margin-top: -20px;">
                 {get_stage_dot(1, 'CAPITULATION', 'Capitulation')}
                 {get_stage_dot(2, 'ACCUMULATING', 'Accumulating')}
@@ -625,8 +620,6 @@ def _render_bottom_stage_indicator(state) -> None:
                 </div>
             </div>
         </div>
-
-        <!-- Current Stage Details -->
         <div style="padding: 12px 16px; background: {stage_info['color']}10; border-top: 1px solid rgba(255,255,255,0.05);">
             <div style="color: {stage_info['color']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">{stage_info['description']}</div>
             <div style="color: #94A3B8; font-size: 0.75rem;">
@@ -634,14 +627,8 @@ def _render_bottom_stage_indicator(state) -> None:
             </div>
         </div>
     </div>
-
-    <style>
-        @keyframes pulse {{
-            0%, 100% {{ opacity: 1; }}
-            50% {{ opacity: 0.5; }}
-        }}
-    </style>
-    ''', unsafe_allow_html=True)
+    '''
+    st.html(html_content)
 
 
 def _render_divergence_alert(state) -> None:
