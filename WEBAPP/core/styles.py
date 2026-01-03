@@ -938,6 +938,84 @@ def get_page_style() -> str:
     }
 
     /* ============================================================
+       SKELETON LOADING ANIMATION
+       ============================================================ */
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    .skeleton-loader {
+        background: linear-gradient(90deg,
+            rgba(139, 92, 246, 0.05) 25%,
+            rgba(139, 92, 246, 0.15) 50%,
+            rgba(139, 92, 246, 0.05) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s ease-in-out infinite;
+        border-radius: 8px;
+    }
+
+    .skeleton-card {
+        background: linear-gradient(90deg,
+            var(--glass-bg) 25%,
+            rgba(139, 92, 246, 0.1) 50%,
+            var(--glass-bg) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s ease-in-out infinite;
+        border-radius: 12px;
+        min-height: 100px;
+        border: 1px solid var(--glass-border);
+    }
+
+    .skeleton-text {
+        background: linear-gradient(90deg,
+            rgba(148, 163, 184, 0.1) 25%,
+            rgba(148, 163, 184, 0.2) 50%,
+            rgba(148, 163, 184, 0.1) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s ease-in-out infinite;
+        border-radius: 4px;
+        height: 1em;
+        width: 100%;
+    }
+
+    /* ============================================================
+       ACCESSIBILITY - FOCUS VISIBLE STATES
+       ============================================================ */
+    *:focus-visible {
+        outline: 2px solid var(--purple-primary) !important;
+        outline-offset: 2px !important;
+    }
+
+    /* Interactive elements focus ring */
+    .stButton > button:focus-visible,
+    .stDownloadButton > button:focus-visible,
+    .stSelectbox > div > div:focus-within,
+    .stMultiSelect > div > div:focus-within,
+    .stTextInput > div > div:focus-within {
+        outline: 2px solid var(--purple-primary) !important;
+        outline-offset: 2px !important;
+        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2) !important;
+    }
+
+    /* Tab focus */
+    .stTabs [data-baseweb="tab"]:focus-visible {
+        outline: 2px solid var(--purple-primary) !important;
+        outline-offset: 2px !important;
+    }
+
+    /* Link focus */
+    a:focus-visible,
+    [data-testid="stSidebarNavLink"]:focus-visible {
+        outline: 2px solid var(--purple-primary) !important;
+        outline-offset: 2px !important;
+        border-radius: 4px !important;
+    }
+
+    /* ============================================================
        DATA TABLE / DATAFRAME - GLASS STYLING
        ============================================================ */
     [data-testid="stDataFrame"],
@@ -1193,6 +1271,11 @@ def get_chart_layout(title: str = "", height: int = 400) -> dict:
         'margin': {'l': 40, 'r': 20, 't': 40, 'b': 40, 'pad': 2},  # Reduced margins
         'paper_bgcolor': 'rgba(0,0,0,0)',
         'plot_bgcolor': 'rgba(0,0,0,0)',
+        # Animation transition for smoother chart updates
+        'transition': {
+            'duration': 300,
+            'easing': 'cubic-in-out'
+        },
         'font': {
             'family': 'JetBrains Mono, monospace',
             'size': 11,
@@ -1411,8 +1494,15 @@ def get_table_style() -> str:
         font-size: 0.85rem;
     }
 
+    .styled-table thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
     .styled-table thead tr {
         background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(6, 182, 212, 0.1) 100%);
+        background-color: var(--bg-void, #0A0612);
     }
 
     .styled-table th.header,
@@ -1449,6 +1539,8 @@ def get_table_style() -> str:
 
     .styled-table tbody tr:hover {
         background: rgba(139, 92, 246, 0.12);
+        transform: translateX(2px);
+        box-shadow: -4px 0 0 var(--purple-primary);
     }
 
     .styled-table td.cell,
@@ -1583,3 +1675,65 @@ def render_valuation_assessment(z_score: float) -> str:
         return '<span class="legend-item"><span class="legend-dot fair"></span><b>Fair Value</b> - Near historical mean</span>'
     else:
         return '<span class="legend-item"><span class="legend-dot very-expensive"></span><b>Expensive</b> - More than 1σ above mean</span>'
+
+
+# ============================================================
+# SKELETON LOADER HELPERS
+# ============================================================
+
+def render_skeleton_card(height: int = 100, width: str = "100%") -> str:
+    """
+    Render a skeleton loading card with shimmer animation.
+
+    Args:
+        height: Card height in pixels
+        width: Card width (CSS value)
+
+    Returns:
+        HTML string for skeleton card
+
+    Example:
+        >>> st.markdown(render_skeleton_card(150), unsafe_allow_html=True)
+    """
+    return f'''
+    <div class="skeleton-card" style="min-height: {height}px; width: {width};"></div>
+    '''
+
+
+def render_skeleton_text(lines: int = 3, width: str = "100%") -> str:
+    """
+    Render skeleton text lines with shimmer animation.
+
+    Args:
+        lines: Number of text lines
+        width: Width of text lines
+
+    Returns:
+        HTML string for skeleton text
+
+    Example:
+        >>> st.markdown(render_skeleton_text(4), unsafe_allow_html=True)
+    """
+    line_html = ''.join([
+        f'<div class="skeleton-text" style="width: {width}; margin-bottom: 8px;"></div>'
+        for _ in range(lines)
+    ])
+    return f'<div style="padding: 8px 0;">{line_html}</div>'
+
+
+def render_skeleton_metric() -> str:
+    """
+    Render a skeleton metric card placeholder.
+
+    Returns:
+        HTML string for skeleton metric
+
+    Example:
+        >>> st.markdown(render_skeleton_metric(), unsafe_allow_html=True)
+    """
+    return '''
+    <div class="skeleton-card" style="min-height: 80px; padding: 16px;">
+        <div class="skeleton-text" style="width: 60%; margin-bottom: 12px;"></div>
+        <div class="skeleton-text" style="width: 40%; height: 24px;"></div>
+    </div>
+    '''
