@@ -15,6 +15,13 @@ from typing import Optional, List
 from datetime import datetime
 
 from WEBAPP.core.models.market_state import MarketState, BreadthHistory
+from WEBAPP.core.trading_constants import (
+    MA20_HIGHER_LOW_WINDOW,
+    MA50_HIGHER_LOW_WINDOW,
+    CAPITULATION_THRESHOLD,
+    ACCUMULATION_THRESHOLD,
+    EARLY_REVERSAL_MA20_MIN,
+)
 
 
 # ==================== SINGLETON PATTERN ====================
@@ -281,42 +288,70 @@ class TADashboardService:
         df['date'] = pd.to_datetime(df['date'])
         return df
 
+    # ==========================================================================
+    # SIGNAL PRIORITY CONFIGURATION
+    # ==========================================================================
+    # Priority 1: Breakout/Breakdown - Price structure change
+    # Priority 2: Strong Reversal - Morning/Evening Star, Engulfing, Three Soldiers/Crows
+    # Priority 3: Weak/Single Candle Reversal - Hammer, Shooting Star, Hanging Man
+    # Priority 4: MA Crossover - Trend confirmation (lagging)
+    # Priority 5: Generic/Indecision - Doji, Spinning Top
+
+    PATTERN_PRIORITY = {
+        # Priority 2: Strong Reversal
+        'morning_star': 2, 'evening_star': 2,
+        'engulfing': 2, 'bullish_engulfing': 2, 'bearish_engulfing': 2,
+        'three_white_soldiers': 2, 'three_black_crows': 2,
+        # Priority 3: Weak/Single Candle Reversal
+        'hammer': 3, 'inverted_hammer': 3,
+        'shooting_star': 3, 'hanging_man': 3,
+        # Priority 5: Generic/Indecision
+        'doji': 5, 'spinning_top': 5,
+    }
+
+    MA_STRENGTH = {20: 50, 50: 75, 100: 85, 200: 100}
+
     @staticmethod
     @st.cache_data(ttl=60)
     def _load_signals() -> pd.DataFrame:
         """Load all signal types and combine with proper labels.
 
-        Uses history files (9 days) instead of latest files (1 day)
-        to enable proper date filtering in Stock Scanner.
+        Returns ALL signals (no dedup) with:
+        - is_primary: True for highest priority signal per symbol+date
+        - secondary_signals: List of other signal names for same symbol+date
+        - priority_group: For sorting (1=highest, 5=lowest)
         """
-        # Use historical directory for multi-day data
         history_dir = Path("DATA/processed/technical/alerts/historical")
         daily_dir = Path("DATA/processed/technical/alerts/daily")
         all_signals = []
 
-        # 1. Candlestick Patterns - most useful signal type
+        # ======================================================================
+        # 1. CANDLESTICK PATTERNS
+        # ======================================================================
         patterns_path = history_dir / "patterns_history.parquet"
         if not patterns_path.exists():
-            patterns_path = daily_dir / "patterns_latest.parquet"  # Fallback
+            patterns_path = daily_dir / "patterns_latest.parquet"
         if patterns_path.exists():
             df = pd.read_parquet(patterns_path)
+
+            # Remove exact duplicates (data pipeline bug)
+            df = df.drop_duplicates(subset=['symbol', 'date', 'pattern_name'])
+
             df['signal_type'] = 'patterns'
             df['type_label'] = df['pattern_name'].fillna('Pattern')
 
-            # JOIN trend data from basic_data for trend-aware signals
+            # JOIN trend data
             basic_path = Path("DATA/processed/technical/basic_data.parquet")
             if basic_path.exists():
                 basic_df = pd.read_parquet(basic_path, columns=[
                     'symbol', 'date', 'price_vs_sma20', 'price_vs_sma50',
                     'trading_value', 'volume', 'expected_trading_value', 'trading_value_diff'
                 ])
-                # Normalize dates for join
                 basic_df['date'] = pd.to_datetime(basic_df['date']).dt.date
                 df['date'] = pd.to_datetime(df['date']).dt.date
                 df = df.merge(basic_df, on=['symbol', 'date'], how='left')
 
-            # Classify trend based on SMA20/SMA50 position
-            # Threshold: ±5% for clear trend, otherwise SIDEWAYS
+            # Classify trend
             def classify_trend(row):
                 sma20 = row.get('price_vs_sma20', 0) or 0
                 sma50 = row.get('price_vs_sma50', 0) or 0
@@ -332,77 +367,93 @@ class TADashboardService:
 
             df['trend'] = df.apply(classify_trend, axis=1)
 
-            # Pullback Strategy: TREND → PATTERN → SIGNAL
+            # Context-aware DOJI signal refinement
+            def refine_doji_signal(row):
+                if row.get('pattern_name') != 'doji':
+                    return row['signal']
+                trend = row.get('trend', 'SIDEWAYS')
+                if trend in ['STRONG_UP', 'UPTREND']:
+                    return 'BEARISH'  # Reversal warning at top
+                elif trend in ['STRONG_DOWN', 'DOWNTREND']:
+                    return 'BULLISH'  # Hope for reversal at bottom
+                return 'NEUTRAL'
+
+            df['signal'] = df.apply(refine_doji_signal, axis=1)
+
+            # TREND → PATTERN → DIRECTION
             def get_strategy_signal(row):
                 pattern_signal = row['signal']
                 trend = row['trend']
-                pattern_name = row.get('pattern_name', '')
 
-                # Doji is always NEUTRAL (indecision)
-                if pattern_name == 'doji':
-                    return 'NEUTRAL'
-
-                # UPTREND patterns
                 if trend in ['STRONG_UP', 'UPTREND']:
                     if pattern_signal == 'BULLISH':
-                        return 'BUY'  # Trend continuation
+                        return 'BUY'
                     elif pattern_signal == 'BEARISH':
-                        return 'PULLBACK'  # Counter-trend, wait for support
-
-                # DOWNTREND patterns
+                        return 'PULLBACK'
                 elif trend in ['STRONG_DOWN', 'DOWNTREND']:
                     if pattern_signal == 'BEARISH':
-                        return 'SELL'  # Trend continuation
+                        return 'SELL'
                     elif pattern_signal == 'BULLISH':
-                        return 'BOUNCE'  # Counter-trend, wait for resistance
-
-                # SIDEWAYS: follow pattern with lighter conviction
-                else:
+                        return 'BOUNCE'
+                else:  # SIDEWAYS
                     if pattern_signal == 'BULLISH':
                         return 'BUY'
                     elif pattern_signal == 'BEARISH':
                         return 'SELL'
-
                 return 'NEUTRAL'
 
             df['direction'] = df.apply(get_strategy_signal, axis=1)
 
-            # Select columns (include trend, volume data for Phase 3+)
-            cols = ['symbol', 'date', 'signal_type', 'type_label', 'direction', 'price', 'strength']
-            optional_cols = ['trend', 'trading_value', 'volume', 'expected_trading_value', 'trading_value_diff',
-                            'price_vs_sma20', 'price_vs_sma50']
-            for col in optional_cols:
-                if col in df.columns:
-                    cols.append(col)
+            # Assign priority group (default 4 for unknown patterns)
+            df['priority_group'] = df['pattern_name'].map(
+                TADashboardService.PATTERN_PRIORITY
+            ).fillna(4).astype(int)
+
+            cols = ['symbol', 'date', 'signal_type', 'type_label', 'direction',
+                    'price', 'strength', 'priority_group', 'trend']
+            optional = ['trading_value', 'volume', 'price_vs_sma20', 'price_vs_sma50']
+            for c in optional:
+                if c in df.columns:
+                    cols.append(c)
             all_signals.append(df[cols])
 
-        # 2. MA Crossover
+        # ======================================================================
+        # 2. MA CROSSOVER - Period-based strength
+        # ======================================================================
         ma_path = history_dir / "ma_crossover_history.parquet"
         if not ma_path.exists():
-            ma_path = daily_dir / "ma_crossover_latest.parquet"  # Fallback
+            ma_path = daily_dir / "ma_crossover_latest.parquet"
         if ma_path.exists():
             df = pd.read_parquet(ma_path)
             df['signal_type'] = 'ma_crossover'
-            df['type_label'] = df['alert_type'].replace({
-                'MA_CROSS_ABOVE': 'MA Cross Up',
-                'MA_CROSS_BELOW': 'MA Cross Down'
-            })
-            df['direction'] = df['signal'].map({
-                'BULLISH': 'BUY', 'BUY': 'BUY',
-                'BEARISH': 'SELL', 'SELL': 'SELL'
-            }).fillna('NEUTRAL')
-            df['strength'] = 0.7  # Default strength
-            all_signals.append(df[['symbol', 'date', 'signal_type', 'type_label', 'direction', 'price', 'strength']])
 
-        # 3. Volume Spike
+            # Label with MA period
+            df['type_label'] = df.apply(
+                lambda r: f"MA{r['ma_period']} Cross {'↑' if r['alert_type'] == 'MA_CROSS_ABOVE' else '↓'}",
+                axis=1
+            )
+            df['direction'] = df['signal'].map({
+                'BULLISH': 'BUY', 'BEARISH': 'SELL'
+            }).fillna('NEUTRAL')
+
+            # Period-based strength: MA20=50, MA50=75, MA100=85, MA200=100
+            df['strength'] = df['ma_period'].map(TADashboardService.MA_STRENGTH).fillna(50)
+            df['priority_group'] = 4  # MA Crossover = Priority 4
+
+            all_signals.append(df[['symbol', 'date', 'signal_type', 'type_label',
+                                   'direction', 'price', 'strength', 'priority_group']])
+
+        # ======================================================================
+        # 3. VOLUME SPIKE
+        # ======================================================================
         vol_path = history_dir / "volume_spike_history.parquet"
         if not vol_path.exists():
-            vol_path = daily_dir / "volume_spike_latest.parquet"  # Fallback
+            vol_path = daily_dir / "volume_spike_latest.parquet"
         if vol_path.exists():
             df = pd.read_parquet(vol_path)
             df['signal_type'] = 'volume_spike'
             df['type_label'] = 'Vol Spike ' + df['volume_ratio'].round(1).astype(str) + 'x'
-            # Handle various signal formats: BULLISH, BEARISH, NOISE, WATCH, etc.
+
             def map_vol_signal(sig):
                 if not isinstance(sig, str):
                     return 'NEUTRAL'
@@ -412,14 +463,20 @@ class TADashboardService:
                 elif 'BEARISH' in sig or sig == 'SELL':
                     return 'SELL'
                 return 'NEUTRAL'
-            df['direction'] = df['signal'].apply(map_vol_signal)
-            df['strength'] = df['confidence'].fillna(0.5)
-            all_signals.append(df[['symbol', 'date', 'signal_type', 'type_label', 'direction', 'price', 'strength']])
 
-        # 4. Breakout
+            df['direction'] = df['signal'].apply(map_vol_signal)
+            df['strength'] = (df['confidence'].fillna(0.5) * 100).clip(0, 100)
+            df['priority_group'] = 4  # Volume = Priority 4
+
+            all_signals.append(df[['symbol', 'date', 'signal_type', 'type_label',
+                                   'direction', 'price', 'strength', 'priority_group']])
+
+        # ======================================================================
+        # 4. BREAKOUT - Dynamic strength based on volume
+        # ======================================================================
         breakout_path = history_dir / "breakout_history.parquet"
         if not breakout_path.exists():
-            breakout_path = daily_dir / "breakout_latest.parquet"  # Fallback
+            breakout_path = daily_dir / "breakout_latest.parquet"
         if breakout_path.exists():
             df = pd.read_parquet(breakout_path)
             df['signal_type'] = 'breakout'
@@ -427,32 +484,66 @@ class TADashboardService:
                 'BREAKOUT_UP': 'Breakout ↑',
                 'BREAKDOWN': 'Breakdown ↓'
             })
-            # Handle various signal formats: BULLISH_BREAKOUT, BEARISH_BREAKDOWN, etc.
+
             def map_breakout_signal(sig):
                 if not isinstance(sig, str):
                     return 'NEUTRAL'
                 sig = sig.upper()
-                if 'BULLISH' in sig or 'UP' in sig or sig == 'BUY':
+                if 'BULLISH' in sig or 'UP' in sig:
                     return 'BUY'
-                elif 'BEARISH' in sig or 'DOWN' in sig or sig == 'SELL':
+                elif 'BEARISH' in sig or 'DOWN' in sig:
                     return 'SELL'
                 return 'NEUTRAL'
+
             df['direction'] = df['signal'].apply(map_breakout_signal)
-            df['strength'] = 0.8  # Default strength
-            all_signals.append(df[['symbol', 'date', 'signal_type', 'type_label', 'direction', 'price', 'strength']])
+
+            # Dynamic strength: Base 70 + volume_confirmed(+15) + volume_ratio>1.5(+15)
+            def calc_breakout_strength(row):
+                base = 70
+                if row.get('volume_confirmed', False):
+                    base += 15
+                vol_ratio = row.get('volume_ratio', 1.0) or 1.0
+                if vol_ratio > 1.5:
+                    base += 15
+                return min(base, 100)
+
+            df['strength'] = df.apply(calc_breakout_strength, axis=1)
+            df['priority_group'] = 1  # Breakout = Priority 1 (highest)
+
+            all_signals.append(df[['symbol', 'date', 'signal_type', 'type_label',
+                                   'direction', 'price', 'strength', 'priority_group']])
 
         if not all_signals:
             return pd.DataFrame()
 
-        # Combine all signals
+        # ======================================================================
+        # COMBINE & ADD PRIMARY/SECONDARY FLAGS
+        # ======================================================================
         combined = pd.concat(all_signals, ignore_index=True)
 
-        # Dedup: Keep highest strength signal per ticker+date
-        # This prevents same stock showing both MUA and BÁN from different patterns
-        combined = combined.sort_values('strength', ascending=False)
-        combined = combined.drop_duplicates(subset=['symbol', 'date'], keep='first')
+        # Sort: Date DESC → Priority ASC (1=best) → Strength DESC
+        combined = combined.sort_values(
+            ['date', 'priority_group', 'strength'],
+            ascending=[False, True, False]
+        )
 
-        return combined.sort_values(['direction', 'symbol'], ascending=[True, True])
+        # Mark is_primary: first row per symbol+date (highest priority)
+        combined['is_primary'] = ~combined.duplicated(subset=['symbol', 'date'], keep='first')
+
+        # Build secondary_signals: collect non-primary type_labels per symbol+date
+        secondary_df = (
+            combined[~combined['is_primary']]
+            .groupby(['symbol', 'date'], as_index=False)
+            .agg(secondary_signals=('type_label', list))
+        )
+
+        # Merge secondary_signals back to combined
+        combined = combined.merge(secondary_df, on=['symbol', 'date'], how='left')
+        combined['secondary_signals'] = combined['secondary_signals'].apply(
+            lambda x: x if isinstance(x, list) else []
+        )
+
+        return combined
 
     @staticmethod
     @st.cache_data(ttl=300)
@@ -502,9 +593,13 @@ class TADashboardService:
         Detect "Higher Lows" pattern for MA20 and MA50 breadth.
         Higher lows = recent low > previous low → confirms uptrend forming.
 
-        Logic:
-        - MA20: Compare min of last 3 days with min of previous 3 days
-        - MA50: Compare min of last 5 days with min of previous 5 days
+        Logic (optimized from 3-year backtest 2023-2025):
+        - MA20: Compare min of last 7 days with min of previous 7 days
+        - MA50: Compare min of last 9 days with min of previous 9 days
+
+        Window rationale:
+        - MA20 median swing cycle: ~14.5 days → window = 7 days (half cycle)
+        - MA50 median swing cycle: ~19.0 days → window = 9 days (half cycle)
 
         Returns:
             dict: {
@@ -518,6 +613,10 @@ class TADashboardService:
                 'ma50_rising_from_low': bool,
             }
         """
+        # Window sizes from trading_constants (based on 3-year backtest)
+        MA20_WINDOW = MA20_HIGHER_LOW_WINDOW  # 7 days (~14.5 day cycle / 2)
+        MA50_WINDOW = MA50_HIGHER_LOW_WINDOW  # 9 days (~19.0 day cycle / 2)
+
         result = {
             'ma20_higher_low': False,
             'ma20_recent_low': 0,
@@ -529,23 +628,23 @@ class TADashboardService:
             'ma50_rising_from_low': False,
         }
 
-        if len(breadth_df) < 10:
+        # Need at least 2x window days of data
+        min_required = MA50_WINDOW * 2
+        if len(breadth_df) < min_required:
             return result
 
         # Get column names
         ma20_col = 'above_ma20_pct' if 'above_ma20_pct' in breadth_df.columns else 'pct_above_ma20'
         ma50_col = 'above_ma50_pct' if 'above_ma50_pct' in breadth_df.columns else 'pct_above_ma50'
 
-        # Get last 10 rows for MA50 analysis (need 10 = 5 recent + 5 previous)
-        recent_10 = breadth_df.tail(10).copy()
-        ma20_values = recent_10[ma20_col].tolist()
-        ma50_values = recent_10[ma50_col].tolist()
+        # Get last 18 rows for analysis
+        recent_data = breadth_df.tail(min_required).copy()
+        ma20_values = recent_data[ma20_col].tolist()
+        ma50_values = recent_data[ma50_col].tolist()
 
-        # MA20: Higher Lows detection (3-day windows)
-        # Recent 3 days: [-3:-1] (indices 7,8,9 in 10-day array)
-        # Previous 3 days: [-6:-3] (indices 4,5,6)
-        ma20_recent_window = ma20_values[-3:]  # Last 3 days
-        ma20_prev_window = ma20_values[-6:-3]  # Previous 3 days
+        # MA20: Higher Lows detection (7-day windows)
+        ma20_recent_window = ma20_values[-MA20_WINDOW:]  # Last 7 days
+        ma20_prev_window = ma20_values[-(MA20_WINDOW * 2):-MA20_WINDOW]  # Previous 7 days
 
         ma20_recent_low = min(ma20_recent_window)
         ma20_prev_low = min(ma20_prev_window)
@@ -556,11 +655,9 @@ class TADashboardService:
         result['ma20_higher_low'] = ma20_recent_low > ma20_prev_low
         result['ma20_rising_from_low'] = ma20_current > ma20_recent_low
 
-        # MA50: Higher Lows detection (5-day windows)
-        # Recent 5 days: [-5:] (indices 5,6,7,8,9)
-        # Previous 5 days: [-10:-5] (indices 0,1,2,3,4)
-        ma50_recent_window = ma50_values[-5:]  # Last 5 days
-        ma50_prev_window = ma50_values[-10:-5]  # Previous 5 days
+        # MA50: Higher Lows detection (9-day windows)
+        ma50_recent_window = ma50_values[-MA50_WINDOW:]  # Last 9 days
+        ma50_prev_window = ma50_values[-(MA50_WINDOW * 2):-MA50_WINDOW]  # Previous 9 days
 
         ma50_recent_low = min(ma50_recent_window)
         ma50_prev_low = min(ma50_prev_window)
@@ -595,8 +692,13 @@ class TADashboardService:
         if ma50 >= 50 and ma100 >= 50:
             return None
 
-        all_oversold = ma20 < 30 and ma50 < 30 and ma100 < 30
-        extreme_oversold = ma20 < 25 and ma50 < 25 and ma100 < 25
+        # Use constants from trading_constants
+        all_oversold = (ma20 < ACCUMULATION_THRESHOLD and
+                        ma50 < ACCUMULATION_THRESHOLD and
+                        ma100 < ACCUMULATION_THRESHOLD)
+        extreme_oversold = (ma20 < CAPITULATION_THRESHOLD and
+                           ma50 < CAPITULATION_THRESHOLD and
+                           ma100 < CAPITULATION_THRESHOLD)
 
         ma20_higher_low = higher_lows.get('ma20_higher_low', False)
         ma20_rising = higher_lows.get('ma20_rising_from_low', False)
@@ -612,7 +714,7 @@ class TADashboardService:
             return 'ACCUMULATING'
 
         # Stage 3: EARLY_REVERSAL - MA20 escaped oversold + both MAs forming higher lows
-        if ma20 >= 25 and ma20_higher_low and ma50_higher_low and ma50_rising:
+        if ma20 >= EARLY_REVERSAL_MA20_MIN and ma20_higher_low and ma50_higher_low and ma50_rising:
             return 'EARLY_REVERSAL'
 
         return None

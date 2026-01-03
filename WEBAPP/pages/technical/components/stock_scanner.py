@@ -25,149 +25,14 @@ from typing import TYPE_CHECKING, Optional
 from datetime import datetime, timedelta
 
 from WEBAPP.core.styles import get_table_style
+from WEBAPP.core.trading_rules import (
+    SIGNAL_TYPES, PATTERN_INTERPRETATIONS, PATTERN_VOLUME_MATRIX,
+    VOLUME_CONTEXT, ACTION_COLORS
+)
+from WEBAPP.core.session_state import get_synced_ticker, has_synced_ticker
 
 if TYPE_CHECKING:
     from ..services.ta_dashboard_service import TADashboardService
-
-
-# ============================================================================
-# CONSTANTS - Pattern Interpretation & Volume Context
-# ============================================================================
-
-# Signal Type Labels
-SIGNAL_TYPES = {
-    'patterns': 'Candlestick',
-    'ma_crossover': 'MA Cross',
-    'volume_spike': 'Volume Spike',
-    'breakout': 'Breakout',
-}
-
-# Pattern Interpretations (Vietnamese with diacritics) - lowercase keys for matching
-# Based on ta-lib candlestick patterns from phase-04 plan
-PATTERN_INTERPRETATIONS = {
-    # ============ BULLISH PATTERNS ============
-    'engulfing': 'Đảo chiều mạnh - Nến xanh bao trùm hoàn toàn nến đỏ trước.',
-    'bullish engulfing': 'Đảo chiều cực mạnh - Buyers áp đảo, nến xanh lớn bao trùm nến đỏ.',
-    'hammer': 'Từ chối giảm giá - Bấc dưới dài >= 2x thân. Buyers vào ở đáy.',
-    'morning star': 'Mô hình 3 nến đảo chiều hoàn hảo: (1) Nến đỏ dài, (2) Doji, (3) Nến xanh dài. High conviction.',
-    'morning doji star': 'Mô hình 3 nến đảo chiều với Doji ở giữa. Tín hiệu mạnh.',
-    'piercing': 'Mô hình xuyên thấu - Nến xanh xuyên thấu >50% thân nến đỏ trước.',
-    'three white soldiers': '3 nến xanh liên tiếp tăng dần - Đảo chiều tăng cực mạnh, trend reversal.',
-    'inverted hammer': 'Bấc trên dài, thân nhỏ. Cần confirm bằng nến tăng tiếp theo.',
-    'inverted_hammer': 'Bấc trên dài, thân nhỏ. Cần confirm bằng nến tăng tiếp theo.',
-    'harami': 'Nến nhỏ nằm trong thân nến lớn. Momentum yếu đi, cần theo dõi.',
-    'harami bullish': 'Harami tăng - Nến xanh nhỏ trong nến đỏ. Momentum giảm đang yếu đi.',
-    'harami_bullish': 'Harami tăng - Nến xanh nhỏ trong nến đỏ. Momentum giảm đang yếu đi.',
-    'doji': 'Thị trường bất định - Open = Close. Chờ nến tiếp theo xác nhận.',
-    'dragonfly doji': 'Từ chối giảm giá mạnh - Bấc dưới cực dài, Open = High = Close.',
-    'dragonfly_doji': 'Từ chối giảm giá mạnh - Bấc dưới cực dài, Open = High = Close.',
-    'marubozu': 'Nến không bấc - Buyers control 100%. Momentum tăng mạnh.',
-    'marubozu white': 'Marubozu xanh - Buyers hoàn toàn thống trị phiên.',
-    'marubozu_white': 'Marubozu xanh - Buyers hoàn toàn thống trị phiên.',
-    'tweezer bottom': 'Đáy nhíp - 2 nến liên tiếp có low bằng nhau. Support mạnh.',
-    'tweezer_bottom': 'Đáy nhíp - 2 nến liên tiếp có low bằng nhau. Support mạnh.',
-
-    # ============ BEARISH PATTERNS ============
-    'bearish engulfing': 'Đảo chiều giảm mạnh - Nến đỏ bao trùm hoàn toàn nến xanh.',
-    'engulfing bearish': 'Đảo chiều giảm mạnh - Sellers áp đảo, nến đỏ lớn bao trùm.',
-    'engulfing_bearish': 'Đảo chiều giảm mạnh - Sellers áp đảo, nến đỏ lớn bao trùm.',
-    'hanging man': 'Cảnh báo đảo chiều giảm sau uptrend. Giống Hammer nhưng ở đỉnh.',
-    'hanging_man': 'Cảnh báo đảo chiều giảm sau uptrend. Giống Hammer nhưng ở đỉnh.',
-    'evening star': 'Mô hình 3 nến đảo chiều giảm: (1) Nến xanh, (2) Doji, (3) Nến đỏ dài. High conviction.',
-    'evening doji star': 'Mô hình 3 nến đảo chiều giảm với Doji ở giữa.',
-    'shooting star': 'Từ chối tăng giá - Bấc trên dài, thân nhỏ ở dưới. Sellers vào.',
-    'shooting_star': 'Từ chối tăng giá - Bấc trên dài, thân nhỏ ở dưới. Sellers vào.',
-    'dark cloud cover': 'Mây đen che phủ - Nến đỏ mở gap lên, đóng cửa <50% nến xanh trước.',
-    'dark_cloud_cover': 'Mây đen che phủ - Nến đỏ mở gap lên, đóng cửa <50% nến xanh trước.',
-    'dark cloud': 'Mây đen che phủ - Áp lực bán tăng sau gap up.',
-    'three black crows': '3 nến đỏ liên tiếp giảm dần - Đảo chiều giảm cực mạnh.',
-    'three_black_crows': '3 nến đỏ liên tiếp giảm dần - Đảo chiều giảm cực mạnh.',
-    'harami bearish': 'Harami giảm - Nến đỏ nhỏ trong nến xanh. Momentum tăng yếu đi.',
-    'harami_bearish': 'Harami giảm - Nến đỏ nhỏ trong nến xanh. Momentum tăng yếu đi.',
-    'gravestone doji': 'Từ chối tăng giá mạnh - Bấc trên cực dài, Open = Low = Close.',
-    'gravestone_doji': 'Từ chối tăng giá mạnh - Bấc trên cực dài, Open = Low = Close.',
-    'marubozu black': 'Marubozu đỏ - Sellers hoàn toàn thống trị phiên.',
-    'marubozu_black': 'Marubozu đỏ - Sellers hoàn toàn thống trị phiên.',
-    'tweezer top': 'Đỉnh nhíp - 2 nến liên tiếp có high bằng nhau. Resistance mạnh.',
-    'tweezer_top': 'Đỉnh nhíp - 2 nến liên tiếp có high bằng nhau. Resistance mạnh.',
-
-    # ============ CHART PATTERNS ============
-    'double bottom': 'Đáy đôi - Mô hình đảo chiều tăng cổ điển. Breakout neckline xác nhận.',
-    'double_bottom': 'Đáy đôi - Mô hình đảo chiều tăng cổ điển. Breakout neckline xác nhận.',
-    'double top': 'Đỉnh đôi - Mô hình đảo chiều giảm cổ điển. Breakdown neckline xác nhận.',
-    'double_top': 'Đỉnh đôi - Mô hình đảo chiều giảm cổ điển. Breakdown neckline xác nhận.',
-    'head shoulders': 'Vai-Đầu-Vai - Mô hình đảo chiều giảm. Breakdown neckline = confirm.',
-    'head_shoulders': 'Vai-Đầu-Vai - Mô hình đảo chiều giảm. Breakdown neckline = confirm.',
-    'cup handle': 'Tách và tay cầm - Mô hình tiếp diễn tăng. Breakout rim = confirm.',
-    'cup_handle': 'Tách và tay cầm - Mô hình tiếp diễn tăng. Breakout rim = confirm.',
-    'flag bull': 'Cờ tăng - Tiếp diễn sau sóng tăng mạnh. Breakout = tiếp tục tăng.',
-    'flag_bull': 'Cờ tăng - Tiếp diễn sau sóng tăng mạnh. Breakout = tiếp tục tăng.',
-    'flag bear': 'Cờ giảm - Tiếp diễn sau sóng giảm mạnh. Breakdown = tiếp tục giảm.',
-    'flag_bear': 'Cờ giảm - Tiếp diễn sau sóng giảm mạnh. Breakdown = tiếp tục giảm.',
-
-    # ============ MA SIGNALS ============
-    'ma cross up': 'Golden Cross - EMA ngắn cắt lên EMA dài. Xu hướng tăng mới bắt đầu.',
-    'ma cross down': 'Death Cross - EMA ngắn cắt xuống EMA dài. Xu hướng giảm.',
-    'ma_crossover': 'MA Crossover - Giao cắt đường trung bình động.',
-    'golden cross': 'Golden Cross - EMA20 cắt lên EMA50. Xu hướng tăng trung hạn.',
-    'death cross': 'Death Cross - EMA20 cắt xuống EMA50. Xu hướng giảm trung hạn.',
-
-    # ============ VOLUME SIGNALS ============
-    'vol spike': 'Volume đột biến - Sức mua/bán bất thường, cần theo dõi giá.',
-    'volume spike': 'Volume tăng đột biến - Có thể báo hiệu breakout hoặc climax.',
-    'volume_spike': 'Volume tăng đột biến - Có thể báo hiệu breakout hoặc climax.',
-
-    # ============ BREAKOUT SIGNALS ============
-    'breakout': 'Phá vỡ resistance - Xu hướng tăng mới. Volume cao xác nhận.',
-    'breakdown': 'Phá vỡ support - Xu hướng giảm. Volume cao xác nhận.',
-    'resistance break': 'Vượt resistance - Giá đóng cửa trên vùng kháng cự.',
-    'support break': 'Xuyên support - Giá đóng cửa dưới vùng hỗ trợ.',
-}
-
-# Volume Context Interpretation Matrix (pattern + volume)
-PATTERN_VOLUME_MATRIX = {
-    # ENGULFING patterns
-    ('engulfing', 'HIGH'): 'Đảo chiều cực mạnh - Volume cao xác nhận buyers áp đảo',
-    ('engulfing', 'AVG'): 'Đảo chiều - Cần theo dõi phiên sau',
-    ('engulfing', 'LOW'): 'Tín hiệu yếu - Chờ volume confirmation',
-
-    # HAMMER patterns
-    ('hammer', 'HIGH'): 'Từ chối giảm giá mạnh - Volume cao = buyers vào mạnh ở đáy',
-    ('hammer', 'AVG'): 'Có thể đảo chiều - Volume chưa confirm',
-    ('hammer', 'LOW'): 'Hammer yếu - Có thể chỉ là nghỉ ngơi tạm thời',
-
-    # MORNING STAR patterns
-    ('morning star', 'HIGH'): 'Đảo chiều cực mạnh - Volume đáy cao xác nhận',
-    ('morning star', 'AVG'): 'Đảo chiều tốt - Chờ thêm 1 phiên confirm',
-    ('morning star', 'LOW'): 'Cẩn thận - Volume thấp giảm độ tin cậy',
-
-    # SHOOTING STAR patterns
-    ('shooting star', 'HIGH'): 'Từ chối tăng giá mạnh - Volume cao xác nhận sellers',
-    ('shooting star', 'AVG'): 'Có thể đảo chiều - Theo dõi phiên sau',
-    ('shooting star', 'LOW'): 'Shooting Star yếu - Cần confirm',
-
-    # DOJI patterns
-    ('doji', 'HIGH'): 'Bất định nhưng vol cao - Có thể là climax, chờ confirm',
-    ('doji', 'AVG'): 'Bất định - Thị trường do dự',
-    ('doji', 'LOW'): 'Bất định vol thấp - Không có tín hiệu rõ ràng',
-}
-
-# Volume Context Labels
-VOLUME_CONTEXT = {
-    'HIGH': {'label': 'VOL CAO', 'color': '#10B981', 'bg': 'rgba(16, 185, 129, 0.15)'},
-    'AVG': {'label': 'VOL TB', 'color': '#F59E0B', 'bg': 'rgba(245, 158, 11, 0.15)'},
-    'LOW': {'label': 'VOL THẤP', 'color': '#64748B', 'bg': 'rgba(100, 116, 139, 0.15)'},
-}
-
-# Action colors (matching dashboard theme)
-ACTION_COLORS = {
-    'BUY': {'bg': 'rgba(16, 185, 129, 0.15)', 'text': '#10B981', 'label': 'MUA'},
-    'SELL': {'bg': 'rgba(239, 68, 68, 0.15)', 'text': '#EF4444', 'label': 'BÁN'},
-    'HOLD': {'bg': 'rgba(245, 158, 11, 0.15)', 'text': '#F59E0B', 'label': 'CHỜ'},
-    'NEUTRAL': {'bg': 'rgba(100, 116, 139, 0.15)', 'text': '#64748B', 'label': 'TRUNG LẬP'},
-    'BULLISH': {'bg': 'rgba(16, 185, 129, 0.15)', 'text': '#10B981', 'label': 'MUA'},
-    'BEARISH': {'bg': 'rgba(239, 68, 68, 0.15)', 'text': '#EF4444', 'label': 'BÁN'},
-}
 
 
 # ============================================================================
@@ -179,15 +44,16 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
     Render Stock Scanner tab following dashboard conventions.
 
     Components:
-    1. Quick Filters (symbol search, sector, days filter)
-    2. Advanced Filters (signal type, direction, min strength)
-    3. Signal Summary (st.metric cards)
-    4. Signal Table with:
+    1. Single Stock Analysis (TOP - linked with Fundamental sync)
+    2. Quick Filters (symbol search, sector, days filter)
+    3. Advanced Filters (signal type, direction, min strength)
+    4. Signal Summary (st.metric cards)
+    5. Signal Table with:
        - Progress bar gauge for score
        - Pattern interpretation (Vietnamese with diacritics)
        - Volume context
        - Signal date
-    5. Pattern Interpretation Guide panel
+    6. Pattern Interpretation Guide panel
     """
 
     # Load signals data
@@ -197,17 +63,34 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
         _render_empty_state()
         return
 
+    # ============ SINGLE STOCK ANALYSIS (TOP - linked with Fundamental) ============
+    _render_single_stock_analysis(signals)
+
+    st.markdown("---")
+
     # ============ QUICK FILTERS ============
     st.markdown("### Bộ lọc nhanh")
+
+    # Check for synced ticker from Fundamental pages
+    default_search = ""
+    synced_indicator = ""
+    if has_synced_ticker():
+        synced = get_synced_ticker()
+        # Only pre-fill if user hasn't typed anything yet
+        if not st.session_state.get('scanner_quick_search'):
+            default_search = synced
+            synced_indicator = f" (from Fundamental)"
 
     qcol1, qcol2, qcol3, qcol4 = st.columns([2, 1, 1, 1])
 
     with qcol1:
         search_symbols = st.text_input(
             "Tìm mã",
+            value=default_search if not st.session_state.get('scanner_quick_search') else None,
             placeholder="VCB, ACB, FPT (phân tách bằng dấu phẩy)",
             key="scanner_quick_search",
-            label_visibility="collapsed"
+            label_visibility="collapsed",
+            help=f"Pre-filled with synced ticker{synced_indicator}" if synced_indicator else None
         )
 
     with qcol2:
@@ -281,7 +164,7 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
                 "Điểm tối thiểu",
                 min_value=0,
                 max_value=100,
-                value=50,  # Phase 3: Default 50 to filter weak signals
+                value=30,  # Lowered from 50 - most signals have strength 30-40
                 key="scanner_min_strength"
             )
 
@@ -317,11 +200,6 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
 
     # ============ SPLIT TABLES: MUA (left) | BÁN (right) ============
     _render_split_tables(filtered)
-
-    st.markdown("---")
-
-    # ============ SINGLE STOCK ANALYSIS ============
-    _render_single_stock_analysis(signals)  # Use full signals for complete analysis
 
     # ============ PATTERN INTERPRETATION GUIDE ============
     if not filtered.empty:
@@ -399,6 +277,10 @@ def _apply_filters(
     if min_value_bn > 0 and 'trading_value' in filtered.columns:
         min_value = min_value_bn * 1e9  # Convert billion to actual value
         filtered = filtered[filtered['trading_value'] >= min_value]
+
+    # Filter to only primary signals (show secondary via tooltip)
+    if 'is_primary' in filtered.columns:
+        filtered = filtered[filtered['is_primary'] == True]
 
     # Sort by action priority (BUY first, then SELL, then PULLBACK/BOUNCE)
     # Then by date (newest) and strength (highest)
@@ -861,8 +743,18 @@ def _render_signal_table_enhanced(signals: pd.DataFrame) -> None:
         else:
             date_str = '-'
 
-        # Type label
+        # Type label with secondary signals tooltip
         type_label = row.get('type_label', SIGNAL_TYPES.get(row.get('signal_type', ''), '-'))
+
+        # Check for secondary signals (+X tooltip)
+        secondary_signals = row.get('secondary_signals', [])
+        if secondary_signals and len(secondary_signals) > 0:
+            # Build tooltip content
+            secondary_list = ', '.join(secondary_signals[:3])  # Max 3 in tooltip
+            if len(secondary_signals) > 3:
+                secondary_list += f' +{len(secondary_signals) - 3}'
+            tooltip_html = f'<span style="cursor:help; margin-left:4px; padding:2px 6px; background:rgba(139,92,246,0.15); color:#A78BFA; border-radius:4px; font-size:0.65rem; font-weight:500;" title="{secondary_list}">+{len(secondary_signals)}</span>'
+            type_label = f'{type_label}{tooltip_html}'
 
         # Get volume context if available
         volume_context = row.get('volume_context', None)
@@ -1062,27 +954,39 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
     """Render Single Stock Analysis component.
 
     Shows trend + pattern + strategy for individual stocks.
+    Linked with Fundamental filter sync for seamless navigation.
     """
     st.markdown("### Phân tích cổ phiếu")
-    st.caption("Nhập mã cổ phiếu để xem xu hướng và tín hiệu chi tiết")
 
-    # Input row
-    input_col, sector_col = st.columns([1, 1])
+    # Check for synced ticker from Fundamental pages
+    default_ticker = ""
+    synced_info = ""
+    if has_synced_ticker():
+        default_ticker = get_synced_ticker()
+        synced_info = " (từ trang Fundamental)"
+
+    # Input row with sync indicator
+    input_col, info_col = st.columns([2, 1])
 
     with input_col:
         ticker_input = st.text_input(
             "Mã cổ phiếu",
-            placeholder="VD: PVD, MWG, GAS",
+            value=default_ticker if default_ticker and not st.session_state.get('single_stock_input') else None,
+            placeholder="VD: VCB, ACB, FPT",
             key="single_stock_input",
-            label_visibility="collapsed"
+            label_visibility="collapsed",
+            help=f"Nhập mã cổ phiếu để xem phân tích{synced_info}"
         )
 
-    with sector_col:
+    with info_col:
         # Get unique tickers with trend data
         if 'trend' in signals.columns:
             available_tickers = signals['symbol'].unique().tolist()
             ticker_count = len(available_tickers)
-            st.caption(f"{ticker_count} mã có dữ liệu phân tích")
+            if synced_info:
+                st.caption(f"{default_ticker}{synced_info}")
+            else:
+                st.caption(f"{ticker_count} mã có dữ liệu")
 
     # If user entered a ticker
     if ticker_input and ticker_input.strip():
