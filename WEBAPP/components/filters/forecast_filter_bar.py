@@ -28,14 +28,22 @@ SORT_OPTIONS = {
     'stock': [
         ('Upside ↓', 'upside_desc'),
         ('Upside ↑', 'upside_asc'),
-        ('PE 25F ↓', 'pe_desc'),
-        ('PE 25F ↑', 'pe_asc'),
+        ('PE 25F ↓', 'pe_25_desc'),
+        ('PE 25F ↑', 'pe_25_asc'),
+        ('PE 26F ↓', 'pe_26_desc'),
+        ('Δ PE ↓', 'pe_delta_asc'),  # Lower = improving
+        ('PB 25F ↓', 'pb_25_desc'),
+        ('PB 25F ↑', 'pb_25_asc'),
+        ('PB 26F ↓', 'pb_26_desc'),
+        ('Δ PB ↓', 'pb_delta_asc'),  # Lower = improving
         ('Growth ↓', 'growth_desc'),
         ('Market Cap ↓', 'mcap_desc'),
     ],
     'sector': [
         ('PE Fwd ↑', 'pe_asc'),
         ('PE Fwd ↓', 'pe_desc'),
+        ('PB Fwd ↑', 'pb_asc'),
+        ('PB Fwd ↓', 'pb_desc'),
         ('Growth ↓', 'growth_desc'),
         ('NPATMI ↓', 'npatmi_desc'),
     ]
@@ -60,6 +68,7 @@ def render_filter_bar(
     sort_options: List[Tuple[str, str]] = None,
     show_extended_toggle: bool = False,
     show_consensus_filter: bool = False,
+    show_ticker_search: bool = False,
     key_prefix: str = 'forecast'
 ) -> Dict[str, Any]:
     """
@@ -74,6 +83,7 @@ def render_filter_bar(
         sort_options: List of (label, value) tuples for sort
         show_extended_toggle: Show extended columns toggle
         show_consensus_filter: Show consensus status filter
+        show_ticker_search: Show ticker search input
         key_prefix: Session state key prefix
 
     Returns:
@@ -84,6 +94,7 @@ def render_filter_bar(
 
     # Calculate number of columns needed
     num_cols = sum([
+        show_ticker_search,
         show_sector,
         show_rating,
         show_sort,
@@ -96,6 +107,8 @@ def render_filter_bar(
 
     # Create responsive columns
     col_weights = []
+    if show_ticker_search:
+        col_weights.append(1.2)  # Smaller for ticker input
     if show_sector:
         col_weights.append(2)
     if show_rating:
@@ -109,6 +122,19 @@ def render_filter_bar(
 
     cols = st.columns(col_weights)
     col_idx = 0
+
+    # Ticker search input
+    if show_ticker_search:
+        with cols[col_idx]:
+            ticker_key = f'{key_prefix}_tab{tab_id}_ticker'
+            filters['ticker_search'] = st.text_input(
+                "Ticker",
+                key=ticker_key,
+                placeholder="VCB, FPT...",
+                label_visibility='collapsed',
+                max_chars=10
+            ).strip().upper()
+        col_idx += 1
 
     # Sector filter
     if show_sector:
@@ -278,10 +304,13 @@ def render_rating_badges(df, rating_col: str = 'rating') -> str:
         rating_col: Column name for rating
 
     Returns:
-        HTML string for rating badges
+        HTML string for rating badges (never empty - always valid HTML for st.html())
     """
+    # Always return valid HTML - st.html() cannot accept empty string
+    placeholder = '<div style="display:flex;gap:8px;margin-bottom:12px;"></div>'
+
     if df.empty or rating_col not in df.columns:
-        return ''
+        return placeholder
 
     counts = df[rating_col].value_counts()
 
@@ -303,5 +332,8 @@ def render_rating_badges(df, rating_col: str = 'rating') -> str:
                 f'{rating}: {count}</span>'
             )
             badges.append(badge)
+
+    if not badges:
+        return placeholder
 
     return f'<div style="display:flex;gap:8px;margin-bottom:12px;">{"".join(badges)}</div>'
