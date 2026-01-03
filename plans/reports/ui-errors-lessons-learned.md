@@ -249,4 +249,122 @@ st.html(table_style + table_html)
 
 ---
 
-*Last Updated: 2025-12-27*
+## 5. st.html() Empty Body Error (2026-01-03)
+
+### Problem
+
+`st.html()` throws `StreamlitAPIException: st.html body cannot be empty` when passed empty string.
+
+```python
+# ❌ WRONG - Can return empty string when no data
+def render_rating_badges(df):
+    if df.empty:
+        return ''  # Empty string = CRASH
+
+st.html(render_rating_badges(filtered_df))  # StreamlitAPIException!
+```
+
+### Solution
+
+Always return valid HTML, use placeholder `<div>` when no content:
+
+```python
+# ✅ CORRECT - Never return empty string
+def render_rating_badges(df):
+    placeholder = '<div style="display:flex;gap:8px;margin-bottom:12px;"></div>'
+
+    if df.empty:
+        return placeholder  # Valid HTML, just empty container
+
+    # ... build badges ...
+
+    if not badges:
+        return placeholder
+
+    return f'<div>{"".join(badges)}</div>'
+```
+
+---
+
+## 6. HTML Comments in f-strings Causing Raw HTML Display (2026-01-03)
+
+### Problem
+
+HTML comments (`<!-- Comment -->`) inside f-strings passed to `st.markdown(unsafe_allow_html=True)` can cause the entire HTML to display as raw text instead of rendering.
+
+```python
+# ❌ WRONG - HTML comments in f-string
+st.markdown(f'''
+<div style="padding: 16px;">
+    <!-- Header Section -->
+    <span>{title}</span>
+    <!-- Progress Bar -->
+    <div style="width: {progress}%"></div>
+</div>
+''', unsafe_allow_html=True)
+```
+
+### Solution
+
+1. **Remove HTML comments** from f-strings
+2. **Use `st.html()`** instead of `st.markdown(unsafe_allow_html=True)`
+3. **Build HTML string first**, then pass to render function
+
+```python
+# ✅ CORRECT - No comments, use st.html()
+html_content = f'''
+<div style="padding: 16px;">
+    <span>{title}</span>
+    <div style="width: {progress}%"></div>
+</div>
+'''
+st.html(html_content)
+```
+
+### CSS @keyframes in f-strings
+
+Double braces `{{` `}}` for CSS keyframes conflict with f-string syntax:
+
+```python
+# ❌ PROBLEMATIC - @keyframes with double braces
+st.markdown(f'''
+<style>
+@keyframes pulse {{
+    0%, 100% {{ opacity: 1; }}
+    50% {{ opacity: 0.5; }}
+}}
+</style>
+<div style="animation: pulse 2s infinite;">Content</div>
+''', unsafe_allow_html=True)
+```
+
+**Solution:** Either avoid CSS animations in f-strings, or move CSS to separate non-f-string:
+
+```python
+# ✅ CORRECT - Separate CSS from f-string content
+css_style = '''<style>@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }</style>'''
+html_content = f'<div>{dynamic_content}</div>'
+st.html(css_style + html_content)
+```
+
+---
+
+## Summary: st.html() vs st.markdown(unsafe_allow_html=True)
+
+| Feature | st.html() | st.markdown(unsafe_allow_html=True) |
+|---------|-----------|-------------------------------------|
+| Complex HTML | ✅ Reliable | ⚠️ Can escape |
+| HTML Comments | ✅ Works | ❌ Can break |
+| Empty string | ❌ Throws error | ✅ Just empty |
+| CSS @keyframes | ✅ Works | ⚠️ Brace conflicts |
+| Streamlit version | v1.33+ | All versions |
+
+**Best Practice:**
+- Use `st.html()` for complex HTML (tables, cards, progress bars)
+- Always ensure HTML content is never empty
+- Avoid HTML comments in dynamic f-strings
+- Keep CSS animations simple or move to separate string
+
+---
+
+*Last Updated: 2026-01-03*
