@@ -10,7 +10,7 @@ Project guidance for Claude Code AI assistants working with the Vietnam Dashboar
 - **Domain:** 457 tickers × 19 sectors × 4 entity types
 - **Features:** Fundamental + Technical + Valuation + Forecast analysis
 - **Tech Stack:** Python 3.13, Streamlit, Parquet, vnstock_data
-- **Status:** v4.0.0 architecture (40% complete)
+- **Status:** v4.0.0 architecture - Foundation complete, optimizing performance
 
 **Primary Location:** `/Users/buuphan/Dev/Vietnam_dashboard`
 
@@ -145,14 +145,16 @@ This will be ~[X] lines. Should I:
 
 ## 📋 Current Priorities
 
-**Active Plan:** `plans/fa+ta_sector_analysis_-_complete_architecture_refactor_b2d5c14f.plan.md`
+**Active Plan:** `plans/260104-2043-performance-optimization/plan.md`
 
-**Current Phase:** Phase 1 - FA/TA Orchestration Layer (Next Up)
+**Current Phase:** Performance Optimization
 
 **Next Steps:**
-1. Build FA/TA orchestration layer (`SectorAnalyzer`, Aggregators, Combiner)
-2. Configuration system (FA/TA weights, preferences)
-3. Unified sector dashboard (Streamlit UI)
+1. Fix Forecast module caching (P0 - critical)
+2. Add cache to core data loading functions
+3. Standardize TTL values across caches
+4. Implement lazy loading for tabs
+5. UX improvements (dark mode, loading states)
 
 **See active plan for complete roadmap.**
 
