@@ -127,10 +127,11 @@ DATA/processed/**/*.csv
 !DATA/processed/sector/sector_fundamental_metrics.parquet
 !DATA/processed/sector/sector_combined_scores.parquet
 
-# Forecast (3 files)
+# Forecast (4 files)
 !DATA/processed/forecast/bsc/bsc_individual.parquet
 !DATA/processed/forecast/bsc/bsc_sector_valuation.parquet
 !DATA/processed/forecast/bsc/bsc_combined.parquet
+!DATA/processed/forecast/comparison/bsc_vs_consensus.parquet
 
 # Macro/Commodity (1 file)
 !DATA/processed/macro_commodity/macro_commodity_unified.parquet
