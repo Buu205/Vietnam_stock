@@ -179,3 +179,5 @@ PROCESSORS/forecast/vci/credentials.json
 concensus_report/raw_extracts/extract_forecast_from_pdf.py
 concensus_report/raw_extracts/*.json
 concensus_report/raw_extracts/*.txt
+# Gemini CLI settings (contains user-specific config)
+.gemini/
