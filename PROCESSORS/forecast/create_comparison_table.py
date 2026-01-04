@@ -6,17 +6,20 @@ Creates pre-joined comparison table for Streamlit dashboard.
 
 Output: DATA/processed/forecast/comparison/bsc_vs_consensus.parquet
 
-Schema:
+Schema (2026F/2027F):
 - symbol, sector, entity_type
 - current_price, bsc_tp, hcm_tp, ssi_tp, vci_tp
-- bsc_npatmi_25, hcm_npatmi_25, ssi_npatmi_25, vci_npatmi_25
 - bsc_npatmi_26, hcm_npatmi_26, ssi_npatmi_26, vci_npatmi_26
-- consensus_tp_mean, consensus_npatmi25_mean, consensus_npatmi26_mean
-- tp_dev_pct, npatmi25_dev_pct, npatmi26_dev_pct (vs BSC)
-- tp_spread_pct, npatmi25_spread_pct (range of consensus)
+- bsc_npatmi_27, hcm_npatmi_27, ssi_npatmi_27, vci_npatmi_27
+- consensus_tp_mean, consensus_npatmi26_mean, consensus_npatmi27_mean
+- tp_dev_pct, npatmi26_dev_pct, npatmi27_dev_pct (vs BSC)
+- tp_spread_pct, npatmi26_spread_pct (range of consensus)
 - max_dev_source, max_dev_pct
 - insight (bullish/aligned/bearish)
 - source_count
+
+Note: Schema migrated from 2025F/2026F to 2026F/2027F in Jan 2026.
+BSC data still uses 2025F/2026F, mapped to 2026F/2027F for comparison.
 """
 
 import pandas as pd
@@ -39,7 +42,10 @@ def load_data():
 
 
 def pivot_consensus(consensus: pd.DataFrame) -> pd.DataFrame:
-    """Pivot consensus data by source for easy merging."""
+    """Pivot consensus data by source for easy merging.
+
+    Handles both old (2025F/2026F) and new (2026F/2027F) schemas.
+    """
     # Target Price pivot
     tp_pivot = consensus.pivot_table(
         index='symbol',
@@ -49,26 +55,35 @@ def pivot_consensus(consensus: pd.DataFrame) -> pd.DataFrame:
     )
     tp_pivot.columns = [f'{c}_tp' for c in tp_pivot.columns]
 
-    # NPATMI 2025 pivot
-    np25_pivot = consensus.pivot_table(
-        index='symbol',
-        columns='source',
-        values='npatmi_2025f',
-        aggfunc='first'
-    )
-    np25_pivot.columns = [f'{c}_npatmi_25' for c in np25_pivot.columns]
+    # Detect schema version
+    has_2026f = 'npatmi_2026f' in consensus.columns
+    has_2027f = 'npatmi_2027f' in consensus.columns
+    has_2025f = 'npatmi_2025f' in consensus.columns
 
-    # NPATMI 2026 pivot
-    np26_pivot = consensus.pivot_table(
+    # NPATMI Year 1 (current year forecast)
+    # New schema: 2026F, Old schema: 2025F
+    year1_col = 'npatmi_2026f' if has_2026f else 'npatmi_2025f'
+    np_year1_pivot = consensus.pivot_table(
         index='symbol',
         columns='source',
-        values='npatmi_2026f',
+        values=year1_col,
         aggfunc='first'
     )
-    np26_pivot.columns = [f'{c}_npatmi_26' for c in np26_pivot.columns]
+    np_year1_pivot.columns = [f'{c}_npatmi_26' for c in np_year1_pivot.columns]
+
+    # NPATMI Year 2 (next year forecast)
+    # New schema: 2027F, Old schema: 2026F
+    year2_col = 'npatmi_2027f' if has_2027f else 'npatmi_2026f'
+    np_year2_pivot = consensus.pivot_table(
+        index='symbol',
+        columns='source',
+        values=year2_col,
+        aggfunc='first'
+    )
+    np_year2_pivot.columns = [f'{c}_npatmi_27' for c in np_year2_pivot.columns]
 
     # Merge all pivots
-    pivoted = tp_pivot.join(np25_pivot, how='outer').join(np26_pivot, how='outer')
+    pivoted = tp_pivot.join(np_year1_pivot, how='outer').join(np_year2_pivot, how='outer')
     return pivoted.reset_index()
 
 
@@ -167,33 +182,50 @@ def create_comparison_table():
     print("Pivoting consensus data...")
     cons_pivot = pivot_consensus(consensus)
 
-    # Select BSC columns and rename
-    bsc_cols = bsc[['symbol', 'sector', 'entity_type', 'current_price',
-                    'target_price', 'npatmi_2025f', 'npatmi_2026f', 'rating']].copy()
-    bsc_cols = bsc_cols.rename(columns={
-        'target_price': 'bsc_tp',
-        'npatmi_2025f': 'bsc_npatmi_25',
-        'npatmi_2026f': 'bsc_npatmi_26',
-    })
+    # Detect BSC schema version and select columns
+    # BSC may have 2025F/2026F or 2026F/2027F
+    bsc_has_2026f = 'npatmi_2026f' in bsc.columns
+    bsc_has_2027f = 'npatmi_2027f' in bsc.columns
+
+    # Use 2025F/2026F mapped to 26/27 labels (year shift for comparison)
+    if bsc_has_2027f:
+        # New schema
+        bsc_cols = bsc[['symbol', 'sector', 'entity_type', 'current_price',
+                        'target_price', 'npatmi_2026f', 'npatmi_2027f', 'rating']].copy()
+        bsc_cols = bsc_cols.rename(columns={
+            'target_price': 'bsc_tp',
+            'npatmi_2026f': 'bsc_npatmi_26',
+            'npatmi_2027f': 'bsc_npatmi_27',
+        })
+    else:
+        # Old schema - map 2025F→26, 2026F→27 for year alignment
+        bsc_cols = bsc[['symbol', 'sector', 'entity_type', 'current_price',
+                        'target_price', 'npatmi_2025f', 'npatmi_2026f', 'rating']].copy()
+        bsc_cols = bsc_cols.rename(columns={
+            'target_price': 'bsc_tp',
+            'npatmi_2025f': 'bsc_npatmi_26',  # Map 2025F to current year (26)
+            'npatmi_2026f': 'bsc_npatmi_27',  # Map 2026F to next year (27)
+        })
+        print("[INFO] BSC using 2025F/2026F schema, mapped to 2026F/2027F labels")
 
     # Merge BSC with pivoted consensus
     print("Merging BSC with consensus...")
     merged = bsc_cols.merge(cons_pivot, on='symbol', how='outer')
 
-    # Calculate stats for each metric
+    # Calculate stats for each metric (updated to 26/27 year labels)
     print("Calculating statistics...")
-    for metric in ['tp', 'npatmi_25', 'npatmi_26']:
+    for metric in ['tp', 'npatmi_26', 'npatmi_27']:
         stats_list = merged.apply(lambda row: calculate_consensus_stats(row, metric), axis=1)
         stats_df = pd.DataFrame(stats_list.tolist())
         for col in stats_df.columns:
             merged[col] = stats_df[col]
 
-    # Generate insight (use NPATMI 2026F as primary)
+    # Generate insight (use NPATMI 2027F as primary - next year forecast)
     merged['insight'] = merged.apply(
         lambda row: get_insight(
             row.get('tp_dev_pct'),
-            row.get('npatmi_26_dev_pct'),
-            row.get('npatmi_26_spread_pct')
+            row.get('npatmi_27_dev_pct'),
+            row.get('npatmi_27_spread_pct')
         ),
         axis=1
     )
@@ -202,7 +234,7 @@ def create_comparison_table():
     def count_sources(row):
         count = 0
         for src in ['hcm', 'ssi', 'vci']:
-            if pd.notna(row.get(f'{src}_tp')) or pd.notna(row.get(f'{src}_npatmi_25')):
+            if pd.notna(row.get(f'{src}_tp')) or pd.notna(row.get(f'{src}_npatmi_26')):
                 count += 1
         return count
 

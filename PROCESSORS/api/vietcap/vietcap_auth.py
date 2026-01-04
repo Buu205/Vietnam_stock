@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 
 # Token cache file
 TOKEN_FILE = Path(__file__).parent / "vietcap_token.json"
+CREDENTIALS_FILE = Path(__file__).parent / "credentials.json"
 
 
 async def login_and_get_token(username: str, password: str, headless: bool = True) -> dict | None:
@@ -147,12 +148,24 @@ def get_token(username: str = None, password: str = None, force_refresh: bool = 
             print("✅ Dùng token từ cache")
             return cached
 
-    # Lấy credentials
-    username = username or os.getenv("VIETCAP_USER")
-    password = password or os.getenv("VIETCAP_PASS")
+    # Lấy credentials từ: args > credentials.json > env
+    if not username or not password:
+        # Try credentials.json first
+        if CREDENTIALS_FILE.exists():
+            try:
+                creds = json.loads(CREDENTIALS_FILE.read_text())
+                username = username or creds.get("username")
+                password = password or creds.get("password")
+                print("📁 Loaded credentials from credentials.json")
+            except:
+                pass
+
+        # Fallback to env
+        username = username or os.getenv("VIETCAP_USER")
+        password = password or os.getenv("VIETCAP_PASS")
 
     if not username or not password:
-        print("❌ Cần VIETCAP_USER và VIETCAP_PASS trong .env hoặc truyền vào")
+        print("❌ Cần credentials trong credentials.json hoặc VIETCAP_USER/VIETCAP_PASS env")
         return None
 
     # Login mới

@@ -127,11 +127,13 @@ DATA/processed/**/*.csv
 !DATA/processed/sector/sector_fundamental_metrics.parquet
 !DATA/processed/sector/sector_combined_scores.parquet
 
-# Forecast (4 files)
+# Forecast (6 files)
 !DATA/processed/forecast/bsc/bsc_individual.parquet
 !DATA/processed/forecast/bsc/bsc_sector_valuation.parquet
 !DATA/processed/forecast/bsc/bsc_combined.parquet
 !DATA/processed/forecast/comparison/bsc_vs_consensus.parquet
+!DATA/processed/forecast/consensus/consensus_combined.parquet
+!DATA/processed/forecast/VCI/vci_coverage_universe.parquet
 
 # Macro/Commodity (1 file)
 !DATA/processed/macro_commodity/macro_commodity_unified.parquet
@@ -163,6 +165,9 @@ DATA/processed/forecast/*.xlsm
 # API Token cache (expires regularly, should not be committed)
 PROCESSORS/api/*/vietcap_token.json
 **/vietcap_token.json
+
+# Vietcap credentials (contains login info)
+PROCESSORS/api/vietcap/credentials.json
 # Consensus report extraction scripts and data
 concensus_report/raw_extracts/extract_forecast_from_pdf.py
 concensus_report/raw_extracts/*.json

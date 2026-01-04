@@ -77,7 +77,13 @@ def fetch_and_save():
 
     # Print sample
     print("\n📊 Sample data:")
-    print(df[['ticker', 'sector', 'rating', 'targetPrice', 'pe_2025F', 'roe_2025F']].head(10).to_string())
+    # Show available columns dynamically
+    display_cols = ['ticker', 'sector', 'rating', 'targetPrice']
+    for col in ['pe_2026F', 'pe_2025F', 'roe_2026F', 'roe_2025F']:
+        if col in df.columns:
+            display_cols.append(col)
+            break
+    print(df[display_cols].head(10).to_string())
 
     # Print columns
     print(f"\n📋 Columns ({len(df.columns)}):")
