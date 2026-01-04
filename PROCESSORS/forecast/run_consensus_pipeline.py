@@ -26,10 +26,13 @@ from datetime import datetime
 # Paths
 PROJECT_ROOT = Path("/Users/buuphan/Dev/Vietnam_dashboard")
 PROCESSORS_DIR = PROJECT_ROOT / "PROCESSORS" / "forecast"
-STAGING_DIR = PROJECT_ROOT / "DATA" / "raw" / "concensus_report" / "staging"
+RAW_FORECAST_DIR = PROJECT_ROOT / "DATA" / "raw" / "forecast"
 OUTPUT_DIR = PROJECT_ROOT / "DATA" / "processed" / "forecast" / "consensus"
-PDF_DIR = PROJECT_ROOT / "DATA" / "raw" / "concensus_report" / "pdf"
-SCREENSHOTS_DIR = PROJECT_ROOT / "DATA" / "raw" / "concensus_report" / "screenshots"
+SOURCES_DIR = PROJECT_ROOT / "DATA" / "processed" / "forecast" / "sources"
+
+# Source-specific paths (HCM and SSI separated)
+HCM_DIR = RAW_FORECAST_DIR / "hcm"
+SSI_DIR = RAW_FORECAST_DIR / "ssi"
 
 
 def run_command(cmd: list, description: str) -> bool:
@@ -80,7 +83,7 @@ def extract_pdfs():
 
         cmd = [
             sys.executable,
-            str(PROCESSORS_DIR / "extractors" / "pdf_extractor.py"),
+            str(PROCESSORS_DIR / "hcm_ssi_extraction" / "pdf_extractor.py"),
             "--pdf", str(pdf_path),
             "--source", source
         ]
@@ -93,7 +96,7 @@ def extract_screenshots():
     """Extract data from screenshots in the screenshots folder."""
     cmd = [
         sys.executable,
-        str(PROCESSORS_DIR / "extractors" / "screenshot_extractor.py")
+        str(PROCESSORS_DIR / "hcm_ssi_extraction" / "screenshot_extractor.py")
     ]
     return run_command(cmd, "Extract from screenshots")
 
@@ -102,7 +105,7 @@ def normalize():
     """Run normalization to convert staging JSON to processed parquet."""
     cmd = [
         sys.executable,
-        str(PROCESSORS_DIR / "normalizer.py")
+        str(PROCESSORS_DIR / "hcm_ssi_extraction" / "hcm_ssi_update_script.py")
     ]
     return run_command(cmd, "Normalize consensus data")
 
@@ -141,14 +144,14 @@ def validate():
     print(f"Unique tickers: {combined['symbol'].nunique()}")
     print(f"Sources: {combined['source'].unique().tolist()}")
 
-    # Coverage check
-    npatmi_2025_coverage = combined['npatmi_2025f'].notna().sum() / len(combined) * 100
+    # Coverage check (schema migrated to 2026F/2027F in Jan 2026)
     npatmi_2026_coverage = combined['npatmi_2026f'].notna().sum() / len(combined) * 100
+    npatmi_2027_coverage = combined['npatmi_2027f'].notna().sum() / len(combined) * 100
     tp_coverage = combined['target_price'].notna().sum() / len(combined) * 100
 
     print(f"\n[COVERAGE]")
-    print(f"NPATMI 2025F: {npatmi_2025_coverage:.1f}%")
     print(f"NPATMI 2026F: {npatmi_2026_coverage:.1f}%")
+    print(f"NPATMI 2027F: {npatmi_2027_coverage:.1f}%")
     print(f"Target Price: {tp_coverage:.1f}%")
 
     # Multi-source coverage
@@ -159,11 +162,11 @@ def validate():
     print(f"  3+ sources: {(coverage >= 3).sum()} stocks")
 
     # Success criteria
-    success = npatmi_2025_coverage >= 80
+    success = npatmi_2026_coverage >= 80
     if success:
         print(f"\n[OK] Data quality check PASSED")
     else:
-        print(f"\n[WARNING] NPATMI 2025F coverage below 80%")
+        print(f"\n[WARNING] NPATMI 2026F coverage below 80%")
 
     return success
 

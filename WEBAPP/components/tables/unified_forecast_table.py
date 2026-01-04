@@ -307,7 +307,7 @@ UNIFIED_TABLE_STYLE = """
     min-width: 70px;
 }
 
-/* Sticky Column 2: Sector */
+/* Sticky Column 2: Sector - with text truncation */
 .unified-forecast-table th:nth-child(2),
 .unified-forecast-table td:nth-child(2) {
     position: sticky !important;
@@ -315,6 +315,10 @@ UNIFIED_TABLE_STYLE = """
     background: #1A1625 !important;
     z-index: 10 !important;
     min-width: 100px;
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Sticky Column 3: Upside - with shadow separator */
@@ -456,7 +460,11 @@ def unified_forecast_table(
             else:
                 formatted = str(value)
 
-            html += f'<td class="{align_class}">{formatted}</td>'
+            # Add title tooltip for sector column (truncated text)
+            if col == 'sector' and pd.notna(value):
+                html += f'<td class="{align_class}" title="{value}">{formatted}</td>'
+            else:
+                html += f'<td class="{align_class}">{formatted}</td>'
         html += '</tr>'
     html += '</tbody>'
 

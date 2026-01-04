@@ -127,13 +127,17 @@ DATA/processed/**/*.csv
 !DATA/processed/sector/sector_fundamental_metrics.parquet
 !DATA/processed/sector/sector_combined_scores.parquet
 
-# Forecast (6 files)
+# Forecast (4 essential files for Streamlit)
 !DATA/processed/forecast/bsc/bsc_individual.parquet
 !DATA/processed/forecast/bsc/bsc_sector_valuation.parquet
 !DATA/processed/forecast/bsc/bsc_combined.parquet
-!DATA/processed/forecast/comparison/bsc_vs_consensus.parquet
-!DATA/processed/forecast/consensus/consensus_combined.parquet
-!DATA/processed/forecast/VCI/vci_coverage_universe.parquet
+!DATA/processed/forecast/unified.parquet
+
+# Forecast source JSONs (editable, keep in git)
+!DATA/processed/forecast/sources/bsc.json
+!DATA/processed/forecast/sources/vci.json
+!DATA/processed/forecast/sources/hcm.json
+!DATA/processed/forecast/sources/ssi.json
 
 # Macro/Commodity (1 file)
 !DATA/processed/macro_commodity/macro_commodity_unified.parquet
@@ -149,9 +153,11 @@ DATA/processed/**/*.csv
 !DATA/processed/*/.gitkeep
 !DATA/processed/**/.gitkeep
 
-# Forecast Excel files (large, frequently updated)
-DATA/processed/forecast/*.xlsx
-DATA/processed/forecast/*.xlsm
+# Forecast raw files (large PDFs, Excel in raw)
+DATA/raw/forecast/**/*.pdf
+DATA/raw/forecast/**/*.xlsx
+DATA/raw/forecast/**/*.xlsm
+DATA/raw/forecast/**/screenshots/*
 
 # Temporary files
 *.tmp
@@ -168,6 +174,7 @@ PROCESSORS/api/*/vietcap_token.json
 
 # Vietcap credentials (contains login info)
 PROCESSORS/api/vietcap/credentials.json
+PROCESSORS/forecast/vci/credentials.json
 # Consensus report extraction scripts and data
 concensus_report/raw_extracts/extract_forecast_from_pdf.py
 concensus_report/raw_extracts/*.json

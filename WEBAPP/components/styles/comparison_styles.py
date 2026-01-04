@@ -44,15 +44,15 @@ COLORS = {
     'brand_cyan': '#06B6D4',        # Secondary accent
     'brand_amber': '#F59E0B',       # Tertiary accent
 
-    # Semantic colors (Bull/Bear) - DISTINCT from source markers
-    'bullish_strong': '#10B981',    # Emerald 500 - Strong Bull
-    'bullish': '#34D399',           # Emerald 400 - Bull
-    'bullish_light': '#6EE7B7',     # Emerald 300 - Light Bull
-    'bearish_strong': '#EF4444',    # Red 500 - Strong Bear
-    'bearish': '#F87171',           # Red 400 - Bear
-    'bearish_light': '#FCA5A5',     # Red 300 - Light Bear
-    'aligned': '#64748B',           # Slate 500 - Neutral
-    'divergent': '#FB923C',         # Orange 400 - High variance
+    # Semantic colors (Bull/Bear) - Soft neon style, DISTINCT from source markers
+    'bullish_strong': '#5EEAD4',    # Teal 300 - Soft neon cyan (bullish)
+    'bullish': '#99F6E4',           # Teal 200 - Soft cyan
+    'bullish_light': '#CCFBF1',     # Teal 100 - Light cyan
+    'bearish_strong': '#FB7185',    # Rose 400 - Soft coral (not harsh red)
+    'bearish': '#FDA4AF',           # Rose 300 - Soft rose
+    'bearish_light': '#FECDD3',     # Rose 200 - Light rose
+    'aligned': '#A1A1AA',           # Zinc 400 - Neutral gray
+    'divergent': '#FBBF24',         # Amber 400 - Soft yellow
 
     # Legacy (kept for compatibility)
     'bullish_moderate': '#34D399',
@@ -130,49 +130,49 @@ def get_marker_with_label(source: str, with_glow: bool = False) -> str:
 INSIGHT_CONFIG = {
     'strong_bullish': {
         'label': 'Strong Bull',
-        'color': '#10B981',         # Emerald 500 - Clear bullish signal
-        'bg': 'rgba(16, 185, 129, 0.15)',
-        'border': 'rgba(16, 185, 129, 0.4)',
+        'color': '#5EEAD4',         # Teal 300 - Soft neon cyan (bullish)
+        'bg': 'rgba(94, 234, 212, 0.12)',
+        'border': 'rgba(94, 234, 212, 0.35)',
         'icon': '▲▲',
         'icon_svg': '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2L2 14h7v8h6v-8h7L12 2z"/></svg>',
     },
     'bullish_gap': {
         'label': 'Bullish',
-        'color': '#34D399',         # Emerald 400 - Moderate bullish
-        'bg': 'rgba(52, 211, 153, 0.12)',
-        'border': 'rgba(52, 211, 153, 0.35)',
+        'color': '#99F6E4',         # Teal 200 - Soft cyan
+        'bg': 'rgba(153, 246, 228, 0.10)',
+        'border': 'rgba(153, 246, 228, 0.30)',
         'icon': '▲',
         'icon_svg': '<svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M12 4L3 15h18L12 4z"/></svg>',
     },
     'aligned': {
         'label': 'Aligned',
-        'color': '#94A3B8',         # Slate 400 - Neutral
-        'bg': 'rgba(148, 163, 184, 0.1)',
-        'border': 'rgba(148, 163, 184, 0.25)',
+        'color': '#A1A1AA',         # Zinc 400 - Neutral gray
+        'bg': 'rgba(161, 161, 170, 0.08)',
+        'border': 'rgba(161, 161, 170, 0.20)',
         'icon': '●',
         'icon_svg': '<svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><circle cx="12" cy="12" r="6"/></svg>',
     },
     'high_variance': {
         'label': 'Divergent',
-        'color': '#FB923C',         # Orange 400 - Warning/Divergent
-        'bg': 'rgba(251, 146, 60, 0.12)',
-        'border': 'rgba(251, 146, 60, 0.35)',
+        'color': '#FBBF24',         # Amber 400 - Soft yellow
+        'bg': 'rgba(251, 191, 36, 0.10)',
+        'border': 'rgba(251, 191, 36, 0.30)',
         'icon': '◆',
         'icon_svg': '<svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M12 2L22 12L12 22L2 12L12 2z"/></svg>',
     },
     'bearish_gap': {
         'label': 'Bearish',
-        'color': '#F87171',         # Red 400 - Moderate bearish
-        'bg': 'rgba(248, 113, 113, 0.12)',
-        'border': 'rgba(248, 113, 113, 0.35)',
+        'color': '#FDA4AF',         # Rose 300 - Soft coral
+        'bg': 'rgba(253, 164, 175, 0.10)',
+        'border': 'rgba(253, 164, 175, 0.30)',
         'icon': '▼',
         'icon_svg': '<svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M12 20L3 9h18L12 20z"/></svg>',
     },
     'strong_bearish': {
         'label': 'Strong Bear',
-        'color': '#EF4444',         # Red 500 - Clear bearish signal
-        'bg': 'rgba(239, 68, 68, 0.15)',
-        'border': 'rgba(239, 68, 68, 0.4)',
+        'color': '#FB7185',         # Rose 400 - Soft rose/coral (not harsh red)
+        'bg': 'rgba(251, 113, 133, 0.12)',
+        'border': 'rgba(251, 113, 133, 0.35)',
         'icon': '▼▼',
         'icon_svg': '<svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 22L2 10h7V2h6v8h7L12 22z"/></svg>',
     },

@@ -51,7 +51,7 @@ def main():
         return 0
 
     try:
-        from PROCESSORS.forecast.bsc_forecast_processor import BSCForecastProcessor
+        from PROCESSORS.forecast.bsc.bsc_forecast_processor import BSCForecastProcessor
 
         processor = BSCForecastProcessor(PROJECT_ROOT)
         result = processor.run(generate_readme=True)

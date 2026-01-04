@@ -23,8 +23,8 @@ from WEBAPP.components.styles.comparison_styles import (
     COLORS,
 )
 
-# Data path
-COMPARISON_PATH = Path("DATA/processed/forecast/comparison/bsc_vs_consensus.parquet")
+# Data path - unified.parquet contains all comparison data
+COMPARISON_PATH = Path("DATA/processed/forecast/unified.parquet")
 
 
 @st.cache_data(ttl=3600)
@@ -58,30 +58,30 @@ def format_price(val) -> str:
 
 
 def format_deviation(val, show_bar: bool = False) -> str:
-    """Format deviation percentage with semantic bull/bear colors.
+    """Format deviation percentage with soft neon bull/bear colors.
 
-    Note: Uses Emerald (#10B981) for bullish and Red (#EF4444) for bearish.
-    These are distinct from source marker colors (Purple, Cyan, Amber, Pink).
+    Note: Uses Teal (#5EEAD4) for bullish and Rose (#FB7185) for bearish.
+    Softer neon colors that are easier on the eyes in dark mode.
     """
     if pd.isna(val):
         return '<span style="color:#64748B;font-family:JetBrains Mono,monospace;">—</span>'
 
     sign = '+' if val >= 0 else ''
 
-    # Semantic colors: Bullish = Emerald, Bearish = Red
+    # Soft neon semantic colors: Bullish = Teal, Bearish = Rose
     # Note: Positive deviation = BSC < Cons = Bearish for BSC
     #       Negative deviation = BSC > Cons = Bullish for BSC
     if val <= -5:
-        color = '#10B981'  # Emerald - BSC bullish (higher than consensus)
-        bar_color = '#10B981'
-        glow = 'rgba(16, 185, 129, 0.3)'
+        color = '#5EEAD4'  # Teal 300 - BSC bullish (higher than consensus)
+        bar_color = '#5EEAD4'
+        glow = 'rgba(94, 234, 212, 0.25)'
     elif val >= 5:
-        color = '#EF4444'  # Red - BSC bearish (lower than consensus)
-        bar_color = '#EF4444'
-        glow = 'rgba(239, 68, 68, 0.3)'
+        color = '#FB7185'  # Rose 400 - BSC bearish (lower than consensus)
+        bar_color = '#FB7185'
+        glow = 'rgba(251, 113, 133, 0.25)'
     else:
-        color = '#94A3B8'  # Slate - Aligned
-        bar_color = '#64748B'
+        color = '#A1A1AA'  # Zinc 400 - Aligned
+        bar_color = '#71717A'
         glow = 'none'
 
     text = f'<span style="color:{color};font-weight:600;font-family:JetBrains Mono,monospace;text-shadow:0 0 8px {glow};">{sign}{val:.1f}%</span>'
@@ -107,7 +107,7 @@ def calculate_summary_stats(df: pd.DataFrame) -> dict:
     """Calculate summary statistics."""
     return {
         'total': len(df),
-        'overlap': ((df['bsc_npatmi_27'].notna()) & (df['source_count'] > 0)).sum(),
+        'overlap': ((df['bsc_npatmi_26'].notna()) & (df['source_count'] > 0)).sum(),
         'strong_bullish': (df['insight'] == 'strong_bullish').sum(),
         'bullish_gap': (df['insight'] == 'bullish_gap').sum(),
         'aligned': (df['insight'] == 'aligned').sum(),
@@ -121,22 +121,25 @@ def calculate_summary_stats(df: pd.DataFrame) -> dict:
 # SUB-TAB 1: SUMMARY TABLE
 # =============================================================================
 def render_summary_table(df: pd.DataFrame):
-    """Render clean summary table focused on NPATMI 2027F."""
+    """Render clean summary table focused on NPATMI 2026F."""
 
-    st.markdown("#### NPATMI 2027F Consensus Comparison")
-    st.caption("Compare BSC forecasts with market consensus (HCM, SSI, VCI)")
+    st.markdown("#### NPATMI 2026F Consensus Comparison")
+    st.caption("Compare BSC forecasts with market consensus (VCI, HCM, SSI)")
 
-    # Filters row
-    col1, col2, col3 = st.columns([2, 2, 2])
+    # Filters row - 4 columns with ticker search
+    col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
 
     with col1:
+        ticker_search = st.text_input("Search Ticker", placeholder="VCB, ACB...", key="cons_ticker")
+
+    with col2:
         sectors = ['All'] + sorted(df['sector'].dropna().unique().tolist())
         sector_filter = st.selectbox("Sector", sectors, key="cons_sector")
 
-    with col2:
+    with col3:
         min_sources = st.selectbox("Min Sources", [1, 2, 3], index=0, key="cons_min_src")
 
-    with col3:
+    with col4:
         insight_options = ['All'] + list(INSIGHT_CONFIG.keys())
         insight_filter = st.selectbox(
             "Insight",
@@ -148,6 +151,11 @@ def render_summary_table(df: pd.DataFrame):
     # Apply filters
     filtered_df = df.copy()
 
+    # Ticker search filter
+    if ticker_search:
+        ticker_search = ticker_search.upper().strip()
+        filtered_df = filtered_df[filtered_df['symbol'].str.contains(ticker_search, case=False, na=False)]
+
     if sector_filter != 'All':
         filtered_df = filtered_df[filtered_df['sector'] == sector_filter]
 
@@ -156,8 +164,8 @@ def render_summary_table(df: pd.DataFrame):
     if insight_filter != 'All':
         filtered_df = filtered_df[filtered_df['insight'] == insight_filter]
 
-    # Sort by NPATMI deviation (absolute) - using 27 (next year) as primary
-    filtered_df['abs_dev'] = filtered_df['npatmi_27_dev_pct'].abs()
+    # Sort by NPATMI deviation (absolute) - using 26 (current year) as primary
+    filtered_df['abs_dev'] = filtered_df['npatmi_26_dev_pct'].abs()
     filtered_df = filtered_df.sort_values('abs_dev', ascending=False, na_position='last')
 
     st.markdown(f"**{len(filtered_df)} stocks** with ≥{min_sources} consensus sources")
@@ -170,10 +178,10 @@ def render_summary_table(df: pd.DataFrame):
     # Compact legend - no separate cards
     st.html('''
     <div style="background:rgba(26,22,37,0.8);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:11px;color:#94A3B8;border:1px solid rgba(255,255,255,0.05);font-family:DM Sans,sans-serif;">
-        <span style="font-weight:600;color:#00C9AD;">NPATMI 2027F</span> (nghìn tỷ) |
-        <span style="color:#8B5CF6;">B</span><span style="color:#06B6D4;">H</span><span style="color:#F59E0B;">S</span><span style="color:#EC4899;">V</span> markers on spread |
-        <span style="color:#10B981;">▲ Bullish</span> (BSC &gt; Cons) •
-        <span style="color:#EF4444;">▼ Bearish</span> (BSC &lt; Cons)
+        <span style="font-weight:600;color:#00C9AD;">NPATMI 2026F</span> (nghìn tỷ) |
+        <span style="color:#8B5CF6;">B</span><span style="color:#EC4899;">V</span><span style="color:#06B6D4;">H</span><span style="color:#F59E0B;">S</span> markers on spread |
+        <span style="color:#5EEAD4;">▲ Bullish</span> (BSC &gt; Cons) •
+        <span style="color:#FB7185;">▼ Bearish</span> (BSC &lt; Cons)
     </div>
     ''')
 
@@ -185,14 +193,15 @@ def render_summary_table(df: pd.DataFrame):
     st.html(render_legend_bar())
 
 
-def build_range_chart_inline(bsc_val, hcm_val, ssi_val, vci_val) -> str:
+def build_range_chart_inline(bsc_val, vci_val, hcm_val, ssi_val) -> str:
     """Build range chart with min/max labels and glowing markers.
 
-    Uses non-semantic source colors (2026-01-04):
+    Column order: BSC, VCI, HCM, SSI
+    Uses non-semantic source colors:
     - BSC: Purple #8B5CF6
+    - VCI: Pink #EC4899
     - HCM: Cyan #06B6D4
     - SSI: Amber #F59E0B
-    - VCI: Pink #EC4899
     """
     values = {
         'BSC': bsc_val,
@@ -262,7 +271,7 @@ def build_range_chart_inline(bsc_val, hcm_val, ssi_val, vci_val) -> str:
 
 
 def build_summary_table_html(df: pd.DataFrame) -> str:
-    """Build HTML for summary table with NPATMI 2027F columns and range chart.
+    """Build HTML for summary table with NPATMI 2026F columns and range chart.
 
     Uses new non-semantic source colors:
     - BSC: Purple #8B5CF6
@@ -270,7 +279,7 @@ def build_summary_table_html(df: pd.DataFrame) -> str:
     - SSI: Amber #F59E0B
     - VCI: Pink #EC4899
 
-    Note: Schema updated to use 2027F (next year forecast) as primary.
+    Note: Schema updated to use 2026F (current year forecast) as primary.
     """
 
     # Header - 14px data fonts, 12px headers
@@ -282,9 +291,9 @@ def build_summary_table_html(df: pd.DataFrame) -> str:
             <th style="text-align:right;padding:12px 8px;color:#94A3B8;font-size:12px;font-weight:600;width:60px;font-family:Space Grotesk,sans-serif;">PRICE</th>
             <th style="text-align:right;padding:12px 8px;color:#8B5CF6;font-size:12px;font-weight:600;width:60px;font-family:Space Grotesk,sans-serif;">BSC TP</th>
             <th style="text-align:right;padding:12px 8px;color:#8B5CF6;font-size:12px;font-weight:600;width:55px;font-family:Space Grotesk,sans-serif;">BSC</th>
+            <th style="text-align:right;padding:12px 8px;color:#EC4899;font-size:12px;font-weight:600;width:55px;font-family:Space Grotesk,sans-serif;">VCI</th>
             <th style="text-align:right;padding:12px 8px;color:#06B6D4;font-size:12px;font-weight:600;width:55px;font-family:Space Grotesk,sans-serif;">HCM</th>
             <th style="text-align:right;padding:12px 8px;color:#F59E0B;font-size:12px;font-weight:600;width:55px;font-family:Space Grotesk,sans-serif;">SSI</th>
-            <th style="text-align:right;padding:12px 8px;color:#EC4899;font-size:12px;font-weight:600;width:55px;font-family:Space Grotesk,sans-serif;">VCI</th>
             <th style="text-align:right;padding:12px 8px;color:#00C9AD;font-size:12px;font-weight:600;width:55px;font-family:Space Grotesk,sans-serif;">CONS</th>
             <th style="text-align:center;padding:12px 8px;color:#C4B5FD;font-size:12px;font-weight:600;width:150px;font-family:Space Grotesk,sans-serif;">SPREAD</th>
             <th style="text-align:center;padding:12px 8px;color:#C4B5FD;font-size:12px;font-weight:600;width:90px;font-family:Space Grotesk,sans-serif;">BSC vs CONS</th>
@@ -298,31 +307,31 @@ def build_summary_table_html(df: pd.DataFrame) -> str:
         symbol = row.get('symbol', '')
         sector = row.get('sector', '')
 
-        # Values - using 2027F (next year forecast) as primary
+        # Values - using 2026F (current year forecast) as primary
         current_price = row.get('current_price')
         bsc_tp = row.get('bsc_tp')
-        bsc_npatmi = row.get('bsc_npatmi_27')
-        hcm_npatmi = row.get('hcm_npatmi_27')
-        ssi_npatmi = row.get('ssi_npatmi_27')
-        vci_npatmi = row.get('vci_npatmi_27')
-        cons_mean = row.get('npatmi_27_cons_mean')
-        dev_pct = row.get('npatmi_27_dev_pct')
+        bsc_npatmi = row.get('bsc_npatmi_26')
+        vci_npatmi = row.get('vci_npatmi_26')
+        hcm_npatmi = row.get('hcm_npatmi_26')
+        ssi_npatmi = row.get('ssi_npatmi_26')
+        cons_mean = row.get('npatmi_26_cons_mean')
+        dev_pct = row.get('npatmi_26_dev_pct')
         insight = row.get('insight', 'no_data')
 
         # Row background based on deviation (BSC vs Cons)
-        # Semantic colors: Emerald for bullish, Red for bearish
+        # Soft neon colors: Teal for bullish, Rose for bearish
         if pd.notna(dev_pct):
             if dev_pct <= -5:
-                row_bg = 'rgba(16, 185, 129, 0.06)'  # Emerald tint - BSC bullish
+                row_bg = 'rgba(94, 234, 212, 0.05)'  # Teal tint - BSC bullish
             elif dev_pct >= 5:
-                row_bg = 'rgba(239, 68, 68, 0.06)'  # Red tint - BSC bearish
+                row_bg = 'rgba(251, 113, 133, 0.05)'  # Rose tint - BSC bearish
             else:
                 row_bg = 'transparent'
         else:
             row_bg = 'transparent'
 
         # Build range chart with labels
-        range_chart = build_range_chart_inline(bsc_npatmi, hcm_npatmi, ssi_npatmi, vci_npatmi)
+        range_chart = build_range_chart_inline(bsc_npatmi, vci_npatmi, hcm_npatmi, ssi_npatmi)
 
         # Combined DEV + INSIGHT cell
         insight_config = INSIGHT_CONFIG.get(insight, INSIGHT_CONFIG['no_data'])
@@ -337,9 +346,9 @@ def build_summary_table_html(df: pd.DataFrame) -> str:
             <td style="text-align:right;padding:10px 8px;font-family:'JetBrains Mono',monospace;color:#94A3B8;font-size:14px;">{format_price(current_price)}</td>
             <td style="text-align:right;padding:10px 8px;font-family:'JetBrains Mono',monospace;color:#C4B5FD;font-size:14px;">{format_price(bsc_tp)}</td>
             <td style="text-align:right;padding:10px 8px;font-family:'JetBrains Mono',monospace;color:#8B5CF6;font-size:14px;">{format_npatmi_t(bsc_npatmi)}</td>
+            <td style="text-align:right;padding:10px 8px;font-family:'JetBrains Mono',monospace;color:#EC4899;font-size:14px;">{format_npatmi_t(vci_npatmi)}</td>
             <td style="text-align:right;padding:10px 8px;font-family:'JetBrains Mono',monospace;color:#06B6D4;font-size:14px;">{format_npatmi_t(hcm_npatmi)}</td>
             <td style="text-align:right;padding:10px 8px;font-family:'JetBrains Mono',monospace;color:#F59E0B;font-size:14px;">{format_npatmi_t(ssi_npatmi)}</td>
-            <td style="text-align:right;padding:10px 8px;font-family:'JetBrains Mono',monospace;color:#EC4899;font-size:14px;">{format_npatmi_t(vci_npatmi)}</td>
             <td style="text-align:right;padding:10px 8px;font-family:'JetBrains Mono',monospace;color:#00C9AD;font-size:14px;font-weight:600;">{format_npatmi_t(cons_mean)}</td>
             <td style="padding:10px;">{range_chart}</td>
             <td style="text-align:center;padding:10px;">{dev_insight_html}</td>
@@ -448,24 +457,24 @@ def render_ticker_lookup(df: pd.DataFrame):
     # Range visualization
     st.html(build_range_visual_html(row))
 
-    # Insight summary (using NPATMI 2027F as primary - next year forecast)
+    # Insight summary (using NPATMI 2026F as primary - current year forecast)
     insight = row.get('insight', 'no_data')
     config = INSIGHT_CONFIG.get(insight, INSIGHT_CONFIG['no_data'])
-    dev_27 = row.get('npatmi_27_dev_pct')
+    dev_26 = row.get('npatmi_26_dev_pct')
 
-    # dev_27 = (Consensus - BSC) / BSC
+    # dev_26 = (Consensus - BSC) / BSC
     # Positive = Consensus > BSC = BSC conservative (bearish)
     # Negative = Consensus < BSC = BSC optimistic (bullish)
     insight_text = ""
-    if pd.notna(dev_27):
-        if dev_27 <= -5:
+    if pd.notna(dev_26):
+        if dev_26 <= -5:
             # BSC higher than consensus = BSC optimistic
-            insight_text = f"BSC lạc quan hơn consensus {abs(dev_27):.1f}% cho NPATMI 2027F"
-        elif dev_27 >= 5:
+            insight_text = f"BSC lạc quan hơn consensus {abs(dev_26):.1f}% cho NPATMI 2026F"
+        elif dev_26 >= 5:
             # BSC lower than consensus = BSC conservative
-            insight_text = f"BSC bảo thủ hơn consensus {dev_27:.1f}% cho NPATMI 2027F"
+            insight_text = f"BSC bảo thủ hơn consensus {dev_26:.1f}% cho NPATMI 2026F"
         else:
-            insight_text = f"BSC và consensus gần nhau ({dev_27:+.1f}%) cho NPATMI 2027F"
+            insight_text = f"BSC và consensus gần nhau ({dev_26:+.1f}%) cho NPATMI 2026F"
 
     st.html(f'''
     <div style="background:{config['color']}15;border:1px solid {config['color']}40;border-radius:8px;padding:16px;margin-top:16px;">
@@ -563,13 +572,13 @@ def build_detail_table_html(row: pd.Series) -> str:
 def build_range_visual_html(row: pd.Series) -> str:
     """Build visual range comparison HTML."""
 
-    def build_range_bar(label: str, bsc_val, hcm_val, ssi_val, vci_val, formatter) -> str:
-        """Build single range bar."""
+    def build_range_bar(label: str, bsc_val, vci_val, hcm_val, ssi_val, formatter) -> str:
+        """Build single range bar. Column order: BSC, VCI, HCM, SSI"""
         values = {
             'BSC': bsc_val,
+            'VCI': vci_val,
             'HCM': hcm_val,
             'SSI': ssi_val,
-            'VCI': vci_val,
         }
         valid = {k: v for k, v in values.items() if pd.notna(v) and v > 0}
 
@@ -617,24 +626,24 @@ def build_range_visual_html(row: pd.Series) -> str:
     # Build range bars
     tp_range = build_range_bar(
         "Target Price",
-        row.get('bsc_tp'), row.get('hcm_tp'), row.get('ssi_tp'), row.get('vci_tp'),
+        row.get('bsc_tp'), row.get('vci_tp'), row.get('hcm_tp'), row.get('ssi_tp'),
         format_price
     )
 
-    npatmi_27_range = build_range_bar(
-        "NPATMI 2027F",
-        row.get('bsc_npatmi_27'), row.get('hcm_npatmi_27'), row.get('ssi_npatmi_27'), row.get('vci_npatmi_27'),
+    npatmi_26_range = build_range_bar(
+        "NPATMI 2026F",
+        row.get('bsc_npatmi_26'), row.get('vci_npatmi_26'), row.get('hcm_npatmi_26'), row.get('ssi_npatmi_26'),
         format_npatmi_t
     )
 
-    if not tp_range and not npatmi_27_range:
+    if not tp_range and not npatmi_26_range:
         return ""
 
     return f'''
     <div style="background:#0F172A;border-radius:8px;padding:16px;margin-top:16px;border:1px solid #334155;">
         <div style="font-size:12px;font-weight:600;color:#94A3B8;margin-bottom:12px;">VISUAL RANGE</div>
         {tp_range}
-        {npatmi_27_range}
+        {npatmi_26_range}
     </div>
     '''
 
@@ -655,8 +664,8 @@ def render_bsc_vs_consensus_tab():
         st.code("python3 PROCESSORS/forecast/create_comparison_table.py", language="bash")
         return
 
-    # Filter to overlap only - using 2027F (next year forecast)
-    overlap_df = df[(df['bsc_npatmi_27'].notna()) & (df['source_count'] > 0)].copy()
+    # Filter to overlap only - using 2026F (current year forecast)
+    overlap_df = df[(df['bsc_npatmi_26'].notna()) & (df['source_count'] > 0)].copy()
 
     # Summary stats
     stats = calculate_summary_stats(overlap_df)

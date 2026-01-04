@@ -58,6 +58,14 @@ class TADashboardService:
         latest_vn = vnindex.iloc[-1]
         latest_br = breadth.iloc[-1]
 
+        # Calculate day-over-day change % (VNINDEX)
+        vnindex_change_pct = 0.0
+        if len(vnindex) >= 2:
+            prev_close = vnindex.iloc[-2]['close']
+            curr_close = latest_vn['close']
+            if prev_close > 0:
+                vnindex_change_pct = ((curr_close - prev_close) / prev_close) * 100
+
         # Previous day breadth for recovery detection
         prev_ma20_pct = None
         prev_ma50_pct = None
@@ -94,7 +102,7 @@ class TADashboardService:
         return MarketState(
             date=latest_vn['date'],
             vnindex_close=latest_vn['close'],
-            vnindex_change_pct=latest_vn.get('change_pct', 0),
+            vnindex_change_pct=vnindex_change_pct,
             regime=regime,
             ema9=ema9,
             ema21=ema21,

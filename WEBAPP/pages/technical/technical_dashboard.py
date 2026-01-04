@@ -61,86 +61,6 @@ def render_header() -> None:
     ''', unsafe_allow_html=True)
 
 
-def render_compact_status_bar(service: TADashboardService) -> None:
-    """Render compact market status bar with glassmorphism styling."""
-    try:
-        state = service.get_market_state()
-
-        # Handle missing data
-        if state is None:
-            st.info("Loading market data...")
-            return
-
-        # Regime styling
-        regime_styles = {
-            'BULLISH': ('#10B981', 'rgba(16, 185, 129, 0.15)'),
-            'NEUTRAL': ('#F59E0B', 'rgba(245, 158, 11, 0.15)'),
-            'BEARISH': ('#EF4444', 'rgba(239, 68, 68, 0.15)'),
-        }
-        signal_styles = {
-            'RISK_ON': ('#10B981', 'rgba(16, 185, 129, 0.15)'),
-            'CAUTION': ('#F59E0B', 'rgba(245, 158, 11, 0.15)'),
-            'RISK_OFF': ('#EF4444', 'rgba(239, 68, 68, 0.15)'),
-        }
-
-        regime_color, regime_bg = regime_styles.get(state.regime, ('#64748B', 'rgba(100, 116, 139, 0.15)'))
-        signal_color, signal_bg = signal_styles.get(state.signal, ('#64748B', 'rgba(100, 116, 139, 0.15)'))
-        change_color = '#10B981' if state.vnindex_change_pct >= 0 else '#EF4444'
-        change_sign = '+' if state.vnindex_change_pct >= 0 else ''
-
-        # Exposure bar color
-        if state.exposure_level >= 80:
-            exp_color = '#10B981'
-        elif state.exposure_level >= 60:
-            exp_color = '#22C55E'
-        elif state.exposure_level >= 40:
-            exp_color = '#F59E0B'
-        else:
-            exp_color = '#EF4444'
-
-        st.markdown(f'''
-        <div style="display: flex; gap: 12px; padding: 8px 0; flex-wrap: wrap; align-items: stretch; margin-bottom: 16px;">
-            <div style="flex: 1; min-width: 130px; background: rgba(139, 92, 246, 0.08); padding: 10px 14px; border-radius: 8px; border-left: 3px solid #8B5CF6;">
-                <div style="color: #64748B; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">VN-Index</div>
-                <div style="display: flex; align-items: baseline; gap: 6px; margin-top: 2px;">
-                    <span style="color: #F8FAFC; font-size: 1.2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;">{state.vnindex_close:,.0f}</span>
-                    <span style="color: {change_color}; font-size: 0.8rem; font-weight: 600;">{change_sign}{state.vnindex_change_pct:.2f}%</span>
-                </div>
-            </div>
-            <div style="flex: 0.8; min-width: 100px; background: {regime_bg}; padding: 10px 14px; border-radius: 8px; border-left: 3px solid {regime_color};">
-                <div style="color: #64748B; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Regime</div>
-                <div style="color: {regime_color}; font-size: 0.95rem; font-weight: 700; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
-                    <span style="display: inline-block; width: 6px; height: 6px; background: {regime_color}; border-radius: 50%;"></span>
-                    {state.regime}
-                </div>
-            </div>
-            <div style="flex: 0.8; min-width: 100px; background: {signal_bg}; padding: 10px 14px; border-radius: 8px; border-left: 3px solid {signal_color};">
-                <div style="color: #64748B; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Signal</div>
-                <div style="color: {signal_color}; font-size: 0.95rem; font-weight: 700; margin-top: 2px; display: flex; align-items: center; gap: 4px;">
-                    <span style="display: inline-block; width: 6px; height: 6px; background: {signal_color}; border-radius: 50%;"></span>
-                    {state.signal.replace('_', ' ')}
-                </div>
-            </div>
-            <div style="flex: 0.8; min-width: 90px; background: rgba(6, 182, 212, 0.08); padding: 10px 14px; border-radius: 8px; border-left: 3px solid #06B6D4;">
-                <div style="color: #64748B; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">MA20</div>
-                <div style="color: #06B6D4; font-size: 1.1rem; font-weight: 700; margin-top: 2px; font-family: 'JetBrains Mono', monospace;">{state.breadth_ma20_pct:.0f}%</div>
-            </div>
-            <div style="flex: 1.2; min-width: 140px; background: rgba(0, 0, 0, 0.25); padding: 10px 14px; border-radius: 8px; border-left: 3px solid {exp_color};">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #64748B; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Exposure</span>
-                    <span style="color: {exp_color}; font-size: 0.9rem; font-weight: 700;">{state.exposure_level}%</span>
-                </div>
-                <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 6px; overflow: hidden;">
-                    <div style="width: {state.exposure_level}%; height: 100%; background: {exp_color}; border-radius: 2px;"></div>
-                </div>
-            </div>
-        </div>
-        ''', unsafe_allow_html=True)
-
-    except Exception as e:
-        st.warning(f"Could not load market status: {e}")
-
-
 def main() -> None:
     """Main dashboard entry point."""
 
@@ -166,9 +86,6 @@ def main() -> None:
         </div>
         ''', unsafe_allow_html=True)
         return
-
-    # Compact status bar
-    render_compact_status_bar(service)
 
     # ============ TAB NAVIGATION (Session State Persisted) ============
     active_tab = render_persistent_tabs(
