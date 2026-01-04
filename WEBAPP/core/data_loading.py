@@ -4,13 +4,15 @@ Cung cấp API load dữ liệu chuẩn (DuckDB/Parquet), có cache và lọc ou
 mặc định. Domain có thể kế thừa/ghi đè ở thư mục `domains/`.
 
 Updated: 2025-12-17 - Added get_all_symbols() using SymbolLoader
+Updated: 2026-01-04 - Added caching with TTL constants
 """
 
 from __future__ import annotations
 import duckdb
 import pandas as pd
+import streamlit as st
 from typing import Dict, List, Optional
-from WEBAPP.core.constants import OUTLIERS_DEFAULT
+from WEBAPP.core.constants import OUTLIERS_DEFAULT, CACHE_TTL_COLD, CACHE_TTL_STATIC
 from WEBAPP.core.utils import clip_outliers
 from WEBAPP.core.formatters import format_valuation_df, format_value
 from WEBAPP.core.symbol_loader import SymbolLoader
@@ -41,8 +43,9 @@ def get_all_symbols(entity_type: Optional[str] = None) -> List[str]:
     return loader.get_all_symbols()
 
 
+@st.cache_data(ttl=CACHE_TTL_STATIC, show_spinner=False)
 def load_symbol_list(path: str) -> List[str]:
-    """Load danh sách symbol duy nhất từ file parquet.
+    """Load danh sách symbol duy nhất từ file parquet (cached 24h).
     NOTE: Consider using get_all_symbols() instead for liquid tickers only.
 
     Args:
@@ -53,9 +56,10 @@ def load_symbol_list(path: str) -> List[str]:
     return df['symbol'].tolist()
 
 
+@st.cache_data(ttl=CACHE_TTL_COLD, show_spinner=False)
 def load_valuation_generic(symbol: str, start_date: str,
                            pe_path: str, pb_path: str, ev_path: str) -> Dict[str, pd.DataFrame]:
-    """Load valuation (PE/PB/EVEBITDA) cho 1 symbol từ 3 parquet.
+    """Load valuation (PE/PB/EVEBITDA) cho 1 symbol từ 3 parquet (cached 1h).
 
     VN: Trả về dict {'pe','pb','ev_ebitda'} – đã lọc outliers mặc định.
     """

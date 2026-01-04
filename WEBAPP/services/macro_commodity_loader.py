@@ -12,10 +12,11 @@ import logging
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 from WEBAPP.core.data_paths import DataPaths
+from WEBAPP.core.constants import CACHE_TTL_WARM
 
 logger = logging.getLogger(__name__)
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(ttl=CACHE_TTL_WARM, show_spinner=False)
 def _load_unified_data_cached(file_path: str, latest_date_key: str) -> pd.DataFrame:
     try:
         df = pd.read_parquet(file_path)

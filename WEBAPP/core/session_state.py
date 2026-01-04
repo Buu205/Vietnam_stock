@@ -328,3 +328,107 @@ def clear_synced_ticker() -> None:
 def has_synced_ticker() -> bool:
     """Check if there's a synced ticker."""
     return st.session_state.get('sync_last_ticker') is not None
+
+
+# =============================================================================
+# LAZY LOADING UTILITIES
+# =============================================================================
+
+def is_tab_loaded(tab_key: str) -> bool:
+    """
+    Check if a tab's data has been loaded.
+
+    Usage:
+        if not is_tab_loaded('forecast_sector_tab'):
+            load_sector_data()
+            mark_tab_loaded('forecast_sector_tab')
+
+    Args:
+        tab_key: Unique key for the tab
+
+    Returns:
+        True if tab data has been loaded in this session
+    """
+    return st.session_state.get(f'_loaded_{tab_key}', False)
+
+
+def mark_tab_loaded(tab_key: str) -> None:
+    """
+    Mark a tab's data as loaded.
+
+    Args:
+        tab_key: Unique key for the tab
+    """
+    st.session_state[f'_loaded_{tab_key}'] = True
+
+
+def reset_tab_loaded(tab_key: str) -> None:
+    """
+    Reset a tab's loaded state (for force refresh).
+
+    Args:
+        tab_key: Unique key for the tab
+    """
+    st.session_state[f'_loaded_{tab_key}'] = False
+
+
+def lazy_load_data(tab_key: str, load_func, *args, **kwargs):
+    """
+    Lazy load data only if not already loaded.
+
+    Usage:
+        data = lazy_load_data('forecast_main', service.get_data)
+
+    Args:
+        tab_key: Unique key for caching
+        load_func: Function to call for loading data
+        *args, **kwargs: Arguments to pass to load_func
+
+    Returns:
+        Loaded data (from cache or fresh load)
+    """
+    cache_key = f'_data_{tab_key}'
+
+    if cache_key not in st.session_state:
+        st.session_state[cache_key] = load_func(*args, **kwargs)
+
+    return st.session_state[cache_key]
+
+
+def render_loading_placeholder(message: str = "Loading...") -> None:
+    """
+    Render a styled loading placeholder.
+
+    Args:
+        message: Loading message to display
+    """
+    st.markdown(f'''
+    <div style="
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        background: rgba(139, 92, 246, 0.05);
+        border: 1px solid rgba(139, 92, 246, 0.1);
+        border-radius: 12px;
+        margin: 20px 0;
+    ">
+        <div style="text-align: center;">
+            <div style="
+                width: 32px;
+                height: 32px;
+                border: 3px solid rgba(139, 92, 246, 0.2);
+                border-top-color: #8B5CF6;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 12px;
+            "></div>
+            <span style="color: #94A3B8; font-size: 0.9rem;">{message}</span>
+        </div>
+    </div>
+    <style>
+        @keyframes spin {{
+            to {{ transform: rotate(360deg); }}
+        }}
+    </style>
+    ''', unsafe_allow_html=True)

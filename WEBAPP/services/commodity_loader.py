@@ -13,6 +13,7 @@ import pandas as pd
 import streamlit as st
 
 from WEBAPP.core.data_paths import DataPaths
+from WEBAPP.core.constants import CACHE_TTL_WARM
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ def _resolve_data_path(explicit_path: Optional[str] = None) -> Path:
     return DataPaths.processed('commodity', 'commodity_prices.parquet')
 
 
-@st.cache_data(ttl=300, show_spinner=False)  # Cache 5 phút, dùng latest_date làm key
+@st.cache_data(ttl=CACHE_TTL_WARM, show_spinner=False)
 def _load_commodity_data_cached(file_path: str, latest_date_key: str) -> pd.DataFrame:
     """
     Load commodity data với Streamlit cache.

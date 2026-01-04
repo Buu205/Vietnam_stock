@@ -4,6 +4,15 @@ Keep domain-agnostic defaults here. Domain-specific overrides can live under
 `streamlit_app/domains/<domain>/constants_<domain>.py` if needed.
 """
 
+# =============================================================================
+# CACHE TTL TIERS (seconds)
+# =============================================================================
+# Use these constants for @st.cache_data(ttl=...) to ensure consistency
+CACHE_TTL_HOT = 60        # Real-time data (technical indicators, live prices)
+CACHE_TTL_WARM = 300      # Frequently updated (news, intraday prices)
+CACHE_TTL_COLD = 3600     # Infrequently updated (fundamentals, forecasts)
+CACHE_TTL_STATIC = 86400  # Static data (symbols, sectors, metadata)
+
 # Outlier thresholds (default)
 OUTLIERS_DEFAULT = {
     'pe_ratio': 100.0,

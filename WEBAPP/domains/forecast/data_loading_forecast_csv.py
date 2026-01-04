@@ -8,19 +8,126 @@ merge with current market data for comprehensive analysis.
 This replaces the Excel-based loader for better performance and automation.
 
 Updated: 2025-11-11 - Using centralized DataPaths configuration
+Updated: 2026-01-04 - Fixed caching with standalone cached functions
 """
 
 import pandas as pd
 import numpy as np
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Tuple
 import logging
 from pathlib import Path
 from datetime import datetime
 import streamlit as st
 from WEBAPP.core.utils import get_data_path
 from WEBAPP.core.data_paths import DataPaths, get_valuation_path, get_fundamental_path
+from WEBAPP.core.constants import CACHE_TTL_COLD
 
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# STANDALONE CACHED FUNCTIONS (avoid class method caching issues)
+# =============================================================================
+
+@st.cache_data(ttl=CACHE_TTL_COLD, show_spinner=False)
+def _cached_load_forecast_csv(csv_path: str) -> pd.DataFrame:
+    """Cached: Load forecast data from CSV file"""
+    try:
+        path = Path(csv_path)
+        if not path.exists():
+            logger.warning(f"Forecast CSV file not found: {path}")
+            return pd.DataFrame()
+
+        df = pd.read_csv(path)
+        logger.info(f"Loaded forecast CSV data: {df.shape}")
+
+        if df.empty:
+            return pd.DataFrame()
+
+        # Normalize symbol column
+        if 'Symbol' in df.columns:
+            df['symbol'] = df['Symbol'].str.strip().str.upper()
+        elif 'symbol' in df.columns:
+            df['symbol'] = df['symbol'].str.strip().str.upper()
+        else:
+            logger.error("CSV file missing 'Symbol' or 'symbol' column")
+            return pd.DataFrame()
+
+        df = df.dropna(subset=['symbol'])
+        df = df[df['symbol'] != '']
+
+        logger.info(f"Forecast CSV data after cleaning: {df.shape}")
+        return df
+
+    except Exception as e:
+        logger.error(f"Error loading forecast CSV: {e}")
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=CACHE_TTL_COLD, show_spinner=False)
+def _cached_load_pe_pb_latest(pe_path: str, pb_path: str, symbols: Tuple[str, ...]) -> Dict[str, Dict]:
+    """Cached: Load latest PE/PB for given symbols"""
+    pe_pb_data = {}
+    symbols_set = set(symbols)
+
+    try:
+        # Load PE data
+        pe_file = Path(pe_path)
+        if pe_file.exists():
+            pe_df = pd.read_parquet(pe_file)
+            pe_df = pe_df[pe_df['symbol'].isin(symbols_set)]
+            if not pe_df.empty:
+                pe_df['date'] = pd.to_datetime(pe_df['date'])
+                latest_pe = pe_df.loc[pe_df.groupby('symbol')['date'].idxmax()]
+                for _, row in latest_pe.iterrows():
+                    symbol = row['symbol']
+                    pe_pb_data[symbol] = {'pe_ttm': row.get('pe_ratio')}
+
+        # Load PB data
+        pb_file = Path(pb_path)
+        if pb_file.exists():
+            pb_df = pd.read_parquet(pb_file)
+            pb_df = pb_df[pb_df['symbol'].isin(symbols_set)]
+            if not pb_df.empty:
+                pb_df['date'] = pd.to_datetime(pb_df['date'])
+                latest_pb = pb_df.loc[pb_df.groupby('symbol')['date'].idxmax()]
+                for _, row in latest_pb.iterrows():
+                    symbol = row['symbol']
+                    if symbol not in pe_pb_data:
+                        pe_pb_data[symbol] = {}
+                    pe_pb_data[symbol]['pb_ttm'] = row.get('pb_ratio')
+
+        logger.info(f"Loaded PE/PB TTM for {len(pe_pb_data)} symbols")
+
+    except Exception as e:
+        logger.error(f"Error loading PE/PB TTM: {e}")
+
+    return pe_pb_data
+
+
+@st.cache_data(ttl=CACHE_TTL_COLD, show_spinner=False)
+def _cached_load_ohlcv_latest(ohlcv_path: str, symbols: Tuple[str, ...]) -> pd.DataFrame:
+    """Cached: Load latest OHLCV data for given symbols"""
+    try:
+        path = Path(ohlcv_path)
+        if not path.exists():
+            return pd.DataFrame()
+
+        ohlcv_df = pd.read_parquet(path, columns=['symbol', 'date', 'close', 'market_cap'])
+        ohlcv_df = ohlcv_df[ohlcv_df['symbol'].isin(set(symbols))]
+
+        if ohlcv_df.empty:
+            return pd.DataFrame()
+
+        ohlcv_df['date'] = pd.to_datetime(ohlcv_df['date'])
+        latest_data = ohlcv_df.loc[ohlcv_df.groupby('symbol')['date'].idxmax()]
+
+        logger.info(f"Loaded OHLCV for {len(latest_data)} symbols")
+        return latest_data[['symbol', 'close', 'market_cap']]
+
+    except Exception as e:
+        logger.error(f"Error loading OHLCV: {e}")
+        return pd.DataFrame()
 
 class ForecastDataLoaderCSV:
     """Load and process forecast data from CSV files"""
@@ -40,141 +147,37 @@ class ForecastDataLoaderCSV:
         self.company_fund_path = get_fundamental_path('company')
         self.bank_fund_path = get_fundamental_path('bank')
     
-    # @st.cache_data(ttl=1800, max_entries=8)  # Cache disabled due to Series hash error
-    def load_forecast_csv(_self) -> pd.DataFrame:
-        """Load forecast data from CSV file"""
-        try:
-            if not _self.csv_path.exists():
-                logger.warning(f"Forecast CSV file not found: {_self.csv_path}")
-                return pd.DataFrame()
-            
-            # Read CSV file
-            df = pd.read_csv(_self.csv_path)
-            logger.info(f"Loaded forecast CSV data: {df.shape}")
-            
-            # Basic data validation
-            if df.empty:
-                logger.warning("Forecast CSV file is empty")
-                return pd.DataFrame()
-            
-            # Ensure symbol column exists and is clean (check both Symbol and symbol)
-            if 'Symbol' in df.columns:
-                df['symbol'] = df['Symbol'].str.strip().str.upper()
-            elif 'symbol' in df.columns:
-                df['symbol'] = df['symbol'].str.strip().str.upper()
-            else:
-                logger.error("CSV file missing 'Symbol' or 'symbol' column")
-                return pd.DataFrame()
-            
-            # Clean symbol data
-            df = df.dropna(subset=['symbol'])
-            df = df[df['symbol'] != '']
-            
-            logger.info(f"Forecast CSV data after cleaning: {df.shape}")
-            return df
-            
-        except Exception as e:
-            logger.error(f"Error loading forecast CSV: {e}")
-            return pd.DataFrame()
+    def load_forecast_csv(self) -> pd.DataFrame:
+        """Load forecast data from CSV file (uses cached standalone function)"""
+        return _cached_load_forecast_csv(str(self.csv_path))
     
-    # @st.cache_data(ttl=1800, max_entries=16)  # Cache disabled due to Series hash error
-    def load_current_market_data(_self) -> Dict[str, pd.DataFrame]:
-        """Load current market data for comparison - optimized for Streamlit"""
-        try:
-            current_data = {}
-            
-            # Load PE data (latest only - optimized)
-            if _self.pe_path.exists():
-                try:
-                    pe_df = pd.read_parquet(_self.pe_path)
-                    pe_df['date'] = pd.to_datetime(pe_df['date'])
-                    # Get latest PE for each symbol - more efficient
-                    latest_pe = pe_df.loc[pe_df.groupby('symbol')['date'].idxmax()]
-                    current_data['pe'] = latest_pe
-                    logger.info(f"Loaded PE data: {len(latest_pe)} records")
-                except Exception as e:
-                    logger.warning(f"Failed to load PE data: {e}")
-            
-            # Load PB data (latest only - optimized)
-            if _self.pb_path.exists():
-                try:
-                    pb_df = pd.read_parquet(_self.pb_path)
-                    pb_df['date'] = pd.to_datetime(pb_df['date'])
-                    # Get latest PB for each symbol - more efficient
-                    latest_pb = pb_df.loc[pb_df.groupby('symbol')['date'].idxmax()]
-                    current_data['pb'] = latest_pb
-                    logger.info(f"Loaded PB data: {len(latest_pb)} records")
-                except Exception as e:
-                    logger.warning(f"Failed to load PB data: {e}")
-            
-            # Load current prices and market cap from OHLCV file
-            try:
-                # First get forecast symbols to filter early
-                forecast_df = _self.load_forecast_csv()
-                forecast_symbols = set(forecast_df['symbol'].str.upper().str.strip()) if not forecast_df.empty else set()
-                
-                if forecast_symbols and _self.ohlcv_path.exists():
-                    # Read OHLCV file which contains close_price and market_cap
-                    ohlcv_df = pd.read_parquet(_self.ohlcv_path, columns=['symbol', 'date', 'close', 'market_cap'])
-                    ohlcv_df['date'] = pd.to_datetime(ohlcv_df['date'])
-                    
-                    # Filter by forecast symbols early to reduce memory usage
-                    ohlcv_df = ohlcv_df[ohlcv_df['symbol'].isin(forecast_symbols)]
-                    
-                    if not ohlcv_df.empty:
-                        # Get latest prices and market cap - more efficient
-                        latest_data = ohlcv_df.loc[ohlcv_df.groupby('symbol')['date'].idxmax()]
-                        current_data['prices'] = latest_data[['symbol', 'close', 'market_cap']]
-                        logger.info(f"Loaded prices and market cap from OHLCV for {len(latest_data)} forecast symbols")
-                    else:
-                        logger.warning("No price data found for forecast symbols in OHLCV file")
-                        current_data['prices'] = pd.DataFrame()
-                elif forecast_symbols:
-                    # Fallback: try PE file for prices only
-                    try:
-                        pe_df = pd.read_parquet(_self.pe_path, columns=['symbol', 'date', 'close_price'])
-                        pe_df['date'] = pd.to_datetime(pe_df['date'])
-                        pe_df = pe_df[pe_df['symbol'].isin(forecast_symbols)]
-                        if not pe_df.empty:
-                            latest_prices = pe_df.loc[pe_df.groupby('symbol')['date'].idxmax()]
-                            latest_prices = latest_prices.rename(columns={'close_price': 'close'})
-                            # Add empty market_cap column
-                            latest_prices['market_cap'] = None
-                            current_data['prices'] = latest_prices[['symbol', 'close', 'market_cap']]
-                            logger.info(f"Loaded prices from PE file for {len(latest_prices)} forecast symbols (no market cap)")
-                    except Exception as e:
-                        logger.warning(f"Failed to load prices from PE file: {e}")
-                        current_data['prices'] = pd.DataFrame()
-                else:
-                    logger.warning("No forecast symbols available for price filtering")
-                    current_data['prices'] = pd.DataFrame()
-                        
-            except Exception as e:
-                logger.error(f"Failed to load prices from OHLCV file: {e}")
-                # Fallback: return empty prices
-                current_data['prices'] = pd.DataFrame()
-            
-            # Load actual fundamental data for 2025 (simplified)
-            try:
-                # Skip heavy fundamental data loading for now
-                current_data['actual_fund'] = pd.DataFrame()
-                logger.info("Skipped fundamental data loading for performance")
-            except Exception as e:
-                logger.warning(f"Failed to load fundamental data: {e}")
-                current_data['actual_fund'] = pd.DataFrame()
-            
-            return current_data
-            
-        except Exception as e:
-            logger.error(f"Error loading current market data: {e}")
-            return {}
+    def load_current_market_data(self) -> Dict[str, pd.DataFrame]:
+        """Load current market data for comparison (uses cached functions)"""
+        current_data = {}
+
+        # Get forecast symbols first
+        forecast_df = self.load_forecast_csv()
+        if forecast_df.empty:
+            return {'pe': pd.DataFrame(), 'pb': pd.DataFrame(), 'prices': pd.DataFrame(), 'actual_fund': pd.DataFrame()}
+
+        forecast_symbols = tuple(forecast_df['symbol'].str.upper().str.strip().unique())
+
+        # Load prices from cached OHLCV
+        prices_df = _cached_load_ohlcv_latest(str(self.ohlcv_path), forecast_symbols)
+        current_data['prices'] = prices_df
+
+        # PE/PB loaded via load_pe_pb_ttm_for_bsc_symbols (already cached)
+        current_data['pe'] = pd.DataFrame()
+        current_data['pb'] = pd.DataFrame()
+        current_data['actual_fund'] = pd.DataFrame()
+
+        return current_data
     
-    # @st.cache_data(ttl=3600, max_entries=16)  # Cache disabled due to Series hash error
-    def load_actual_fundamental_data_2025(_self) -> pd.DataFrame:
+    def load_actual_fundamental_data_2025(self) -> pd.DataFrame:
         """Load actual YTD data for forecast symbols - same logic as Excel version"""
         try:
             # First, get forecast symbols to filter
-            forecast_df = _self.load_forecast_csv()
+            forecast_df = self.load_forecast_csv()
             if forecast_df.empty:
                 logger.warning("No forecast data available for filtering")
                 return pd.DataFrame()
@@ -226,8 +229,8 @@ class ForecastDataLoaderCSV:
                 metrics = bank_metrics if entity_type == 'BANK' else company_metrics
                 
                 # Calculate YTD for revenue and profit
-                ytd_revenue, quarters_count = _self._calculate_ytd(symbol_data, metrics['revenue'])
-                ytd_profit, _ = _self._calculate_ytd(symbol_data, metrics['profit'])
+                ytd_revenue, quarters_count = self._calculate_ytd(symbol_data, metrics['revenue'])
+                ytd_profit, _ = self._calculate_ytd(symbol_data, metrics['profit'])
                 
                 if ytd_revenue is not None and ytd_profit is not None:
                     ytd_data.append({
@@ -537,44 +540,11 @@ class ForecastDataLoaderCSV:
         return symbol_data.iloc[0].get('close')
     
     def load_pe_pb_ttm_for_bsc_symbols(self, bsc_symbols: list) -> dict:
-        """Load PE/PB TTM from DATA/processed for BSC symbols only"""
-        pe_pb_data = {}
-        
-        try:
-            # Load PE data
-            pe_path = Path(get_data_path('DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet'))
-            if pe_path.exists():
-                pe_df = pd.read_parquet(pe_path)
-                # Get latest date for each BSC symbol
-                pe_df = pe_df[pe_df['symbol'].isin(bsc_symbols)]
-                if not pe_df.empty:
-                    latest_pe = pe_df.loc[pe_df.groupby('symbol')['date'].idxmax()]
-                    for _, row in latest_pe.iterrows():
-                        symbol = row['symbol']
-                        if symbol not in pe_pb_data:
-                            pe_pb_data[symbol] = {}
-                        pe_pb_data[symbol]['pe_ttm'] = row.get('pe_ratio')
-            
-            # Load PB TTM data
-            pb_path = Path(get_data_path('DATA/processed/valuation/pb/pb_historical_all_symbols_final.parquet'))
-            if pb_path.exists():
-                pb_df = pd.read_parquet(pb_path)
-                # Get latest date for each BSC symbol
-                pb_df = pb_df[pb_df['symbol'].isin(bsc_symbols)]
-                if not pb_df.empty:
-                    latest_pb = pb_df.loc[pb_df.groupby('symbol')['date'].idxmax()]
-                    for _, row in latest_pb.iterrows():
-                        symbol = row['symbol']
-                        if symbol not in pe_pb_data:
-                            pe_pb_data[symbol] = {}
-                        pe_pb_data[symbol]['pb_ttm'] = row.get('pb_ratio')
-            
-            logger.info(f"Loaded PE/PB TTM for {len(pe_pb_data)} BSC symbols")
-            
-        except Exception as e:
-            logger.error(f"Error loading PE/PB TTM: {e}")
-        
-        return pe_pb_data
+        """Load PE/PB TTM from DATA/processed for BSC symbols only (uses cached function)"""
+        pe_path = get_data_path('DATA/processed/valuation/pe/pe_historical_all_symbols_final.parquet')
+        pb_path = get_data_path('DATA/processed/valuation/pb/pb_historical_all_symbols_final.parquet')
+        # Convert list to tuple for caching (lists are not hashable)
+        return _cached_load_pe_pb_latest(pe_path, pb_path, tuple(bsc_symbols))
     
     def get_current_pe(self, symbol: str, pe_df: Optional[pd.DataFrame]) -> Optional[float]:
         """Get current PE for symbol - DEPRECATED, use load_pe_pb_ttm_for_bsc_symbols instead"""
@@ -599,9 +569,9 @@ class ForecastDataLoaderCSV:
         return symbol_data.iloc[0].get('pb_ratio')
 
 
-# @st.cache_data(ttl=1800, max_entries=16)  # Cache disabled due to Series hash error
+@st.cache_data(ttl=CACHE_TTL_COLD, show_spinner=False)
 def load_comprehensive_forecast_data_csv() -> pd.DataFrame:
-    """Main function to load comprehensive forecast data from CSV"""
+    """Main function to load comprehensive forecast data from CSV (cached)"""
     loader = ForecastDataLoaderCSV()
     return loader.create_comprehensive_forecast_table()
 

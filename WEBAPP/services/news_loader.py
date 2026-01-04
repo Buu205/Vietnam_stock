@@ -7,6 +7,8 @@ from typing import Dict, Tuple
 import pandas as pd
 import streamlit as st
 
+from WEBAPP.core.constants import CACHE_TTL_WARM
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 NEWS_DIR = PROJECT_ROOT / "DATA" / "processed" / "news"
 NEWS_DATA_PATH = NEWS_DIR / "news_latest.parquet"
@@ -16,7 +18,7 @@ BSC_FORECAST_PATH = (
 )
 
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=CACHE_TTL_WARM, show_spinner=False)
 def load_news_data(days: int = 3) -> pd.DataFrame:
     if not NEWS_DATA_PATH.exists():
         return pd.DataFrame()
@@ -35,14 +37,14 @@ def load_news_data(days: int = 3) -> pd.DataFrame:
     return df.sort_values("publish_time", ascending=False).reset_index(drop=True)
 
 
-@st.cache_data(ttl=900)
+@st.cache_data(ttl=CACHE_TTL_WARM, show_spinner=False)
 def load_news_summary() -> dict:
     if NEWS_SUMMARY_PATH.exists():
         return json.loads(NEWS_SUMMARY_PATH.read_text())
     return {}
 
 
-@st.cache_data(ttl=900)
+@st.cache_data(ttl=CACHE_TTL_WARM, show_spinner=False)
 def load_bsc_symbols() -> set[str]:
     if not BSC_FORECAST_PATH.exists():
         return set()
