@@ -24,7 +24,7 @@ import pandas as pd
 from typing import TYPE_CHECKING, Optional
 from datetime import datetime, timedelta
 
-from WEBAPP.core.styles import get_table_style
+from WEBAPP.core.styles import get_table_style, get_status_class
 from WEBAPP.core.trading_rules import (
     SIGNAL_TYPES, PATTERN_INTERPRETATIONS, PATTERN_VOLUME_MATRIX,
     VOLUME_CONTEXT, ACTION_COLORS

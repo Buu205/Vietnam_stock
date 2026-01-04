@@ -1241,6 +1241,170 @@ def get_page_style() -> str:
         }
     }
 
+    /* ============================================================
+       SEMANTIC TEXT CLASSES
+       ============================================================ */
+    .text-primary-emphasis {
+        color: var(--purple-primary);
+        font-weight: 600;
+    }
+
+    .text-secondary-emphasis {
+        color: var(--cyan-primary);
+        font-weight: 600;
+    }
+
+    .text-accent-emphasis {
+        color: var(--amber-primary);
+        font-weight: 600;
+    }
+
+    .text-muted {
+        color: var(--text-muted);
+    }
+
+    .text-secondary-sm {
+        color: var(--text-secondary);
+        font-size: 0.7rem;
+    }
+
+    /* ============================================================
+       STATUS INDICATORS
+       ============================================================ */
+    .status-positive {
+        color: var(--positive);
+        font-weight: 600;
+    }
+
+    .status-negative {
+        color: var(--negative);
+        font-weight: 600;
+    }
+
+    .status-neutral {
+        color: var(--text-secondary);
+    }
+
+    .status-warning {
+        color: var(--warning);
+        font-weight: 600;
+    }
+
+    /* ============================================================
+       BADGE STYLES
+       ============================================================ */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        font-family: var(--font-body);
+    }
+
+    .badge-primary {
+        background: rgba(139, 92, 246, 0.2);
+        color: var(--purple-light);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .badge-success {
+        background: rgba(16, 185, 129, 0.2);
+        color: var(--positive-light);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-danger {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--negative-light);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .badge-warning {
+        background: rgba(245, 158, 11, 0.2);
+        color: var(--amber-light);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-info {
+        background: rgba(6, 182, 212, 0.2);
+        color: var(--cyan-light);
+        border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    /* ============================================================
+       METRIC DISPLAY CLASSES
+       ============================================================ */
+    .metric-label {
+        color: var(--text-secondary);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .metric-value {
+        color: var(--text-white);
+        font-size: 1.4rem;
+        font-weight: 700;
+        font-family: var(--font-mono);
+    }
+
+    .metric-value-sm {
+        color: var(--text-white);
+        font-size: 1.1rem;
+        font-weight: 700;
+        font-family: var(--font-mono);
+    }
+
+    .metric-value-xs {
+        color: var(--text-primary);
+        font-size: 0.75rem;
+        font-family: var(--font-mono);
+    }
+
+    .metric-delta-positive {
+        color: var(--positive);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .metric-delta-negative {
+        color: var(--negative);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* ============================================================
+       LEGEND & INDICATOR CLASSES
+       ============================================================ */
+    .legend-line-primary { color: var(--purple-primary); font-weight: 600; }
+    .legend-line-secondary { color: var(--cyan-primary); font-weight: 600; }
+    .legend-line-accent { color: var(--amber-primary); font-weight: 600; }
+    .legend-line-positive { color: var(--positive); font-weight: 600; }
+    .legend-line-negative { color: var(--negative); font-weight: 600; }
+
+    /* ============================================================
+       UTILITY CLASSES
+       ============================================================ */
+    .text-mono {
+        font-family: var(--font-mono);
+    }
+
+    .text-uppercase {
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .font-semibold {
+        font-weight: 600;
+    }
+
+    .font-bold {
+        font-weight: 700;
+    }
+
 </style>
 """
 
@@ -1737,3 +1901,156 @@ def render_skeleton_metric() -> str:
         <div class="skeleton-text" style="width: 40%; height: 24px;"></div>
     </div>
     '''
+
+
+# ============================================================
+# STYLED HTML HELPER FUNCTIONS
+# ============================================================
+
+def get_status_class(value: float, threshold: float = 0) -> str:
+    """
+    Get CSS class name based on value comparison.
+
+    Args:
+        value: Numeric value to evaluate
+        threshold: Comparison threshold (default 0)
+
+    Returns:
+        CSS class name: 'status-positive', 'status-negative', or 'status-neutral'
+
+    Example:
+        >>> get_status_class(5.5)
+        'status-positive'
+        >>> get_status_class(-2.3)
+        'status-negative'
+    """
+    if value > threshold:
+        return "status-positive"
+    elif value < threshold:
+        return "status-negative"
+    return "status-neutral"
+
+
+def render_styled_text(text: str, style: str = 'primary') -> str:
+    """
+    Render text with semantic CSS class.
+
+    Args:
+        text: Text content
+        style: Style variant - 'primary', 'secondary', 'accent', 'muted'
+
+    Returns:
+        HTML span with appropriate class
+
+    Example:
+        >>> st.markdown(render_styled_text("VN-Index", "primary"), unsafe_allow_html=True)
+    """
+    class_map = {
+        'primary': 'text-primary-emphasis',
+        'secondary': 'text-secondary-emphasis',
+        'accent': 'text-accent-emphasis',
+        'muted': 'text-muted',
+    }
+    css_class = class_map.get(style, 'text-primary-emphasis')
+    return f'<span class="{css_class}">{text}</span>'
+
+
+def render_styled_badge(text: str, variant: str = 'primary') -> str:
+    """
+    Render status badge with semantic styling.
+
+    Args:
+        text: Badge text
+        variant: 'primary', 'success', 'danger', 'warning', 'info'
+
+    Returns:
+        HTML span with badge classes
+
+    Example:
+        >>> st.markdown(render_styled_badge("Active", "success"), unsafe_allow_html=True)
+    """
+    return f'<span class="badge badge-{variant}">{text}</span>'
+
+
+def render_styled_status(value: float, format_str: str = "{:+.2f}%", threshold: float = 0) -> str:
+    """
+    Render value with positive/negative color coding.
+
+    Args:
+        value: Numeric value
+        format_str: Format string for value display
+        threshold: Comparison threshold
+
+    Returns:
+        HTML span with status class
+
+    Example:
+        >>> st.markdown(render_styled_status(5.23), unsafe_allow_html=True)
+        >>> st.markdown(render_styled_status(-2.1, "{:.1f}%"), unsafe_allow_html=True)
+    """
+    css_class = get_status_class(value, threshold)
+    formatted = format_str.format(value)
+    return f'<span class="{css_class}">{formatted}</span>'
+
+
+def render_styled_label(text: str) -> str:
+    """
+    Render uppercase metric label.
+
+    Args:
+        text: Label text
+
+    Returns:
+        HTML div with metric-label class
+
+    Example:
+        >>> st.markdown(render_styled_label("VN-Index"), unsafe_allow_html=True)
+    """
+    return f'<div class="metric-label">{text}</div>'
+
+
+def render_styled_metric_inline(label: str, value: str, delta: float = None) -> str:
+    """
+    Render inline metric with label, value, and optional delta.
+
+    Args:
+        label: Metric label
+        value: Formatted value string
+        delta: Optional delta value for color coding
+
+    Returns:
+        HTML structure with metric classes
+
+    Example:
+        >>> st.markdown(render_styled_metric_inline("Price", "25,750", 2.5), unsafe_allow_html=True)
+    """
+    delta_html = ""
+    if delta is not None:
+        delta_class = "metric-delta-positive" if delta >= 0 else "metric-delta-negative"
+        delta_sign = "+" if delta >= 0 else ""
+        delta_html = f' <span class="{delta_class}">{delta_sign}{delta:.2f}%</span>'
+
+    return f'''
+    <div>
+        <div class="metric-label">{label}</div>
+        <span class="metric-value">{value}</span>{delta_html}
+    </div>
+    '''
+
+
+def render_legend_item(symbol: str, label: str, color_class: str) -> str:
+    """
+    Render chart legend item.
+
+    Args:
+        symbol: Legend symbol (e.g., "●", "┄")
+        label: Legend label
+        color_class: CSS class for color (e.g., "legend-line-primary")
+
+    Returns:
+        HTML span with legend styling
+
+    Example:
+        >>> st.markdown(render_legend_item("●", "VN-Index", "legend-line-primary"), unsafe_allow_html=True)
+    """
+    return f'<span class="{color_class}">{symbol} {label}</span>'

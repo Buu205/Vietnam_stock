@@ -20,7 +20,16 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from typing import TYPE_CHECKING
 
-from WEBAPP.core.styles import get_chart_layout, CHART_COLORS, TRADING_CHART_COLORS
+from WEBAPP.core.styles import (
+    get_chart_layout,
+    CHART_COLORS,
+    TRADING_CHART_COLORS,
+    render_styled_text,
+    render_styled_status,
+    render_styled_label,
+    render_legend_item,
+    get_status_class,
+)
 from WEBAPP.core.trading_constants import MARKET_SCORE_WEIGHTS, BREADTH_TIMEFRAMES, DEFAULT_BREADTH_TIMEFRAME
 from WEBAPP.core.trading_rules import (
     REGIME_STYLES, SIGNAL_STYLES, BREADTH_COLORS,
@@ -91,8 +100,7 @@ def _render_market_metrics_bar(state) -> None:
     regime_style = REGIME_STYLES.get(state.regime, REGIME_STYLES['NEUTRAL'])
     signal_style = SIGNAL_STYLES.get(state.signal, SIGNAL_STYLES['CAUTION'])
 
-    # VN-Index change color
-    change_color = '#10B981' if state.vnindex_change_pct >= 0 else '#EF4444'
+    # VN-Index change sign
     change_sign = '+' if state.vnindex_change_pct >= 0 else ''
 
     # Exposure color (gradient from red to green)
@@ -109,32 +117,32 @@ def _render_market_metrics_bar(state) -> None:
 
     st.markdown(f'''
     <div style="display: flex; gap: 16px; padding: 12px 0; flex-wrap: wrap; align-items: stretch;">
-        <div style="flex: 1; min-width: 140px; background: rgba(139, 92, 246, 0.1); padding: 12px 16px; border-radius: 10px; border-left: 3px solid #8B5CF6;">
-            <div style="color: #94A3B8; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">VN-Index</div>
+        <div style="flex: 1; min-width: 140px; background: rgba(139, 92, 246, 0.1); padding: 12px 16px; border-radius: 10px; border-left: 3px solid var(--purple-primary);">
+            <div class="metric-label">VN-Index</div>
             <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
-                <span style="color: #F8FAFC; font-size: 1.4rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;">{state.vnindex_close:,.0f}</span>
-                <span style="color: {change_color}; font-size: 0.9rem; font-weight: 600;">{change_sign}{state.vnindex_change_pct:.2f}%</span>
+                <span class="metric-value">{state.vnindex_close:,.0f}</span>
+                <span class="{get_status_class(state.vnindex_change_pct)}" style="font-size: 0.9rem;">{change_sign}{state.vnindex_change_pct:.2f}%</span>
             </div>
         </div>
         <div style="flex: 1; min-width: 120px; background: {regime_style['bg']}; padding: 12px 16px; border-radius: 10px; border-left: 3px solid {regime_style['border']};">
-            <div style="color: #94A3B8; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Regime</div>
+            <div class="metric-label">Regime</div>
             <div style="color: {regime_style['color']}; font-size: 1.1rem; font-weight: 700; margin-top: 4px;">
                 <span style="display: inline-block; width: 8px; height: 8px; background: {regime_style['color']}; border-radius: 50%; margin-right: 6px;"></span>
                 {state.regime}
             </div>
         </div>
         <div style="flex: 1; min-width: 120px; background: {signal_style['bg']}; padding: 12px 16px; border-radius: 10px; border-left: 3px solid {signal_style['color']};">
-            <div style="color: #94A3B8; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Signal</div>
+            <div class="metric-label">Signal</div>
             <div style="color: {signal_style['color']}; font-size: 1.1rem; font-weight: 700; margin-top: 4px;">
                 <span style="display: inline-block; width: 8px; height: 8px; background: {signal_style['color']}; border-radius: 50%; margin-right: 6px;"></span>
                 {state.signal.replace('_', ' ')}
             </div>
         </div>
         <div style="flex: 1.5; min-width: 180px; background: rgba(0, 0, 0, 0.3); padding: 12px 16px; border-radius: 10px; border-left: 3px solid {exp_color};">
-            <div style="color: #94A3B8; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Capital Allocation</div>
+            <div class="metric-label">Capital Allocation</div>
             <div style="margin-top: 8px;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span style="color: #E2E8F0; font-size: 0.8rem;">Recommended</span>
+                    <span style="color: var(--text-white); font-size: 0.8rem;">Recommended</span>
                     <span style="color: {exp_color}; font-size: 1rem; font-weight: 700;">{state.exposure_level}%</span>
                 </div>
                 <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
@@ -333,12 +341,12 @@ def _render_breadth_chart(history) -> None:
     st.markdown(f'''
     <div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 0; font-size: 0.75rem;">
         <div style="display: flex; gap: 20px; justify-content: center;">
-            <span style="color: #8B5CF6; font-weight: 600;">● VN-Index</span>
-            <span style="color: #10B981; font-weight: 600;">┄ MA20</span>
-            <span style="color: #F59E0B; font-weight: 600;">┄ MA50</span>
-            <span style="color: #EF4444; font-weight: 600;">┄ MA100</span>
+            {render_legend_item("●", "VN-Index", "legend-line-primary")}
+            {render_legend_item("┄", "MA20", "legend-line-positive")}
+            {render_legend_item("┄", "MA50", "legend-line-accent")}
+            {render_legend_item("┄", "MA100", "legend-line-negative")}
         </div>
-        <div style="display: flex; gap: 20px; justify-content: center; color: #64748B;">
+        <div style="display: flex; gap: 20px; justify-content: center;" class="text-muted">
             <span>Breadth:</span>
             <span style="color: {BREADTH_COLORS['ma20']}; font-weight: 600;">% > MA20</span>
             <span style="color: {BREADTH_COLORS['ma50']}; font-weight: 600;">% > MA50</span>
@@ -363,25 +371,25 @@ def _render_breadth_gauges(state) -> None:
         # Status based on zone
         if value > 80:
             status = "Overbought"
-            status_color = "#EF4444"
+            status_class = "status-negative"
         elif value < 20:
             status = "Oversold"
-            status_color = "#10B981"
+            status_class = "status-positive"
         else:
             status = "Neutral"
-            status_color = "#94A3B8"
+            status_class = "status-neutral"
 
         with col:
             st.markdown(f'''
             <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border-left: 3px solid {color};">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                     <span style="color: {color}; font-size: 0.85rem; font-weight: 600;">{label}</span>
-                    <span style="color: #F8FAFC; font-size: 1.1rem; font-weight: 700; font-family: 'JetBrains Mono', monospace;">{value:.0f}%</span>
+                    <span class="metric-value-sm">{value:.0f}%</span>
                 </div>
                 <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
                     <div style="width: {min(value, 100)}%; height: 100%; background: {color}; border-radius: 3px;"></div>
                 </div>
-                <div style="color: {status_color}; font-size: 0.7rem; margin-top: 6px; text-align: right;">{status}</div>
+                <div class="{status_class}" style="font-size: 0.7rem; margin-top: 6px; text-align: right;">{status}</div>
             </div>
             ''', unsafe_allow_html=True)
 
@@ -434,22 +442,22 @@ def _render_breadth_gauges(state) -> None:
     signal = SIGNAL_MATRIX[signal_key]
 
     # Trend status styling
-    trend_color = '#10B981' if is_uptrend else '#EF4444'
+    trend_color = 'var(--positive)' if is_uptrend else 'var(--negative)'
     trend_label = 'UPTREND' if is_uptrend else 'DOWNTREND'
     trend_icon = '▲' if is_uptrend else '▼'
 
     # Score color based on value
     if market_score >= 60:
-        score_color = '#10B981'
+        score_color = 'var(--positive)'
     elif market_score >= 40:
-        score_color = '#F59E0B'
+        score_color = 'var(--warning)'
     else:
-        score_color = '#EF4444'
+        score_color = 'var(--negative)'
 
     # Recovery indicator ONLY for buy signals in uptrend
     recovery_html = ""
     if is_uptrend and signal_key in ['STRONG_BUY', 'BUY'] and is_recovering:
-        recovery_html = '<span style="color: #10B981; font-size: 0.7rem; margin-left: 6px;">▲ Recovering</span>'
+        recovery_html = '<span class="status-positive" style="font-size: 0.7rem; margin-left: 6px;">▲ Recovering</span>'
 
     # Render comprehensive Signal Matrix Card
     st.markdown(f'''
@@ -459,7 +467,7 @@ def _render_breadth_gauges(state) -> None:
             <!-- Score Box -->
             <div style="padding: 16px 20px; background: rgba(0,0,0,0.3); border-right: 1px solid rgba(255,255,255,0.1); text-align: center; min-width: 90px;">
                 <div style="color: {score_color}; font-size: 2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; line-height: 1;">{market_score:.0f}</div>
-                <div style="color: #64748B; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px;">Score</div>
+                <div style="color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px;">Score</div>
             </div>
             <!-- Trend Status -->
             <div style="padding: 16px; border-right: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: center;">
@@ -467,67 +475,67 @@ def _render_breadth_gauges(state) -> None:
                     <span>{trend_icon}</span>
                     <span>{trend_label}</span>
                 </div>
-                <div style="color: #64748B; font-size: 0.65rem; margin-top: 2px;">MA50≥50 & MA100≥50</div>
+                <div style="color: var(--text-muted); font-size: 0.65rem; margin-top: 2px;">MA50≥50 & MA100≥50</div>
             </div>
             <!-- Signal Badge -->
             <div style="flex: 1; padding: 16px; display: flex; align-items: center; justify-content: flex-end;">
                 <div style="background: {signal['bg']}; border: 1px solid {signal['color']}40; border-radius: 8px; padding: 8px 16px;">
                     <div style="color: {signal['color']}; font-size: 1rem; font-weight: 700; letter-spacing: 0.05em;">{signal['label']}</div>
-                    <div style="color: #94A3B8; font-size: 0.7rem;">{signal['subtitle']}{recovery_html}</div>
+                    <div style="color: var(--text-secondary); font-size: 0.7rem;">{signal['subtitle']}{recovery_html}</div>
                 </div>
             </div>
         </div>
         <!-- Breadth Breakdown -->
         <div style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-            <div style="color: #64748B; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Breadth Breakdown</div>
+            <div style="color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Breadth Breakdown</div>
             <!-- MA20 -->
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                <span style="color: #8B5CF6; font-size: 0.75rem; font-weight: 600; width: 45px;">MA20</span>
+                <span class="text-primary-emphasis" style="font-size: 0.75rem; width: 45px;">MA20</span>
                 <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                    <div style="width: {min(b_ma20, 100)}%; height: 100%; background: #8B5CF6; border-radius: 3px;"></div>
+                    <div style="width: {min(b_ma20, 100)}%; height: 100%; background: var(--purple-primary); border-radius: 3px;"></div>
                 </div>
-                <span style="color: #E2E8F0; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; width: 35px; text-align: right;">{b_ma20:.0f}%</span>
-                <span style="color: #64748B; font-size: 0.65rem; width: 50px;">Timing</span>
+                <span class="metric-value-xs" style="width: 35px; text-align: right;">{b_ma20:.0f}%</span>
+                <span class="text-muted" style="font-size: 0.65rem; width: 50px;">Timing</span>
             </div>
             <!-- MA50 -->
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                <span style="color: #06B6D4; font-size: 0.75rem; font-weight: 600; width: 45px;">MA50</span>
+                <span class="text-secondary-emphasis" style="font-size: 0.75rem; width: 45px;">MA50</span>
                 <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                    <div style="width: {min(b_ma50, 100)}%; height: 100%; background: #06B6D4; border-radius: 3px;"></div>
+                    <div style="width: {min(b_ma50, 100)}%; height: 100%; background: var(--cyan-primary); border-radius: 3px;"></div>
                 </div>
-                <span style="color: #E2E8F0; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; width: 35px; text-align: right;">{b_ma50:.0f}%</span>
-                <span style="color: #64748B; font-size: 0.65rem; width: 50px;">Trend{'  ⚠' if b_ma50 < 50 else ''}</span>
+                <span class="metric-value-xs" style="width: 35px; text-align: right;">{b_ma50:.0f}%</span>
+                <span class="text-muted" style="font-size: 0.65rem; width: 50px;">Trend{'  ⚠' if b_ma50 < 50 else ''}</span>
             </div>
             <!-- MA100 -->
             <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="color: #F59E0B; font-size: 0.75rem; font-weight: 600; width: 45px;">MA100</span>
+                <span class="text-accent-emphasis" style="font-size: 0.75rem; width: 45px;">MA100</span>
                 <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                    <div style="width: {min(b_ma100, 100)}%; height: 100%; background: #F59E0B; border-radius: 3px;"></div>
+                    <div style="width: {min(b_ma100, 100)}%; height: 100%; background: var(--amber-primary); border-radius: 3px;"></div>
                 </div>
-                <span style="color: #E2E8F0; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; width: 35px; text-align: right;">{b_ma100:.0f}%</span>
-                <span style="color: #64748B; font-size: 0.65rem; width: 50px;">Safety</span>
+                <span class="metric-value-xs" style="width: 35px; text-align: right;">{b_ma100:.0f}%</span>
+                <span class="text-muted" style="font-size: 0.65rem; width: 50px;">Safety</span>
             </div>
             <!-- Higher Lows Detection Info -->
             <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
                 <!-- MA20 Higher Low (7-day window) -->
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #8B5CF6; font-size: 0.65rem; width: 75px;">MA20 (7d):</span>
-                    <span style="color: #64748B; font-size: 0.65rem;">Low trước</span>
-                    <span style="color: #94A3B8; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">{state.ma20_prev_low:.1f}%</span>
-                    <span style="color: {'#10B981' if state.ma20_higher_low else '#EF4444'}; font-size: 0.7rem;">{'→' if not state.ma20_higher_low else '↗'}</span>
-                    <span style="color: #64748B; font-size: 0.65rem;">Low sau</span>
-                    <span style="color: {'#10B981' if state.ma20_higher_low else '#E2E8F0'}; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{state.ma20_recent_low:.1f}%</span>
-                    <span style="color: {'#10B981' if state.ma20_higher_low else '#64748B'}; font-size: 0.65rem; font-weight: 600;">{'✓ Higher Low' if state.ma20_higher_low else ''}</span>
+                    <span style="color: var(--purple-primary); font-size: 0.65rem; width: 75px;">MA20 (7d):</span>
+                    <span style="color: var(--text-muted); font-size: 0.65rem;">Low trước</span>
+                    <span style="color: var(--text-secondary); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">{state.ma20_prev_low:.1f}%</span>
+                    <span style="color: {'var(--positive)' if state.ma20_higher_low else 'var(--negative)'}; font-size: 0.7rem;">{'→' if not state.ma20_higher_low else '↗'}</span>
+                    <span style="color: var(--text-muted); font-size: 0.65rem;">Low sau</span>
+                    <span style="color: {'var(--positive)' if state.ma20_higher_low else 'var(--text-primary)'}; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{state.ma20_recent_low:.1f}%</span>
+                    <span style="color: {'var(--positive)' if state.ma20_higher_low else 'var(--text-muted)'}; font-size: 0.65rem; font-weight: 600;">{'✓ Higher Low' if state.ma20_higher_low else ''}</span>
                 </div>
                 <!-- MA50 Higher Low (9-day window) -->
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #06B6D4; font-size: 0.65rem; width: 75px;">MA50 (9d):</span>
-                    <span style="color: #64748B; font-size: 0.65rem;">Low trước</span>
-                    <span style="color: #94A3B8; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">{state.ma50_prev_low:.1f}%</span>
-                    <span style="color: {'#10B981' if state.ma50_higher_low else '#EF4444'}; font-size: 0.7rem;">{'→' if not state.ma50_higher_low else '↗'}</span>
-                    <span style="color: #64748B; font-size: 0.65rem;">Low sau</span>
-                    <span style="color: {'#10B981' if state.ma50_higher_low else '#E2E8F0'}; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{state.ma50_recent_low:.1f}%</span>
-                    <span style="color: {'#10B981' if state.ma50_higher_low else '#64748B'}; font-size: 0.65rem; font-weight: 600;">{'✓ Higher Low' if state.ma50_higher_low else ''}</span>
+                    <span style="color: var(--cyan-primary); font-size: 0.65rem; width: 75px;">MA50 (9d):</span>
+                    <span style="color: var(--text-muted); font-size: 0.65rem;">Low trước</span>
+                    <span style="color: var(--text-secondary); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">{state.ma50_prev_low:.1f}%</span>
+                    <span style="color: {'var(--positive)' if state.ma50_higher_low else 'var(--negative)'}; font-size: 0.7rem;">{'→' if not state.ma50_higher_low else '↗'}</span>
+                    <span style="color: var(--text-muted); font-size: 0.65rem;">Low sau</span>
+                    <span style="color: {'var(--positive)' if state.ma50_higher_low else 'var(--text-primary)'}; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{state.ma50_recent_low:.1f}%</span>
+                    <span style="color: {'var(--positive)' if state.ma50_higher_low else 'var(--text-muted)'}; font-size: 0.65rem; font-weight: 600;">{'✓ Higher Low' if state.ma50_higher_low else ''}</span>
                 </div>
             </div>
         </div>
@@ -580,12 +588,12 @@ def _render_bottom_stage_indicator(state) -> None:
             font_weight = "500"
         else:
             dot_style = "background: rgba(255,255,255,0.2);"
-            text_color = "#64748B"
+            text_color = "var(--text-muted)"
             font_weight = "400"
 
         return f'''
         <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
-            <div style="width: 24px; height: 24px; border-radius: 50%; {dot_style} display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: {'#0F172A' if is_current else '#94A3B8'};">{pos}</div>
+            <div style="width: 24px; height: 24px; border-radius: 50%; {dot_style} display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: {'var(--bg-primary)' if is_current else 'var(--text-muted)'};">{pos}</div>
             <div style="color: {text_color}; font-size: 0.6rem; font-weight: {font_weight}; margin-top: 4px; text-align: center;">{label}</div>
         </div>
         '''
@@ -599,7 +607,7 @@ def _render_bottom_stage_indicator(state) -> None:
         <div style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between;">
             <div style="display: flex; align-items: center; gap: 8px;">
                 <div style="width: 8px; height: 8px; background: {stage_info['color']}; border-radius: 50%;"></div>
-                <span style="color: #E2E8F0; font-size: 0.8rem; font-weight: 600;">BOTTOM FORMATION DETECTED</span>
+                <span style="color: var(--text-white); font-size: 0.8rem; font-weight: 600;">BOTTOM FORMATION DETECTED</span>
             </div>
             <div style="background: {stage_info['color']}20; border: 1px solid {stage_info['color']}40; border-radius: 6px; padding: 4px 10px;">
                 <span style="color: {stage_info['color']}; font-size: 0.75rem; font-weight: 700;">{stage_info['label']}</span>
@@ -615,15 +623,15 @@ def _render_bottom_stage_indicator(state) -> None:
                 {get_stage_dot(2, 'ACCUMULATING', 'Accumulating')}
                 {get_stage_dot(3, 'EARLY_REVERSAL', 'Early Reversal')}
                 <div style="display: flex; flex-direction: column; align-items: center; flex: 1;">
-                    <div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: #64748B;">4</div>
-                    <div style="color: #64748B; font-size: 0.6rem; font-weight: 400; margin-top: 4px; text-align: center;">Confirmed</div>
+                    <div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--text-muted);">4</div>
+                    <div style="color: var(--text-muted); font-size: 0.6rem; font-weight: 400; margin-top: 4px; text-align: center;">Confirmed</div>
                 </div>
             </div>
         </div>
         <div style="padding: 12px 16px; background: {stage_info['color']}10; border-top: 1px solid rgba(255,255,255,0.05);">
             <div style="color: {stage_info['color']}; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">{stage_info['description']}</div>
-            <div style="color: #94A3B8; font-size: 0.75rem;">
-                <span style="color: #64748B;">Điều kiện:</span> {stage_info['condition']}
+            <div style="color: var(--text-secondary); font-size: 0.75rem;">
+                <span style="color: var(--text-muted);">Điều kiện:</span> {stage_info['condition']}
             </div>
         </div>
     </div>
@@ -637,13 +645,13 @@ def _render_divergence_alert(state) -> None:
     if state.divergence_type:
         if state.divergence_type == "BULLISH":
             icon_svg = '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>'''
-            color = "#10B981"
+            color = "var(--positive)"
             bg = "rgba(16, 185, 129, 0.1)"
             description = "VN-Index: Lower Lows | Breadth: Higher Lows"
             action = "Potential bullish reversal signal"
         else:
             icon_svg = '''<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>'''
-            color = "#EF4444"
+            color = "var(--negative)"
             bg = "rgba(239, 68, 68, 0.1)"
             description = "VN-Index: Higher Highs | Breadth: Lower Highs"
             action = "Potential bearish reversal signal"
@@ -661,12 +669,12 @@ def _render_divergence_alert(state) -> None:
                 <div>
                     <div style="color: {color}; font-size: 1.1rem; font-weight: 700;">{state.divergence_type} DIVERGENCE</div>
                     <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
-                        <span style="color: #94A3B8; font-size: 0.75rem;">Strength:</span>
+                        <span style="color: var(--text-secondary); font-size: 0.75rem;">Strength:</span>
                         {strength_dots}
                     </div>
                 </div>
             </div>
-            <div style="color: #E2E8F0; font-size: 0.85rem; margin-bottom: 8px;">{description}</div>
+            <div style="color: var(--text-white); font-size: 0.85rem; margin-bottom: 8px;">{description}</div>
             <div style="color: {color}; font-size: 0.85rem; font-weight: 500;">{action}</div>
         </div>
         ''', unsafe_allow_html=True)
@@ -677,7 +685,7 @@ def _render_divergence_alert(state) -> None:
                 <circle cx="12" cy="12" r="10"/>
                 <path d="M12 8v4M12 16h.01"/>
             </svg>
-            <div style="color: #94A3B8; font-size: 0.9rem;">No divergence detected</div>
-            <div style="color: #64748B; font-size: 0.75rem; margin-top: 4px;">Price and breadth moving in sync</div>
+            <div style="color: var(--text-secondary); font-size: 0.9rem;">No divergence detected</div>
+            <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px;">Price and breadth moving in sync</div>
         </div>
         ''', unsafe_allow_html=True)

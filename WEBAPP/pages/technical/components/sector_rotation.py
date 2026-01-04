@@ -221,17 +221,17 @@ def _create_rrg_chart(
     fig.add_hline(y=0, line=dict(color='#64748B', width=1, dash='solid'))
     fig.add_vline(x=1, line=dict(color='#64748B', width=1, dash='solid'))
 
-    # Quadrant labels with HTML styling
-    fig.add_annotation(x=0.82, y=7, text="IMPROVING", showarrow=False,
+    # Quadrant labels with HTML styling (positioned for -40 to 40 scale)
+    fig.add_annotation(x=0.82, y=30, text="IMPROVING", showarrow=False,
                        font=dict(size=11, color=QUADRANT_COLORS['IMPROVING'], family='DM Sans'),
                        bgcolor='rgba(6, 182, 212, 0.1)', borderpad=4)
-    fig.add_annotation(x=1.18, y=7, text="LEADING", showarrow=False,
+    fig.add_annotation(x=1.18, y=30, text="LEADING", showarrow=False,
                        font=dict(size=11, color=QUADRANT_COLORS['LEADING'], family='DM Sans'),
                        bgcolor='rgba(16, 185, 129, 0.1)', borderpad=4)
-    fig.add_annotation(x=0.82, y=-7, text="LAGGING", showarrow=False,
+    fig.add_annotation(x=0.82, y=-30, text="LAGGING", showarrow=False,
                        font=dict(size=11, color=QUADRANT_COLORS['LAGGING'], family='DM Sans'),
                        bgcolor='rgba(239, 68, 68, 0.1)', borderpad=4)
-    fig.add_annotation(x=1.18, y=-7, text="WEAKENING", showarrow=False,
+    fig.add_annotation(x=1.18, y=-30, text="WEAKENING", showarrow=False,
                        font=dict(size=11, color=QUADRANT_COLORS['WEAKENING'], family='DM Sans'),
                        bgcolor='rgba(245, 158, 11, 0.1)', borderpad=4)
 
@@ -247,7 +247,7 @@ def _create_rrg_chart(
     )
     layout['yaxis'] = dict(
         title='RS Momentum',
-        range=[-10, 10],
+        range=[-40, 40],
         tickfont=dict(color='#64748B'),
         gridcolor='rgba(255,255,255,0.05)',
         zerolinecolor='rgba(255,255,255,0.1)'
@@ -302,43 +302,43 @@ def _render_sector_ranking_table(ranking: pd.DataFrame) -> None:
 
     display_df = ranking[display_cols].head(15).copy()
 
-    # Build HTML table
+    # Build HTML table with CSS variables
     html = '''
-    <div style="max-height: 400px; overflow-y: auto; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+    <div style="max-height: 400px; overflow-y: auto; border-radius: 10px; border: 1px solid var(--glass-border);">
     <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
     <thead>
     <tr style="background: rgba(139, 92, 246, 0.1); position: sticky; top: 0;">
-        <th style="padding: 10px 12px; text-align: left; color: #8B5CF6; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.08);">#</th>
-        <th style="padding: 10px 12px; text-align: left; color: #8B5CF6; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.08);">Sector</th>
-        <th style="padding: 10px 12px; text-align: right; color: #8B5CF6; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.08);">Score</th>
+        <th style="padding: 10px 12px; text-align: left; color: var(--purple-primary); font-weight: 600; border-bottom: 1px solid var(--glass-border);">#</th>
+        <th style="padding: 10px 12px; text-align: left; color: var(--purple-primary); font-weight: 600; border-bottom: 1px solid var(--glass-border);">Sector</th>
+        <th style="padding: 10px 12px; text-align: right; color: var(--purple-primary); font-weight: 600; border-bottom: 1px solid var(--glass-border);">Score</th>
     '''
 
     if 'ret_1w' in display_df.columns:
-        html += '<th style="padding: 10px 12px; text-align: right; color: #8B5CF6; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.08);">1W</th>'
+        html += '<th style="padding: 10px 12px; text-align: right; color: var(--purple-primary); font-weight: 600; border-bottom: 1px solid var(--glass-border);">1W</th>'
     if 'quadrant' in display_df.columns:
-        html += '<th style="padding: 10px 12px; text-align: center; color: #8B5CF6; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.08);">Phase</th>'
+        html += '<th style="padding: 10px 12px; text-align: center; color: var(--purple-primary); font-weight: 600; border-bottom: 1px solid var(--glass-border);">Phase</th>'
 
     html += '</tr></thead><tbody>'
 
     for idx, row in enumerate(display_df.itertuples(), 1):
         bg = 'rgba(37, 32, 51, 0.5)' if idx % 2 == 0 else 'transparent'
         score = row.strength_score if pd.notna(row.strength_score) else 0
-        score_color = '#10B981' if score > 70 else ('#EF4444' if score < 30 else '#F8FAFC')
+        score_color = 'var(--positive)' if score > 70 else ('var(--negative)' if score < 30 else 'var(--text-white)')
 
         html += f'''
         <tr style="background: {bg}; transition: background 0.15s;">
-            <td style="padding: 10px 12px; color: #64748B; border-bottom: 1px solid rgba(255,255,255,0.05);">{idx}</td>
-            <td style="padding: 10px 12px; color: #F8FAFC; font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.05);">{row.sector_code}</td>
+            <td style="padding: 10px 12px; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05);">{idx}</td>
+            <td style="padding: 10px 12px; color: var(--text-white); font-weight: 500; border-bottom: 1px solid rgba(255,255,255,0.05);">{row.sector_code}</td>
             <td style="padding: 10px 12px; text-align: right; color: {score_color}; font-family: 'JetBrains Mono', monospace; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">{score:.1f}</td>
         '''
 
         if 'ret_1w' in display_df.columns:
             ret = getattr(row, 'ret_1w', None)
             if pd.notna(ret):
-                ret_color = '#10B981' if ret > 0 else '#EF4444'
+                ret_color = 'var(--positive)' if ret > 0 else 'var(--negative)'
                 html += f'<td style="padding: 10px 12px; text-align: right; color: {ret_color}; font-family: \'JetBrains Mono\', monospace; border-bottom: 1px solid rgba(255,255,255,0.05);">{ret:+.1f}%</td>'
             else:
-                html += '<td style="padding: 10px 12px; text-align: right; color: #64748B; border-bottom: 1px solid rgba(255,255,255,0.05);">-</td>'
+                html += '<td style="padding: 10px 12px; text-align: right; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05);">-</td>'
 
         if 'quadrant' in display_df.columns:
             quadrant = getattr(row, 'quadrant', None)
@@ -346,7 +346,7 @@ def _render_sector_ranking_table(ranking: pd.DataFrame) -> None:
                 q_color = QUADRANT_COLORS[quadrant]
                 html += f'<td style="padding: 10px 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);"><span style="display: inline-block; width: 8px; height: 8px; background: {q_color}; border-radius: 50%;" title="{quadrant}"></span></td>'
             else:
-                html += '<td style="padding: 10px 12px; text-align: center; color: #64748B; border-bottom: 1px solid rgba(255,255,255,0.05);">-</td>'
+                html += '<td style="padding: 10px 12px; text-align: center; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,0.05);">-</td>'
 
         html += '</tr>'
 
@@ -564,19 +564,19 @@ def _render_stock_rs_heatmap(service: 'TADashboardService') -> None:
 
     # ============ INFO BAR ============
     st.markdown(f'''
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; color: #64748B; font-size: 0.75rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; color: var(--text-muted); font-size: 0.75rem;">
         <span>Showing {num_stocks} stocks × {num_days} days</span>
         <span>Chart size: {chart_width}×{chart_height}px | Scroll ↔↕ to navigate</span>
     </div>
     ''', unsafe_allow_html=True)
 
-    # ============ LEGEND ============
+    # ============ LEGEND (heatmap-specific colors kept as-is) ============
     st.markdown('''
     <div style="display: flex; gap: 16px; justify-content: center; padding: 8px 0; flex-wrap: wrap; font-size: 0.75rem;">
-        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; background: #4A148C; border-radius: 2px;"></span><span style="color: #94A3B8;">1-19 Very Weak</span></span>
-        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; background: #7B1FA2; border-radius: 2px;"></span><span style="color: #94A3B8;">20-49 Weak</span></span>
-        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; background: #9E9E9E; border-radius: 2px;"></span><span style="color: #94A3B8;">50-79 Average</span></span>
-        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; background: #4CAF50; border-radius: 2px;"></span><span style="color: #94A3B8;">80-99 Strong</span></span>
+        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; background: #4A148C; border-radius: 2px;"></span><span style="color: var(--text-secondary);">1-19 Very Weak</span></span>
+        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; background: #7B1FA2; border-radius: 2px;"></span><span style="color: var(--text-secondary);">20-49 Weak</span></span>
+        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; background: #9E9E9E; border-radius: 2px;"></span><span style="color: var(--text-secondary);">50-79 Average</span></span>
+        <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 12px; height: 12px; background: #4CAF50; border-radius: 2px;"></span><span style="color: var(--text-secondary);">80-99 Strong</span></span>
     </div>
     ''', unsafe_allow_html=True)
 
@@ -659,6 +659,6 @@ def _render_empty_state(message: str, icon: str = "info") -> None:
     st.markdown(f'''
     <div style="background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 12px; padding: 24px; text-align: center;">
         {icons.get(icon, icons['info'])}
-        <div style="color: #94A3B8; font-size: 0.9rem; margin-top: 8px;">{message}</div>
+        <div style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">{message}</div>
     </div>
     ''', unsafe_allow_html=True)

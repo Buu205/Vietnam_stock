@@ -32,7 +32,7 @@ from WEBAPP.services.macro_commodity_loader import MacroCommodityLoader
 from WEBAPP.core.styles import (
     get_page_style, get_chart_layout,
     CHART_COLORS, BAR_COLORS, DISTRIBUTION_COLORS, ASSESSMENT_COLORS, BAND_COLORS,
-    render_styled_table, get_table_style, render_valuation_legend, render_valuation_assessment
+    render_styled_table, get_table_style, render_valuation_legend, render_valuation_assessment,
 )
 # Import centralized valuation config and chart components
 from WEBAPP.core.valuation_config import (
@@ -268,23 +268,23 @@ if active_tab == 0:
         pe_fwd25 = latest_bsc.get('pe_fwd_2025') if latest_bsc is not None else None
         pe_fwd26 = latest_bsc.get('pe_fwd_2026') if latest_bsc is not None else None
 
-        # Inline compact metrics using HTML
+        # Inline compact metrics using HTML with CSS variables
         st.markdown(f'''
         <div style="display: flex; gap: 24px; padding: 12px 0; flex-wrap: wrap; align-items: center;">
-            <div style="display: flex; gap: 16px; align-items: center; background: rgba(139, 92, 246, 0.1); padding: 8px 16px; border-radius: 8px; border-left: 3px solid #8B5CF6;">
-                <span style="color: #A78BFA; font-size: 0.75rem; font-weight: 600;">VNINDEX</span>
-                <span style="color: #E2E8F0;">PE <b style="color: #00D4AA;">{_fmt(pe_vni)}</b></span>
-                <span style="color: #E2E8F0;">PB <b style="color: #06B6D4;">{_fmt(pb_vni)}</b></span>
+            <div style="display: flex; gap: 16px; align-items: center; background: rgba(139, 92, 246, 0.1); padding: 8px 16px; border-radius: 8px; border-left: 3px solid var(--purple-primary);">
+                <span style="color: var(--purple-light); font-size: 0.75rem; font-weight: 600;">VNINDEX</span>
+                <span style="color: var(--text-primary);">PE <b style="color: var(--positive-light);">{_fmt(pe_vni)}</b></span>
+                <span style="color: var(--text-primary);">PB <b style="color: var(--cyan-primary);">{_fmt(pb_vni)}</b></span>
             </div>
-            <div style="display: flex; gap: 16px; align-items: center; background: rgba(6, 182, 212, 0.1); padding: 8px 16px; border-radius: 8px; border-left: 3px solid #06B6D4;">
-                <span style="color: #22D3EE; font-size: 0.75rem; font-weight: 600;">EXCLUDE</span>
-                <span style="color: #E2E8F0;">PE <b style="color: #00D4AA;">{_fmt(pe_exc)}</b></span>
-                <span style="color: #E2E8F0;">PB <b style="color: #06B6D4;">{_fmt(pb_exc)}</b></span>
+            <div style="display: flex; gap: 16px; align-items: center; background: rgba(6, 182, 212, 0.1); padding: 8px 16px; border-radius: 8px; border-left: 3px solid var(--cyan-primary);">
+                <span style="color: var(--cyan-light); font-size: 0.75rem; font-weight: 600;">EXCLUDE</span>
+                <span style="color: var(--text-primary);">PE <b style="color: var(--positive-light);">{_fmt(pe_exc)}</b></span>
+                <span style="color: var(--text-primary);">PB <b style="color: var(--cyan-primary);">{_fmt(pb_exc)}</b></span>
             </div>
-            <div style="display: flex; gap: 16px; align-items: center; background: rgba(245, 158, 11, 0.1); padding: 8px 16px; border-radius: 8px; border-left: 3px solid #F59E0B;">
-                <span style="color: #FBBF24; font-size: 0.75rem; font-weight: 600;">BSC FWD</span>
-                <span style="color: #E2E8F0;">2025 <b style="color: #F59E0B;">{_fmt(pe_fwd25)}</b></span>
-                <span style="color: #E2E8F0;">2026 <b style="color: #8B5CF6;">{_fmt(pe_fwd26)}</b></span>
+            <div style="display: flex; gap: 16px; align-items: center; background: rgba(245, 158, 11, 0.1); padding: 8px 16px; border-radius: 8px; border-left: 3px solid var(--amber-primary);">
+                <span style="color: var(--amber-light); font-size: 0.75rem; font-weight: 600;">BSC FWD</span>
+                <span style="color: var(--text-primary);">2025 <b style="color: var(--amber-primary);">{_fmt(pe_fwd25)}</b></span>
+                <span style="color: var(--text-primary);">2026 <b style="color: var(--purple-primary);">{_fmt(pe_fwd26)}</b></span>
             </div>
         </div>
         ''', unsafe_allow_html=True)
@@ -499,27 +499,28 @@ if active_tab == 0:
                     status_color = get_status_color(percentile)
                     status_label = get_status_label(percentile)
 
-                    # Compact stats bar
+                    # Compact stats bar with CSS variables
+                    z_color = 'var(--positive-light)' if z_score < 0 else 'var(--negative-light)'
                     st.markdown(f'''
                     <div style="display: flex; gap: 16px; padding: 16px 0; flex-wrap: wrap; align-items: center;">
                         <div style="background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 8px; border-left: 3px solid {index_colors_detail[selected_index]};">
-                            <div style="color: #94A3B8; font-size: 0.7rem; margin-bottom: 2px;">CURRENT</div>
-                            <div style="color: #E2E8F0; font-size: 1.25rem; font-weight: 600;">{current_val:.2f}x</div>
+                            <div class="metric-label">CURRENT</div>
+                            <div class="metric-value-sm">{current_val:.2f}x</div>
                         </div>
                         <div style="background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 8px;">
-                            <div style="color: #94A3B8; font-size: 0.7rem; margin-bottom: 2px;">MEDIAN</div>
-                            <div style="color: #E2E8F0; font-size: 1.25rem; font-weight: 600;">{median_val:.2f}x</div>
+                            <div class="metric-label">MEDIAN</div>
+                            <div class="metric-value-sm">{median_val:.2f}x</div>
                         </div>
                         <div style="background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 8px;">
-                            <div style="color: #94A3B8; font-size: 0.7rem; margin-bottom: 2px;">Z-SCORE</div>
-                            <div style="color: {'#00D4AA' if z_score < 0 else '#FF6B6B'}; font-size: 1.25rem; font-weight: 600;">{z_score:+.2f}σ</div>
+                            <div class="metric-label">Z-SCORE</div>
+                            <div style="color: {z_color}; font-size: 1.25rem; font-weight: 600;">{z_score:+.2f}σ</div>
                         </div>
                         <div style="background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 8px;">
-                            <div style="color: #94A3B8; font-size: 0.7rem; margin-bottom: 2px;">PERCENTILE</div>
-                            <div style="color: #E2E8F0; font-size: 1.25rem; font-weight: 600;">{percentile:.0f}%</div>
+                            <div class="metric-label">PERCENTILE</div>
+                            <div class="metric-value-sm">{percentile:.0f}%</div>
                         </div>
                         <div style="background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 8px; border-left: 3px solid {status_color};">
-                            <div style="color: #94A3B8; font-size: 0.7rem; margin-bottom: 2px;">STATUS</div>
+                            <div class="metric-label">STATUS</div>
                             <div style="color: {status_color}; font-size: 1.1rem; font-weight: 600;">● {status_label}</div>
                         </div>
                     </div>
