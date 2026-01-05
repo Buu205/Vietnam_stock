@@ -347,9 +347,12 @@ class SectorRegistry:
 
         return results
 
-    def get_all_sectors(self) -> List[str]:
+    def get_all_sectors(self, language: str = "vi") -> List[str]:
         """
         Get list of all sector names
+
+        Args:
+            language: "vi" for Vietnamese (default), "en" for English
 
         Returns:
             List of all sector names
@@ -359,8 +362,46 @@ class SectorRegistry:
             >>> sectors = registry.get_all_sectors()
             >>> print(len(sectors))
             19
+            >>> sectors_en = registry.get_all_sectors(language="en")
+            >>> print(sectors_en[0])
+            'Banking'
         """
+        if language == "en":
+            return [
+                info.get('sector_en', sector_vn)
+                for sector_vn, info in self.registry["sectors"].items()
+            ]
         return list(self.registry["sectors"].keys())
+
+    def get_sector_en(self, sector_vn: str) -> str:
+        """
+        Get English name for a Vietnamese sector name
+
+        Args:
+            sector_vn: Vietnamese sector name
+
+        Returns:
+            English sector name, or original if not found
+        """
+        sector_info = self.get_sector(sector_vn)
+        if sector_info:
+            return sector_info.get('sector_en', sector_vn)
+        return sector_vn
+
+    def get_sector_vn(self, sector_en: str) -> str:
+        """
+        Get Vietnamese name for an English sector name
+
+        Args:
+            sector_en: English sector name
+
+        Returns:
+            Vietnamese sector name, or original if not found
+        """
+        for sector_vn, info in self.registry["sectors"].items():
+            if info.get('sector_en') == sector_en:
+                return sector_vn
+        return sector_en
 
     def get_all_entity_types(self) -> List[str]:
         """

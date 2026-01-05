@@ -75,6 +75,7 @@ def calculate_rs_rating(
 
     Args:
         ohlcv_df: OHLCV data with columns [symbol, date, close]
+                  Optional: trading_value for liquidity filter
         sector_map: Optional mapping symbol -> sector_code
 
     Returns:
@@ -83,6 +84,7 @@ def calculate_rs_rating(
             - rs_1m, rs_3m, rs_6m, rs_9m, rs_12m (individual period RS 1-99)
             - rs_rating, rs_score (combined weighted)
             - ret_1m, ret_3m, ret_6m, ret_9m, ret_12m (raw returns %)
+            - avg_trading_value (20-day average in VND, for liquidity filter)
     """
     logger.info("Calculating Multi-Period RS Rating...")
 
@@ -101,6 +103,15 @@ def calculate_rs_rating(
     df['ret_6m'] = df.groupby('symbol')['close'].pct_change(PERIOD_6M) * 100
     df['ret_9m'] = df.groupby('symbol')['close'].pct_change(PERIOD_9M) * 100
     df['ret_12m'] = df.groupby('symbol')['close'].pct_change(PERIOD_12M) * 100
+
+    # Calculate average trading value (20-day rolling average for liquidity filter)
+    if 'trading_value' in df.columns:
+        logger.info("  Calculating 20-day average trading value for liquidity filter...")
+        df['avg_trading_value'] = df.groupby('symbol')['trading_value'].transform(
+            lambda x: x.rolling(window=20, min_periods=5).mean()
+        )
+    else:
+        df['avg_trading_value'] = None
 
     # Individual RS Rating for each period (1-99 percentile rank)
     logger.info("  Computing individual period RS ratings...")
@@ -172,7 +183,9 @@ def calculate_rs_rating(
         # Combined RS (with penalty applied to rs_rating)
         'rs_rating', 'rs_rating_raw', 'rs_score', 'penalty',
         # Raw returns
-        'ret_1m', 'ret_3m', 'ret_6m', 'ret_9m', 'ret_12m'
+        'ret_1m', 'ret_3m', 'ret_6m', 'ret_9m', 'ret_12m',
+        # Liquidity filter (20-day avg trading value in VND)
+        'avg_trading_value'
     ]
 
     result = df[[c for c in output_cols if c in df.columns]].copy()
@@ -299,12 +312,13 @@ class RSRatingCalculator:
         Initialize RS Rating Calculator.
 
         Args:
-            ohlcv_path: Path to OHLCV data (default: basic_data.parquet)
+            ohlcv_path: Path to OHLCV data (default: raw OHLCV with trading_value)
         """
         if ohlcv_path:
             self.ohlcv_path = Path(ohlcv_path)
         else:
-            self.ohlcv_path = PROJECT_ROOT / "DATA" / "processed" / "technical" / "basic_data.parquet"
+            # Use raw OHLCV which has trading_value for liquidity filter
+            self.ohlcv_path = PROJECT_ROOT / "DATA" / "raw" / "ohlcv" / "OHLCV_mktcap.parquet"
 
     @property
     def name(self) -> str:
@@ -350,11 +364,11 @@ class RSRatingCalculator:
             logger.warning("No RS Rating data to export for 30d history")
             return None
 
-        # Select columns for heatmap (including individual period RS)
+        # Select columns for heatmap (including individual period RS and liquidity)
         cols = [
             'symbol', 'date', 'sector_code',
             'rs_1m', 'rs_3m', 'rs_6m', 'rs_9m', 'rs_12m',
-            'rs_rating', 'rs_score'
+            'rs_rating', 'rs_score', 'avg_trading_value'
         ]
         df = df[[c for c in cols if c in df.columns]].copy()
 

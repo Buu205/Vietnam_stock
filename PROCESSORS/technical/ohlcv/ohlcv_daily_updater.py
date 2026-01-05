@@ -16,12 +16,12 @@ import json
 import sys
 import os
 
-# Add project and core paths for date formatter
-import sys
-import os
+# Add project root to Python path
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import path configuration
-from PROCESSORS.core.config.paths import PROJECT_ROOT, RAW_OHLCV
+from PROCESSORS.core.config.paths import RAW_OHLCV
 
 # Import DateFormatter
 from PROCESSORS.core.shared.date_formatter import DateFormatter
@@ -447,7 +447,7 @@ def main():
     parser.add_argument('--end-date', type=str, help='End date for range update (YYYY-MM-DD)')
     # Default paths based on PROJECT_ROOT
     default_output_path = str(RAW_OHLCV / "OHLCV_mktcap.parquet")
-    default_symbols_path = str(PROJECT_ROOT / "DATA" / "raw" / "metadata" / "all_tickers.csv")
+    default_symbols_path = str(PROJECT_ROOT / "DATA" / "metadata" / "master_symbols.json")
     
     parser.add_argument('--output-path', type=str, 
                        default=default_output_path,

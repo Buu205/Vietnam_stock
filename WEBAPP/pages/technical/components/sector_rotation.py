@@ -16,10 +16,9 @@ Date: 2025-12-25
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
-from WEBAPP.core.styles import get_chart_layout, BAR_COLORS
-from WEBAPP.core.trading_constants import BSC_UNIVERSE, WATCHLISTS
+from WEBAPP.core.styles import get_chart_layout
 from WEBAPP.core.trading_rules import QUADRANT_COLORS, QUADRANT_BG, QUADRANT_TRAIL
 
 if TYPE_CHECKING:
@@ -81,7 +80,7 @@ def render_sector_rotation(service: 'TADashboardService') -> None:
 def _render_rrg_with_options(service: 'TADashboardService') -> None:
     """Render RRG chart with mode selector and options."""
 
-    # ============ OPTIONS ROW ============
+    # ============ OPTIONS ROW 1: Mode + Filters ============
     col1, col2, col3, col4 = st.columns([1.5, 1.5, 1, 1])
 
     with col1:
@@ -95,41 +94,66 @@ def _render_rrg_with_options(service: 'TADashboardService') -> None:
 
     with col2:
         if rrg_mode == "Stock":
-            watchlist_name = st.selectbox(
-                "Watchlist",
-                list(WATCHLISTS.keys()),
-                key="rrg_watchlist",
-                label_visibility="collapsed"
+            # Sector filter for stock mode (English names)
+            sectors = ["All Sectors"] + service.get_sector_list()
+            selected_sector = st.selectbox(
+                "Sector",
+                sectors,
+                key="rrg_stock_sector"
             )
         else:
-            watchlist_name = None
+            selected_sector = None
 
     with col3:
         trail_days = st.selectbox(
-            "Trail",
+            "Trail (đường di chuyển)",
             [0, 3, 5, 10],
-            index=2,
-            format_func=lambda x: f"{x}d trail" if x > 0 else "No trail",
-            key="rrg_trail",
-            label_visibility="collapsed"
+            index=0,  # Default: No trail
+            format_func=lambda x: f"{x} ngày" if x > 0 else "Không",
+            key="rrg_trail"
         )
 
     with col4:
         smooth_period = st.selectbox(
-            "Smooth",
+            "Làm mượt (SMA)",
             [1, 3, 5],
-            index=1,
+            index=0,  # Default: Raw (không làm mượt)
             format_func=lambda x: f"SMA{x}" if x > 1 else "Raw",
-            key="rrg_smooth",
-            label_visibility="collapsed"
+            key="rrg_smooth"
         )
+
+    # ============ STOCK MODE: Symbol Input ============
+    symbols_to_show = None
+    sector_to_show = None
+
+    if rrg_mode == "Stock":
+        # Show symbol input only if no sector selected
+        if selected_sector == "All Sectors":
+            symbol_input = st.text_input(
+                "Enter stock symbols (comma separated)",
+                value="MWG",
+                key="rrg_stock_symbols",
+                placeholder="MWG, FPT, VNM..."
+            )
+            # Parse symbols
+            if symbol_input:
+                symbols_to_show = [s.strip().upper() for s in symbol_input.split(',') if s.strip()]
+        else:
+            sector_to_show = selected_sector
+            st.caption(f"*Showing all stocks in {selected_sector} sector*")
 
     # ============ GET DATA ============
     if rrg_mode == "Sector":
         rrg_data = service.get_sector_rs_for_rrg(smooth=smooth_period, trail_days=trail_days)
         entity_col = 'sector_code'
     else:
-        rrg_data = None  # Not implemented yet
+        # Stock mode
+        rrg_data = service.get_stock_rs_for_rrg(
+            symbols=symbols_to_show,
+            sector=sector_to_show,
+            smooth=smooth_period,
+            trail_days=trail_days
+        )
         entity_col = 'symbol'
 
     # ============ RENDER CHART ============
@@ -141,7 +165,12 @@ def _render_rrg_with_options(service: 'TADashboardService') -> None:
         _render_rrg_summary(rrg_data, entity_col)
     else:
         if rrg_mode == "Stock":
-            _render_empty_state("Stock RRG mode coming soon", icon="construction")
+            if symbols_to_show:
+                _render_empty_state(f"No data found for: {', '.join(symbols_to_show)}", icon="info")
+            elif sector_to_show:
+                _render_empty_state(f"No data for {sector_to_show} sector", icon="info")
+            else:
+                _render_empty_state("Enter stock symbols or select a sector to view RRG", icon="info")
         else:
             _render_empty_state("No RRG data available. Run RS calculation pipeline.", icon="chart")
 
@@ -221,17 +250,17 @@ def _create_rrg_chart(
     fig.add_hline(y=0, line=dict(color='#64748B', width=1, dash='solid'))
     fig.add_vline(x=1, line=dict(color='#64748B', width=1, dash='solid'))
 
-    # Quadrant labels with HTML styling (positioned for -40 to 40 scale)
-    fig.add_annotation(x=0.82, y=30, text="IMPROVING", showarrow=False,
+    # Quadrant labels with HTML styling (positioned for -100 to 100 scale)
+    fig.add_annotation(x=0.6, y=70, text="IMPROVING", showarrow=False,
                        font=dict(size=11, color=QUADRANT_COLORS['IMPROVING'], family='DM Sans'),
                        bgcolor='rgba(6, 182, 212, 0.1)', borderpad=4)
-    fig.add_annotation(x=1.18, y=30, text="LEADING", showarrow=False,
+    fig.add_annotation(x=1.4, y=70, text="LEADING", showarrow=False,
                        font=dict(size=11, color=QUADRANT_COLORS['LEADING'], family='DM Sans'),
                        bgcolor='rgba(16, 185, 129, 0.1)', borderpad=4)
-    fig.add_annotation(x=0.82, y=-30, text="LAGGING", showarrow=False,
+    fig.add_annotation(x=0.6, y=-70, text="LAGGING", showarrow=False,
                        font=dict(size=11, color=QUADRANT_COLORS['LAGGING'], family='DM Sans'),
                        bgcolor='rgba(239, 68, 68, 0.1)', borderpad=4)
-    fig.add_annotation(x=1.18, y=-30, text="WEAKENING", showarrow=False,
+    fig.add_annotation(x=1.4, y=-70, text="WEAKENING", showarrow=False,
                        font=dict(size=11, color=QUADRANT_COLORS['WEAKENING'], family='DM Sans'),
                        bgcolor='rgba(245, 158, 11, 0.1)', borderpad=4)
 
@@ -240,14 +269,14 @@ def _create_rrg_chart(
     layout['showlegend'] = False
     layout['xaxis'] = dict(
         title='RS Ratio',
-        range=[0.7, 1.3],
+        range=[0.4, 1.6],
         tickfont=dict(color='#64748B'),
         gridcolor='rgba(255,255,255,0.05)',
         zerolinecolor='rgba(255,255,255,0.1)'
     )
     layout['yaxis'] = dict(
         title='RS Momentum',
-        range=[-40, 40],
+        range=[-100, 100],
         tickfont=dict(color='#64748B'),
         gridcolor='rgba(255,255,255,0.05)',
         zerolinecolor='rgba(255,255,255,0.1)'
@@ -418,27 +447,24 @@ def _render_stock_rs_heatmap(service: 'TADashboardService') -> None:
 
     st.markdown("### RS Rating Heatmap")
 
-    # ============ FILTERS ============
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 2])
+    # ============ FILTERS (Single Row) ============
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 1.5, 1.5, 2])
 
     with col1:
         top_n = st.selectbox(
-            "Show Top",
+            "Top N mã",
             [20, 50, 100, 200, 300],
             index=1,
-            key="rs_heatmap_top_n",
-            label_visibility="collapsed"
+            key="rs_heatmap_top_n"
         )
 
     with col2:
-        # Days selector for horizontal scroll
         days_options = {"30D": 30, "60D": 60, "90D": 90, "180D": 180}
         selected_days_label = st.selectbox(
-            "Days",
+            "Số ngày",
             list(days_options.keys()),
             index=0,
-            key="rs_heatmap_days",
-            label_visibility="collapsed"
+            key="rs_heatmap_days"
         )
         days = days_options[selected_days_label]
 
@@ -447,16 +473,31 @@ def _render_stock_rs_heatmap(service: 'TADashboardService') -> None:
         selected_sector = st.selectbox(
             "Sector",
             sectors,
-            key="rs_heatmap_sector",
-            label_visibility="collapsed"
+            key="rs_heatmap_sector"
         )
 
     with col4:
+        min_liquidity_options = {
+            "Tất cả": 0,
+            "≥ 1B": 1,
+            "≥ 2B": 2,
+            "≥ 5B": 5,
+            "≥ 10B": 10,
+            "≥ 20B": 20
+        }
+        selected_liq_label = st.selectbox(
+            "Thanh khoản (VND/ngày)",
+            list(min_liquidity_options.keys()),
+            index=4,  # Default: >= 10B
+            key="rs_heatmap_liquidity"
+        )
+        min_liquidity = min_liquidity_options[selected_liq_label] * 1e9
+
+    with col5:
         search_symbol = st.text_input(
-            "Search",
+            "Tìm mã",
             key="rs_heatmap_search",
-            placeholder="VCB, ACB, FPT...",
-            label_visibility="collapsed"
+            placeholder="VCB, ACB, FPT..."
         )
 
     # ============ GET DATA ============
@@ -469,12 +510,24 @@ def _render_stock_rs_heatmap(service: 'TADashboardService') -> None:
     # ============ APPLY FILTERS ============
     filtered_df = rs_data.copy()
 
-    if selected_sector != "All" and 'sector_code' in filtered_df.columns:
+    # Filter by sector
+    if selected_sector != "Tất cả" and 'sector_code' in filtered_df.columns:
         filtered_df = filtered_df[filtered_df['sector_code'] == selected_sector]
 
+    # Filter by search symbols
     if search_symbol:
         symbols = [s.strip().upper() for s in search_symbol.split(',')]
         filtered_df = filtered_df[filtered_df['symbol'].isin(symbols)]
+
+    # Filter by minimum liquidity (avg trading value)
+    if min_liquidity > 0 and 'avg_trading_value' in filtered_df.columns:
+        # Get symbols meeting liquidity threshold (based on latest data)
+        latest_date = filtered_df['date'].max()
+        liquid_symbols = filtered_df[
+            (filtered_df['date'] == latest_date) &
+            (filtered_df['avg_trading_value'] >= min_liquidity)
+        ]['symbol'].unique()
+        filtered_df = filtered_df[filtered_df['symbol'].isin(liquid_symbols)]
 
     # Sort by latest RS rating
     latest_date = filtered_df['date'].max()

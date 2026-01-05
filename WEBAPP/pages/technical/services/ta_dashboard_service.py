@@ -15,6 +15,7 @@ from typing import Optional, List
 from datetime import datetime
 
 from WEBAPP.core.models.market_state import MarketState, BreadthHistory
+from config.registries import SectorRegistry
 from WEBAPP.core.trading_constants import (
     MA20_HIGHER_LOW_WINDOW,
     MA50_HIGHER_LOW_WINDOW,
@@ -225,6 +226,118 @@ class TADashboardService:
         except Exception:
             return None
 
+    def get_stock_rs_for_rrg(
+        self,
+        symbols: List[str] = None,
+        sector: str = None,
+        smooth: int = 1,
+        trail_days: int = 0
+    ) -> Optional[pd.DataFrame]:
+        """
+        Get stock RS data for RRG chart.
+
+        Args:
+            symbols: List of stock symbols to include
+            sector: Sector name to get all stocks from
+            smooth: SMA smoothing period (1=raw)
+            trail_days: Number of days for trail (0=no trail)
+
+        Returns:
+            DataFrame with rs_ratio_smooth, rs_momentum_smooth, quadrant columns
+        """
+        try:
+            # Load RS rating data
+            path = self.DATA_ROOT / "rs_rating/stock_rs_rating_daily.parquet"
+            if not path.exists():
+                return None
+
+            df = pd.read_parquet(path)
+            df['date'] = pd.to_datetime(df['date'])
+
+            # Filter by symbols or sector
+            if symbols and len(symbols) > 0:
+                df = df[df['symbol'].isin(symbols)]
+            elif sector:
+                # Convert English sector name to Vietnamese for lookup
+                sector_reg = SectorRegistry()
+                sector_vn = sector_reg.get_sector_vn(sector)  # English → Vietnamese
+
+                # Lookup sector from registry
+                sector_symbols = []
+                for sym in df['symbol'].unique():
+                    info = sector_reg.get_ticker(sym)
+                    if info and info.get('sector') == sector_vn:
+                        sector_symbols.append(sym)
+                if not sector_symbols:
+                    return None
+                df = df[df['symbol'].isin(sector_symbols)]
+            else:
+                return None
+
+            if df.empty:
+                return None
+
+            # Need at least trail_days + calculation days
+            min_days = max(15, trail_days + 10)
+            cutoff = df['date'].max() - pd.Timedelta(days=min_days + 30)
+            df = df[df['date'] >= cutoff]
+
+            # Calculate RS ratio and momentum per symbol
+            result = []
+            for symbol in df['symbol'].unique():
+                sym_df = df[df['symbol'] == symbol].sort_values('date').copy()
+
+                if len(sym_df) < 10:
+                    continue
+
+                # RS Ratio = rs_rating normalized (using 50 as center, scale to ~1.0)
+                # rs_rating ranges from 1-99, so we normalize around 50
+                sym_df['rs_ratio'] = sym_df['rs_rating'] / 50.0
+
+                # RS Momentum = rate of change of RS ratio over 5 days, scaled
+                sym_df['rs_momentum'] = sym_df['rs_ratio'].diff(5) * 100
+
+                # Apply smoothing
+                if smooth > 1:
+                    sym_df['rs_ratio_smooth'] = sym_df['rs_ratio'].rolling(smooth, min_periods=1).mean()
+                    sym_df['rs_momentum_smooth'] = sym_df['rs_momentum'].rolling(smooth, min_periods=1).mean()
+                else:
+                    sym_df['rs_ratio_smooth'] = sym_df['rs_ratio']
+                    sym_df['rs_momentum_smooth'] = sym_df['rs_momentum']
+
+                # Determine quadrant
+                sym_df['quadrant'] = sym_df.apply(
+                    lambda r: self._determine_quadrant(r['rs_ratio_smooth'], r['rs_momentum_smooth']),
+                    axis=1
+                )
+
+                # Keep last N days for trail or just latest
+                if trail_days > 0:
+                    result.append(sym_df.tail(trail_days))
+                else:
+                    result.append(sym_df.tail(1))
+
+            if not result:
+                return None
+
+            return pd.concat(result, ignore_index=True)
+        except Exception:
+            return None
+
+    def get_tickers_by_sector(self, sector: str) -> List[str]:
+        """Get list of stock tickers in a sector."""
+        try:
+            path = self.DATA_ROOT / "rs_rating/stock_rs_rating_daily.parquet"
+            if not path.exists():
+                return []
+
+            df = pd.read_parquet(path)
+            latest_date = df['date'].max()
+            df = df[df['date'] == latest_date]
+            return df[df['sector_code'] == sector]['symbol'].tolist()
+        except Exception:
+            return []
+
     # ==================== STOCK LAYER ====================
 
     def get_signals(self, signal_type: str = None) -> Optional[pd.DataFrame]:
@@ -257,9 +370,18 @@ class TADashboardService:
         except Exception:
             return None
 
-    def get_sector_list(self) -> List[str]:
-        """Get list of all sectors"""
-        return self._load_sector_list()
+    def get_sector_list(self, language: str = "en") -> List[str]:
+        """
+        Get list of all sectors.
+
+        Args:
+            language: "en" for English (default), "vi" for Vietnamese
+
+        Returns:
+            List of sector names
+        """
+        sector_reg = SectorRegistry()
+        return sorted(sector_reg.get_all_sectors(language=language))
 
     # ==================== PRIVATE METHODS (with Caching) ====================
 
