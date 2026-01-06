@@ -120,8 +120,15 @@ def calculate_summary_stats(df: pd.DataFrame) -> dict:
 # =============================================================================
 # SUB-TAB 1: SUMMARY TABLE
 # =============================================================================
-def render_summary_table(df: pd.DataFrame):
-    """Render clean summary table focused on NPATMI 2026F."""
+def render_summary_table(df: pd.DataFrame, full_df: pd.DataFrame = None):
+    """Render clean summary table focused on NPATMI 2026F.
+
+    Args:
+        df: Filtered DataFrame based on toggle
+        full_df: Full DataFrame with all stocks (for sector filter)
+    """
+    if full_df is None:
+        full_df = df
 
     st.markdown("#### NPATMI 2026F Consensus Comparison")
     st.caption("Compare BSC forecasts with market consensus (VCI, HCM, SSI)")
@@ -133,7 +140,8 @@ def render_summary_table(df: pd.DataFrame):
         ticker_search = st.text_input("Search Ticker", placeholder="VCB, ACB...", key="cons_ticker")
 
     with col2:
-        sectors = ['All'] + sorted(df['sector'].dropna().unique().tolist())
+        # Use full_df for sector list to show all available sectors
+        sectors = ['All'] + sorted(full_df['sector'].dropna().unique().tolist())
         sector_filter = st.selectbox("Sector", sectors, key="cons_sector")
 
     with col3:
@@ -149,15 +157,16 @@ def render_summary_table(df: pd.DataFrame):
         )
 
     # Apply filters
-    filtered_df = df.copy()
+    # When sector is selected, show ALL stocks in that sector (use full_df)
+    if sector_filter != 'All':
+        filtered_df = full_df[full_df['sector'] == sector_filter].copy()
+    else:
+        filtered_df = df.copy()
 
     # Ticker search filter
     if ticker_search:
         ticker_search = ticker_search.upper().strip()
         filtered_df = filtered_df[filtered_df['symbol'].str.contains(ticker_search, case=False, na=False)]
-
-    if sector_filter != 'All':
-        filtered_df = filtered_df[filtered_df['sector'] == sector_filter]
 
     filtered_df = filtered_df[filtered_df['source_count'] >= min_sources]
 
@@ -670,6 +679,16 @@ def render_bsc_vs_consensus_tab():
     with col_toggle:
         show_all = st.checkbox("Include non-BSC stocks", value=False, key="show_all_consensus")
 
+    # Filter: show all stocks with ANY NPATMI data from any source
+    # (stocks without NPATMI from all 4 sources are excluded)
+    has_any_npatmi = (
+        df['bsc_npatmi_26'].notna() |
+        df['vci_npatmi_26'].notna() |
+        df['hcm_npatmi_26'].notna() |
+        df['ssi_npatmi_26'].notna()
+    )
+    df = df[has_any_npatmi].copy()
+
     # Filter based on toggle
     if show_all:
         # All stocks with at least 1 source (including non-BSC)
@@ -715,7 +734,7 @@ def render_bsc_vs_consensus_tab():
     )
 
     if sub_tab == "Summary Table":
-        render_summary_table(overlap_df)
+        render_summary_table(overlap_df, full_df=df)
     else:
         render_ticker_lookup(df)
 

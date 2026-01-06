@@ -26,6 +26,37 @@ from datetime import datetime
 import pandas as pd
 import numpy as np
 
+# Load ticker metadata for canonical sector mapping
+TICKER_METADATA_PATH = Path("/Users/buuphan/Dev/Vietnam_dashboard/config/metadata/ticker_details.json")
+TICKER_METADATA = {}
+
+if TICKER_METADATA_PATH.exists():
+    with open(TICKER_METADATA_PATH, 'r', encoding='utf-8') as f:
+        TICKER_METADATA = json.load(f)
+
+
+def get_sector_from_metadata(symbol: str, fallback_sector: str = '') -> str:
+    """Get canonical sector from ticker_details.json metadata.
+
+    Args:
+        symbol: Stock ticker symbol
+        fallback_sector: Fallback sector if not found in metadata
+
+    Returns:
+        Vietnamese sector name from metadata, or fallback
+    """
+    if symbol in TICKER_METADATA:
+        return TICKER_METADATA[symbol].get('sector', fallback_sector)
+    return fallback_sector
+
+
+def get_entity_from_metadata(symbol: str, fallback_entity: str = 'COMPANY') -> str:
+    """Get entity type from ticker_details.json metadata."""
+    if symbol in TICKER_METADATA:
+        return TICKER_METADATA[symbol].get('entity', fallback_entity)
+    return fallback_entity
+
+
 # Paths
 PROJECT_ROOT = Path("/Users/buuphan/Dev/Vietnam_dashboard")
 SOURCES_DIR = PROJECT_ROOT / "DATA" / "processed" / "forecast" / "sources"
@@ -106,22 +137,28 @@ def calculate_comparison_metrics(df: pd.DataFrame) -> pd.DataFrame:
     for symbol, group in df.groupby('symbol'):
         row = {'symbol': symbol}
 
+        # Get canonical sector and entity from metadata (single source of truth)
+        row['sector'] = get_sector_from_metadata(symbol, '')
+        row['entity_type'] = get_entity_from_metadata(symbol, 'COMPANY')
+
         # Get BSC data as reference
         bsc_data = group[group['source'] == 'bsc']
         if not bsc_data.empty:
             bsc = bsc_data.iloc[0]
-            row['sector'] = bsc['sector']
-            row['entity_type'] = bsc['entity_type']
+            # Use metadata sector, fallback to BSC sector if not in metadata
+            if not row['sector']:
+                row['sector'] = bsc['sector'] or ''
             row['current_price'] = bsc['current_price']
             row['bsc_tp'] = bsc['target_price']
             row['bsc_npatmi_26'] = bsc['npatmi_2026f']
             row['bsc_npatmi_27'] = bsc['npatmi_2027f']
             row['rating'] = bsc['rating']
         else:
-            # No BSC data, use first available
+            # No BSC data, use first available for price only
             first = group.iloc[0]
-            row['sector'] = first['sector']
-            row['entity_type'] = first['entity_type']
+            # Use metadata sector, fallback to source sector if not in metadata
+            if not row['sector']:
+                row['sector'] = first['sector'] or ''
             row['current_price'] = first['current_price']
             row['bsc_tp'] = None
             row['bsc_npatmi_26'] = None

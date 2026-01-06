@@ -1826,5 +1826,9 @@
   "DSE": {
     "entity": "SECURITY",
     "sector": "Dịch vụ tài chính"
+  },
+  "TCX": {
+    "entity": "COMPANY",
+    "sector": "Dịch vụ tài chính"
   }
 }
