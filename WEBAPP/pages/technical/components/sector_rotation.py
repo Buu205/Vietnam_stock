@@ -95,7 +95,7 @@ def _render_rrg_with_options(service: 'TADashboardService') -> None:
     with col2:
         if rrg_mode == "Stock":
             # Sector filter for stock mode (English names)
-            sectors = ["All Sectors"] + service.get_sector_list()
+            sectors = ["All"] + service.get_sector_list()
             selected_sector = st.selectbox(
                 "Sector",
                 sectors,
@@ -128,7 +128,7 @@ def _render_rrg_with_options(service: 'TADashboardService') -> None:
 
     if rrg_mode == "Stock":
         # Show symbol input only if no sector selected
-        if selected_sector == "All Sectors":
+        if selected_sector == "All":
             symbol_input = st.text_input(
                 "Enter stock symbols (comma separated)",
                 value="MWG",
@@ -180,7 +180,7 @@ def _create_rrg_chart(
     entity_col: str = 'sector_code',
     show_trail: bool = False
 ) -> go.Figure:
-    """Create premium RRG scatter plot."""
+    """Create premium RRG scatter plot with auto-scaling axes."""
 
     fig = go.Figure()
 
@@ -188,18 +188,36 @@ def _create_rrg_chart(
     latest_date = rrg_df['date'].max()
     latest_data = rrg_df[rrg_df['date'] == latest_date]
 
-    # Add quadrant backgrounds
+    # ============ AUTO-SCALE: Calculate range from data ============
+    x_vals = rrg_df['rs_ratio_smooth'].dropna()
+    y_vals = rrg_df['rs_momentum_smooth'].dropna()
+
+    # Calculate range with 15% padding, ensure center (1, 0) is visible
+    x_min = min(x_vals.min(), 1) - 0.15 * abs(x_vals.min() - 1)
+    x_max = max(x_vals.max(), 1) + 0.15 * abs(x_vals.max() - 1)
+    y_min = min(y_vals.min(), 0) - 0.15 * max(abs(y_vals.min()), 10)
+    y_max = max(y_vals.max(), 0) + 0.15 * max(abs(y_vals.max()), 10)
+
+    # Ensure minimum range for readability
+    if x_max - x_min < 0.4:
+        x_mid = (x_max + x_min) / 2
+        x_min, x_max = x_mid - 0.2, x_mid + 0.2
+    if y_max - y_min < 40:
+        y_mid = (y_max + y_min) / 2
+        y_min, y_max = y_mid - 20, y_mid + 20
+
+    # ============ QUADRANT BACKGROUNDS (full range) ============
     # Leading (top-right)
-    fig.add_shape(type="rect", x0=1, x1=1.3, y0=0, y1=10,
+    fig.add_shape(type="rect", x0=1, x1=x_max, y0=0, y1=y_max,
                   fillcolor="rgba(16, 185, 129, 0.05)", line_width=0)
     # Weakening (bottom-right)
-    fig.add_shape(type="rect", x0=1, x1=1.3, y0=-10, y1=0,
+    fig.add_shape(type="rect", x0=1, x1=x_max, y0=y_min, y1=0,
                   fillcolor="rgba(245, 158, 11, 0.05)", line_width=0)
     # Lagging (bottom-left)
-    fig.add_shape(type="rect", x0=0.7, x1=1, y0=-10, y1=0,
+    fig.add_shape(type="rect", x0=x_min, x1=1, y0=y_min, y1=0,
                   fillcolor="rgba(239, 68, 68, 0.05)", line_width=0)
     # Improving (top-left)
-    fig.add_shape(type="rect", x0=0.7, x1=1, y0=0, y1=10,
+    fig.add_shape(type="rect", x0=x_min, x1=1, y0=0, y1=y_max,
                   fillcolor="rgba(6, 182, 212, 0.05)", line_width=0)
 
     # Add trail lines if enabled
@@ -250,33 +268,38 @@ def _create_rrg_chart(
     fig.add_hline(y=0, line=dict(color='#64748B', width=1, dash='solid'))
     fig.add_vline(x=1, line=dict(color='#64748B', width=1, dash='solid'))
 
-    # Quadrant labels with HTML styling (positioned for -100 to 100 scale)
-    fig.add_annotation(x=0.6, y=70, text="IMPROVING", showarrow=False,
+    # Quadrant labels - positioned dynamically based on data range
+    label_x_left = x_min + 0.1 * (1 - x_min)
+    label_x_right = 1 + 0.9 * (x_max - 1)
+    label_y_top = 0 + 0.8 * y_max
+    label_y_bottom = 0 + 0.8 * y_min
+
+    fig.add_annotation(x=label_x_left, y=label_y_top, text="IMPROVING", showarrow=False,
                        font=dict(size=11, color=QUADRANT_COLORS['IMPROVING'], family='DM Sans'),
                        bgcolor='rgba(6, 182, 212, 0.1)', borderpad=4)
-    fig.add_annotation(x=1.4, y=70, text="LEADING", showarrow=False,
+    fig.add_annotation(x=label_x_right, y=label_y_top, text="LEADING", showarrow=False,
                        font=dict(size=11, color=QUADRANT_COLORS['LEADING'], family='DM Sans'),
                        bgcolor='rgba(16, 185, 129, 0.1)', borderpad=4)
-    fig.add_annotation(x=0.6, y=-70, text="LAGGING", showarrow=False,
+    fig.add_annotation(x=label_x_left, y=label_y_bottom, text="LAGGING", showarrow=False,
                        font=dict(size=11, color=QUADRANT_COLORS['LAGGING'], family='DM Sans'),
                        bgcolor='rgba(239, 68, 68, 0.1)', borderpad=4)
-    fig.add_annotation(x=1.4, y=-70, text="WEAKENING", showarrow=False,
+    fig.add_annotation(x=label_x_right, y=label_y_bottom, text="WEAKENING", showarrow=False,
                        font=dict(size=11, color=QUADRANT_COLORS['WEAKENING'], family='DM Sans'),
                        bgcolor='rgba(245, 158, 11, 0.1)', borderpad=4)
 
-    # Layout - increased height for better sector visibility
+    # Layout with auto-scaled axes
     layout = get_chart_layout(height=500)
     layout['showlegend'] = False
     layout['xaxis'] = dict(
         title='RS Ratio',
-        range=[0.4, 1.6],
+        range=[x_min, x_max],
         tickfont=dict(color='#64748B'),
         gridcolor='rgba(255,255,255,0.05)',
         zerolinecolor='rgba(255,255,255,0.1)'
     )
     layout['yaxis'] = dict(
         title='RS Momentum',
-        range=[-100, 100],
+        range=[y_min, y_max],
         tickfont=dict(color='#64748B'),
         gridcolor='rgba(255,255,255,0.05)',
         zerolinecolor='rgba(255,255,255,0.1)'
@@ -511,7 +534,7 @@ def _render_stock_rs_heatmap(service: 'TADashboardService') -> None:
     filtered_df = rs_data.copy()
 
     # Filter by sector
-    if selected_sector != "Tất cả" and 'sector_code' in filtered_df.columns:
+    if selected_sector != "All" and 'sector_code' in filtered_df.columns:
         filtered_df = filtered_df[filtered_df['sector_code'] == selected_sector]
 
     # Filter by search symbols

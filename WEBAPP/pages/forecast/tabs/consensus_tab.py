@@ -1,13 +1,13 @@
 """
 Consensus Tab
 =============
-Tab 3: BSC vs VCI Forecast Comparison (NEW)
+Tab 3: Multi-Source Forecast Comparison (BSC, VCI, SSI, HSC)
 
 Features:
-- Summary cards showing consensus status distribution
-- Comparison table with BSC and VCI forecasts
-- Delta columns highlighting differences
-- Status badges (ALIGNED, BSC_BULL, VCI_BULL)
+- View mode toggle: BSC vs VCI (original) | All Sources (new)
+- Summary cards showing coverage per source
+- Multi-source comparison table
+- Standard deviation to measure consensus
 """
 
 import streamlit as st
@@ -41,35 +41,125 @@ def _calculate_consensus_summary(df: pd.DataFrame) -> dict:
     return summary
 
 
-def _build_summary_cards_html(summary: dict) -> str:
-    """Build HTML for summary cards."""
-    CARD_CONFIG = {
-        'ALIGNED': {'label': 'ALIGNED', 'color': '#00C9AD', 'bg': 'rgba(0, 201, 173, 0.15)', 'desc': 'Both views aligned (<5% diff)'},
-        'BSC_BULL': {'label': 'BSC BULL', 'color': '#8B5CF6', 'bg': 'rgba(139, 92, 246, 0.15)', 'desc': 'BSC more optimistic'},
-        'VCI_BULL': {'label': 'VCI BULL', 'color': '#F59E0B', 'bg': 'rgba(245, 158, 11, 0.15)', 'desc': 'VCI more optimistic'},
-        'ALIGNED_BEARISH': {'label': 'ALIGNED', 'color': '#64748B', 'bg': 'rgba(100, 116, 139, 0.15)', 'desc': 'Both conservative'},
+def _build_source_coverage_cards(stats: dict) -> str:
+    """Build HTML cards showing coverage per source."""
+    SOURCE_COLORS = {
+        'bsc': {'color': '#8B5CF6', 'bg': 'rgba(139, 92, 246, 0.15)', 'label': 'BSC'},
+        'vci': {'color': '#F59E0B', 'bg': 'rgba(245, 158, 11, 0.15)', 'label': 'VCI'},
+        'ssi': {'color': '#10B981', 'bg': 'rgba(16, 185, 129, 0.15)', 'label': 'SSI'},
+        'hcm': {'color': '#3B82F6', 'bg': 'rgba(59, 130, 246, 0.15)', 'label': 'HSC'},
     }
 
-    cards_html = ""
-    for status, config in CARD_CONFIG.items():
-        count = summary.get(status, 0)
+    cards_html = '<div style="display:flex;gap:12px;flex-wrap:wrap;">'
+    for source, s in stats.items():
+        config = SOURCE_COLORS.get(source, {'color': '#64748B', 'bg': 'rgba(100, 116, 139, 0.15)', 'label': source.upper()})
+        count = s.get('count', 0)
         cards_html += f'''
-        <div style="background:{config['bg']};border:1px solid {config['color']}40;border-radius:8px;padding:12px 16px;min-width:120px;">
+        <div style="background:{config['bg']};border:1px solid {config['color']}40;border-radius:8px;padding:12px 16px;min-width:100px;">
             <div style="color:{config['color']};font-weight:700;font-size:11px;margin-bottom:4px;">{config['label']}</div>
             <div style="color:{config['color']};font-size:24px;font-weight:700;font-family:monospace;">{count}</div>
-            <div style="color:#64748B;font-size:10px;">{config['desc']}</div>
+            <div style="color:#64748B;font-size:10px;">stocks</div>
         </div>
         '''
+    cards_html += '</div>'
     return cards_html
+
+
+def _build_multi_source_table(df: pd.DataFrame, year: str) -> str:
+    """Build HTML table for multi-source comparison."""
+    SOURCE_COLORS = {
+        'bsc': '#8B5CF6',
+        'vci': '#F59E0B',
+        'ssi': '#10B981',
+        'hcm': '#3B82F6',
+    }
+
+    def format_npatmi(val):
+        if pd.isna(val):
+            return '<span style="color:#64748B;">-</span>'
+        return f'{val:,.0f}'
+
+    def format_target(val):
+        if pd.isna(val):
+            return '<span style="color:#64748B;">-</span>'
+        return f'{val:,.0f}'
+
+    # Build table HTML
+    html = '''
+    <style>
+        .ms-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .ms-table th { background: #1E293B; color: #E2E8F0; padding: 10px 8px; text-align: left; border-bottom: 2px solid #334155; font-weight: 600; }
+        .ms-table td { padding: 8px; border-bottom: 1px solid #334155; color: #E2E8F0; }
+        .ms-table tr:hover { background: rgba(59, 130, 246, 0.1); }
+        .ms-symbol { font-weight: 700; color: #F59E0B; }
+        .ms-sector { color: #94A3B8; font-size: 11px; }
+        .ms-count { background: #1E293B; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+    </style>
+    <table class="ms-table">
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Sector</th>
+    '''
+
+    # Add source columns
+    for source in ['bsc', 'vci', 'ssi', 'hcm']:
+        color = SOURCE_COLORS.get(source, '#64748B')
+        html += f'<th style="color:{color};">{source.upper()} NPATMI</th>'
+        html += f'<th style="color:{color};">{source.upper()} Target</th>'
+
+    html += '<th>Sources</th><th>Avg NPATMI</th><th>Std Dev</th></tr></thead><tbody>'
+
+    # Add rows
+    for _, row in df.iterrows():
+        html += f'''
+        <tr>
+            <td class="ms-symbol">{row['symbol']}</td>
+            <td class="ms-sector">{row.get('sector', '-')}</td>
+        '''
+
+        for source in ['bsc', 'vci', 'ssi', 'hcm']:
+            npatmi = row.get(f'{source}_npatmi')
+            target = row.get(f'{source}_target')
+            html += f'<td>{format_npatmi(npatmi)}</td>'
+            html += f'<td>{format_target(target)}</td>'
+
+        source_count = row.get('source_count', 0)
+        avg_npatmi = row.get('avg_npatmi')
+        npatmi_std = row.get('npatmi_std')
+
+        html += f'<td><span class="ms-count">{source_count}</span></td>'
+        html += f'<td>{format_npatmi(avg_npatmi)}</td>'
+        html += f'<td>{format_npatmi(npatmi_std)}</td>'
+        html += '</tr>'
+
+    html += '</tbody></table>'
+    return html
 
 
 def render_consensus_tab(service):
     """
-    Render Consensus tab with BSC vs VCI comparison.
+    Render Consensus tab with multi-source comparison.
 
     Args:
-        service: ForecastService instance with VCI methods
+        service: ForecastService instance
     """
+    # View mode selector
+    view_mode = st.radio(
+        "View Mode",
+        ["BSC vs VCI", "All Sources"],
+        horizontal=True,
+        key="consensus_view_mode"
+    )
+
+    if view_mode == "BSC vs VCI":
+        _render_bsc_vci_view(service)
+    else:
+        _render_multi_source_view(service)
+
+
+def _render_bsc_vci_view(service):
+    """Original BSC vs VCI comparison view."""
     st.markdown("### BSC vs VCI Consensus Comparison")
     st.markdown("*Compare BSC Research forecasts with VCI (VietCap) coverage*")
 
@@ -85,11 +175,6 @@ def render_consensus_tab(service):
 
     if comparison_df.empty:
         st.info("No overlapping coverage between BSC and VCI. Comparison not available.")
-        st.markdown("""
-        **Possible reasons:**
-        - VCI data not loaded (`DATA/processed/forecast/vci/vci_coverage_universe.parquet`)
-        - No matching tickers between BSC and VCI coverage
-        """)
         return
 
     # Initialize year selector state
@@ -100,11 +185,9 @@ def render_consensus_tab(service):
     # Prepare data based on selected year
     display_df = comparison_df.copy()
     if selected_year == "2026F":
-        # Use 2026F columns
         bsc_npatmi_col = 'npatmi_2026f' if 'npatmi_2026f' in display_df.columns else 'npatmi_2025f'
         vci_npatmi_col = 'vci_npatmi_2026' if 'vci_npatmi_2026' in display_df.columns else 'vci_npatmi_2025'
     else:
-        # Default: 2025F columns
         bsc_npatmi_col = 'npatmi_2025f'
         vci_npatmi_col = 'vci_npatmi_2025'
 
@@ -147,7 +230,6 @@ def render_consensus_tab(service):
         sector_filter = st.selectbox("Filter by Sector", sectors, key="consensus_sector")
 
     with col2:
-        # Calculate status based on delta
         def get_status_from_delta(delta):
             if pd.isna(delta):
                 return 'ALIGNED'
@@ -182,8 +264,99 @@ def render_consensus_tab(service):
         - **ALIGNED**: BSC and VCI forecasts within 5% difference
         - **BSC BULL**: BSC more optimistic (higher NPATMI or target)
         - **VCI BULL**: VCI more optimistic (higher NPATMI or target)
+        """)
+    else:
+        st.info("No stocks match the selected filters.")
 
-        **Priority Metrics:** NPATMI > Target Price > PE/PB (derived metrics)
+
+def _render_multi_source_view(service):
+    """Multi-source comparison view (BSC, VCI, SSI, HSC)."""
+    st.markdown("### Multi-Source Consensus Comparison")
+    st.markdown("*Compare forecasts from BSC, VCI, SSI, and HSC*")
+
+    # Year selector
+    col1, col2 = st.columns([3, 1])
+    with col2:
+        year = st.selectbox(
+            "Forecast Year",
+            ["2025F", "2026F", "2027F"],
+            key="multi_source_year"
+        )
+
+    # Load coverage stats
+    try:
+        stats = service.get_source_coverage_stats()
+    except Exception as e:
+        st.error(f"Failed to load source stats: {e}")
+        return
+
+    # Show coverage cards
+    st.html(_build_source_coverage_cards(stats))
+
+    st.markdown("---")
+
+    # Load multi-source comparison
+    try:
+        comparison_df = service.get_multi_source_comparison(year)
+    except Exception as e:
+        st.error(f"Failed to load comparison: {e}")
+        return
+
+    if comparison_df.empty:
+        st.info("No overlapping coverage found. Need at least 2 sources covering the same stock.")
+        return
+
+    # Filters
+    col1, col2, col3 = st.columns([2, 2, 2])
+
+    with col1:
+        sectors = ['All'] + sorted(comparison_df['sector'].dropna().unique().tolist())
+        sector_filter = st.selectbox("Filter by Sector", sectors, key="ms_sector")
+
+    with col2:
+        min_sources = st.selectbox(
+            "Min Sources",
+            [2, 3, 4],
+            key="ms_min_sources"
+        )
+
+    with col3:
+        sort_by = st.selectbox(
+            "Sort By",
+            ["Source Count", "Avg NPATMI", "Std Dev (Low)"],
+            key="ms_sort"
+        )
+
+    # Apply filters
+    filtered_df = comparison_df.copy()
+
+    if sector_filter != 'All':
+        filtered_df = filtered_df[filtered_df['sector'] == sector_filter]
+
+    filtered_df = filtered_df[filtered_df['source_count'] >= min_sources]
+
+    # Sort
+    if sort_by == "Source Count":
+        filtered_df = filtered_df.sort_values('source_count', ascending=False)
+    elif sort_by == "Avg NPATMI":
+        filtered_df = filtered_df.sort_values('avg_npatmi', ascending=False)
+    else:  # Std Dev (Low) = high consensus
+        filtered_df = filtered_df.sort_values('npatmi_std', ascending=True)
+
+    st.markdown(f"**Showing {len(filtered_df)} stocks with {min_sources}+ source coverage**")
+
+    # Render table
+    if not filtered_df.empty:
+        table_html = _build_multi_source_table(filtered_df, year)
+        st.markdown(table_html, unsafe_allow_html=True)
+
+        # Legend
+        st.markdown("---")
+        st.markdown("""
+        **Notes:**
+        - **NPATMI**: Net Profit After Tax to Minority Interests (Billion VND)
+        - **Std Dev**: Lower = higher consensus between sources
+        - **Sources**: Number of research houses covering the stock
         """)
     else:
         st.info("No stocks match the selected filters.")

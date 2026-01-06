@@ -587,19 +587,16 @@ elif active_tab == 1:
             "Dầu: WTI vs Brent": ('oil_wti', 'oil_crude', '$/bbl', '$/bbl'),
             "Ure: DPM vs Trung Đông": ('ure_vn_dpm', 'fertilizer_ure', 'VND/kg', '$/ton'),
             "Ure: DCM vs Trung Đông": ('ure_vn_dcm', 'fertilizer_ure', 'VND/kg', '$/ton'),
-            "Thép: HRC vs D10": ('steel_hrc', 'steel_d10', '$/ton', '$/ton'),
         }
 
         # Individual commodities (no emojis, clean labels)
         individual_commodities = [
-            ('gold_global', 'Vàng thế giới'),
             ('gas_natural', 'Khí thiên nhiên'),
             ('coke', 'Than cốc'),
             ('steel_d10', 'Thép D10'),
             ('steel_hrc', 'Thép HRC'),
             ('steel_coated', 'Tôn mạ'),
             ('iron_ore', 'Quặng sắt'),
-            ('fertilizer_ure', 'Ure (Trung Đông)'),
             ('soybean', 'Đậu tương'),
             ('corn', 'Ngô'),
             ('sugar', 'Đường'),
@@ -730,6 +727,12 @@ elif active_tab == 1:
                         value_col = 'close' if 'close' in series.columns and series['close'].notna().any() else 'value'
                         label = COMMODITY_LABELS.get(symbol, symbol)
 
+                        # Calculate y-axis range with padding (auto-scale)
+                        y_min = series[value_col].min()
+                        y_max = series[value_col].max()
+                        y_padding = (y_max - y_min) * 0.1  # 10% padding
+                        y_range = [y_min - y_padding, y_max + y_padding]
+
                         fig = go.Figure()
                         fig.add_trace(go.Scatter(
                             x=series['date'],
@@ -737,14 +740,13 @@ elif active_tab == 1:
                             name=label,
                             mode='lines',
                             line=dict(color=CHART_COLORS['primary'], width=2.5),
-                            fill='tozeroy',
-                            fillcolor=FILL_COLORS['primary'],
                             hovertemplate=f'<b>{label}</b><br>%{{x|%d/%m/%Y}}<br>Price: %{{y:,.2f}}<extra></extra>'
                         ))
 
                         layout = get_chart_layout(height=500)
                         layout['showlegend'] = False
                         layout['yaxis']['title'] = 'Price'
+                        layout['yaxis']['range'] = y_range  # Auto-scale y-axis
                         layout['xaxis'] = dict(
                             tickformat='%b %Y', tickmode='auto', nticks=8, tickangle=0,
                             tickfont=dict(size=10, color='#CBD5E1'),

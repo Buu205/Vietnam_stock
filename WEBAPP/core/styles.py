@@ -158,6 +158,58 @@ def get_page_style() -> str:
         margin-top: 0 !important;
     }
 
+    /* ========== COMPACT VERTICAL SPACING ========== */
+    /* Aggressively reduce vertical gaps */
+    [data-testid="stVerticalBlock"] {
+        gap: 0.25rem !important;
+    }
+
+    [data-testid="stVerticalBlock"] > div {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        gap: 0.25rem !important;
+        padding: 0 !important;
+    }
+
+    /* Reduce margin after headers */
+    h1, h2, h3, h4, h5, h6 {
+        margin-bottom: 0.25rem !important;
+        margin-top: 0.25rem !important;
+    }
+
+    /* Compact metric cards spacing */
+    [data-testid="stHorizontalBlock"] {
+        gap: 0.5rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    /* Reduce element container margins */
+    .element-container {
+        margin-bottom: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* Reduce column gaps */
+    [data-testid="column"] {
+        padding: 0 0.25rem !important;
+    }
+
+    /* Compact stMarkdown */
+    [data-testid="stMarkdownContainer"] {
+        margin-bottom: 0 !important;
+    }
+
+    /* Reduce spacing for metric containers */
+    [data-testid="stMetricValue"],
+    [data-testid="stMetricLabel"],
+    [data-testid="stMetricDelta"] {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
     * {
         font-family: var(--font-body);
     }
@@ -885,7 +937,7 @@ def get_page_style() -> str:
             var(--glass-border) 80%,
             transparent 100%
         );
-        margin: 0.75rem 0 1rem 0;  /* Reduced from 1rem 0 1.25rem */
+        margin: 0.5rem 0 0.5rem 0;  /* Compact spacing */
         opacity: 0.6;
     }
 

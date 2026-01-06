@@ -309,25 +309,6 @@ selected_metrics = st.multiselect(
     label_visibility="collapsed"
 )
 
-# Quick select buttons in horizontal layout
-quick_col1, quick_col2, quick_col3, quick_col4 = st.columns(4)
-with quick_col1:
-    if st.button("Key Performance", width='stretch'):
-        st.session_state['selected_metrics'] = ["NIM", "CIR", "NPL", "ROE", "ROA", "LLCR", "Provision/Loan"]
-        st.rerun()
-with quick_col2:
-    if st.button("Growth Focus", width='stretch'):
-        st.session_state['selected_metrics'] = ["Credit Growth", "Deposit Growth", "Loan Growth", "NII Growth", "NPATMI Growth", "ROE", "NIM", "NPL"]
-        st.rerun()
-with quick_col3:
-    if st.button("All Metrics", width='stretch'):
-        st.session_state['selected_metrics'] = list(AVAILABLE_METRICS.keys())
-        st.rerun()
-with quick_col4:
-    if st.button("Reset Default", width='stretch'):
-        st.session_state['selected_metrics'] = DEFAULT_METRICS
-        st.rerun()
-
 st.markdown("---")
 
 # ============================================================================

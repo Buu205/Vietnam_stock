@@ -553,3 +553,154 @@ class ForecastService(BaseService):
             return {}
 
         return df['consensus_status'].value_counts().to_dict()
+
+    # =========================================================================
+    # P3: Multi-Source Consensus (BSC, VCI, SSI, HSC)
+    # =========================================================================
+
+    def _load_source_json(self, source: str) -> pd.DataFrame:
+        """
+        Load forecast data from JSON source files.
+
+        Args:
+            source: Source name (bsc, vci, ssi, hcm)
+
+        Returns:
+            DataFrame with standardized columns
+        """
+        import json
+
+        json_path = self.data_root / "processed" / "forecast" / "sources" / f"{source}.json"
+
+        if not json_path.exists():
+            return pd.DataFrame()
+
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        stocks = data.get('stocks', [])
+        if not stocks:
+            return pd.DataFrame()
+
+        df = pd.DataFrame(stocks)
+
+        # Standardize column names
+        if 'symbol' not in df.columns and 'Symbol' in df.columns:
+            df = df.rename(columns={'Symbol': 'symbol'})
+
+        # Add source column
+        df['source'] = source
+
+        return df
+
+    def get_all_sources_data(self) -> Dict[str, pd.DataFrame]:
+        """
+        Load data from all forecast sources.
+
+        Returns:
+            Dict mapping source name to DataFrame
+        """
+        sources = ['bsc', 'vci', 'ssi', 'hcm']
+        result = {}
+
+        for source in sources:
+            df = self._load_source_json(source)
+            if not df.empty:
+                result[source] = df
+
+        return result
+
+    def get_multi_source_comparison(self, year: str = '2025F') -> pd.DataFrame:
+        """
+        Compare forecasts across multiple sources for overlapping tickers.
+
+        Args:
+            year: Forecast year ('2025F', '2026F', '2027F')
+
+        Returns:
+            DataFrame with ticker and forecasts from each source
+        """
+        import numpy as np
+
+        sources_data = self.get_all_sources_data()
+
+        if not sources_data:
+            return pd.DataFrame()
+
+        # Determine NPATMI column based on year
+        year_suffix = year.lower().replace('f', 'f')  # e.g., '2025f'
+        npatmi_col = f'npatmi_{year_suffix}'
+
+        # Collect all unique symbols
+        all_symbols = set()
+        for df in sources_data.values():
+            if 'symbol' in df.columns:
+                all_symbols.update(df['symbol'].dropna().unique())
+
+        # Build comparison dataframe
+        rows = []
+        for symbol in sorted(all_symbols):
+            row = {'symbol': symbol}
+
+            for source, df in sources_data.items():
+                source_df = df[df['symbol'] == symbol]
+                if source_df.empty:
+                    row[f'{source}_npatmi'] = None
+                    row[f'{source}_target'] = None
+                else:
+                    stock = source_df.iloc[0]
+                    row[f'{source}_npatmi'] = stock.get(npatmi_col)
+                    row[f'{source}_target'] = stock.get('target_price')
+                    # Get sector from first available source
+                    if 'sector' not in row or row.get('sector') == 'Unknown':
+                        row['sector'] = stock.get('sector', 'Unknown')
+
+            rows.append(row)
+
+        result_df = pd.DataFrame(rows)
+
+        # Calculate consensus metrics
+        npatmi_cols = [c for c in result_df.columns if c.endswith('_npatmi')]
+        target_cols = [c for c in result_df.columns if c.endswith('_target')]
+
+        # Count how many sources cover each ticker
+        result_df['source_count'] = result_df[npatmi_cols].notna().sum(axis=1)
+
+        # Calculate average NPATMI and target across sources
+        result_df['avg_npatmi'] = result_df[npatmi_cols].mean(axis=1, skipna=True)
+        result_df['avg_target'] = result_df[target_cols].mean(axis=1, skipna=True)
+
+        # Calculate std dev (measure of consensus)
+        result_df['npatmi_std'] = result_df[npatmi_cols].std(axis=1, skipna=True)
+        result_df['target_std'] = result_df[target_cols].std(axis=1, skipna=True)
+
+        # Filter to tickers with at least 2 sources
+        result_df = result_df[result_df['source_count'] >= 2].copy()
+
+        # Sort by source count (more coverage = more interesting)
+        result_df = result_df.sort_values('source_count', ascending=False)
+
+        return result_df
+
+    def get_source_coverage_stats(self) -> Dict[str, Dict]:
+        """
+        Get coverage statistics for each source.
+
+        Returns:
+            Dict with source -> {count, avg_npatmi_2025f, avg_target}
+        """
+        sources_data = self.get_all_sources_data()
+        stats = {}
+
+        for source, df in sources_data.items():
+            if df.empty:
+                continue
+
+            stats[source] = {
+                'count': len(df),
+                'avg_npatmi_2025f': df['npatmi_2025f'].mean() if 'npatmi_2025f' in df.columns else None,
+                'avg_npatmi_2026f': df['npatmi_2026f'].mean() if 'npatmi_2026f' in df.columns else None,
+                'avg_target': df['target_price'].mean() if 'target_price' in df.columns else None,
+            }
+
+        return stats

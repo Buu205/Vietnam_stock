@@ -217,7 +217,8 @@ class TADashboardService:
                     axis=1
                 )
 
-                result.append(sector_df.tail(trail_days))
+                # When trail_days=0, return only latest point; otherwise return trail
+                result.append(sector_df.tail(max(1, trail_days)))
 
             if not result:
                 return None
