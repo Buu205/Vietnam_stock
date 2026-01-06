@@ -664,8 +664,22 @@ def render_bsc_vs_consensus_tab():
         st.code("python3 PROCESSORS/forecast/create_comparison_table.py", language="bash")
         return
 
-    # Filter to overlap only - using 2026F (current year forecast)
-    overlap_df = df[(df['bsc_npatmi_26'].notna()) & (df['source_count'] > 0)].copy()
+    # Data view toggle - BSC only or All stocks with consensus
+    col_title, col_toggle = st.columns([4, 2])
+
+    with col_toggle:
+        show_all = st.checkbox("Include non-BSC stocks", value=False, key="show_all_consensus")
+
+    # Filter based on toggle
+    if show_all:
+        # All stocks with at least 1 source (including non-BSC)
+        overlap_df = df[df['source_count'] > 0].copy()
+    else:
+        # Only BSC covered stocks with consensus
+        overlap_df = df[(df['bsc_npatmi_26'].notna()) & (df['source_count'] > 0)].copy()
+
+    # Count non-BSC stocks
+    non_bsc_count = len(df[(df['bsc_npatmi_26'].isna()) & (df['source_count'] > 0)])
 
     # Summary stats
     stats = calculate_summary_stats(overlap_df)
@@ -674,21 +688,22 @@ def render_bsc_vs_consensus_tab():
     bullish_count = stats['strong_bullish'] + stats['bullish_gap']
     bearish_count = stats['bearish_gap'] + stats['strong_bearish']
 
-    st.html(f'''
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;margin-bottom:8px;">
-        <div style="display:flex;align-items:center;gap:20px;">
+    with col_title:
+        title_suffix = " (All Sources)" if show_all else ""
+        st.html(f'''
+        <div style="display:flex;align-items:center;gap:20px;padding:8px 0;">
             <h3 style="margin:0;font-size:18px;font-weight:700;color:#F8FAFC;font-family:Space Grotesk,sans-serif;">
-                BSC vs Consensus
+                BSC vs Consensus{title_suffix}
             </h3>
             <div style="display:flex;gap:16px;font-family:JetBrains Mono,monospace;font-size:12px;">
                 <span style="color:#00C9AD;"><strong>{stats['overlap']}</strong> overlap</span>
                 <span style="color:#10B981;"><strong>{bullish_count}</strong> bullish</span>
                 <span style="color:#94A3B8;"><strong>{stats['aligned']}</strong> aligned</span>
                 <span style="color:#EF4444;"><strong>{bearish_count}</strong> bearish</span>
+                {f'<span style="color:#F59E0B;"><strong>{non_bsc_count}</strong> non-BSC</span>' if not show_all else ''}
             </div>
         </div>
-    </div>
-    ''')
+        ''')
 
     # Compact sub-tabs
     sub_tab = st.radio(
