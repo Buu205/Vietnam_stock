@@ -64,6 +64,37 @@ Used for: Medium-term higher low detection in breadth.
 """
 
 # =============================================================================
+# SWING LOW DETECTION PARAMETERS
+# =============================================================================
+
+SWING_LOW_CONFIRM_DAYS = 2
+"""
+Number of days AFTER the low that must be higher to confirm a Swing Low.
+A value of 2 means: day[i] < day[i+1] AND day[i] < day[i+2]
+This ensures the bounce is real, not just a 1-day noise.
+"""
+
+SWING_LOW_LOOKBACK_DAYS = 2
+"""
+Number of days BEFORE the low that must be higher to qualify as Swing Low.
+A value of 2 means: day[i] < day[i-1] AND day[i] < day[i-2]
+This ensures we're detecting actual local minimums, not flat periods.
+"""
+
+SWING_LOW_MIN_DEPTH_PCT = 3.0
+"""
+Minimum percentage drop from recent high to qualify as a Swing Low.
+This filters out minor noise/dips. A 3% drop in breadth (e.g., 40% → 37%)
+is meaningful, while 0.5% might just be random fluctuation.
+"""
+
+SWING_LOW_LOOKBACK_WINDOW = 30
+"""
+Number of trading days to scan for Swing Lows.
+30 days ≈ 6 weeks of trading, enough to capture 2-3 swing cycles.
+"""
+
+# =============================================================================
 # MARKET SCORE WEIGHTS
 # For 4-8 week Swing Trading strategy
 # =============================================================================

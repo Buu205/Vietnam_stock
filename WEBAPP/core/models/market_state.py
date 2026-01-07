@@ -40,18 +40,26 @@ class MarketState:
     prev_breadth_ma20_pct: Optional[float] = None
     prev_breadth_ma50_pct: Optional[float] = None
 
-    # Bottom Detection: Higher Lows pattern (confirms uptrend forming)
-    # MA20: Compare min of last 3 days vs min of previous 3 days
-    ma20_higher_low: bool = False      # True if recent low > previous low
-    ma20_recent_low: float = 0         # Min of last 3 days
-    ma20_prev_low: float = 0           # Min of previous 3 days
-    ma20_rising_from_low: bool = False # Current > recent low
+    # Bottom Detection: Higher Lows pattern using Swing Low detection
+    # Swing Low = local minimum with ≥2 days bounce confirmation
+    ma20_higher_low: bool = False      # True if recent swing low > previous swing low
+    ma20_recent_low: float = 0         # Most recent confirmed swing low value
+    ma20_prev_low: float = 0           # Previous confirmed swing low value
+    ma20_rising_from_low: bool = False # Current > recent swing low
 
-    # MA50: Compare min of last 5 days vs min of previous 5 days
+    # MA20 Pending Swing Low (1 day bounce, waiting for confirmation)
+    ma20_pending_low: Optional[float] = None        # Pending swing low value
+    ma20_pending_higher_low: Optional[bool] = None  # Will be Higher Low if confirmed?
+
+    # MA50: Same logic as MA20
     ma50_higher_low: bool = False
     ma50_recent_low: float = 0
     ma50_prev_low: float = 0
     ma50_rising_from_low: bool = False
+
+    # MA50 Pending Swing Low
+    ma50_pending_low: Optional[float] = None
+    ma50_pending_higher_low: Optional[bool] = None
 
     # Bottom Formation Stage: CAPITULATION, ACCUMULATING, EARLY_REVERSAL, or None
     bottom_stage: Optional[str] = None

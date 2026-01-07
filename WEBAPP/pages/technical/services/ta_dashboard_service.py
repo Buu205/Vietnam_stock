@@ -17,11 +17,13 @@ from datetime import datetime
 from WEBAPP.core.models.market_state import MarketState, BreadthHistory
 from config.registries import SectorRegistry
 from WEBAPP.core.trading_constants import (
-    MA20_HIGHER_LOW_WINDOW,
-    MA50_HIGHER_LOW_WINDOW,
     CAPITULATION_THRESHOLD,
     ACCUMULATION_THRESHOLD,
     EARLY_REVERSAL_MA20_MIN,
+    SWING_LOW_CONFIRM_DAYS,
+    SWING_LOW_LOOKBACK_DAYS,
+    SWING_LOW_MIN_DEPTH_PCT,
+    SWING_LOW_LOOKBACK_WINDOW,
 )
 
 
@@ -116,10 +118,14 @@ class TADashboardService:
             ma20_recent_low=higher_lows['ma20_recent_low'],
             ma20_prev_low=higher_lows['ma20_prev_low'],
             ma20_rising_from_low=higher_lows['ma20_rising_from_low'],
+            ma20_pending_low=higher_lows['ma20_pending_low'],
+            ma20_pending_higher_low=higher_lows['ma20_pending_higher_low'],
             ma50_higher_low=higher_lows['ma50_higher_low'],
             ma50_recent_low=higher_lows['ma50_recent_low'],
             ma50_prev_low=higher_lows['ma50_prev_low'],
             ma50_rising_from_low=higher_lows['ma50_rising_from_low'],
+            ma50_pending_low=higher_lows['ma50_pending_low'],
+            ma50_pending_higher_low=higher_lows['ma50_pending_higher_low'],
             bottom_stage=bottom_stage,
             ad_ratio=latest_br.get('ad_ratio', 1.0),
             exposure_level=exposure,
@@ -721,46 +727,39 @@ class TADashboardService:
 
     def _calculate_higher_lows(self, breadth_df: pd.DataFrame) -> dict:
         """
-        Detect "Higher Lows" pattern for MA20 and MA50 breadth.
-        Higher lows = recent low > previous low → confirms uptrend forming.
+        Detect "Higher Lows" pattern using proper Swing Low detection.
 
-        Logic (optimized from 3-year backtest 2023-2025):
-        - MA20: Compare min of last 7 days with min of previous 7 days
-        - MA50: Compare min of last 9 days with min of previous 9 days
+        Swing Low Status:
+        - CONFIRMED: ≥2 days after are higher (bounce confirmed)
+        - PENDING: 1 day after is higher (waiting for confirmation)
+        - NONE: no bounce yet
 
-        Window rationale:
-        - MA20 median swing cycle: ~14.5 days → window = 7 days (half cycle)
-        - MA50 median swing cycle: ~19.0 days → window = 9 days (half cycle)
+        Logic:
+        1. Scan last SWING_LOW_LOOKBACK_WINDOW days for all Swing Lows
+        2. Get 2 most recent confirmed Swing Lows for main comparison
+        3. Check for pending swing low at end of series
+        4. Compare: recent_low > prev_low = Higher Low (bullish)
 
         Returns:
-            dict: {
-                'ma20_higher_low': bool,      # True if MA20 forming higher lows
-                'ma20_recent_low': float,     # Recent low value
-                'ma20_prev_low': float,       # Previous low value
-                'ma20_rising_from_low': bool, # Current > recent low
-                'ma50_higher_low': bool,
-                'ma50_recent_low': float,
-                'ma50_prev_low': float,
-                'ma50_rising_from_low': bool,
-            }
+            dict with confirmed swing lows + pending info
         """
-        # Window sizes from trading_constants (based on 3-year backtest)
-        MA20_WINDOW = MA20_HIGHER_LOW_WINDOW  # 7 days (~14.5 day cycle / 2)
-        MA50_WINDOW = MA50_HIGHER_LOW_WINDOW  # 9 days (~19.0 day cycle / 2)
-
         result = {
             'ma20_higher_low': False,
             'ma20_recent_low': 0,
             'ma20_prev_low': 0,
             'ma20_rising_from_low': False,
+            'ma20_pending_low': None,        # Pending swing low value
+            'ma20_pending_higher_low': None, # Will be Higher Low if confirmed?
             'ma50_higher_low': False,
             'ma50_recent_low': 0,
             'ma50_prev_low': 0,
             'ma50_rising_from_low': False,
+            'ma50_pending_low': None,
+            'ma50_pending_higher_low': None,
         }
 
-        # Need at least 2x window days of data
-        min_required = MA50_WINDOW * 2
+        # Need enough data for swing detection
+        min_required = SWING_LOW_LOOKBACK_WINDOW + SWING_LOW_CONFIRM_DAYS
         if len(breadth_df) < min_required:
             return result
 
@@ -768,38 +767,142 @@ class TADashboardService:
         ma20_col = 'above_ma20_pct' if 'above_ma20_pct' in breadth_df.columns else 'pct_above_ma20'
         ma50_col = 'above_ma50_pct' if 'above_ma50_pct' in breadth_df.columns else 'pct_above_ma50'
 
-        # Get last 18 rows for analysis
-        recent_data = breadth_df.tail(min_required).copy()
+        # Get recent data for analysis
+        recent_data = breadth_df.tail(min_required).reset_index(drop=True)
         ma20_values = recent_data[ma20_col].tolist()
         ma50_values = recent_data[ma50_col].tolist()
 
-        # MA20: Higher Lows detection (7-day windows)
-        ma20_recent_window = ma20_values[-MA20_WINDOW:]  # Last 7 days
-        ma20_prev_window = ma20_values[-(MA20_WINDOW * 2):-MA20_WINDOW]  # Previous 7 days
+        # Detect Swing Lows for MA20 (confirmed + pending)
+        ma20_confirmed, ma20_pending = self._find_swing_lows_with_pending(ma20_values)
 
-        ma20_recent_low = min(ma20_recent_window)
-        ma20_prev_low = min(ma20_prev_window)
-        ma20_current = ma20_values[-1]
+        if len(ma20_confirmed) >= 2:
+            recent_low = ma20_confirmed[-1]
+            prev_low = ma20_confirmed[-2]
+            result['ma20_recent_low'] = recent_low['value']
+            result['ma20_prev_low'] = prev_low['value']
+            result['ma20_higher_low'] = recent_low['value'] > prev_low['value']
+            result['ma20_rising_from_low'] = ma20_values[-1] > recent_low['value']
+        elif len(ma20_confirmed) == 1:
+            result['ma20_recent_low'] = ma20_confirmed[0]['value']
+            result['ma20_prev_low'] = ma20_confirmed[0]['value']
+            result['ma20_rising_from_low'] = ma20_values[-1] > ma20_confirmed[0]['value']
 
-        result['ma20_recent_low'] = ma20_recent_low
-        result['ma20_prev_low'] = ma20_prev_low
-        result['ma20_higher_low'] = ma20_recent_low > ma20_prev_low
-        result['ma20_rising_from_low'] = ma20_current > ma20_recent_low
+        # Check pending swing low for MA20
+        if ma20_pending:
+            result['ma20_pending_low'] = ma20_pending['value']
+            # Will this be a higher low if confirmed?
+            if result['ma20_recent_low'] > 0:
+                result['ma20_pending_higher_low'] = ma20_pending['value'] > result['ma20_recent_low']
 
-        # MA50: Higher Lows detection (9-day windows)
-        ma50_recent_window = ma50_values[-MA50_WINDOW:]  # Last 9 days
-        ma50_prev_window = ma50_values[-(MA50_WINDOW * 2):-MA50_WINDOW]  # Previous 9 days
+        # Detect Swing Lows for MA50 (confirmed + pending)
+        ma50_confirmed, ma50_pending = self._find_swing_lows_with_pending(ma50_values)
 
-        ma50_recent_low = min(ma50_recent_window)
-        ma50_prev_low = min(ma50_prev_window)
-        ma50_current = ma50_values[-1]
+        if len(ma50_confirmed) >= 2:
+            recent_low = ma50_confirmed[-1]
+            prev_low = ma50_confirmed[-2]
+            result['ma50_recent_low'] = recent_low['value']
+            result['ma50_prev_low'] = prev_low['value']
+            result['ma50_higher_low'] = recent_low['value'] > prev_low['value']
+            result['ma50_rising_from_low'] = ma50_values[-1] > recent_low['value']
+        elif len(ma50_confirmed) == 1:
+            result['ma50_recent_low'] = ma50_confirmed[0]['value']
+            result['ma50_prev_low'] = ma50_confirmed[0]['value']
+            result['ma50_rising_from_low'] = ma50_values[-1] > ma50_confirmed[0]['value']
 
-        result['ma50_recent_low'] = ma50_recent_low
-        result['ma50_prev_low'] = ma50_prev_low
-        result['ma50_higher_low'] = ma50_recent_low > ma50_prev_low
-        result['ma50_rising_from_low'] = ma50_current > ma50_recent_low
+        # Check pending swing low for MA50
+        if ma50_pending:
+            result['ma50_pending_low'] = ma50_pending['value']
+            if result['ma50_recent_low'] > 0:
+                result['ma50_pending_higher_low'] = ma50_pending['value'] > result['ma50_recent_low']
 
         return result
+
+    def _find_swing_lows_with_pending(self, values: list) -> tuple:
+        """
+        Find confirmed and pending Swing Lows in a value series.
+
+        Swing Low Status:
+        - CONFIRMED: lower than N days before AND N days after
+        - PENDING: lower than N days before AND only 1 day after (waiting)
+
+        Args:
+            values: List of breadth percentage values
+
+        Returns:
+            tuple: (confirmed_list, pending_dict or None)
+        """
+        confirmed = []
+        pending = None
+        n = len(values)
+
+        # Need enough data
+        start_idx = SWING_LOW_LOOKBACK_DAYS
+        if start_idx >= n:
+            return confirmed, pending
+
+        # Scan for confirmed swing lows (need CONFIRM_DAYS after)
+        end_idx_confirmed = n - SWING_LOW_CONFIRM_DAYS
+        for i in range(start_idx, end_idx_confirmed):
+            current = values[i]
+
+            # Check: Lower than previous N days
+            is_lower_than_before = all(
+                current < values[i - j]
+                for j in range(1, SWING_LOW_LOOKBACK_DAYS + 1)
+            )
+
+            # Check: Lower than next N days (confirmed bounce)
+            is_lower_than_after = all(
+                current < values[i + j]
+                for j in range(1, SWING_LOW_CONFIRM_DAYS + 1)
+            )
+
+            if is_lower_than_before and is_lower_than_after:
+                # Check depth from recent high
+                lookback_for_high = min(10, i)
+                recent_high = max(values[i - lookback_for_high:i])
+                depth = recent_high - current
+
+                if depth >= SWING_LOW_MIN_DEPTH_PCT:
+                    confirmed.append({
+                        'index': i,
+                        'value': current,
+                        'depth': depth,
+                        'status': 'CONFIRMED'
+                    })
+
+        # Check for pending swing low (at position n-2, need only 1 day bounce)
+        # Position n-2 means: we have values[n-2] and values[n-1] after it
+        pending_idx = n - 2  # Second to last position
+        if pending_idx >= start_idx:
+            current = values[pending_idx]
+
+            # Check: Lower than previous N days
+            is_lower_than_before = all(
+                current < values[pending_idx - j]
+                for j in range(1, SWING_LOW_LOOKBACK_DAYS + 1)
+            )
+
+            # Check: Lower than 1 day after (partial bounce)
+            is_lower_than_1_after = current < values[pending_idx + 1]
+
+            if is_lower_than_before and is_lower_than_1_after:
+                # Check depth
+                lookback_for_high = min(10, pending_idx)
+                recent_high = max(values[pending_idx - lookback_for_high:pending_idx])
+                depth = recent_high - current
+
+                if depth >= SWING_LOW_MIN_DEPTH_PCT:
+                    # Make sure this isn't already in confirmed list
+                    if not any(c['index'] == pending_idx for c in confirmed):
+                        pending = {
+                            'index': pending_idx,
+                            'value': current,
+                            'depth': depth,
+                            'status': 'PENDING'
+                        }
+
+        return confirmed, pending
 
     def _detect_bottom_stage(
         self,
