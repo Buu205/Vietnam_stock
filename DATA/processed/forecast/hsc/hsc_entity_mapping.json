@@ -1,0 +1,467 @@
+{
+  "1028": {
+    "ticker": "ACV",
+    "company_name": "Airports Corp. of Vietnam",
+    "entity_id": "1028"
+  },
+  "1000": {
+    "ticker": "ACB",
+    "company_name": "Asia Commercial Bank",
+    "entity_id": "1000"
+  },
+  "1694": {
+    "ticker": "BAF",
+    "company_name": "BAF Vietnam Agriculture JSC",
+    "entity_id": "1694"
+  },
+  "1001": {
+    "ticker": "BID",
+    "company_name": "Bank for Inv't & Dev't of VN",
+    "entity_id": "1001"
+  },
+  "1011": {
+    "ticker": "BVH",
+    "company_name": "Bao Viet Holdings",
+    "entity_id": "1011"
+  },
+  "1633": {
+    "ticker": "BCM",
+    "company_name": "Becamex IDC",
+    "entity_id": "1633"
+  },
+  "1663": {
+    "ticker": "BWE",
+    "company_name": "Binh Duong Water-Environ't",
+    "entity_id": "1663"
+  },
+  "1049": {
+    "ticker": "BMP",
+    "company_name": "Binh Minh Plastics JSC",
+    "entity_id": "1049"
+  },
+  "1635": {
+    "ticker": "BSR",
+    "company_name": "Binh Son Refining & Petroch.",
+    "entity_id": "1635"
+  },
+  "1012": {
+    "ticker": "CRE",
+    "company_name": "Century Land JSC",
+    "entity_id": "1012"
+  },
+  "1124": {
+    "ticker": "CMG",
+    "company_name": "CMC Corp.",
+    "entity_id": "1124"
+  },
+  "1021": {
+    "ticker": "CTD",
+    "company_name": "Coteccons Construction JSC",
+    "entity_id": "1021"
+  },
+  "1050": {
+    "ticker": "DRC",
+    "company_name": "Da Nang Rubber JSC",
+    "entity_id": "1050"
+  },
+  "1013": {
+    "ticker": "DXG",
+    "company_name": "Dat Xanh Group JSC",
+    "entity_id": "1013"
+  },
+  "1647": {
+    "ticker": "DXS",
+    "company_name": "Dat Xanh Services",
+    "entity_id": "1647"
+  },
+  "1047": {
+    "ticker": "DHG",
+    "company_name": "DHG Pharmaceutical JSC",
+    "entity_id": "1047"
+  },
+  "1046": {
+    "ticker": "DGW",
+    "company_name": "Digiworld Corp",
+    "entity_id": "1046"
+  },
+  "1667": {
+    "ticker": "DHC",
+    "company_name": "Dong Hai Ben Tre JSC",
+    "entity_id": "1667"
+  },
+  "1653": {
+    "ticker": "DGC",
+    "company_name": "Duc Giang Chemicals Group",
+    "entity_id": "1653"
+  },
+  "1125": {
+    "ticker": "ELC",
+    "company_name": "Elcom Corp.",
+    "entity_id": "1125"
+  },
+  "1045": {
+    "ticker": "FPT",
+    "company_name": "FPT Corp",
+    "entity_id": "1045"
+  },
+  "1041": {
+    "ticker": "FRT",
+    "company_name": "FPT Retail",
+    "entity_id": "1041"
+  },
+  "1029": {
+    "ticker": "GMD",
+    "company_name": "Gemadept",
+    "entity_id": "1029"
+  },
+  "1128": {
+    "ticker": "GEG",
+    "company_name": "Gialai Electricity",
+    "entity_id": "1128"
+  },
+  "1675": {
+    "ticker": "HAH",
+    "company_name": "Hai An Transport and Steve.",
+    "entity_id": "1675"
+  },
+  "1094": {
+    "ticker": "HAX",
+    "company_name": "Hang Xanh Motors",
+    "entity_id": "1094"
+  },
+  "1004": {
+    "ticker": "HDB",
+    "company_name": "HD Bank",
+    "entity_id": "1004"
+  },
+  "1051": {
+    "ticker": "HPG",
+    "company_name": "Hoa Phat Group",
+    "entity_id": "1051"
+  },
+  "1052": {
+    "ticker": "HSG",
+    "company_name": "Hoa Sen Group",
+    "entity_id": "1052"
+  },
+  "1700": {
+    "ticker": "TCH",
+    "company_name": "Hoang Huy Investment F. Services JSC",
+    "entity_id": "1700"
+  },
+  "1681": {
+    "ticker": "IDC",
+    "company_name": "IDICO Corporation - JSC",
+    "entity_id": "1681"
+  },
+  "1122": {
+    "ticker": "IMP",
+    "company_name": "Imexpharm Corp.",
+    "entity_id": "1122"
+  },
+  "1015": {
+    "ticker": "KDH",
+    "company_name": "Khang Dien House",
+    "entity_id": "1015"
+  },
+  "1014": {
+    "ticker": "KBC",
+    "company_name": "Kinh Bac City Development",
+    "entity_id": "1014"
+  },
+  "1005": {
+    "ticker": "LPB",
+    "company_name": "LPBank",
+    "entity_id": "1005"
+  },
+  "1070": {
+    "ticker": "MSB",
+    "company_name": "Maritime Comm. JSB",
+    "entity_id": "1070"
+  },
+  "1687": {
+    "ticker": "MCH",
+    "company_name": "Masan Consumer Corporation",
+    "entity_id": "1687"
+  },
+  "1036": {
+    "ticker": "MSN",
+    "company_name": "Masan Group",
+    "entity_id": "1036"
+  },
+  "1006": {
+    "ticker": "MBB",
+    "company_name": "Military Commercial Bank",
+    "entity_id": "1006"
+  },
+  "1683": {
+    "ticker": "MIG",
+    "company_name": "Military Insurance Corporation",
+    "entity_id": "1683"
+  },
+  "1042": {
+    "ticker": "MWG",
+    "company_name": "Mobile World Inv't Corp.",
+    "entity_id": "1042"
+  },
+  "1053": {
+    "ticker": "NKG",
+    "company_name": "Nam Kim Steel",
+    "entity_id": "1053"
+  },
+  "1016": {
+    "ticker": "NLG",
+    "company_name": "Nam Long Investment Corp",
+    "entity_id": "1016"
+  },
+  "1113": {
+    "ticker": "ANV",
+    "company_name": "Nam Viet Corporation",
+    "entity_id": "1113"
+  },
+  "1017": {
+    "ticker": "NVL",
+    "company_name": "Novaland Group",
+    "entity_id": "1017"
+  },
+  "1631": {
+    "ticker": "OCB",
+    "company_name": "Orient Commercial JSB",
+    "entity_id": "1631"
+  },
+  "1105": {
+    "ticker": "DCM",
+    "company_name": "PetroVietnam Ca Mau Fert.",
+    "entity_id": "1105"
+  },
+  "1057": {
+    "ticker": "PVD",
+    "company_name": "PetroVietnam Drill. & Well",
+    "entity_id": "1057"
+  },
+  "1034": {
+    "ticker": "DPM",
+    "company_name": "PetroVietnam Fert. & Chem.",
+    "entity_id": "1034"
+  },
+  "1056": {
+    "ticker": "GAS",
+    "company_name": "PetroVietnam Gas",
+    "entity_id": "1056"
+  },
+  "1061": {
+    "ticker": "OIL",
+    "company_name": "PetroVietnam Oil Corp.",
+    "entity_id": "1061"
+  },
+  "1063": {
+    "ticker": "POW",
+    "company_name": "PetroVietnam Power",
+    "entity_id": "1063"
+  },
+  "1058": {
+    "ticker": "PVS",
+    "company_name": "PetroVietnam Tech'l Services",
+    "entity_id": "1058"
+  },
+  "1081": {
+    "ticker": "PDR",
+    "company_name": "Phat Dat Real Estate",
+    "entity_id": "1081"
+  },
+  "1043": {
+    "ticker": "PNJ",
+    "company_name": "Phu Nhuan Jewelry",
+    "entity_id": "1043"
+  },
+  "1669": {
+    "ticker": "PTB",
+    "company_name": "Phu Tai JSC",
+    "entity_id": "1669"
+  },
+  "1020": {
+    "ticker": "PHR",
+    "company_name": "Phuoc Hoa Rubber JSC",
+    "entity_id": "1020"
+  },
+  "1082": {
+    "ticker": "PC1",
+    "company_name": "Power Construction",
+    "entity_id": "1082"
+  },
+  "1645": {
+    "ticker": "PGV",
+    "company_name": "Power Generation JSC 3",
+    "entity_id": "1645"
+  },
+  "1074": {
+    "ticker": "PVI",
+    "company_name": "PVI Holdings",
+    "entity_id": "1074"
+  },
+  "1037": {
+    "ticker": "QNS",
+    "company_name": "Quang Ngai Sugar",
+    "entity_id": "1037"
+  },
+  "1026": {
+    "ticker": "REE",
+    "company_name": "Refrigeration Electrical Eng.",
+    "entity_id": "1026"
+  },
+  "1038": {
+    "ticker": "SAB",
+    "company_name": "Sabeco",
+    "entity_id": "1038"
+  },
+  "1641": {
+    "ticker": "STB",
+    "company_name": "Sacombank",
+    "entity_id": "1641"
+  },
+  "1691": {
+    "ticker": "SIP",
+    "company_name": "Sai Gon VRG Invest. Corp.",
+    "entity_id": "1691"
+  },
+  "1651": {
+    "ticker": "FMC",
+    "company_name": "Sao Ta Foods JSC",
+    "entity_id": "1651"
+  },
+  "1095": {
+    "ticker": "SCS",
+    "company_name": "SCSC Cargo Service",
+    "entity_id": "1095"
+  },
+  "1076": {
+    "ticker": "SSI",
+    "company_name": "SSI Securities Corporate",
+    "entity_id": "1076"
+  },
+  "1702": {
+    "ticker": "TCX",
+    "company_name": "Techcom Securities",
+    "entity_id": "1702"
+  },
+  "1007": {
+    "ticker": "TCB",
+    "company_name": "TechcomBank",
+    "entity_id": "1007"
+  },
+  "1065": {
+    "ticker": "TCM",
+    "company_name": "Thanh Cong Text. Garment",
+    "entity_id": "1065"
+  },
+  "1679": {
+    "ticker": "TLG",
+    "company_name": "Thien Long Group",
+    "entity_id": "1679"
+  },
+  "1661": {
+    "ticker": "TDM",
+    "company_name": "Thu Dau Mot Water",
+    "entity_id": "1661"
+  },
+  "1077": {
+    "ticker": "TPB",
+    "company_name": "Tien Phong Comm. Bank",
+    "entity_id": "1077"
+  },
+  "1655": {
+    "ticker": "TNH",
+    "company_name": "TNH Hospital Group JSC",
+    "entity_id": "1655"
+  },
+  "1040": {
+    "ticker": "VNM",
+    "company_name": "Viet Nam Dairy Products",
+    "entity_id": "1040"
+  },
+  "1078": {
+    "ticker": "VCI",
+    "company_name": "Vietcap Securities JSC",
+    "entity_id": "1078"
+  },
+  "1008": {
+    "ticker": "VCB",
+    "company_name": "VietcomBank",
+    "entity_id": "1008"
+  },
+  "1002": {
+    "ticker": "CTG",
+    "company_name": "VietinBank",
+    "entity_id": "1002"
+  },
+  "1091": {
+    "ticker": "VJC",
+    "company_name": "Vietjet Aviation",
+    "entity_id": "1091"
+  },
+  "1030": {
+    "ticker": "HVN",
+    "company_name": "Vietnam Airlines",
+    "entity_id": "1030"
+  },
+  "1009": {
+    "ticker": "VIB",
+    "company_name": "Vietnam International Bank",
+    "entity_id": "1009"
+  },
+  "1010": {
+    "ticker": "VPB",
+    "company_name": "Vietnam Prosperity Bank",
+    "entity_id": "1010"
+  },
+  "1665": {
+    "ticker": "CTR",
+    "company_name": "Viettel Construction",
+    "entity_id": "1665"
+  },
+  "1092": {
+    "ticker": "VTP",
+    "company_name": "Viettel Post",
+    "entity_id": "1092"
+  },
+  "1023": {
+    "ticker": "VGC",
+    "company_name": "Viglacera",
+    "entity_id": "1023"
+  },
+  "1018": {
+    "ticker": "VRE",
+    "company_name": "Vincom Retail",
+    "entity_id": "1018"
+  },
+  "1027": {
+    "ticker": "VIC",
+    "company_name": "Vingroup",
+    "entity_id": "1027"
+  },
+  "1039": {
+    "ticker": "VHC",
+    "company_name": "Vinh Hoan Corp.",
+    "entity_id": "1039"
+  },
+  "1019": {
+    "ticker": "VHM",
+    "company_name": "Vinhomes",
+    "entity_id": "1019"
+  },
+  "1055": {
+    "ticker": "VEA",
+    "company_name": "VN Engine & Agri. Machinery",
+    "entity_id": "1055"
+  },
+  "1689": {
+    "ticker": "PLX",
+    "company_name": "VN National Petroleum Gp.",
+    "entity_id": "1689"
+  },
+  "1079": {
+    "ticker": "VND",
+    "company_name": "VNDirect Securities",
+    "entity_id": "1079"
+  }
+}

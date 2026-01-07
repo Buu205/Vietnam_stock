@@ -181,3 +181,6 @@ concensus_report/raw_extracts/*.json
 concensus_report/raw_extracts/*.txt
 # Gemini CLI settings (contains user-specific config)
 .gemini/
+
+# HSC Credentials (sensitive)
+PROCESSORS/forecast/hsc/credentials.json

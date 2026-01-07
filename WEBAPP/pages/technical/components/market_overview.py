@@ -93,64 +93,6 @@ def render_market_overview(service: 'TADashboardService') -> None:
     _render_divergence_alert(state)
 
 
-def _render_pending_swing_lows_html(state) -> str:
-    """
-    Render HTML for pending swing lows section.
-    Returns empty string if no pending swing lows.
-    """
-    has_ma20_pending = state.ma20_pending_low is not None
-    has_ma50_pending = state.ma50_pending_low is not None
-
-    if not has_ma20_pending and not has_ma50_pending:
-        return ""
-
-    # Build pending items HTML
-    pending_items = []
-
-    if has_ma20_pending:
-        # Determine if pending will be higher low when confirmed
-        will_be_higher = state.ma20_pending_higher_low
-        arrow = '↗' if will_be_higher else '↘'
-        result_text = 'Higher Low' if will_be_higher else 'Lower Low'
-        result_color = 'var(--positive)' if will_be_higher else 'var(--negative)'
-
-        pending_items.append(f'''
-            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                <span style="color: var(--purple-primary); font-size: 0.65rem; width: 40px;">MA20:</span>
-                <span style="color: var(--amber-primary); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{state.ma20_pending_low:.1f}%</span>
-                <span style="color: var(--amber-primary); font-size: 0.6rem;">⏳ Chờ confirm</span>
-                <span style="color: var(--text-muted); font-size: 0.6rem;">→ Nếu xác nhận:</span>
-                <span style="color: {result_color}; font-size: 0.6rem; font-weight: 600;">{arrow} {result_text}</span>
-            </div>
-        ''')
-
-    if has_ma50_pending:
-        will_be_higher = state.ma50_pending_higher_low
-        arrow = '↗' if will_be_higher else '↘'
-        result_text = 'Higher Low' if will_be_higher else 'Lower Low'
-        result_color = 'var(--positive)' if will_be_higher else 'var(--negative)'
-
-        pending_items.append(f'''
-            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                <span style="color: var(--cyan-primary); font-size: 0.65rem; width: 40px;">MA50:</span>
-                <span style="color: var(--amber-primary); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{state.ma50_pending_low:.1f}%</span>
-                <span style="color: var(--amber-primary); font-size: 0.6rem;">⏳ Chờ confirm</span>
-                <span style="color: var(--text-muted); font-size: 0.6rem;">→ Nếu xác nhận:</span>
-                <span style="color: {result_color}; font-size: 0.6rem; font-weight: 600;">{arrow} {result_text}</span>
-            </div>
-        ''')
-
-    return f'''
-        <div style="margin-top: 8px; padding: 8px 10px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px;">
-            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                <span style="color: var(--amber-primary); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">⏳ Pending Swing Lows</span>
-                <span style="color: var(--text-muted); font-size: 0.55rem;">(cần thêm 1 ngày để xác nhận)</span>
-            </div>
-            {''.join(pending_items)}
-        </div>
-    '''
-
-
 def _render_market_metrics_bar(state) -> None:
     """Render compact inline metrics bar with HTML styling."""
 
@@ -517,17 +459,43 @@ def _render_breadth_gauges(state) -> None:
     if is_uptrend and signal_key in ['STRONG_BUY', 'BUY'] and is_recovering:
         recovery_html = '<span class="status-positive" style="font-size: 0.7rem; margin-left: 6px;">▲ Recovering</span>'
 
-    # Render comprehensive Signal Matrix Card
-    st.markdown(f'''
+    # Swing Low display logic: show pending if exists, otherwise confirmed
+    # MA20
+    if state.ma20_pending_low is not None:
+        ma20_prev = state.ma20_recent_low  # confirmed becomes "prev"
+        ma20_recent = state.ma20_pending_low  # pending becomes "recent"
+        ma20_higher = state.ma20_pending_higher_low
+        ma20_status_text = 'Chờ xác nhận'
+        ma20_is_pending = True
+    else:
+        ma20_prev = state.ma20_prev_low
+        ma20_recent = state.ma20_recent_low
+        ma20_higher = state.ma20_higher_low
+        ma20_status_text = 'Đã xác nhận' if ma20_higher else ''
+        ma20_is_pending = False
+
+    # MA50
+    if state.ma50_pending_low is not None:
+        ma50_prev = state.ma50_recent_low
+        ma50_recent = state.ma50_pending_low
+        ma50_higher = state.ma50_pending_higher_low
+        ma50_status_text = 'Chờ xác nhận'
+        ma50_is_pending = True
+    else:
+        ma50_prev = state.ma50_prev_low
+        ma50_recent = state.ma50_recent_low
+        ma50_higher = state.ma50_higher_low
+        ma50_status_text = 'Đã xác nhận' if ma50_higher else ''
+        ma50_is_pending = False
+
+    # Render comprehensive Signal Matrix Card - use st.html() for reliable rendering (no HTML comments!)
+    st.html(f'''
     <div style="margin-top: 16px; background: rgba(0,0,0,0.4); border-radius: 12px; overflow: hidden;">
-        <!-- Header Row: Score + Trend + Signal -->
         <div style="display: flex; align-items: stretch; border-bottom: 1px solid rgba(255,255,255,0.1);">
-            <!-- Score Box -->
             <div style="padding: 16px 20px; background: rgba(0,0,0,0.3); border-right: 1px solid rgba(255,255,255,0.1); text-align: center; min-width: 90px;">
                 <div style="color: {score_color}; font-size: 2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; line-height: 1;">{market_score:.0f}</div>
                 <div style="color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px;">Score</div>
             </div>
-            <!-- Trend Status -->
             <div style="padding: 16px; border-right: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; justify-content: center;">
                 <div style="color: {trend_color}; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 4px;">
                     <span>{trend_icon}</span>
@@ -535,7 +503,6 @@ def _render_breadth_gauges(state) -> None:
                 </div>
                 <div style="color: var(--text-muted); font-size: 0.65rem; margin-top: 2px;">MA50≥50 & MA100≥50</div>
             </div>
-            <!-- Signal Badge -->
             <div style="flex: 1; padding: 16px; display: flex; align-items: center; justify-content: flex-end;">
                 <div style="background: {signal['bg']}; border: 1px solid {signal['color']}40; border-radius: 8px; padding: 8px 16px;">
                     <div style="color: {signal['color']}; font-size: 1rem; font-weight: 700; letter-spacing: 0.05em;">{signal['label']}</div>
@@ -543,10 +510,8 @@ def _render_breadth_gauges(state) -> None:
                 </div>
             </div>
         </div>
-        <!-- Breadth Breakdown -->
         <div style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1);">
             <div style="color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">Breadth Breakdown</div>
-            <!-- MA20 -->
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                 <span class="text-primary-emphasis" style="font-size: 0.75rem; width: 45px;">MA20</span>
                 <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
@@ -555,7 +520,6 @@ def _render_breadth_gauges(state) -> None:
                 <span class="metric-value-xs" style="width: 35px; text-align: right;">{b_ma20:.0f}%</span>
                 <span class="text-muted" style="font-size: 0.65rem; width: 50px;">Timing</span>
             </div>
-            <!-- MA50 -->
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                 <span class="text-secondary-emphasis" style="font-size: 0.75rem; width: 45px;">MA50</span>
                 <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
@@ -564,7 +528,6 @@ def _render_breadth_gauges(state) -> None:
                 <span class="metric-value-xs" style="width: 35px; text-align: right;">{b_ma50:.0f}%</span>
                 <span class="text-muted" style="font-size: 0.65rem; width: 50px;">Trend{'  ⚠' if b_ma50 < 50 else ''}</span>
             </div>
-            <!-- MA100 -->
             <div style="display: flex; align-items: center; gap: 8px;">
                 <span class="text-accent-emphasis" style="font-size: 0.75rem; width: 45px;">MA100</span>
                 <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
@@ -573,35 +536,29 @@ def _render_breadth_gauges(state) -> None:
                 <span class="metric-value-xs" style="width: 35px; text-align: right;">{b_ma100:.0f}%</span>
                 <span class="text-muted" style="font-size: 0.65rem; width: 50px;">Safety</span>
             </div>
-            <!-- Swing Low Detection (Confirmed) -->
             <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
-                <div style="color: var(--text-muted); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Swing Lows (Confirmed)</div>
-                <!-- MA20 Swing Lows -->
+                <div style="color: var(--text-muted); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Swing Lows (Recent)</div>
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                     <span style="color: var(--purple-primary); font-size: 0.65rem; width: 40px;">MA20:</span>
-                    <span style="color: var(--text-secondary); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">{state.ma20_prev_low:.1f}%</span>
-                    <span style="color: {'var(--positive)' if state.ma20_higher_low else 'var(--negative)'}; font-size: 0.75rem; font-weight: 600;">{'↗' if state.ma20_higher_low else '↘'}</span>
-                    <span style="color: {'var(--positive)' if state.ma20_higher_low else 'var(--text-primary)'}; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{state.ma20_recent_low:.1f}%</span>
-                    <span style="background: {'var(--positive)' if state.ma20_higher_low else 'var(--negative)'}20; color: {'var(--positive)' if state.ma20_higher_low else 'var(--negative)'}; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">{'Higher Low ✓' if state.ma20_higher_low else 'Lower Low'}</span>
+                    <span style="color: var(--text-secondary); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">{ma20_prev:.1f}%</span>
+                    <span style="color: {'var(--positive)' if ma20_higher else 'var(--negative)'}; font-size: 0.75rem; font-weight: 600;">{'↗' if ma20_higher else '↘'}</span>
+                    <span style="color: {'var(--positive)' if ma20_higher else 'var(--text-primary)'}; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{ma20_recent:.1f}%</span>
+                    <span style="background: {'#F59E0B' if ma20_is_pending else ('#10B981' if ma20_higher else '#EF4444')}20; color: {'#F59E0B' if ma20_is_pending else ('#10B981' if ma20_higher else '#EF4444')}; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">{'Higher Low' if ma20_higher else 'Lower Low'} -- {ma20_status_text}</span>
                 </div>
-                <!-- MA50 Swing Lows -->
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                     <span style="color: var(--cyan-primary); font-size: 0.65rem; width: 40px;">MA50:</span>
-                    <span style="color: var(--text-secondary); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">{state.ma50_prev_low:.1f}%</span>
-                    <span style="color: {'var(--positive)' if state.ma50_higher_low else 'var(--negative)'}; font-size: 0.75rem; font-weight: 600;">{'↗' if state.ma50_higher_low else '↘'}</span>
-                    <span style="color: {'var(--positive)' if state.ma50_higher_low else 'var(--text-primary)'}; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{state.ma50_recent_low:.1f}%</span>
-                    <span style="background: {'var(--positive)' if state.ma50_higher_low else 'var(--negative)'}20; color: {'var(--positive)' if state.ma50_higher_low else 'var(--negative)'}; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">{'Higher Low ✓' if state.ma50_higher_low else 'Lower Low'}</span>
+                    <span style="color: var(--text-secondary); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">{ma50_prev:.1f}%</span>
+                    <span style="color: {'var(--positive)' if ma50_higher else 'var(--negative)'}; font-size: 0.75rem; font-weight: 600;">{'↗' if ma50_higher else '↘'}</span>
+                    <span style="color: {'var(--positive)' if ma50_higher else 'var(--text-primary)'}; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{ma50_recent:.1f}%</span>
+                    <span style="background: {'#F59E0B' if ma50_is_pending else ('#10B981' if ma50_higher else '#EF4444')}20; color: {'#F59E0B' if ma50_is_pending else ('#10B981' if ma50_higher else '#EF4444')}; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">{'Higher Low' if ma50_higher else 'Lower Low'} -- {ma50_status_text}</span>
                 </div>
             </div>
-            <!-- Pending Swing Lows (if any) -->
-            {_render_pending_swing_lows_html(state)}
         </div>
-        <!-- Action Recommendation -->
         <div style="padding: 12px 16px; background: {signal['bg']}; border-left: 3px solid {signal['color']};">
             <div style="color: {signal['color']}; font-size: 0.85rem; font-weight: 500;">{signal['action']}</div>
         </div>
     </div>
-    ''', unsafe_allow_html=True)
+    ''')
 
     # Render Bottom Formation Stage Indicator (only when bottom_stage is detected)
     _render_bottom_stage_indicator(state)

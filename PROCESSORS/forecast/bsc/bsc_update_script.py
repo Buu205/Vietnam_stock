@@ -3,16 +3,20 @@
 BSC Forecast Excel Re-read Script
 ==================================
 
-Manual script to re-read BSC Forecast Excel and regenerate parquet files.
+Manual script to re-read BSC Forecast Excel and regenerate parquet + JSON files.
 
 Use this when BSC Research updates the forecast Excel file with new data.
+
+Flow:
+    Excel → Parquet → bsc.json (for webapp)
 
 Usage:
     python3 PROCESSORS/forecast/bsc/bsc_update_script.py
 
-Updated: 2025-12-17
+Updated: 2026-01-07
 """
 
+import json
 import sys
 import os
 from pathlib import Path
@@ -47,6 +51,61 @@ def verify_update(parquet_path: Path, symbol: str = "HDB") -> dict:
         "updated_at": str(row['updated_at'].values[0]),
         "file_mtime": datetime.fromtimestamp(parquet_path.stat().st_mtime).isoformat()
     }
+
+
+def update_bsc_json(parquet_path: Path) -> int:
+    """
+    Update bsc.json from bsc_individual.parquet.
+
+    This ensures the webapp reads the latest data from JSON source.
+
+    Args:
+        parquet_path: Path to bsc_individual.parquet
+
+    Returns:
+        Number of stocks written to JSON
+    """
+    json_path = project_root / "DATA" / "processed" / "forecast" / "sources" / "bsc.json"
+    json_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Use absolute path
+    abs_parquet_path = project_root / parquet_path if not parquet_path.is_absolute() else parquet_path
+    df = pd.read_parquet(abs_parquet_path)
+
+    stocks = []
+    for _, row in df.iterrows():
+        stock = {
+            "symbol": str(row.get('symbol', '')).upper(),
+            "sector": row.get('sector', ''),
+            "entity_type": row.get('entity_type', 'COMPANY'),
+            "target_price": float(row['target_price']) if pd.notna(row.get('target_price')) else None,
+            "current_price": float(row['current_price']) if pd.notna(row.get('current_price')) else None,
+            "rating": row.get('rating', ''),
+            # BSC has 2025F/2026F forecast - store as 2025f/2026f
+            "npatmi_2025f": float(row['npatmi_2025f']) if pd.notna(row.get('npatmi_2025f')) else None,
+            "npatmi_2026f": float(row['npatmi_2026f']) if pd.notna(row.get('npatmi_2026f')) else None,
+            "npatmi_2027f": None,  # BSC doesn't have 2027F forecast yet
+            "eps_2025f": float(row['eps_2025f']) if pd.notna(row.get('eps_2025f')) else None,
+            "eps_2026f": float(row['eps_2026f']) if pd.notna(row.get('eps_2026f')) else None,
+            "eps_2027f": None,
+            "pe_2025f": float(row['pe_fwd_2025']) if pd.notna(row.get('pe_fwd_2025')) else None,
+            "pe_2026f": float(row['pe_fwd_2026']) if pd.notna(row.get('pe_fwd_2026')) else None,
+            "pe_2027f": None,
+            "notes": ""
+        }
+        stocks.append(stock)
+
+    data = {
+        "source": "bsc",
+        "updated_at": datetime.now().strftime("%d/%m/%y"),
+        "schema_version": "2025-2027",
+        "stocks": sorted(stocks, key=lambda x: x['symbol'])
+    }
+
+    with open(json_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+    return len(stocks)
 
 
 def main():
@@ -146,11 +205,20 @@ def main():
         print(f"{sector_name:<25} {pe_25:>12} {pe_26:>12} {pb_25:>12}")
     print()
 
+    # Update bsc.json for webapp
+    print("=" * 60)
+    print("UPDATING bsc.json")
+    print("=" * 60)
+    json_count = update_bsc_json(parquet_path)
+    print(f"  ✅ Updated bsc.json with {json_count} stocks")
+    print()
+
     print("Output files generated:")
     print(f"  - DATA/processed/forecast/bsc/bsc_individual.parquet")
     print(f"  - DATA/processed/forecast/bsc/bsc_sector_valuation.parquet")
     print(f"  - DATA/processed/forecast/bsc/bsc_combined.parquet")
     print(f"  - DATA/processed/forecast/bsc/README.md")
+    print(f"  - DATA/processed/forecast/sources/bsc.json (webapp source)")
     print()
     print("✅ Done!")
 

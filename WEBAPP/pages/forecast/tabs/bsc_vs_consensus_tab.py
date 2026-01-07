@@ -23,16 +23,142 @@ from WEBAPP.components.styles.comparison_styles import (
     COLORS,
 )
 
-# Data path - unified.parquet contains all comparison data
-COMPARISON_PATH = Path("DATA/processed/forecast/unified.parquet")
+# Data paths
+FORECAST_SOURCES_PATH = Path("DATA/processed/forecast/sources")
+UNIFIED_PARQUET_PATH = Path("DATA/processed/forecast/unified.parquet")
 
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=300)  # Cache 5 minutes for fresh data
 def load_comparison_data() -> pd.DataFrame:
-    """Load pre-computed comparison data."""
-    if not COMPARISON_PATH.exists():
+    """Load comparison data from mixed sources.
+
+    JSON sources (fresh): bsc.json, hcm.json, vci.json
+    Parquet source (SSI): unified.parquet
+    """
+    import json
+    from datetime import datetime
+
+    # Load JSON sources (BSC, HCM, VCI)
+    sources = {}
+    for source in ['bsc', 'hcm', 'vci']:
+        path = FORECAST_SOURCES_PATH / f"{source}.json"
+        if path.exists():
+            with open(path, encoding='utf-8') as f:
+                data = json.load(f)
+                sources[source] = {s['symbol']: s for s in data.get('stocks', [])}
+
+    # Load SSI from unified.parquet
+    ssi_data = {}
+    if UNIFIED_PARQUET_PATH.exists():
+        unified_df = pd.read_parquet(UNIFIED_PARQUET_PATH)
+        for _, row in unified_df.iterrows():
+            symbol = row['symbol']
+            ssi_data[symbol] = {
+                'symbol': symbol,
+                'target_price': row.get('ssi_tp'),
+                'npatmi_2026f': row.get('ssi_npatmi_26'),
+                'npatmi_2027f': row.get('ssi_npatmi_27'),
+            }
+    sources['ssi'] = ssi_data
+
+    if not sources.get('bsc'):
         return pd.DataFrame()
-    return pd.read_parquet(COMPARISON_PATH)
+
+    # Build unified dataframe from BSC as base
+    rows = []
+    all_symbols = set()
+    for src_data in sources.values():
+        all_symbols.update(src_data.keys())
+
+    for symbol in all_symbols:
+        bsc = sources.get('bsc', {}).get(symbol, {})
+        hcm = sources.get('hcm', {}).get(symbol, {})
+        vci = sources.get('vci', {}).get(symbol, {})
+        ssi = sources.get('ssi', {}).get(symbol, {})
+
+        # Get base info from any available source
+        base = bsc or hcm or vci or ssi
+
+        row = {
+            'symbol': symbol,
+            'sector': base.get('sector', ''),
+            'entity_type': base.get('entity_type', 'COMPANY'),
+            'current_price': bsc.get('current_price') or hcm.get('current_price') or vci.get('current_price') or ssi.get('current_price'),
+            # BSC data
+            'bsc_tp': bsc.get('target_price'),
+            'bsc_npatmi_26': bsc.get('npatmi_2026f'),
+            'bsc_npatmi_27': bsc.get('npatmi_2027f'),
+            'rating': bsc.get('rating'),
+            # HCM (HSC) data
+            'hcm_tp': hcm.get('target_price'),
+            'hcm_npatmi_26': hcm.get('npatmi_2026f'),
+            'hcm_npatmi_27': hcm.get('npatmi_2027f'),
+            # VCI data
+            'vci_tp': vci.get('target_price'),
+            'vci_npatmi_26': vci.get('npatmi_2026f'),
+            'vci_npatmi_27': vci.get('npatmi_2027f'),
+            # SSI data
+            'ssi_tp': ssi.get('target_price'),
+            'ssi_npatmi_26': ssi.get('npatmi_2026f'),
+            'ssi_npatmi_27': ssi.get('npatmi_2027f'),
+        }
+        rows.append(row)
+
+    df = pd.DataFrame(rows)
+
+    # Calculate consensus metrics
+    def calc_consensus(row, metric_prefix):
+        vals = [row.get(f'{src}_{metric_prefix}') for src in ['bsc', 'vci', 'hcm', 'ssi']]
+        vals = [v for v in vals if pd.notna(v) and v > 0]
+        if not vals:
+            return None, None, None
+        mean_val = np.mean(vals)
+        spread = (max(vals) - min(vals)) / mean_val * 100 if mean_val > 0 else 0
+        bsc_val = row.get(f'bsc_{metric_prefix}')
+        dev = ((mean_val - bsc_val) / bsc_val * 100) if pd.notna(bsc_val) and bsc_val > 0 else None
+        return mean_val, dev, spread
+
+    # Add consensus columns
+    for _, row in df.iterrows():
+        # NPATMI 2026
+        mean_26, dev_26, spread_26 = calc_consensus(row, 'npatmi_26')
+        df.loc[df['symbol'] == row['symbol'], 'npatmi_26_cons_mean'] = mean_26
+        df.loc[df['symbol'] == row['symbol'], 'npatmi_26_dev_pct'] = dev_26
+        df.loc[df['symbol'] == row['symbol'], 'npatmi_26_spread_pct'] = spread_26
+
+        # TP consensus
+        tp_mean, tp_dev, tp_spread = calc_consensus(row, 'tp')
+        df.loc[df['symbol'] == row['symbol'], 'tp_cons_mean'] = tp_mean
+        df.loc[df['symbol'] == row['symbol'], 'tp_dev_pct'] = tp_dev
+        df.loc[df['symbol'] == row['symbol'], 'tp_spread_pct'] = tp_spread
+
+    # Calculate insight
+    def get_insight(row):
+        dev = row.get('npatmi_26_dev_pct')
+        if pd.isna(dev):
+            return 'no_data'
+        if dev <= -10:
+            return 'bullish_gap'
+        elif dev >= 10:
+            return 'bearish_gap'
+        elif -5 <= dev <= 5:
+            return 'aligned'
+        elif dev < 0:
+            return 'slight_bull'
+        else:
+            return 'slight_bear'
+
+    df['insight'] = df.apply(get_insight, axis=1)
+
+    # Source count
+    df['source_count'] = df.apply(
+        lambda r: sum(1 for src in ['bsc', 'vci', 'hcm', 'ssi'] if pd.notna(r.get(f'{src}_npatmi_26'))),
+        axis=1
+    )
+
+    df['build_timestamp'] = datetime.now().isoformat()
+
+    return df
 
 
 def format_npatmi_t(val) -> str:
