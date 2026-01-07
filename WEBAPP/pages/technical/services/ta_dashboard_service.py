@@ -120,12 +120,14 @@ class TADashboardService:
             ma20_rising_from_low=higher_lows['ma20_rising_from_low'],
             ma20_pending_low=higher_lows['ma20_pending_low'],
             ma20_pending_higher_low=higher_lows['ma20_pending_higher_low'],
+            ma20_just_confirmed=higher_lows['ma20_just_confirmed'],
             ma50_higher_low=higher_lows['ma50_higher_low'],
             ma50_recent_low=higher_lows['ma50_recent_low'],
             ma50_prev_low=higher_lows['ma50_prev_low'],
             ma50_rising_from_low=higher_lows['ma50_rising_from_low'],
             ma50_pending_low=higher_lows['ma50_pending_low'],
             ma50_pending_higher_low=higher_lows['ma50_pending_higher_low'],
+            ma50_just_confirmed=higher_lows['ma50_just_confirmed'],
             bottom_stage=bottom_stage,
             ad_ratio=latest_br.get('ad_ratio', 1.0),
             exposure_level=exposure,
@@ -207,11 +209,20 @@ class TADashboardService:
                 if len(sector_df) < 5:
                     continue
 
-                # RS Ratio = sector strength relative to market average
-                sector_df['rs_ratio'] = sector_df['strength_score'] / sector_df['strength_score'].mean()
+                # Skip sectors with too few stocks (< 5) to avoid noisy data
+                if 'total_stocks' in sector_df.columns:
+                    avg_stocks = sector_df['total_stocks'].mean()
+                    if avg_stocks < 5:
+                        continue
 
-                # RS Momentum = rate of change
+                # RS Ratio = sector strength relative to market average
+                # Use max(mean, 10) to avoid extreme ratios when mean is very low
+                mean_score = max(sector_df['strength_score'].mean(), 10)
+                sector_df['rs_ratio'] = sector_df['strength_score'] / mean_score
+
+                # RS Momentum = rate of change (clipped to [-100, 150] to avoid outliers)
                 sector_df['rs_momentum'] = sector_df['rs_ratio'].diff(5) * 100
+                sector_df['rs_momentum'] = sector_df['rs_momentum'].clip(-100, 150)
 
                 # Smooth
                 sector_df['rs_ratio_smooth'] = sector_df['rs_ratio'].rolling(smooth, min_periods=1).mean()
@@ -750,12 +761,14 @@ class TADashboardService:
             'ma20_rising_from_low': False,
             'ma20_pending_low': None,        # Pending swing low value
             'ma20_pending_higher_low': None, # Will be Higher Low if confirmed?
+            'ma20_just_confirmed': False,    # True if swing low was just confirmed today
             'ma50_higher_low': False,
             'ma50_recent_low': 0,
             'ma50_prev_low': 0,
             'ma50_rising_from_low': False,
             'ma50_pending_low': None,
             'ma50_pending_higher_low': None,
+            'ma50_just_confirmed': False,    # True if swing low was just confirmed today
         }
 
         # Need enough data for swing detection
@@ -782,10 +795,16 @@ class TADashboardService:
             result['ma20_prev_low'] = prev_low['value']
             result['ma20_higher_low'] = recent_low['value'] > prev_low['value']
             result['ma20_rising_from_low'] = ma20_values[-1] > recent_low['value']
+            # Check if just confirmed: recent swing low at position n-3 (was pending yesterday)
+            just_confirmed_idx = len(ma20_values) - SWING_LOW_CONFIRM_DAYS - 1
+            result['ma20_just_confirmed'] = (recent_low['index'] == just_confirmed_idx)
         elif len(ma20_confirmed) == 1:
             result['ma20_recent_low'] = ma20_confirmed[0]['value']
             result['ma20_prev_low'] = ma20_confirmed[0]['value']
             result['ma20_rising_from_low'] = ma20_values[-1] > ma20_confirmed[0]['value']
+            # Check if just confirmed
+            just_confirmed_idx = len(ma20_values) - SWING_LOW_CONFIRM_DAYS - 1
+            result['ma20_just_confirmed'] = (ma20_confirmed[0]['index'] == just_confirmed_idx)
 
         # Check pending swing low for MA20
         if ma20_pending:
@@ -793,6 +812,8 @@ class TADashboardService:
             # Will this be a higher low if confirmed?
             if result['ma20_recent_low'] > 0:
                 result['ma20_pending_higher_low'] = ma20_pending['value'] > result['ma20_recent_low']
+            # If there's pending, it's not just confirmed
+            result['ma20_just_confirmed'] = False
 
         # Detect Swing Lows for MA50 (confirmed + pending)
         ma50_confirmed, ma50_pending = self._find_swing_lows_with_pending(ma50_values)
@@ -804,16 +825,24 @@ class TADashboardService:
             result['ma50_prev_low'] = prev_low['value']
             result['ma50_higher_low'] = recent_low['value'] > prev_low['value']
             result['ma50_rising_from_low'] = ma50_values[-1] > recent_low['value']
+            # Check if just confirmed: recent swing low at position n-3 (was pending yesterday)
+            just_confirmed_idx = len(ma50_values) - SWING_LOW_CONFIRM_DAYS - 1
+            result['ma50_just_confirmed'] = (recent_low['index'] == just_confirmed_idx)
         elif len(ma50_confirmed) == 1:
             result['ma50_recent_low'] = ma50_confirmed[0]['value']
             result['ma50_prev_low'] = ma50_confirmed[0]['value']
             result['ma50_rising_from_low'] = ma50_values[-1] > ma50_confirmed[0]['value']
+            # Check if just confirmed
+            just_confirmed_idx = len(ma50_values) - SWING_LOW_CONFIRM_DAYS - 1
+            result['ma50_just_confirmed'] = (ma50_confirmed[0]['index'] == just_confirmed_idx)
 
         # Check pending swing low for MA50
         if ma50_pending:
             result['ma50_pending_low'] = ma50_pending['value']
             if result['ma50_recent_low'] > 0:
                 result['ma50_pending_higher_low'] = ma50_pending['value'] > result['ma50_recent_low']
+            # If there's pending, it's not just confirmed
+            result['ma50_just_confirmed'] = False
 
         return result
 

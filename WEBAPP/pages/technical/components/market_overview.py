@@ -467,12 +467,15 @@ def _render_breadth_gauges(state) -> None:
         ma20_higher = state.ma20_pending_higher_low
         ma20_status_text = 'Chờ xác nhận'
         ma20_is_pending = True
+        ma20_sub_text = ''
     else:
         ma20_prev = state.ma20_prev_low
         ma20_recent = state.ma20_recent_low
         ma20_higher = state.ma20_higher_low
         ma20_status_text = 'Đã xác nhận' if ma20_higher else ''
         ma20_is_pending = False
+        # Show sub-text if just confirmed (was pending yesterday)
+        ma20_sub_text = '<div style="color: var(--text-muted); font-size: 0.55rem; margin-top: 2px;">Hôm qua: Chờ xác nhận</div>' if state.ma20_just_confirmed else ''
 
     # MA50
     if state.ma50_pending_low is not None:
@@ -481,12 +484,15 @@ def _render_breadth_gauges(state) -> None:
         ma50_higher = state.ma50_pending_higher_low
         ma50_status_text = 'Chờ xác nhận'
         ma50_is_pending = True
+        ma50_sub_text = ''
     else:
         ma50_prev = state.ma50_prev_low
         ma50_recent = state.ma50_recent_low
         ma50_higher = state.ma50_higher_low
         ma50_status_text = 'Đã xác nhận' if ma50_higher else ''
         ma50_is_pending = False
+        # Show sub-text if just confirmed (was pending yesterday)
+        ma50_sub_text = '<div style="color: var(--text-muted); font-size: 0.55rem; margin-top: 2px;">Hôm qua: Chờ xác nhận</div>' if state.ma50_just_confirmed else ''
 
     # Render comprehensive Signal Matrix Card - use st.html() for reliable rendering (no HTML comments!)
     st.html(f'''
@@ -538,19 +544,25 @@ def _render_breadth_gauges(state) -> None:
             </div>
             <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
                 <div style="color: var(--text-muted); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Swing Lows (Recent)</div>
-                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap;">
                     <span style="color: var(--purple-primary); font-size: 0.65rem; width: 40px;">MA20:</span>
                     <span style="color: var(--text-secondary); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">{ma20_prev:.1f}%</span>
                     <span style="color: {'var(--positive)' if ma20_higher else 'var(--negative)'}; font-size: 0.75rem; font-weight: 600;">{'↗' if ma20_higher else '↘'}</span>
                     <span style="color: {'var(--positive)' if ma20_higher else 'var(--text-primary)'}; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{ma20_recent:.1f}%</span>
-                    <span style="background: {'#F59E0B' if ma20_is_pending else ('#10B981' if ma20_higher else '#EF4444')}20; color: {'#F59E0B' if ma20_is_pending else ('#10B981' if ma20_higher else '#EF4444')}; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">{'Higher Low' if ma20_higher else 'Lower Low'} -- {ma20_status_text}</span>
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="background: {'#F59E0B' if ma20_is_pending else ('#10B981' if ma20_higher else '#EF4444')}20; color: {'#F59E0B' if ma20_is_pending else ('#10B981' if ma20_higher else '#EF4444')}; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">{'Higher Low' if ma20_higher else 'Lower Low'} -- {ma20_status_text}</span>
+                        {ma20_sub_text}
+                    </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap;">
                     <span style="color: var(--cyan-primary); font-size: 0.65rem; width: 40px;">MA50:</span>
                     <span style="color: var(--text-secondary); font-size: 0.7rem; font-family: 'JetBrains Mono', monospace;">{ma50_prev:.1f}%</span>
                     <span style="color: {'var(--positive)' if ma50_higher else 'var(--negative)'}; font-size: 0.75rem; font-weight: 600;">{'↗' if ma50_higher else '↘'}</span>
                     <span style="color: {'var(--positive)' if ma50_higher else 'var(--text-primary)'}; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{ma50_recent:.1f}%</span>
-                    <span style="background: {'#F59E0B' if ma50_is_pending else ('#10B981' if ma50_higher else '#EF4444')}20; color: {'#F59E0B' if ma50_is_pending else ('#10B981' if ma50_higher else '#EF4444')}; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">{'Higher Low' if ma50_higher else 'Lower Low'} -- {ma50_status_text}</span>
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="background: {'#F59E0B' if ma50_is_pending else ('#10B981' if ma50_higher else '#EF4444')}20; color: {'#F59E0B' if ma50_is_pending else ('#10B981' if ma50_higher else '#EF4444')}; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: 600;">{'Higher Low' if ma50_higher else 'Lower Low'} -- {ma50_status_text}</span>
+                        {ma50_sub_text}
+                    </div>
                 </div>
             </div>
         </div>

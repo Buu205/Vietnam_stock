@@ -1036,85 +1036,101 @@ elif active_tab == 1:
         st.markdown(f"### {selected_metric} Historical Trend with Statistical Bands")
         st.markdown("*Line chart with median and ±1σ, ±2σ bands for individual stock.*")
 
-        # Sector selector for individual stock
-        if sector_scopes:
-            stock_ind_sector = st.selectbox(
-                "Select Sector",
-                options=sector_scopes,
-                index=0,
-                key="stock_ind_sector_select"
-            )
+        # Horizontal filter row: Direct ticker input | Sector | Stock
+        col_ticker, col_sector, col_stock = st.columns([1, 1.5, 1.5])
 
-            # Get tickers in this sector
-            ind_sector_tickers = get_sector_tickers(stock_ind_sector)
+        with col_ticker:
+            direct_ticker = st.text_input(
+                "Ticker",
+                value="",
+                placeholder="VNM, FPT...",
+                key="stock_ind_direct_ticker"
+            ).strip().upper()
 
+        # Sector selector
+        with col_sector:
+            if sector_scopes:
+                stock_ind_sector = st.selectbox(
+                    "Sector",
+                    options=sector_scopes,
+                    index=0,
+                    key="stock_ind_sector_select"
+                )
+            else:
+                stock_ind_sector = None
+
+        # Get tickers in selected sector
+        ind_sector_tickers = get_sector_tickers(stock_ind_sector) if stock_ind_sector else []
+
+        with col_stock:
             if ind_sector_tickers:
-                selected_stock = st.selectbox(
-                    "Select Stock",
+                selected_stock_dropdown = st.selectbox(
+                    "Stock",
                     options=ind_sector_tickers,
                     index=0,
                     key="individual_stock_select"
                 )
-
-                if selected_stock:
-                    stock_history = load_stock_valuation(selected_stock, days)
-
-                    if not stock_history.empty and primary_metric in stock_history.columns:
-                        # Create line chart with bands + histogram side-by-side
-                        col_line, col_hist = st.columns([0.7, 0.3])
-
-                        with col_line:
-                            fig_stock, stats_stock = line_with_statistical_bands(
-                                stock_history,
-                                date_col='date',
-                                value_col=primary_metric,
-                                metric_label=selected_metric,
-                                height=get_chart_config('line_with_bands').height,
-                                title=f"{selected_stock} - {selected_metric}"
-                            )
-                            if fig_stock:
-                                st.plotly_chart(fig_stock, width='stretch')
-                            else:
-                                st.warning(f"Not enough valid data for {selected_stock}")
-
-                        with col_hist:
-                            # Histogram distribution
-                            metric_data = stock_history[primary_metric].dropna()
-                            metric_key = primary_metric.upper().replace('_TTM', '').replace('_', '')
-                            clean_data = filter_outliers(metric_data, metric_key)
-
-                            if len(clean_data) >= 10:
-                                current_val = metric_data.iloc[-1] if len(metric_data) > 0 else None
-                                fig_hist = histogram_with_stats(
-                                    clean_data,
-                                    metric_label=selected_metric,
-                                    height=get_chart_config('line_with_bands').height,
-                                    current_value=current_val,
-                                    title="Distribution"
-                                )
-                                st.plotly_chart(fig_hist, width='stretch')
-
-                        # Stats cards
-                        if stats_stock:
-                            col1, col2, col3, col4 = st.columns(4)
-                            with col1:
-                                st.metric("Current", format_ratio(stats_stock.get('current')))
-                            with col2:
-                                st.metric("Median", format_ratio(stats_stock.get('median')))
-                            with col3:
-                                st.metric("Z-Score", format_zscore(stats_stock.get('z_score')))
-                            with col4:
-                                st.metric("Percentile", format_percent(stats_stock.get('percentile')))
-
-                            # Valuation assessment (HTML styled, no emojis)
-                            z = stats_stock.get('z_score', 0)
-                            st.markdown(f"**Assessment**: {render_valuation_assessment(z)}", unsafe_allow_html=True)
-                    else:
-                        st.warning(f"No {selected_metric} data available for {selected_stock}")
             else:
-                st.warning(f"No tickers found in {stock_ind_sector}")
-        else:
-            st.warning("No sectors available")
+                selected_stock_dropdown = None
+
+        # Priority: direct ticker input > dropdown selection
+        selected_stock = direct_ticker if direct_ticker else selected_stock_dropdown
+
+        if selected_stock:
+            stock_history = load_stock_valuation(selected_stock, days)
+
+            if not stock_history.empty and primary_metric in stock_history.columns:
+                # Create line chart with bands + histogram side-by-side
+                col_line, col_hist = st.columns([0.7, 0.3])
+
+                with col_line:
+                    fig_stock, stats_stock = line_with_statistical_bands(
+                        stock_history,
+                        date_col='date',
+                        value_col=primary_metric,
+                        metric_label=selected_metric,
+                        height=get_chart_config('line_with_bands').height,
+                        title=f"{selected_stock} - {selected_metric}"
+                    )
+                    if fig_stock:
+                        st.plotly_chart(fig_stock, width='stretch')
+                    else:
+                        st.warning(f"Not enough valid data for {selected_stock}")
+
+                with col_hist:
+                    # Histogram distribution
+                    metric_data = stock_history[primary_metric].dropna()
+                    metric_key = primary_metric.upper().replace('_TTM', '').replace('_', '')
+                    clean_data = filter_outliers(metric_data, metric_key)
+
+                    if len(clean_data) >= 10:
+                        current_val = metric_data.iloc[-1] if len(metric_data) > 0 else None
+                        fig_hist = histogram_with_stats(
+                            clean_data,
+                            metric_label=selected_metric,
+                            height=get_chart_config('line_with_bands').height,
+                            current_value=current_val,
+                            title="Distribution"
+                        )
+                        st.plotly_chart(fig_hist, width='stretch')
+
+                # Stats cards
+                if stats_stock:
+                    col1, col2, col3, col4 = st.columns(4)
+                    with col1:
+                        st.metric("Current", format_ratio(stats_stock.get('current')))
+                    with col2:
+                        st.metric("Median", format_ratio(stats_stock.get('median')))
+                    with col3:
+                        st.metric("Z-Score", format_zscore(stats_stock.get('z_score')))
+                    with col4:
+                        st.metric("Percentile", format_percent(stats_stock.get('percentile')))
+
+                    # Valuation assessment (HTML styled, no emojis)
+                    z = stats_stock.get('z_score', 0)
+                    st.markdown(f"**Assessment**: {render_valuation_assessment(z)}", unsafe_allow_html=True)
+            else:
+                st.warning(f"No {selected_metric} data available for {selected_stock}")
 
 # ============================================================================
 # TAB 2: DATA TABLES

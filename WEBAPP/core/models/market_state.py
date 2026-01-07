@@ -50,6 +50,7 @@ class MarketState:
     # MA20 Pending Swing Low (1 day bounce, waiting for confirmation)
     ma20_pending_low: Optional[float] = None        # Pending swing low value
     ma20_pending_higher_low: Optional[bool] = None  # Will be Higher Low if confirmed?
+    ma20_just_confirmed: bool = False               # True if swing low was just confirmed today
 
     # MA50: Same logic as MA20
     ma50_higher_low: bool = False
@@ -60,6 +61,7 @@ class MarketState:
     # MA50 Pending Swing Low
     ma50_pending_low: Optional[float] = None
     ma50_pending_higher_low: Optional[bool] = None
+    ma50_just_confirmed: bool = False               # True if swing low was just confirmed today
 
     # Bottom Formation Stage: CAPITULATION, ACCUMULATING, EARLY_REVERSAL, or None
     bottom_stage: Optional[str] = None
