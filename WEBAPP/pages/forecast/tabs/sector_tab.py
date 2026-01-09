@@ -14,7 +14,6 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from WEBAPP.core.styles import render_styled_table
-from WEBAPP.components.filters.forecast_filter_bar import WATCHLIST_PRESETS
 
 
 def format_number(val, decimals: int = 1, suffix: str = '') -> str:
@@ -318,57 +317,25 @@ def render_sector_tab(sector_df: pd.DataFrame, individual_df: pd.DataFrame, serv
         return
 
     # === CHART SECTION (TOP) ===
-    # Sector, watchlist and metric filter
-    col1, col2, col3 = st.columns([2, 1.5, 1.5])
+    # Sector and metric filter only
+    col1, col2 = st.columns([3, 1.5])
 
     sectors = sorted(sector_df['sector'].dropna().unique().tolist())
     sectors = [s for s in sectors if s != 'BSC Universal']
 
     with col1:
-        # Add "All" option at the beginning for watchlist mode
-        selected_sector = st.selectbox("Sector", ['All'] + sectors, key="sector_chart_filter")
+        selected_sector = st.selectbox("Sector", sectors, key="sector_chart_filter")
     with col2:
-        # Only show non-'All' watchlist options
-        watchlist_options = [k for k in WATCHLIST_PRESETS.keys() if k != 'All']
-        watchlist_filter = st.selectbox("Watchlist", watchlist_options, key="sector_watchlist")
-    with col3:
         metric = st.radio("Metric", ["PE", "PB"], horizontal=True, key="sector_chart_metric")
 
-    # Apply watchlist filter to individual_df
     chart_individual_df = individual_df.copy()
-    watchlist_tickers = WATCHLIST_PRESETS.get(watchlist_filter, [])
-    if watchlist_tickers:
-        chart_individual_df = chart_individual_df[chart_individual_df['symbol'].isin(watchlist_tickers)].copy()
 
     # Render Valuation Matrix chart
     try:
         from WEBAPP.services.valuation_service import ValuationService
         val_service = ValuationService()
 
-        # Handle "All" sector selection - get data from all sectors containing watchlist stocks
-        if selected_sector == 'All':
-            if watchlist_tickers:
-                # Get sectors that have watchlist stocks
-                watchlist_sectors = chart_individual_df['sector'].dropna().unique().tolist()
-            else:
-                watchlist_sectors = sectors
-
-            # Collect stats_data from all relevant sectors
-            stats_data = []
-            for sec in watchlist_sectors:
-                sec_data = val_service.get_industry_candle_data(sec, metric=metric)
-                if sec_data:
-                    # Filter by watchlist if active
-                    if watchlist_tickers:
-                        sec_data = [s for s in sec_data if s.get('symbol') in watchlist_tickers]
-                    stats_data.extend(sec_data)
-            chart_title = f"All Sectors ({len(stats_data)} stocks)"
-        else:
-            stats_data = val_service.get_industry_candle_data(selected_sector, metric=metric)
-            # Apply watchlist filter to stats_data if watchlist is selected
-            if watchlist_tickers:
-                stats_data = [s for s in stats_data if s.get('symbol') in watchlist_tickers]
-            chart_title = selected_sector
+        stats_data = val_service.get_industry_candle_data(selected_sector, metric=metric)
 
         if stats_data:
             # Get forward 2026 values from BSC
@@ -376,10 +343,7 @@ def render_sector_tab(sector_df: pd.DataFrame, individual_df: pd.DataFrame, serv
             vci_fwd_2026 = {}
 
             if not chart_individual_df.empty:
-                if selected_sector == 'All':
-                    sector_stocks = chart_individual_df
-                else:
-                    sector_stocks = chart_individual_df[chart_individual_df['sector'] == selected_sector]
+                sector_stocks = chart_individual_df[chart_individual_df['sector'] == selected_sector]
                 if metric == "PE":
                     bsc_fwd_2026 = dict(zip(sector_stocks['symbol'], sector_stocks['pe_fwd_2026']))
                 else:
@@ -389,13 +353,7 @@ def render_sector_tab(sector_df: pd.DataFrame, individual_df: pd.DataFrame, serv
             try:
                 comparison_df = service.get_bsc_vs_vci_comparison()
                 if not comparison_df.empty:
-                    if selected_sector == 'All':
-                        vci_sector = comparison_df
-                    else:
-                        vci_sector = comparison_df[comparison_df['sector'] == selected_sector]
-                    # Apply watchlist filter to VCI data
-                    if watchlist_tickers:
-                        vci_sector = vci_sector[vci_sector['symbol'].isin(watchlist_tickers)]
+                    vci_sector = comparison_df[comparison_df['sector'] == selected_sector]
                     if metric == "PE" and 'vci_pe_2026' in comparison_df.columns:
                         vci_fwd_2026 = dict(zip(vci_sector['symbol'], vci_sector['vci_pe_2026']))
                     elif metric == "PB" and 'vci_pb_2026' in comparison_df.columns:
@@ -405,13 +363,13 @@ def render_sector_tab(sector_df: pd.DataFrame, individual_df: pd.DataFrame, serv
             except Exception:
                 vci_fwd_2026 = {}
 
-            fig = render_valuation_matrix(stats_data, bsc_fwd_2026, chart_title, metric, vci_fwd_2026)
+            fig = render_valuation_matrix(stats_data, bsc_fwd_2026, selected_sector, metric, vci_fwd_2026)
             st.plotly_chart(fig, width='stretch')
 
             # Compact legend
             st.caption(f"━ {metric} TTM | ◆ BSC 26F (trái) | △ VCI 26F (phải) | Box: P25-P75")
         else:
-            st.info(f"No historical {metric} data for {chart_title}.")
+            st.info(f"No historical {metric} data for {selected_sector}.")
 
     except Exception as e:
         st.error(f"Failed to load valuation data: {e}")

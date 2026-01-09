@@ -252,6 +252,76 @@ class BSCForecastProcessor:
         logger.info(f"Total minority interest records: {len(combined)}")
         return combined
 
+    def load_equity_q4_2024(self) -> pd.DataFrame:
+        """
+        Load Total Equity from Q4/2024 (year-end 2024) for PB Forward calculation.
+
+        For PB FWD, we need equity at end of 2024, NOT TTM (latest quarter).
+        Formula: Parent Equity 2024 = Total Equity Q4/2024 - Minority Interest Q4/2024
+
+        Total Equity codes by entity type:
+        - Company: CBS_500 (Tổng vốn chủ sở hữu)
+        - Bank: BBS_500 (Tổng vốn chủ sở hữu)
+        - Security: SBS_500 (Tổng vốn chủ sở hữu)
+        - Insurance: IBS_500 (Tổng vốn chủ sở hữu)
+
+        Returns:
+            DataFrame with symbol, total_equity_q4_2024 (in billions VND)
+        """
+        logger.info("Loading Total Equity from Q4/2024 for PB Forward calculation...")
+
+        # Entity type to (file_pattern, equity_code) mapping
+        entity_mapping = {
+            'bank': ('bank_financial_metrics.parquet', 'BBS_500'),
+            'company': ('company_financial_metrics.parquet', 'CBS_500'),
+            'security': ('security_financial_metrics.parquet', 'SBS_500'),
+            'insurance': ('insurance_financial_metrics.parquet', 'IBS_500'),
+        }
+
+        all_data = []
+        for entity, (filename, _) in entity_mapping.items():
+            file_path = self.fundamental_dir / entity / filename
+            if file_path.exists():
+                try:
+                    df = pd.read_parquet(file_path)
+
+                    # Filter for Q4/2024 specifically
+                    if 'year' in df.columns and 'quarter' in df.columns:
+                        q4_2024 = df[(df['year'] == 2024) & (df['quarter'] == 4)].copy()
+
+                        if q4_2024.empty:
+                            # Fallback to latest Q4 available
+                            q4_any = df[df['quarter'] == 4].sort_values('year', ascending=False)
+                            if not q4_any.empty:
+                                latest_year = q4_any['year'].iloc[0]
+                                q4_2024 = df[(df['year'] == latest_year) & (df['quarter'] == 4)].copy()
+                                logger.warning(f"  {entity}: Q4/2024 not found, using Q4/{latest_year}")
+
+                        if not q4_2024.empty and 'total_equity' in q4_2024.columns:
+                            equity_df = q4_2024[['symbol', 'total_equity']].copy()
+                            equity_df.columns = ['symbol', 'total_equity_q4_2024']
+
+                            # Convert to billions if needed
+                            median_val = equity_df['total_equity_q4_2024'].median()
+                            if median_val > 10000:  # Likely in VND or millions
+                                equity_df['total_equity_q4_2024'] = equity_df['total_equity_q4_2024'] / 1e9
+
+                            all_data.append(equity_df)
+                            logger.info(f"  - Loaded {len(equity_df)} {entity} Q4/2024 equity records")
+
+                except Exception as e:
+                    logger.warning(f"  Error loading {filename}: {e}")
+
+        if not all_data:
+            logger.warning("No Q4/2024 equity data found!")
+            return pd.DataFrame(columns=['symbol', 'total_equity_q4_2024'])
+
+        combined = pd.concat(all_data, ignore_index=True)
+        combined = combined.drop_duplicates(subset=['symbol'], keep='first')
+
+        logger.info(f"Total Q4/2024 equity records: {len(combined)}")
+        return combined
+
     def load_fundamental_data(self) -> pd.DataFrame:
         """
         Load TTM fundamental data (total_equity, total_assets, npatmi_ttm, minority_interest).
@@ -584,20 +654,25 @@ class BSCForecastProcessor:
         # Load additional data
         market_data = self.load_market_data()
         fundamental_data = self.load_fundamental_data()
+        equity_q4_2024 = self.load_equity_q4_2024()  # Q4/2024 equity for PB FWD
         ytd_data = self.load_ytd_data()
         historical_data = self.load_historical_data()
 
         # Filter to only BSC symbols
         market_data = market_data[market_data['symbol'].isin(bsc_symbols)]
         fundamental_data = fundamental_data[fundamental_data['symbol'].isin(bsc_symbols)]
+        equity_q4_2024 = equity_q4_2024[equity_q4_2024['symbol'].isin(bsc_symbols)]
         ytd_data = ytd_data[ytd_data['symbol'].isin(bsc_symbols)]
         historical_data = historical_data[historical_data['symbol'].isin(bsc_symbols)]
 
         # Merge market data
         df = df.merge(market_data, on='symbol', how='left')
 
-        # Merge fundamental data
+        # Merge fundamental data (includes minority_interest)
         df = df.merge(fundamental_data, on='symbol', how='left')
+
+        # Merge Q4/2024 equity for PB FWD calculation
+        df = df.merge(equity_q4_2024, on='symbol', how='left')
 
         # Merge YTD data
         df = df.merge(ytd_data, on='symbol', how='left')
@@ -613,11 +688,13 @@ class BSCForecastProcessor:
         df['pe_fwd_2025'] = df['market_cap'] / df['npatmi_2025f']
         df['pe_fwd_2026'] = df['market_cap'] / df['npatmi_2026f']
 
-        # Calculate PB Forward using Parent's Equity (excluding minority interest)
-        # Formula: Parent Equity = Total Equity - Minority Interest
-        # Equity 2025F = Parent Equity 2024 + NPATMI 2025F
+        # Calculate PB Forward using Parent's Equity from Q4/2024 (year-end 2024)
+        # Formula: Parent Equity Q4/2024 = Total Equity Q4/2024 - Minority Interest
+        # Equity 2025F = Parent Equity Q4/2024 + NPATMI 2025F
         # Equity 2026F = Equity 2025F + NPATMI 2026F
-        df['parent_equity_2024'] = df['total_equity'] - df['minority_interest']
+        # Use Q4/2024 equity; fallback to TTM if Q4/2024 not available
+        df['total_equity_for_pb'] = df['total_equity_q4_2024'].fillna(df['total_equity'])
+        df['parent_equity_2024'] = df['total_equity_for_pb'] - df['minority_interest']
         df['equity_2025f'] = df['parent_equity_2024'] + df['npatmi_2025f']
         df['equity_2026f'] = df['equity_2025f'] + df['npatmi_2026f']
         df['pb_fwd_2025'] = df['market_cap'] / df['equity_2025f']
@@ -653,7 +730,7 @@ class BSCForecastProcessor:
             'npatmi_growth_yoy_2025', 'npatmi_growth_yoy_2026',
             'rev_ytd_2025', 'npatmi_ytd_2025',
             'rev_achievement_pct', 'npatmi_achievement_pct',
-            'market_cap', 'total_equity', 'minority_interest', 'parent_equity_2024',
+            'market_cap', 'total_equity', 'total_equity_q4_2024', 'minority_interest', 'parent_equity_2024',
             'pe_fwd_2025', 'pe_fwd_2026', 'pb_fwd_2025', 'pb_fwd_2026',
             'sector', 'entity_type', 'updated_at'
         ]

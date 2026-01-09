@@ -1109,6 +1109,7 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
 
         sma20, sma50, price, trading_value, expected_value = 0, 0, 0, 0, 0
         trend = 'SIDEWAYS'
+        daily_change = 0  # Daily price change %
 
         # Trading value comparisons
         tv_vs_1w, tv_vs_3w, tv_vs_1m = 0, 0, 0
@@ -1123,6 +1124,13 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
                 sma50 = latest_basic.get('price_vs_sma50', 0) or 0
                 price = latest_basic.get('close', 0) or 0
                 trading_value = latest_basic.get('trading_value', 0) or 0
+
+                # Calculate daily change %
+                daily_change = 0
+                if len(ticker_basic) >= 2:
+                    prev_close = ticker_basic.iloc[1].get('close', 0) or 0
+                    if prev_close > 0:
+                        daily_change = (price / prev_close - 1) * 100
 
                 # Calculate trading value vs periods
                 avg_1w = ticker_basic.head(5)['trading_value'].mean()  # 5 days
@@ -1187,9 +1195,17 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
                         font-weight: 600;
                     ">{trend_icon} {trend_label}</span>
                 </div>
-                <span style="color: #94A3B8; font-size: 0.9rem;">
-                    {price:,.0f}đ
-                </span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #94A3B8; font-size: 0.9rem;">
+                        {price:,.0f}đ
+                    </span>
+                    <span style="
+                        color: {'#10B981' if daily_change > 0 else '#EF4444' if daily_change < 0 else '#64748B'};
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                        font-family: monospace;
+                    ">({'+' if daily_change > 0 else ''}{daily_change:.2f}%)</span>
+                </div>
             </div>
 
             <!-- SMA & Trading Value Indicators -->
