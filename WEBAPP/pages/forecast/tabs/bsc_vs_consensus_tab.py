@@ -314,8 +314,8 @@ def render_summary_table(df: pd.DataFrame, full_df: pd.DataFrame = None):
         filtered_df = filtered_df[filtered_df['insight'] == insight_filter]
 
     # Sort by sector first, then by deviation within each sector
-    # Handle None/NaN values in abs calculation
-    filtered_df['abs_dev'] = filtered_df['npatmi_26_dev_pct'].fillna(0).abs()
+    # Handle None/NaN values - convert to numeric first to handle object dtype with None
+    filtered_df['abs_dev'] = pd.to_numeric(filtered_df['npatmi_26_dev_pct'], errors='coerce').fillna(0).abs()
     filtered_df = filtered_df.sort_values(['sector', 'abs_dev'], ascending=[True, False], na_position='last')
 
     st.markdown(f"**{len(filtered_df)} stocks** with ≥{min_sources} consensus sources")
