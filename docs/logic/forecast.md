@@ -119,6 +119,42 @@ Pure business logic for BSC forecast analysis. No code.
 
 ---
 
+## Valuation Formulas
+
+### PE Forward
+```
+PE FWD 2025 = Market Cap / NPATMI 2025F
+PE FWD 2026 = Market Cap / NPATMI 2026F
+```
+
+### PB Forward (Parent Equity)
+```
+Parent Equity Q4/2024 = Total Equity Q4/2024 - Minority Interest
+Equity 2025F = Parent Equity Q4/2024 + NPATMI 2025F
+Equity 2026F = Equity 2025F + NPATMI 2026F
+
+PB FWD 2025 = Market Cap / Equity 2025F
+PB FWD 2026 = Market Cap / Equity 2026F
+```
+
+**IMPORTANT:** PB FWD uses Q4/2024 (year-end 2024) equity, NOT TTM (latest quarter).
+
+### Book Value Per Share
+```
+BVPS 2025F = Equity 2025F / Shares Outstanding
+BVPS 2026F = Equity 2026F / Shares Outstanding
+```
+
+### Minority Interest Codes
+| Entity Type | Code |
+|-------------|------|
+| Company | CBS_429 |
+| Bank | BBS_700 |
+| Security | SBS_418 |
+| Insurance | IBS_4214 |
+
+---
+
 ## Data Flow
 
 ```
