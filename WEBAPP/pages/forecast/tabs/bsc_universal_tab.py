@@ -22,7 +22,8 @@ from WEBAPP.components.filters.forecast_filter_bar import (
     apply_filters,
     apply_sort,
     render_rating_badges,
-    SORT_OPTIONS
+    SORT_OPTIONS,
+    WATCHLIST_PRESETS
 )
 
 
@@ -48,6 +49,7 @@ def render_bsc_universal_tab(
         sectors=sectors_list or [],
         show_ticker_search=True,
         show_sector=True,
+        show_watchlist=True,
         show_rating=True,
         show_sort=True,
         sort_options=SORT_OPTIONS['stock'],
@@ -59,12 +61,19 @@ def render_bsc_universal_tab(
     # Extract filter values
     ticker_search = filters.get('ticker_search', '')
     sector_filter = filters.get('sector', 'All')
+    watchlist_filter = filters.get('watchlist', 'All')
     rating_filter = filters.get('rating', 'All')
     sort_by = filters.get('sort', 'upside_desc')
     show_extended = filters.get('show_extended', False)
 
     # Apply filters
     filtered_df = df.copy()
+
+    # Watchlist filter (apply first)
+    if watchlist_filter != 'All':
+        watchlist_tickers = WATCHLIST_PRESETS.get(watchlist_filter, [])
+        if watchlist_tickers:
+            filtered_df = filtered_df[filtered_df['symbol'].isin(watchlist_tickers)].copy()
 
     # Ticker search filter (exact or partial match)
     if ticker_search:
@@ -102,6 +111,8 @@ def render_bsc_universal_tab(
         'pb_delta_asc': ('pb_delta', True),  # Ascending = most improving (negative delta)
         'growth_desc': ('npatmi_growth_yoy_2026', False),
         'mcap_desc': ('market_cap', False),
+        'sector_asc': ('sector', True),   # A-Z
+        'sector_desc': ('sector', False),  # Z-A
     }
 
     if sort_by in sort_mapping:

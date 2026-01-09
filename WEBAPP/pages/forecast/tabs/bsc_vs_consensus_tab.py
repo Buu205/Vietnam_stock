@@ -22,6 +22,7 @@ from WEBAPP.components.styles.comparison_styles import (
     INSIGHT_CONFIG,
     COLORS,
 )
+from WEBAPP.components.filters.forecast_filter_bar import WATCHLIST_PRESETS
 
 # Data paths
 FORECAST_SOURCES_PATH = Path("DATA/processed/forecast/sources")
@@ -55,6 +56,7 @@ def load_comparison_data() -> pd.DataFrame:
             symbol = row['symbol']
             ssi_data[symbol] = {
                 'symbol': symbol,
+                'sector': row.get('sector', ''),  # Include sector for non-BSC stocks
                 'target_price': row.get('ssi_tp'),
                 'npatmi_2026f': row.get('ssi_npatmi_26'),
                 'npatmi_2027f': row.get('ssi_npatmi_27'),
@@ -259,21 +261,27 @@ def render_summary_table(df: pd.DataFrame, full_df: pd.DataFrame = None):
     st.markdown("#### NPATMI 2026F Consensus Comparison")
     st.caption("Compare BSC forecasts with market consensus (VCI, HCM, SSI)")
 
-    # Filters row - 4 columns with ticker search
-    col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
+    # Filters row - 5 columns with ticker search and watchlist
+    col1, col2, col3, col4, col5 = st.columns([2, 2, 1.5, 1.5, 1.5])
 
     with col1:
         ticker_search = st.text_input("Search Ticker", placeholder="VCB, ACB...", key="cons_ticker")
 
     with col2:
         # Use full_df for sector list to show all available sectors
-        sectors = ['All'] + sorted(full_df['sector'].dropna().unique().tolist())
+        # Filter out empty strings and NaN values
+        sectors = ['All'] + sorted([s for s in full_df['sector'].dropna().unique() if s and s.strip()])
         sector_filter = st.selectbox("Sector", sectors, key="cons_sector")
 
     with col3:
-        min_sources = st.selectbox("Min Sources", [1, 2, 3], index=0, key="cons_min_src")
+        # Watchlist preset filter
+        watchlist_options = list(WATCHLIST_PRESETS.keys())
+        watchlist_filter = st.selectbox("Watchlist", watchlist_options, key="cons_watchlist")
 
     with col4:
+        min_sources = st.selectbox("Min Sources", [1, 2, 3], index=0, key="cons_min_src")
+
+    with col5:
         insight_options = ['All'] + list(INSIGHT_CONFIG.keys())
         insight_filter = st.selectbox(
             "Insight",
@@ -289,6 +297,12 @@ def render_summary_table(df: pd.DataFrame, full_df: pd.DataFrame = None):
     else:
         filtered_df = df.copy()
 
+    # Watchlist filter - apply before other filters
+    if watchlist_filter != 'All':
+        watchlist_tickers = WATCHLIST_PRESETS.get(watchlist_filter, [])
+        if watchlist_tickers:
+            filtered_df = filtered_df[filtered_df['symbol'].isin(watchlist_tickers)].copy()
+
     # Ticker search filter
     if ticker_search:
         ticker_search = ticker_search.upper().strip()
@@ -299,9 +313,10 @@ def render_summary_table(df: pd.DataFrame, full_df: pd.DataFrame = None):
     if insight_filter != 'All':
         filtered_df = filtered_df[filtered_df['insight'] == insight_filter]
 
-    # Sort by NPATMI deviation (absolute) - using 26 (current year) as primary
-    filtered_df['abs_dev'] = filtered_df['npatmi_26_dev_pct'].abs()
-    filtered_df = filtered_df.sort_values('abs_dev', ascending=False, na_position='last')
+    # Sort by sector first, then by deviation within each sector
+    # Handle None/NaN values in abs calculation
+    filtered_df['abs_dev'] = filtered_df['npatmi_26_dev_pct'].fillna(0).abs()
+    filtered_df = filtered_df.sort_values(['sector', 'abs_dev'], ascending=[True, False], na_position='last')
 
     st.markdown(f"**{len(filtered_df)} stocks** with ≥{min_sources} consensus sources")
 

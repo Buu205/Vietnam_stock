@@ -38,6 +38,8 @@ SORT_OPTIONS = {
         ('Δ PB ↓', 'pb_delta_asc'),  # Lower = improving
         ('Growth ↓', 'growth_desc'),
         ('Market Cap ↓', 'mcap_desc'),
+        ('Sector A-Z', 'sector_asc'),
+        ('Sector Z-A', 'sector_desc'),
     ],
     'sector': [
         ('PE Fwd ↑', 'pe_asc'),
@@ -58,6 +60,12 @@ CONSENSUS_STATUS_OPTIONS = [
     ('VCI Bull', 'VCI_BULL'),
 ]
 
+# Watchlist presets for quick filtering
+WATCHLIST_PRESETS = {
+    'All': [],  # No filter
+    'BSC_2026': ['CTG', 'VPB', 'TCB', 'MWG', 'MSN', 'DXG', 'VHM', 'PVS', 'PVD', 'POW', 'TCX', 'DBC', 'HPG', 'GMD', 'GEX'],
+}
+
 
 def render_filter_bar(
     tab_id: int,
@@ -69,6 +77,7 @@ def render_filter_bar(
     show_extended_toggle: bool = False,
     show_consensus_filter: bool = False,
     show_ticker_search: bool = False,
+    show_watchlist: bool = False,
     key_prefix: str = 'forecast'
 ) -> Dict[str, Any]:
     """
@@ -84,6 +93,7 @@ def render_filter_bar(
         show_extended_toggle: Show extended columns toggle
         show_consensus_filter: Show consensus status filter
         show_ticker_search: Show ticker search input
+        show_watchlist: Show watchlist preset filter
         key_prefix: Session state key prefix
 
     Returns:
@@ -96,6 +106,7 @@ def render_filter_bar(
     num_cols = sum([
         show_ticker_search,
         show_sector,
+        show_watchlist,
         show_rating,
         show_sort,
         show_extended_toggle,
@@ -111,6 +122,8 @@ def render_filter_bar(
         col_weights.append(1.2)  # Smaller for ticker input
     if show_sector:
         col_weights.append(2)
+    if show_watchlist:
+        col_weights.append(1.5)
     if show_rating:
         col_weights.append(1.5)
     if show_sort:
@@ -144,6 +157,18 @@ def render_filter_bar(
                 "Sector",
                 options=['All'] + sector_list,
                 key=sector_key,
+                label_visibility='collapsed'
+            )
+        col_idx += 1
+
+    # Watchlist preset filter
+    if show_watchlist:
+        with cols[col_idx]:
+            watchlist_key = f'{key_prefix}_tab{tab_id}_watchlist'
+            filters['watchlist'] = st.selectbox(
+                "Watchlist",
+                options=list(WATCHLIST_PRESETS.keys()),
+                key=watchlist_key,
                 label_visibility='collapsed'
             )
         col_idx += 1

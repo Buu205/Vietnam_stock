@@ -920,6 +920,110 @@ def _render_signal_table_enhanced(signals: pd.DataFrame) -> None:
 # SINGLE STOCK ANALYSIS COMPONENT
 # ============================================================================
 
+# ============================================================================
+# FIBONACCI SUPPORT/RESISTANCE CALCULATION
+# ============================================================================
+
+@st.cache_data(ttl=3600)
+def _calculate_fib_sr_levels(ticker: str) -> dict:
+    """
+    Calculate Support/Resistance using Fibonacci retracement.
+
+    Method: Swing High/Low 10d + Fib levels from 30d range.
+
+    Returns:
+        dict with: swing_high, swing_low, current_price, supports, resistances
+    """
+    from pathlib import Path
+
+    result = {
+        'swing_high': 0,
+        'swing_low': 0,
+        'current_price': 0,
+        'supports': [],
+        'resistances': []
+    }
+
+    basic_path = Path("DATA/processed/technical/basic_data.parquet")
+    if not basic_path.exists():
+        return result
+
+    basic_df = pd.read_parquet(basic_path)
+    ticker_data = basic_df[basic_df['symbol'] == ticker].sort_values('date', ascending=False)
+
+    if ticker_data.empty or len(ticker_data) < 10:
+        return result
+
+    # Swing High/Low from 10 days
+    data_10d = ticker_data.head(10)
+    swing_high_10d = data_10d['high'].max()
+    swing_low_10d = data_10d['low'].min()
+
+    # Fib range from 30 days
+    data_30d = ticker_data.head(30)
+    fib_high = data_30d['high'].max()
+    fib_low = data_30d['low'].min()
+
+    current_price = ticker_data.iloc[0]['close']
+
+    result['swing_high'] = swing_high_10d
+    result['swing_low'] = swing_low_10d
+    result['current_price'] = current_price
+
+    # Calculate Fib levels from 30d range
+    price_range = fib_high - fib_low
+    if price_range <= 0:
+        return result
+
+    fib_levels = [
+        (0.0, 'Low 30d'),
+        (0.236, 'Fib 23.6%'),
+        (0.382, 'Fib 38.2%'),
+        (0.5, 'Fib 50%'),
+        (0.618, 'Fib 61.8%'),
+        (0.786, 'Fib 78.6%'),
+        (1.0, 'High 30d')
+    ]
+
+    supports = []
+    resistances = []
+
+    for level, label in fib_levels:
+        fib_price = fib_low + (price_range * level)
+        fib_price = round(fib_price, -2)  # Round to nearest 100 (e.g., 16793 → 16800)
+        pct = ((fib_price / current_price) - 1) * 100
+
+        info = {'price': fib_price, 'label': label, 'pct': pct}
+
+        if fib_price < current_price * 0.995:  # Below price (0.5% buffer)
+            supports.append(info)
+        elif fib_price > current_price * 1.005:  # Above price
+            resistances.append(info)
+
+    # Sort: supports descending (nearest first), resistances ascending
+    supports.sort(key=lambda x: x['price'], reverse=True)
+    resistances.sort(key=lambda x: x['price'])
+
+    # Add Swing Low 10d as additional support if not already in list
+    swing_low_10d = round(swing_low_10d, -2)  # Round to nearest 100
+    swing_low_pct = ((swing_low_10d / current_price) - 1) * 100
+    swing_low_info = {'price': swing_low_10d, 'label': 'Swing Low 10d', 'pct': swing_low_pct}
+
+    # Check if swing_low_10d is not too close to existing supports
+    existing_prices = [s['price'] for s in supports]
+    if not any(abs(swing_low_10d - p) / p < 0.01 for p in existing_prices):  # >1% difference
+        supports.append(swing_low_info)
+        supports.sort(key=lambda x: x['price'], reverse=True)
+
+    result['supports'] = supports[:3]  # Top 3 supports (including Swing Low 10d)
+
+    # Round swing_high_10d for resistance fallback
+    swing_high_10d = round(swing_high_10d, -2)
+    result['resistances'] = resistances[:1] if resistances else [{'price': swing_high_10d, 'label': 'Swing High 10d', 'pct': ((swing_high_10d / current_price) - 1) * 100}]
+
+    return result
+
+
 TREND_ICONS = {
     'STRONG_UP': '⬆⬆',
     'UPTREND': '⬆',
@@ -1051,6 +1155,11 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
         # Get recent patterns/signals
         recent_patterns = ticker_signals.sort_values('date', ascending=False).head(5)
 
+        # Calculate Fib S/R levels (Swing 10d + Fib 30d)
+        sr_levels = _calculate_fib_sr_levels(ticker)
+        supports = sr_levels.get('supports', [])
+        resistances = sr_levels.get('resistances', [])
+
         # Build analysis card HTML
         card_html = f'''
         <div style="
@@ -1131,6 +1240,30 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
                 </div>
             </div>
 
+            <!-- Support/Resistance (Fib 30d) -->
+            <div style="
+                display: flex;
+                gap: 16px;
+                padding: 12px 16px;
+                background: rgba(139, 92, 246, 0.08);
+                border-radius: 8px;
+                margin-bottom: 16px;
+            ">
+                <div style="flex: 1;">
+                    <span style="color: #10B981; font-size: 0.7rem; text-transform: uppercase; display: block; margin-bottom: 6px;">
+                        Hỗ trợ
+                    </span>
+                    {''.join([f'<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span style="color: #94A3B8; font-size: 0.8rem;">{s["price"]:,.0f} ({s["label"]})</span><span style="color: #10B981; font-size: 0.8rem; font-family: monospace;">{s["pct"]:+.1f}%</span></div>' for s in supports]) if supports else '<span style="color: #64748B; font-size: 0.8rem;">N/A</span>'}
+                </div>
+                <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
+                <div style="flex: 1;">
+                    <span style="color: #EF4444; font-size: 0.7rem; text-transform: uppercase; display: block; margin-bottom: 6px;">
+                        Kháng cự
+                    </span>
+                    {''.join([f'<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span style="color: #94A3B8; font-size: 0.8rem;">{r["price"]:,.0f} ({r["label"]})</span><span style="color: #EF4444; font-size: 0.8rem; font-family: monospace;">{r["pct"]:+.1f}%</span></div>' for r in resistances]) if resistances else '<span style="color: #64748B; font-size: 0.8rem;">N/A</span>'}
+                </div>
+            </div>
+
             <!-- Recent Patterns -->
             <div style="margin-bottom: 16px;">
                 <span style="color: #8B5CF6; font-size: 0.75rem; text-transform: uppercase; display: block; margin-bottom: 8px;">
@@ -1176,9 +1309,27 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
                 </div>
             '''
 
-        # Strategy recommendation
+        # Strategy recommendation with S/R context
         latest_direction = recent_patterns.iloc[0].get('direction', 'NEUTRAL') if not recent_patterns.empty else 'NEUTRAL'
-        strategy = STRATEGY_RECOMMENDATIONS.get((trend, latest_direction), ('THEO DÕI', 'Chờ tín hiệu rõ hơn'))
+        base_strategy = STRATEGY_RECOMMENDATIONS.get((trend, latest_direction), ('THEO DÕI', 'Chờ tín hiệu rõ hơn'))
+
+        # Build enhanced strategy text with S/R context
+        strategy_action = base_strategy[0]
+        strategy_text = base_strategy[1]
+
+        # Add S/R context to strategy (simple version - just append S/R info)
+        if supports and resistances:
+            nearest_support = supports[0]
+            nearest_resistance = resistances[0]
+
+            # Simple S/R context without changing base strategy logic
+            if nearest_resistance['pct'] < 3:  # Near resistance
+                strategy_text = f"{base_strategy[1]}. Gần kháng cự {nearest_resistance['price']:,.0f}."
+            elif nearest_support['pct'] > -3:  # Near support
+                stop_text = f" Stop: {supports[1]['price']:,.0f}" if len(supports) > 1 else ""
+                strategy_text = f"{base_strategy[1]}. Hỗ trợ: {nearest_support['price']:,.0f} ({nearest_support['label']}).{stop_text}"
+            else:
+                strategy_text = f"{base_strategy[1]}. S: {nearest_support['price']:,.0f} | R: {nearest_resistance['price']:,.0f}"
 
         card_html += f'''
             </div>
@@ -1195,8 +1346,8 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
                         color: #FFFFFF;
                         font-weight: 600;
                         font-size: 1rem;
-                    ">{strategy[0]}</span>
-                    <span style="color: #94A3B8; font-size: 0.85rem;">{strategy[1]}</span>
+                    ">{strategy_action}</span>
+                    <span style="color: #94A3B8; font-size: 0.85rem;">{strategy_text}</span>
                 </div>
             </div>
         </div>
