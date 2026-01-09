@@ -171,13 +171,23 @@ class HistoricalPBCalculator:
     def _preprocess_data(self):
         """Tiền xử lý và chuẩn bị dữ liệu (Pivot, Vectorization) để tối ưu hóa tốc độ tính toán"""
         logger.info("⚡ Pre-processing data for optimization...")
-        
+
         # 1. Get Equity Codes from Mapper
         # Returns dict: {'COMPANY': 'CBS_80', 'BANK': 'BBS_300', ...}
         # Assuming 'total_equity' is the metric name for Book Value
         equity_codes = self.mapper.get_all_codes_for_metric('total_equity')
         all_valid_codes = set(equity_codes.values())
-        
+
+        # 1b. Get Minority Interest Codes for Parent Equity calculation
+        # Minority Interest codes: Company=CBS_429, Bank=BBS_700, Security=SBS_418, Insurance=IBS_4214
+        minority_interest_codes = {
+            'COMPANY': 'CBS_429',
+            'BANK': 'BBS_700',
+            'SECURITY': 'SBS_418',
+            'INSURANCE': 'IBS_4214'
+        }
+        all_mi_codes = set(minority_interest_codes.values())
+
         logger.info("   Creating quarterly equity pivot...")
         if 'FREQ_CODE' in self.fundamental_data.columns:
             logger.info("   Filtering for 'Q' frequency...")
@@ -187,20 +197,46 @@ class HistoricalPBCalculator:
         equity_data = self.fundamental_data[
             self.fundamental_data['METRIC_CODE'].isin(all_valid_codes)
         ].copy()
-        
+
+        # Load Minority Interest data
+        mi_data = self.fundamental_data[
+            self.fundamental_data['METRIC_CODE'].isin(all_mi_codes)
+        ].copy()
+
         if not equity_data.empty:
              # Add expected metric code based on ENTITY_TYPE already in data
             equity_data['expected_metric'] = equity_data['ENTITY_TYPE'].str.upper().map(equity_codes)
-            
+
             # Filter rows where the metric code actually matches the expected one for that entity
             valid_mask = equity_data['METRIC_CODE'] == equity_data['expected_metric']
             equity_df = equity_data[valid_mask][['symbol', 'REPORT_DATE', 'METRIC_VALUE']].copy()
-            
+            equity_df = equity_df.rename(columns={'METRIC_VALUE': 'total_equity_raw'})
+
+            # Process Minority Interest
+            if not mi_data.empty:
+                mi_data['expected_mi_code'] = mi_data['ENTITY_TYPE'].str.upper().map(minority_interest_codes)
+                mi_valid_mask = mi_data['METRIC_CODE'] == mi_data['expected_mi_code']
+                mi_df = mi_data[mi_valid_mask][['symbol', 'REPORT_DATE', 'METRIC_VALUE']].copy()
+                mi_df = mi_df.rename(columns={'METRIC_VALUE': 'minority_interest'})
+
+                # Merge equity with minority interest
+                if not mi_df.empty:
+                    equity_df = equity_df.merge(mi_df, on=['symbol', 'REPORT_DATE'], how='left')
+                    equity_df['minority_interest'] = equity_df['minority_interest'].fillna(0)
+                else:
+                    equity_df['minority_interest'] = 0
+            else:
+                equity_df['minority_interest'] = 0
+
+            # Calculate Parent Equity = Total Equity - Minority Interest
+            equity_df['parent_equity_raw'] = equity_df['total_equity_raw'] - equity_df['minority_interest']
+
             if not equity_df.empty:
                 # Remove duplicates
-                equity_df = equity_df.groupby(['symbol', 'REPORT_DATE'], as_index=False)['METRIC_VALUE'].first()
+                equity_df = equity_df.groupby(['symbol', 'REPORT_DATE'], as_index=False).first()
                 self.raw_equity_df = equity_df.sort_values(['symbol', 'REPORT_DATE'])
-                logger.info(f"   Prepared equity data with {len(self.raw_equity_df):,} records")
+                logger.info(f"   Prepared parent equity data with {len(self.raw_equity_df):,} records")
+                logger.info(f"   (Parent Equity = Total Equity - Minority Interest)")
             else:
                 self.raw_equity_df = pd.DataFrame()
         else:
@@ -253,28 +289,29 @@ class HistoricalPBCalculator:
             return pd.DataFrame()
 
         equity_subset = self.raw_equity_df[self.raw_equity_df['symbol'].isin(symbols)].copy()
-        equity_subset = equity_subset.rename(columns={'REPORT_DATE': 'report_date', 'METRIC_VALUE': 'total_equity_raw'})
+        equity_subset = equity_subset.rename(columns={'REPORT_DATE': 'report_date'})
         equity_subset = equity_subset.sort_values('report_date')
-        
+
         # 3. Merge Market Data with Equity Data
         # merge_asof requires strict sorting by the 'on' key
         market_subset = market_subset.sort_values('date')
         equity_subset = equity_subset.sort_values('report_date')
-        
+
         merged_data = pd.merge_asof(
             market_subset,
-            equity_subset[['symbol', 'report_date', 'total_equity_raw']],
+            equity_subset[['symbol', 'report_date', 'parent_equity_raw', 'total_equity_raw']],
             left_on='date',
             right_on='report_date',
             by='symbol',
             direction='backward'
         )
-        
+
         # 4. Compute Metrics
         # shares_outstanding calculated in preprocess
-        
-        # Calculate BPS: Total Equity (Raw VND) / Shares
-        merged_data['bps'] = merged_data['total_equity_raw'] / merged_data['shares_outstanding']
+
+        # Calculate BPS using Parent Equity (Total Equity - Minority Interest)
+        # BPS = Parent Equity (Raw VND) / Shares Outstanding
+        merged_data['bps'] = merged_data['parent_equity_raw'] / merged_data['shares_outstanding']
         
         # Calculate PB: Close Price / BPS
         # Vectorized application
@@ -284,8 +321,8 @@ class HistoricalPBCalculator:
             np.nan
         )
         
-        # Add metadata
-        merged_data['equity_billion_vnd'] = merged_data['total_equity_raw'] / 1e9
+        # Add metadata - use Parent Equity (excluding minority interest)
+        merged_data['equity_billion_vnd'] = merged_data['parent_equity_raw'] / 1e9
         merged_data['sector'] = merged_data['symbol'].map(self.symbol_entity_types).fillna('COMPANY')
         
         # Final formatting
