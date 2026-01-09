@@ -53,7 +53,9 @@ class BSCForecastProcessor:
             project_root: Project root directory (defaults to auto-detect)
         """
         if project_root is None:
-            project_root = Path(__file__).resolve().parents[2]
+            # parents[3] = Vietnam_dashboard (project root)
+            # parents[2] = PROCESSORS, parents[1] = forecast, parents[0] = bsc
+            project_root = Path(__file__).resolve().parents[3]
 
         self.project_root = project_root
         self.excel_path = project_root / "DATA" / "raw" / "forecast" / "bsc_excel" / "BSC Forecast.xlsx"
@@ -90,20 +92,26 @@ class BSCForecastProcessor:
         # Read raw Excel
         df_raw = pd.read_excel(self.excel_path, sheet_name='Sheet1', header=None)
 
-        # Parse individual stocks (columns 1-12, rows 2 onwards)
+        # Parse individual stocks (columns 1-16, rows 2 onwards)
+        # Excel structure: Symbol, Target, REV_25, REV_26, REV_27, NPATMI_25, NPATMI_26, NPATMI_27,
+        #                  EPS_25, EPS_26, EPS_27, ROA_25, ROA_26, ROA_27, ROE_25, ROE_26
         individual_cols = {
             1: 'symbol',
             2: 'target_price',
             3: 'rev_2025f',
             4: 'rev_2026f',
-            5: 'npatmi_2025f',
-            6: 'npatmi_2026f',
-            7: 'eps_2025f',
-            8: 'eps_2026f',
-            9: 'roa_2025f',
-            10: 'roa_2026f',
-            11: 'roe_2025f',
-            12: 'roe_2026f',
+            # 5 is REV_2027F - skip
+            6: 'npatmi_2025f',
+            7: 'npatmi_2026f',
+            # 8 is NPATMI_2027F - skip
+            9: 'eps_2025f',
+            10: 'eps_2026f',
+            # 11 is EPS_2027F - skip
+            12: 'roa_2025f',
+            13: 'roa_2026f',
+            # 14 is ROA_2027F - skip
+            15: 'roe_2025f',
+            16: 'roe_2026f',
         }
 
         individual_df = df_raw.iloc[2:, list(individual_cols.keys())].copy()
@@ -119,15 +127,15 @@ class BSCForecastProcessor:
 
         logger.info(f"Loaded {len(individual_df)} individual stocks from Excel")
 
-        # Parse sector aggregates (columns 14-19, rows 2-21)
+        # Parse sector aggregates (columns 18-24, rows 2-21)
         # Note: Excel has BSC sector names, but we ignore them and use ICB L2 sectors from ticker_details
         sector_cols = {
-            14: 'excel_sector',  # Temporary, will be dropped
-            15: 'rev_2025f',
-            16: 'rev_2026f',
-            17: 'npatmi_2025f',
-            18: 'npatmi_2026f',
-            19: 'yoy_growth',
+            18: 'excel_sector',  # Temporary, will be dropped
+            19: 'rev_2025f',
+            20: 'rev_2026f',
+            21: 'npatmi_2025f',
+            22: 'npatmi_2026f',
+            23: 'yoy_growth',  # %YoY_Rev
         }
 
         sector_df = df_raw.iloc[2:22, list(sector_cols.keys())].copy()
@@ -169,12 +177,87 @@ class BSCForecastProcessor:
 
         return latest
 
-    def load_fundamental_data(self) -> pd.DataFrame:
+    def load_minority_interest(self) -> pd.DataFrame:
         """
-        Load TTM fundamental data (total_equity, total_assets, npatmi_ttm).
+        Load minority interest from raw balance sheet CSV files.
+
+        Minority Interest codes by entity type:
+        - Company: CBS_429 (Lợi ích cổ đông không kiểm soát)
+        - Bank: BBS_700 (Lợi ích của cổ đông thiểu số)
+        - Security: SBS_418 (Lợi ích cổ đông không kiểm soát)
+        - Insurance: IBS_4214 (Lợi ích cổ đông không kiểm soát)
 
         Returns:
-            DataFrame with symbol, total_equity, total_assets, npatmi_ttm
+            DataFrame with symbol, minority_interest (in billions VND)
+        """
+        logger.info("Loading minority interest from raw balance sheets...")
+
+        # Find latest quarter folder
+        csv_dir = self.project_root / "DATA" / "raw" / "fundamental" / "csv"
+        quarter_folders = sorted([d for d in csv_dir.iterdir() if d.is_dir() and d.name.startswith('Q')], reverse=True)
+
+        if not quarter_folders:
+            logger.warning("No quarter folders found in raw fundamental CSV")
+            return pd.DataFrame(columns=['symbol', 'minority_interest'])
+
+        latest_quarter = quarter_folders[0]
+        logger.info(f"  Using raw data from: {latest_quarter.name}")
+
+        # Entity type to (file, column) mapping
+        entity_mapping = {
+            'COMPANY': ('COMPANY_BALANCE_SHEET.csv', 'CBS_429'),
+            'BANK': ('BANK_BALANCE_SHEET.csv', 'BBS_700'),
+            'SECURITY': ('SECURITY_BALANCE_SHEET.csv', 'SBS_418'),
+            'INSURANCE': ('INSURANCE_BALANCE_SHEET.csv', 'IBS_4214'),
+        }
+
+        all_data = []
+        for entity, (filename, col_name) in entity_mapping.items():
+            file_path = latest_quarter / filename
+            if file_path.exists():
+                try:
+                    df = pd.read_csv(file_path, low_memory=False)
+
+                    if col_name not in df.columns:
+                        logger.warning(f"  Column {col_name} not found in {filename}")
+                        continue
+
+                    # Get latest record per symbol (by REPORT_DATE)
+                    df['REPORT_DATE'] = pd.to_datetime(df['REPORT_DATE'])
+                    df = df.sort_values('REPORT_DATE', ascending=False)
+                    df = df.groupby('SECURITY_CODE').first().reset_index()
+
+                    # Extract minority interest
+                    mi_df = df[['SECURITY_CODE', col_name]].copy()
+                    mi_df.columns = ['symbol', 'minority_interest']
+
+                    # Convert to billions VND (raw data is in VND)
+                    mi_df['minority_interest'] = pd.to_numeric(mi_df['minority_interest'], errors='coerce') / 1e9
+
+                    # Fill NaN with 0 (no minority interest)
+                    mi_df['minority_interest'] = mi_df['minority_interest'].fillna(0)
+
+                    all_data.append(mi_df)
+                    logger.info(f"  - Loaded {len(mi_df)} {entity} minority interest records")
+
+                except Exception as e:
+                    logger.warning(f"  Error loading {filename}: {e}")
+
+        if not all_data:
+            return pd.DataFrame(columns=['symbol', 'minority_interest'])
+
+        combined = pd.concat(all_data, ignore_index=True)
+        combined = combined.drop_duplicates(subset=['symbol'], keep='first')
+
+        logger.info(f"Total minority interest records: {len(combined)}")
+        return combined
+
+    def load_fundamental_data(self) -> pd.DataFrame:
+        """
+        Load TTM fundamental data (total_equity, total_assets, npatmi_ttm, minority_interest).
+
+        Returns:
+            DataFrame with symbol, total_equity, total_assets, npatmi_ttm, minority_interest
         """
         logger.info("Loading fundamental data...")
 
@@ -215,7 +298,7 @@ class BSCForecastProcessor:
                 logger.info(f"  - Loaded {len(df)} {entity} records")
 
         if not all_data:
-            return pd.DataFrame(columns=['symbol', 'total_equity', 'total_assets', 'npatmi_ttm'])
+            return pd.DataFrame(columns=['symbol', 'total_equity', 'total_assets', 'npatmi_ttm', 'minority_interest'])
 
         combined = pd.concat(all_data, ignore_index=True)
 
@@ -229,6 +312,14 @@ class BSCForecastProcessor:
                 median_val = combined[col].median()
                 if median_val > 10000:  # Likely in millions or raw VND
                     combined[col] = combined[col] / 1e9
+
+        # Load and merge minority interest
+        mi_df = self.load_minority_interest()
+        if not mi_df.empty:
+            combined = combined.merge(mi_df, on='symbol', how='left')
+            combined['minority_interest'] = combined['minority_interest'].fillna(0)
+        else:
+            combined['minority_interest'] = 0
 
         logger.info(f"Combined fundamental data: {len(combined)} unique symbols")
 
@@ -522,8 +613,12 @@ class BSCForecastProcessor:
         df['pe_fwd_2025'] = df['market_cap'] / df['npatmi_2025f']
         df['pe_fwd_2026'] = df['market_cap'] / df['npatmi_2026f']
 
-        # Calculate PB Forward (equity grows by retained earnings)
-        df['equity_2025f'] = df['total_equity'] + df['npatmi_2025f']
+        # Calculate PB Forward using Parent's Equity (excluding minority interest)
+        # Formula: Parent Equity = Total Equity - Minority Interest
+        # Equity 2025F = Parent Equity 2024 + NPATMI 2025F
+        # Equity 2026F = Equity 2025F + NPATMI 2026F
+        df['parent_equity_2024'] = df['total_equity'] - df['minority_interest']
+        df['equity_2025f'] = df['parent_equity_2024'] + df['npatmi_2025f']
         df['equity_2026f'] = df['equity_2025f'] + df['npatmi_2026f']
         df['pb_fwd_2025'] = df['market_cap'] / df['equity_2025f']
         df['pb_fwd_2026'] = df['market_cap'] / df['equity_2026f']
@@ -558,7 +653,7 @@ class BSCForecastProcessor:
             'npatmi_growth_yoy_2025', 'npatmi_growth_yoy_2026',
             'rev_ytd_2025', 'npatmi_ytd_2025',
             'rev_achievement_pct', 'npatmi_achievement_pct',
-            'market_cap', 'total_equity',
+            'market_cap', 'total_equity', 'minority_interest', 'parent_equity_2024',
             'pe_fwd_2025', 'pe_fwd_2026', 'pb_fwd_2025', 'pb_fwd_2026',
             'sector', 'entity_type', 'updated_at'
         ]
@@ -590,7 +685,7 @@ class BSCForecastProcessor:
             'npatmi_2026f': 'sum',
             'rev_2025f': 'sum',
             'rev_2026f': 'sum',
-            'total_equity': 'sum',
+            'parent_equity_2024': 'sum',  # Use parent equity (total_equity - minority_interest)
             'upside_pct': 'mean',
             'roe_2025f': 'mean',
             'roe_2026f': 'mean',
@@ -608,7 +703,7 @@ class BSCForecastProcessor:
             'npatmi_2026f': 'total_npatmi_2026f',
             'rev_2025f': 'total_rev_2025f',
             'rev_2026f': 'total_rev_2026f',
-            'total_equity': 'total_equity_ttm',
+            'parent_equity_2024': 'total_parent_equity_2024',
             'upside_pct': 'avg_upside_pct',
             'roe_2025f': 'avg_roe_2025f',
             'roe_2026f': 'avg_roe_2026f',
@@ -618,8 +713,8 @@ class BSCForecastProcessor:
             'npatmi_growth_yoy_2026': 'avg_npatmi_growth_2026',
         })
 
-        # Calculate forward equity
-        sector_agg['total_equity_2025f'] = sector_agg['total_equity_ttm'] + sector_agg['total_npatmi_2025f']
+        # Calculate forward equity using Parent Equity (excluding minority interest)
+        sector_agg['total_equity_2025f'] = sector_agg['total_parent_equity_2024'] + sector_agg['total_npatmi_2025f']
         sector_agg['total_equity_2026f'] = sector_agg['total_equity_2025f'] + sector_agg['total_npatmi_2026f']
 
         # Calculate PE/PB Forward

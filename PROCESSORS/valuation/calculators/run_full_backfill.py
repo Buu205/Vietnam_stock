@@ -14,7 +14,6 @@ from PROCESSORS.valuation.calculators.historical_pe_calculator import Historical
 from PROCESSORS.valuation.calculators.historical_pb_calculator import HistoricalPBCalculator
 from PROCESSORS.valuation.calculators.historical_ev_ebitda_calculator import HistoricalEVEBITDACalculator
 from PROCESSORS.valuation.calculators.vnindex_valuation_calculator import VNIndexValuationCalculator
-from PROCESSORS.valuation.calculators.sector_valuation_calculator import SectorValuationCalculator
 
 # Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -96,20 +95,6 @@ def run_full_backfill():
         
     except Exception as e:
         logger.error(f"❌ Failed VNINDEX Backfill: {e}")
-
-    # 5. Sector Valuation
-    try:
-        logger.info("\n--- 5. Running Sector Valuation ---")
-        sector_calc = SectorValuationCalculator()
-        sector_calc.load_data()
-        df_sector = sector_calc.process_all_sectors(start_date=START_DATE, end_date=END_DATE)
-        
-        output_sector = sector_calc.output_path / 'sector_valuation.parquet'
-        if not output_sector.parent.exists(): output_sector.parent.mkdir(parents=True, exist_ok=True)
-        df_sector.to_parquet(output_sector)
-        logger.info(f"✅ Saved Sector Valuation data to {output_sector} ({len(df_sector)} rows)")
-    except Exception as e:
-        logger.error(f"❌ Failed Sector Backfill: {e}")
 
     logger.info(f"\n🎉 ALL BACKFILLS COMPLETED in {datetime.now() - start_time}")
 
