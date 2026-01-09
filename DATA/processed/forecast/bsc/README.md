@@ -3,7 +3,7 @@
 ## Overview
 Dữ liệu dự báo BSC Research đã xử lý, bao gồm PE/PB forward và các metrics tính toán.
 
-**Last Updated:** 2026-01-09 00:36:31
+**Last Updated:** 2026-01-09 20:26:57
 **Source:** BSC Research Forecast Excel
 **Symbols:** 92 mã | **Sectors:** 15 ngành
 
