@@ -1,7 +1,7 @@
 # Technical Dashboard - Trading Logic Reference
 
 **Single Source of Truth for Trading Parameters & Logic**
-**Last Updated:** 2026-01-04
+**Last Updated:** 2026-01-08
 
 ---
 
@@ -364,6 +364,116 @@ DOJI signal phụ thuộc prior trend:
 |------|-----------|----------|
 | Golden Cross | Short MA > Long MA | MA20=50, MA50=75, MA100=85, MA200=100 |
 | Death Cross | Short MA < Long MA | Same as above |
+
+---
+
+## 3.10 Support/Resistance (Fibonacci + Swing)
+
+**Purpose:** Identify key S/R levels for entry/exit decisions
+
+**Method:** Hybrid approach combining Swing High/Low (10d) + Fibonacci levels (30d)
+
+### Calculation Steps
+
+| Step | Source | Description |
+|------|--------|-------------|
+| 1 | OHLCV 10d | Get Swing High (max high), Swing Low (min low) |
+| 2 | OHLCV 30d | Get Fib High (max high), Fib Low (min low) |
+| 3 | Fib Range | `price_range = fib_high_30d - fib_low_30d` |
+| 4 | Fib Levels | Calculate levels from 30d range |
+| 5 | Rounding | Round all prices to nearest 100 (e.g., 16793 → 16800) |
+
+### Fibonacci Levels (from 30d range)
+
+```python
+fib_levels = {
+    0.0:   'Low 30d',
+    0.236: 'Fib 23.6%',
+    0.382: 'Fib 38.2%',
+    0.5:   'Fib 50%',
+    0.618: 'Fib 61.8%',
+    0.786: 'Fib 78.6%',
+    1.0:   'High 30d'
+}
+
+fib_price = fib_low + (price_range × level)
+fib_price = round(fib_price, -2)  # Round to nearest 100
+```
+
+### S/R Classification
+
+| Category | Condition | Display |
+|----------|-----------|---------|
+| Support | fib_price < current_price × 0.995 | Below price (0.5% buffer) |
+| Resistance | fib_price > current_price × 1.005 | Above price (0.5% buffer) |
+| Current Zone | Within 0.5% | Near current price (ignored) |
+
+### Output Structure
+
+| Field | Description | Max Items |
+|-------|-------------|-----------|
+| `supports` | Fib levels below price + Swing Low 10d | 3 |
+| `resistances` | Fib levels above price (or Swing High 10d fallback) | 1 |
+
+### Example Output (MWG @ 87,500đ)
+
+```
+HỖ TRỢ                           │  KHÁNG CỰ
+87,200 (Fib 61.8%)      -0.3%   │  90,000 (Swing High 10d)  +2.9%
+85,400 (Fib 38.2%)      -2.4%   │
+82,600 (Swing Low 10d)  -5.6%   │
+```
+
+---
+
+## 3.11 Strategy Recommendations (with S/R Context)
+
+**Purpose:** Generate actionable trading recommendations based on Trend + Pattern + S/R
+
+### Base Strategy Matrix (Trend × Pattern)
+
+| Trend | Pattern Direction | Strategy Action | Base Text |
+|-------|-------------------|-----------------|-----------|
+| STRONG_UP | BUY | MUA THÊM | Trend continuation mạnh |
+| STRONG_UP | PULLBACK | GIỮ | Pullback bình thường, chờ test support |
+| UPTREND | BUY | MUA | Trend following |
+| UPTREND | PULLBACK | GIỮ | Có thể pullback, set stop loss |
+| SIDEWAYS | BUY | MUA NHẸ | Range trading |
+| SIDEWAYS | SELL | BÁN NHẸ | Range trading |
+| DOWNTREND | SELL | BÁN | Trend following |
+| DOWNTREND | BOUNCE | CHỜ | Counter-trend risky |
+| STRONG_DOWN | SELL | BÁN/SHORT | Trend continuation |
+| STRONG_DOWN | BOUNCE | TRÁNH MUA | Counter-trend rất risky |
+
+### S/R Context (Append Only)
+
+Strategy logic giữ nguyên base strategy từ (Trend × Pattern). Chỉ append thông tin S/R.
+
+| Position | Append Text |
+|----------|-------------|
+| Near Resistance (<3%) | "{base_text}. Gần kháng cự {R}." |
+| Near Support (>-3%) | "{base_text}. Hỗ trợ: {S1} ({label}). Stop: {S2}" |
+| Far from both | "{base_text}. S: {S1} \| R: {R}" |
+
+### Strategy Logic Flow
+
+```
+1. Get base strategy (Action, Text) from (Trend, Pattern Direction)
+2. Append S/R context (không thay đổi Action):
+   - If nearest_resistance['pct'] < 3% → Append resistance warning
+   - If nearest_support['pct'] > -3% → Append support + stop
+   - Else → Append S/R summary
+3. Output: {Base Action} + {Base Text + S/R Context}
+```
+
+### Example Outputs
+
+| Scenario | Action | Strategy Text |
+|----------|--------|---------------|
+| UPTREND + PULLBACK + near R | GIỮ | Pullback bình thường. Gần kháng cự 90,000. |
+| UPTREND + PULLBACK + near S | GIỮ | Pullback bình thường. Hỗ trợ: 87,200 (Fib 61.8%). Stop: 85,400 |
+| UPTREND + BUY | MUA | Trend following. S: 87,200 \| R: 90,000 |
+| DOWNTREND + SELL | BÁN | Trend following. S: 82,600 \| R: 87,200 |
 
 ---
 
