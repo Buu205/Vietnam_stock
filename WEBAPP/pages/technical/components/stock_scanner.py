@@ -2,21 +2,23 @@
 Stock Scanner Component - Tab 3
 ===============================
 
-Comprehensive signal scanner with pattern recognition.
-Design: Crypto Terminal Glassmorphism - unified with dashboard theme
+Unified Signal Scanner with FULL 100-point composite scoring (v2.1).
 
-Layout (from plan phase-04):
-- Quick Filters: Symbol search, Sector dropdown
-- Advanced Filters: Signal Type, Direction, Min Strength
-- Signal Summary: KPI metrics (st.metric)
-- Signal Table: Styled HTML table with:
-  - Progress bar gauge for score
-  - Pattern interpretation text (Vietnamese with diacritics)
-  - Volume context indicators
-  - Signal date
+Design: Dark Mode OLED + Fintech palette
+- No emojis - use text badges (++/+/=/-/--)
+- Side-by-side MUA/BAN tables
+- Score breakdown panels (6 factors)
+
+6 Factors (100 pts total):
+1. Pattern (15 pts) - Candlestick pattern quality
+2. VSA (25 pts) - Volume Spread Analysis
+3. Trend (20 pts) - Trend alignment
+4. S/R (15 pts) - Support/Resistance proximity
+5. RS (15 pts) - Relative Strength rating
+6. Liquidity (10 pts) - Trading value
 
 Author: Claude Code
-Date: 2025-12-27
+Date: 2026-01-12
 """
 
 import streamlit as st
@@ -68,19 +70,25 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
 
     st.markdown("---")
 
-    # ============ QUICK FILTERS ============
-    st.markdown("### Bộ lọc nhanh")
+    # ============ UNIFIED SIGNAL SCANNER (Full Spec Scoring) ============
+    _render_unified_signal_scanner(signals, service)
+
+
+def _render_pattern_tab(signals: pd.DataFrame, service: 'TADashboardService') -> None:
+    """Render Pattern Signals tab content."""
+    # ============ QUICK FILTERS (Composite Scoring UI) ============
+    st.markdown("### Bộ lọc tín hiệu")
 
     # Check for synced ticker from Fundamental pages
     default_search = ""
     synced_indicator = ""
     if has_synced_ticker():
         synced = get_synced_ticker()
-        # Only pre-fill if user hasn't typed anything yet
         if not st.session_state.get('scanner_quick_search'):
             default_search = synced
             synced_indicator = f" (from Fundamental)"
 
+    # Row 1: Symbol + Direction + Score + Days
     qcol1, qcol2, qcol3, qcol4 = st.columns([2, 1, 1, 1])
 
     with qcol1:
@@ -94,47 +102,61 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
         )
 
     with qcol2:
-        sectors = service.get_sector_list()
-        sector_options = ["Tất cả ngành"] + sectors
-        selected_sector = st.selectbox(
-            "Ngành",
-            sector_options,
-            key="scanner_sector",
+        # Direction filter - simplified for composite UI (no emoji icons)
+        direction_options = ['Tất cả', 'MUA', 'BÁN', 'CHỜ']
+        selected_direction = st.selectbox(
+            "Hướng",
+            direction_options,
+            format_func=lambda x: {
+                'Tất cả': 'Tất cả hướng',
+                'MUA': 'MUA',
+                'BÁN': 'BÁN',
+                'CHỜ': 'CHỜ'
+            }.get(x, x),
+            key="scanner_direction_quick",
             label_visibility="collapsed"
         )
 
     with qcol3:
-        # Trend filter
-        trend_options = ['Tất cả', 'UPTREND', 'DOWNTREND', 'SIDEWAYS']
-        selected_trend = st.selectbox(
-            "Xu hướng",
-            trend_options,
-            format_func=lambda x: {
-                'Tất cả': 'Tất cả xu hướng',
-                'UPTREND': '⬆ Xu hướng tăng',
-                'DOWNTREND': '⬇ Xu hướng giảm',
-                'SIDEWAYS': '↔ Đi ngang'
-            }.get(x, x),
-            key="scanner_trend",
-            label_visibility="collapsed"
+        # Composite Score filter as slider (more flexible than dropdown)
+        min_score = st.slider(
+            "Điểm tối thiểu",
+            min_value=0,
+            max_value=100,
+            value=50,  # Default: 50 điểm
+            step=5,
+            key="scanner_min_score",
+            label_visibility="collapsed",
+            help="Điểm composite (6 yếu tố): 80+ Mạnh, 60-79 Khá, 50-59 TB, <50 Yếu"
         )
 
     with qcol4:
-        days_options = {1: "Hôm nay", 2: "2 ngày gần nhất", 5: "5 ngày", 10: "10 ngày"}
+        days_options = {1: "1 phiên", 2: "2 phiên", 5: "5 phiên", 10: "10 phiên"}
         selected_days = st.selectbox(
             "Thời gian",
             options=list(days_options.keys()),
             format_func=lambda x: days_options[x],
-            index=1,  # Default: 2 ngày gần nhất
+            index=1,
             key="scanner_days",
             label_visibility="collapsed"
         )
 
-    # ============ ADVANCED FILTERS ============
+    # ============ ADVANCED FILTERS (Composite Scoring) ============
     with st.expander("Bộ lọc nâng cao", expanded=False):
-        fcol1, fcol2, fcol3, fcol4 = st.columns(4)
+        # Row 1: Sector, Signal Type, Trend
+        fcol1, fcol2, fcol3 = st.columns(3)
 
         with fcol1:
+            sectors = service.get_sector_list()
+            sector_options = ["Tất cả ngành"] + sectors
+            selected_sector = st.selectbox(
+                "Ngành",
+                sector_options,
+                key="scanner_sector",
+                label_visibility="visible"
+            )
+
+        with fcol2:
             type_options = ['Tất cả'] + list(signals['signal_type'].unique()) if 'signal_type' in signals.columns else ['Tất cả']
             selected_type = st.selectbox(
                 "Loại tín hiệu",
@@ -143,52 +165,102 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
                 key="scanner_type"
             )
 
-        with fcol2:
-            direction_options = ['Tất cả', 'BUY', 'SELL', 'PULLBACK', 'BOUNCE', 'NEUTRAL']
-            selected_direction = st.selectbox(
-                "Hướng",
-                direction_options,
+        with fcol3:
+            # Trend filter - no emoji icons
+            trend_options = ['Tất cả', 'UPTREND', 'DOWNTREND', 'SIDEWAYS']
+            selected_trend = st.selectbox(
+                "Xu hướng",
+                trend_options,
                 format_func=lambda x: {
-                    'Tất cả': 'Tất cả',
-                    'BUY': 'MUA ✅',
-                    'SELL': 'BÁN ✅',
-                    'PULLBACK': 'PULLBACK 🟠',
-                    'BOUNCE': 'BOUNCE 🟠',
-                    'NEUTRAL': 'THEO DÕI'
+                    'Tất cả': 'Tất cả xu hướng',
+                    'UPTREND': 'Tăng (+ Strong Up)',
+                    'DOWNTREND': 'Giảm (+ Strong Down)',
+                    'SIDEWAYS': 'Đi ngang'
                 }.get(x, x),
-                key="scanner_direction"
+                key="scanner_trend"
             )
 
-        with fcol3:
-            min_strength = st.slider(
-                "Điểm tối thiểu",
-                min_value=0,
-                max_value=100,
-                value=30,  # Lowered from 50 - most signals have strength 30-40
-                key="scanner_min_strength"
-            )
+        # Row 2: VSA Context, Trend Alignment, Liquidity
+        fcol4, fcol5, fcol6 = st.columns(3)
 
         with fcol4:
-            min_value_bn = st.slider(
-                "GTGD (tỷ)",
-                min_value=0,
-                max_value=10,
-                value=0,  # No default filter
-                key="scanner_min_value",
-                help="Giá trị giao dịch tối thiểu (tỷ VND)"
+            # VSA Context filter (from composite scoring) - no emoji icons
+            vsa_options = ['Tất cả', 'Bullish', 'Bearish', 'Neutral']
+            selected_vsa = st.selectbox(
+                "VSA Context",
+                vsa_options,
+                format_func=lambda x: {
+                    'Tất cả': 'Tất cả VSA',
+                    'Bullish': 'Tích lũy (+)',
+                    'Bearish': 'Phân phối (-)',
+                    'Neutral': 'Trung lập'
+                }.get(x, x),
+                key="scanner_vsa",
+                help="Volume Spread Analysis: Tích lũy (+10-25đ), Phân phối (-5-25đ), Trung lập (0đ)"
             )
 
-    # ============ APPLY FILTERS ============
+        with fcol5:
+            # Trend Alignment filter - no emoji icons
+            alignment_options = ['Tất cả', 'Aligned', 'Counter']
+            selected_alignment = st.selectbox(
+                "Trend Alignment",
+                alignment_options,
+                format_func=lambda x: {
+                    'Tất cả': 'Tất cả',
+                    'Aligned': 'Thuận trend (+20đ)',
+                    'Counter': 'Ngược trend (-10đ)'
+                }.get(x, x),
+                key="scanner_alignment",
+                help="Thuận trend: BUY trong uptrend, SELL trong downtrend"
+            )
+
+        with fcol6:
+            # Liquidity filter with updated thresholds (plan v2.1)
+            liquidity_options = [0, 30, 50, 100]
+            min_value_bn = st.selectbox(
+                "GTGD tối thiểu",
+                liquidity_options,
+                format_func=lambda x: {
+                    0: 'Tất cả thanh khoản',
+                    30: '≥30 tỷ (7đ)',
+                    50: '≥50 tỷ (8đ)',
+                    100: '≥100 tỷ (10đ)'
+                }.get(x, f'≥{x} tỷ'),
+                key="scanner_min_value",
+                help="Thanh khoản: <10 tỷ (0đ), 10-30 tỷ (5đ), 30-50 tỷ (7đ), 50-100 tỷ (8đ), >100 tỷ (10đ)"
+            )
+
+        # Row 3: RS Rating range (optional)
+        fcol7, fcol8, _ = st.columns(3)
+
+        with fcol7:
+            min_rs = st.slider(
+                "RS Rating tối thiểu",
+                min_value=0,
+                max_value=100,
+                value=0,
+                key="scanner_min_rs",
+                help="RS Rating: >70 (15đ), 50-70 (10đ), 30-50 (5đ), <30 (0đ)"
+            )
+
+    # ============ APPLY FILTERS (Composite Scoring) ============
+    # Map direction from Quick Filter (MUA/BÁN/CHỜ → BUY/SELL/NEUTRAL)
+    direction_map = {'MUA': 'BUY', 'BÁN': 'SELL', 'CHỜ': 'NEUTRAL'}
+    mapped_direction = direction_map.get(selected_direction) if selected_direction != 'Tất cả' else None
+
     filtered = _apply_filters(
         signals,
         search_symbols,
         selected_sector if selected_sector != "Tất cả ngành" else None,
         selected_type if selected_type != 'Tất cả' else None,
-        selected_direction if selected_direction != 'Tất cả' else None,
-        min_strength,
+        mapped_direction,  # Use mapped direction from Quick Filter
+        min_score,  # Composite score (replaces min_strength)
         selected_days,
-        min_value_bn,  # Phase 3: Liquidity filter
-        selected_trend if selected_trend != 'Tất cả' else None  # Trend filter
+        min_value_bn,  # Liquidity filter (updated thresholds)
+        selected_trend if selected_trend != 'Tất cả' else None,  # Trend filter
+        selected_vsa if selected_vsa != 'Tất cả' else None,  # VSA context filter
+        selected_alignment if selected_alignment != 'Tất cả' else None,  # Trend alignment filter
+        min_rs  # RS Rating filter
     )
 
     st.markdown("---")
@@ -212,6 +284,502 @@ def render_stock_scanner(service: 'TADashboardService') -> None:
 
 
 # ============================================================================
+# UNIFIED SIGNAL SCANNER (Full Spec Scoring)
+# ============================================================================
+
+def _render_unified_signal_scanner(signals: pd.DataFrame, service: 'TADashboardService') -> None:
+    """
+    Render unified Signal Scanner with FULL 100-point scoring.
+
+    Design: Dark Mode OLED + Fintech palette
+    - Side-by-side MUA/BAN tables
+    - Score breakdown panels (6 factors)
+    - No emojis - use text badges
+
+    Layout:
+    1. Quick Filters (Huong, Diem, Thoi gian, Ma, Nganh)
+    2. Summary metrics (st.metric)
+    3. Side-by-side MUA/BAN tables
+    4. Score breakdown panels for selected tickers
+    """
+    # ============ HEADER ============
+    st.markdown("### Signal Scanner (100 pts)")
+
+    # Check for synced ticker
+    default_search = ""
+    if has_synced_ticker():
+        synced = get_synced_ticker()
+        if not st.session_state.get('scanner_quick_search'):
+            default_search = synced
+
+    # ============ QUICK FILTERS (Row 1) ============
+    fcol1, fcol2, fcol3, fcol4 = st.columns([2, 1, 1, 1])
+
+    with fcol1:
+        search_symbols = st.text_input(
+            "Tìm mã",
+            value=default_search if not st.session_state.get('scanner_quick_search') else None,
+            placeholder="VCB, ACB, FPT (dấu phẩy)",
+            key="scanner_quick_search",
+            label_visibility="collapsed"
+        )
+
+    with fcol2:
+        direction_options = ['Tất cả', 'MUA', 'BÁN']
+        selected_direction = st.selectbox(
+            "Hướng",
+            direction_options,
+            format_func=lambda x: {'Tất cả': 'Tất cả', 'MUA': 'MUA (+)', 'BÁN': 'BÁN (-)'}.get(x, x),
+            key="scanner_direction_unified",
+            label_visibility="collapsed"
+        )
+
+    with fcol3:
+        min_score = st.slider(
+            "Điểm tối thiểu",
+            min_value=0, max_value=100, value=50, step=5,
+            key="scanner_min_score_unified",
+            label_visibility="collapsed",
+            help="Composite Score: 80+ Mạnh, 60-79 Khá, 50-59 TB"
+        )
+
+    with fcol4:
+        days_options = {1: "1 phiên", 2: "2 phiên", 5: "5 phiên"}
+        selected_days = st.selectbox(
+            "Thời gian",
+            options=list(days_options.keys()),
+            format_func=lambda x: days_options[x],
+            index=1,
+            key="scanner_days_unified",
+            label_visibility="collapsed"
+        )
+
+    # ============ ADVANCED FILTERS (Expandable) ============
+    with st.expander("Bộ lọc nâng cao", expanded=False):
+        afcol1, afcol2, afcol3 = st.columns(3)
+
+        with afcol1:
+            sectors = service.get_sector_list()
+            selected_sector = st.selectbox(
+                "Ngành",
+                ["Tất cả ngành"] + sectors,
+                key="scanner_sector_unified"
+            )
+
+        with afcol2:
+            trend_options = ['Tất cả', 'UPTREND', 'DOWNTREND', 'SIDEWAYS']
+            selected_trend = st.selectbox(
+                "Xu hướng",
+                trend_options,
+                format_func=lambda x: {'Tất cả': 'Tất cả', 'UPTREND': 'Tăng (++/+)', 'DOWNTREND': 'Giảm (--/-)', 'SIDEWAYS': 'Ngang (=)'}.get(x, x),
+                key="scanner_trend_unified"
+            )
+
+        with afcol3:
+            min_rs = st.slider(
+                "RS Rating tối thiểu",
+                min_value=0, max_value=100, value=0,
+                key="scanner_min_rs_unified",
+                help="RS: 80+ (15đ), 70-79 (13đ), 50-69 (10đ)"
+            )
+
+    # ============ APPLY FILTERS ============
+    direction_map = {'MUA': 'BUY', 'BÁN': 'SELL'}
+    mapped_direction = direction_map.get(selected_direction) if selected_direction != 'Tất cả' else None
+
+    filtered = _apply_unified_filters(
+        signals,
+        search_symbols,
+        selected_sector if selected_sector != "Tất cả ngành" else None,
+        mapped_direction,
+        min_score,
+        selected_days,
+        selected_trend if selected_trend != 'Tất cả' else None,
+        min_rs
+    )
+
+    st.markdown("---")
+
+    # ============ SUMMARY METRICS ============
+    _render_unified_summary(filtered)
+
+    st.markdown("---")
+
+    # ============ SIDE-BY-SIDE TABLES: MUA | BAN ============
+    _render_unified_tables(filtered)
+
+    # ============ SCORE BREAKDOWN PANELS ============
+    if not filtered.empty:
+        st.markdown("---")
+        _render_unified_breakdown(filtered)
+
+
+def _apply_unified_filters(
+    df: pd.DataFrame,
+    symbols_str: str,
+    sector: str,
+    direction: str,
+    min_score: int,
+    days: int,
+    trend: str,
+    min_rs: int
+) -> pd.DataFrame:
+    """Apply filters for unified scanner."""
+    filtered = df.copy()
+
+    # Filter by trading sessions (not calendar days)
+    if 'date' in filtered.columns:
+        try:
+            filtered['date'] = pd.to_datetime(filtered['date'])
+            # Get unique trading dates sorted descending
+            unique_dates = filtered['date'].dropna().unique()
+            unique_dates = pd.to_datetime(unique_dates)
+            unique_dates = sorted(unique_dates, reverse=True)
+            # Take top N trading sessions
+            if len(unique_dates) >= days:
+                valid_dates = unique_dates[:days]
+                filtered = filtered[filtered['date'].isin(valid_dates)]
+        except Exception:
+            pass
+
+    # Symbol search
+    if symbols_str and symbols_str.strip():
+        symbols = [s.strip().upper() for s in symbols_str.split(',')]
+        filtered = filtered[filtered['symbol'].isin(symbols)]
+
+    # Sector filter
+    if sector and 'sector_code' in filtered.columns:
+        filtered = filtered[filtered['sector_code'] == sector]
+
+    # Direction filter
+    if direction and 'direction' in filtered.columns:
+        if direction == 'BUY':
+            filtered = filtered[filtered['direction'].isin(['BUY', 'PULLBACK'])]
+        elif direction == 'SELL':
+            filtered = filtered[filtered['direction'].isin(['SELL', 'BOUNCE'])]
+
+    # Trend filter
+    if trend and 'trend' in filtered.columns:
+        if trend == 'UPTREND':
+            filtered = filtered[filtered['trend'].isin(['UPTREND', 'STRONG_UP'])]
+        elif trend == 'DOWNTREND':
+            filtered = filtered[filtered['trend'].isin(['DOWNTREND', 'STRONG_DOWN'])]
+        elif trend == 'SIDEWAYS':
+            filtered = filtered[filtered['trend'] == 'SIDEWAYS']
+
+    # Composite Score filter
+    score_col = 'composite_score' if 'composite_score' in filtered.columns else 'strength'
+    if min_score > 0 and score_col in filtered.columns:
+        score_values = filtered[score_col].copy()
+        if score_values.max() <= 1:
+            score_values = score_values * 100
+        filtered = filtered[score_values >= min_score]
+
+    # RS Rating filter
+    if min_rs > 0 and 'rs_rating' in filtered.columns:
+        filtered = filtered[filtered['rs_rating'] >= min_rs]
+
+    # Sort by composite score
+    if score_col in filtered.columns:
+        filtered = filtered.sort_values(score_col, ascending=False)
+
+    return filtered
+
+
+def _render_unified_summary(signals: pd.DataFrame) -> None:
+    """Render summary metrics for unified scanner."""
+    if signals.empty:
+        st.info("Không có tín hiệu phù hợp")
+        return
+
+    buy_signals = signals[signals['direction'].isin(['BUY', 'PULLBACK'])] if 'direction' in signals.columns else pd.DataFrame()
+    sell_signals = signals[signals['direction'].isin(['SELL', 'BOUNCE'])] if 'direction' in signals.columns else pd.DataFrame()
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.metric("Tổng", len(signals))
+    with col2:
+        st.metric("MUA", len(buy_signals), delta=None)
+    with col3:
+        st.metric("BÁN", len(sell_signals), delta=None)
+    with col4:
+        avg_score = signals['composite_score'].mean() if 'composite_score' in signals.columns else 0
+        st.metric("Điểm TB", f"{avg_score:.0f}")
+
+
+def _render_unified_tables(signals: pd.DataFrame) -> None:
+    """Render side-by-side MUA/BAN tables."""
+    if signals.empty:
+        return
+
+    # Split by direction
+    buy_signals = signals[signals['direction'].isin(['BUY', 'PULLBACK'])].copy() if 'direction' in signals.columns else pd.DataFrame()
+    sell_signals = signals[signals['direction'].isin(['SELL', 'BOUNCE'])].copy() if 'direction' in signals.columns else pd.DataFrame()
+
+    # Sort by score
+    score_col = 'composite_score' if 'composite_score' in signals.columns else 'strength'
+    buy_signals = buy_signals.sort_values(score_col, ascending=False).head(20)
+    sell_signals = sell_signals.sort_values(score_col, ascending=False).head(20)
+
+    # Ticker selection for breakdown
+    all_tickers = signals['symbol'].unique().tolist()
+    st.markdown("##### Chọn mã để xem chi tiết")
+    selected_tickers = st.multiselect(
+        "Mã",
+        options=all_tickers[:50],  # Limit options
+        default=[],
+        max_selections=5,
+        key="scanner_selected_unified",
+        label_visibility="collapsed",
+        help="Chọn tối đa 5 mã"
+    )
+    st.session_state['_unified_selected_tickers'] = selected_tickers
+
+    # Two columns
+    col1, col2 = st.columns(2)
+
+    with col1:
+        _render_signal_table_unified(buy_signals, "MUA", "#10B981", True)
+
+    with col2:
+        _render_signal_table_unified(sell_signals, "BÁN", "#EF4444", False)
+
+
+def _render_signal_table_unified(df: pd.DataFrame, title: str, accent_color: str, is_buy: bool) -> None:
+    """Render signal table with Dark Mode OLED style."""
+    # Trend badges (no emoji)
+    trend_badges = {
+        'STRONG_UP': ('++', '#10B981'),
+        'UPTREND': ('+', '#34D399'),
+        'SIDEWAYS': ('=', '#64748B'),
+        'DOWNTREND': ('-', '#F87171'),
+        'STRONG_DOWN': ('--', '#EF4444'),
+    }
+
+    has_trend = 'trend' in df.columns
+
+    # Header
+    header_html = f'''
+    <div style="
+        background: linear-gradient(90deg, {accent_color}15 0%, rgba(15,23,42,0.95) 100%);
+        border: 1px solid {accent_color}40;
+        border-radius: 12px 12px 0 0;
+        padding: 10px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    ">
+        <span style="color: {accent_color}; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">{title}</span>
+        <span style="background: {accent_color}20; color: {accent_color}; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; font-family: monospace;">{len(df)}</span>
+    </div>
+    '''
+
+    # Table body
+    table_html = f'''
+    <div style="
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid {accent_color}20;
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+        max-height: 400px;
+        overflow-y: auto;
+    ">
+    <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr style="background: rgba(30, 41, 59, 0.8);">
+            <th style="padding: 8px 12px; text-align: left; color: #94A3B8; font-size: 0.7rem; font-weight: 600;">MA</th>
+            {'<th style="padding: 8px 6px; text-align: center; color: #94A3B8; font-size: 0.7rem;">TREND</th>' if has_trend else ''}
+            <th style="padding: 8px 12px; text-align: left; color: #94A3B8; font-size: 0.7rem;">MAU HINH</th>
+            <th style="padding: 8px 12px; text-align: right; color: #94A3B8; font-size: 0.7rem;">DIEM</th>
+        </tr>
+    </thead>
+    <tbody>
+    '''
+
+    for _, row in df.iterrows():
+        symbol = row.get('symbol', '-')
+        pattern = row.get('type_label', row.get('pattern_name', '-'))
+        score = row.get('composite_score', row.get('strength', 0))
+        # Handle NaN values
+        if pd.isna(score):
+            score = 0
+        elif score <= 1:
+            score = int(score * 100)
+        score = int(score)
+
+        # Score color gradient
+        if is_buy:
+            if score >= 70:
+                bar_color = '#10B981'
+                text_color = '#10B981'
+            elif score >= 50:
+                bar_color = '#34D399'
+                text_color = '#34D399'
+            else:
+                bar_color = '#64748B'
+                text_color = '#64748B'
+        else:
+            if score >= 70:
+                bar_color = '#EF4444'
+                text_color = '#EF4444'
+            elif score >= 50:
+                bar_color = '#F87171'
+                text_color = '#F87171'
+            else:
+                bar_color = '#64748B'
+                text_color = '#64748B'
+
+        # Trend badge (text, not emoji)
+        trend = row.get('trend', '') if has_trend else ''
+        if pd.isna(trend) or not isinstance(trend, str):
+            trend = ''
+        trend_badge, trend_color = trend_badges.get(trend, ('', '#64748B'))
+
+        trend_cell = f'''
+            <td style="padding: 8px 6px; text-align: center;">
+                <span style="color: {trend_color}; font-weight: 700; font-size: 0.85rem; font-family: monospace;" title="{trend}">{trend_badge}</span>
+            </td>
+        ''' if has_trend else ''
+
+        row_html = f'''
+        <tr style="background: rgba(15, 23, 42, 0.6); border-bottom: 1px solid rgba(148,163,184,0.1);">
+            <td style="padding: 8px 12px; color: #F8FAFC; font-weight: 600; font-family: monospace; font-size: 0.85rem;">
+                {symbol}
+            </td>
+            {trend_cell}
+            <td style="padding: 8px 12px; color: #CBD5E1; font-size: 0.8rem;">
+                {pattern[:20]}
+            </td>
+            <td style="padding: 8px 12px;">
+                <div style="display: flex; align-items: center; gap: 8px; justify-content: flex-end;">
+                    <div style="flex: 1; max-width: 50px; height: 5px; background: rgba(148,163,184,0.2); border-radius: 3px; overflow: hidden;">
+                        <div style="width: {score}%; height: 100%; background: {bar_color}; border-radius: 3px;"></div>
+                    </div>
+                    <span style="color: {text_color}; font-weight: 700; font-size: 0.8rem; min-width: 24px; text-align: right; font-family: monospace;">
+                        {score}
+                    </span>
+                </div>
+            </td>
+        </tr>
+        '''
+        table_html += row_html
+
+    table_html += '</tbody></table></div>'
+    st.html(header_html + table_html)
+
+
+def _render_unified_breakdown(signals: pd.DataFrame) -> None:
+    """Render score breakdown panels for selected tickers."""
+    selected_tickers = st.session_state.get('_unified_selected_tickers', [])
+
+    if not selected_tickers:
+        st.caption("Chọn mã từ dropdown phía trên để xem chi tiết điểm 6 yếu tố")
+        return
+
+    selected_signals = signals[signals['symbol'].isin(selected_tickers)]
+    if selected_signals.empty:
+        return
+
+    st.markdown("##### Chi tiết điểm Composite (6 yếu tố)")
+
+    # Render each ticker
+    ticker_chunks = [selected_tickers[i:i+3] for i in range(0, len(selected_tickers), 3)]
+
+    for chunk in ticker_chunks:
+        cols = st.columns(len(chunk))
+
+        for idx, ticker in enumerate(chunk):
+            with cols[idx]:
+                ticker_data = selected_signals[selected_signals['symbol'] == ticker]
+                if ticker_data.empty:
+                    continue
+                ticker_row = ticker_data.iloc[0]
+
+                # Extract scores
+                total = ticker_row.get('composite_score', 0)
+                if total <= 1:
+                    total = total * 100
+                pattern_s = ticker_row.get('pattern_score', 0)
+                vsa_s = ticker_row.get('vsa_score', 0)
+                trend_s = ticker_row.get('trend_score', 0)
+                sr_s = ticker_row.get('sr_score', 0)
+                rs_s = ticker_row.get('rs_score', 0)
+                liq_s = ticker_row.get('liquidity_score', 0)
+
+                # Normalize
+                pattern_s = min(15, max(0, pattern_s if not pd.isna(pattern_s) else 0))
+                vsa_s = min(25, max(0, vsa_s if not pd.isna(vsa_s) else 0))
+                trend_s = min(20, max(0, trend_s if not pd.isna(trend_s) else 0))
+                sr_s = min(15, max(0, sr_s if not pd.isna(sr_s) else 0))
+                rs_s = min(15, max(0, rs_s if not pd.isna(rs_s) else 0))
+                liq_s = min(10, max(0, liq_s if not pd.isna(liq_s) else 0))
+
+                direction = ticker_row.get('direction', 'NEUTRAL')
+                trend = ticker_row.get('trend', 'SIDEWAYS')
+                pattern = ticker_row.get('type_label', ticker_row.get('pattern_name', '-'))
+
+                # Direction color
+                dir_color = {'BUY': '#10B981', 'SELL': '#EF4444', 'PULLBACK': '#F59E0B', 'BOUNCE': '#F59E0B'}.get(direction, '#64748B')
+
+                breakdown_html = f'''
+                <div style="
+                    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+                    border: 1px solid rgba(148, 163, 184, 0.2);
+                    border-radius: 12px;
+                    padding: 16px;
+                ">
+                    <!-- Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #F8FAFC; font-weight: 700; font-family: monospace; font-size: 1.1rem;">{ticker}</span>
+                            <span style="color: {dir_color}; font-size: 0.8rem; font-weight: 600;">{direction}</span>
+                        </div>
+                        <div style="
+                            background: rgba(59, 130, 246, 0.2);
+                            color: #60A5FA;
+                            padding: 4px 12px;
+                            border-radius: 20px;
+                            font-size: 0.85rem;
+                            font-weight: 700;
+                            font-family: monospace;
+                        ">{int(total)} pts</div>
+                    </div>
+
+                    <!-- Pattern & Trend -->
+                    <div style="color: #94A3B8; font-size: 0.75rem; margin-bottom: 12px;">
+                        {pattern[:25]} | {trend}
+                    </div>
+
+                    <!-- 6 Factor Bars -->
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        {_render_unified_bar("Pattern", pattern_s, 15, "#8B5CF6")}
+                        {_render_unified_bar("VSA", vsa_s, 25, "#06B6D4")}
+                        {_render_unified_bar("Trend", trend_s, 20, "#10B981")}
+                        {_render_unified_bar("S/R", sr_s, 15, "#22D3EE")}
+                        {_render_unified_bar("RS", rs_s, 15, "#A78BFA")}
+                        {_render_unified_bar("Liq", liq_s, 10, "#64748B")}
+                    </div>
+                </div>
+                '''
+                st.html(breakdown_html)
+
+
+def _render_unified_bar(label: str, score: float, max_score: float, color: str) -> str:
+    """Render a single score bar."""
+    pct = min(100, (score / max_score) * 100) if max_score > 0 else 0
+    return f'''
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="color: #64748B; font-size: 0.65rem; min-width: 45px; text-transform: uppercase;">{label}</span>
+        <div style="flex: 1; height: 5px; background: rgba(100,116,139,0.2); border-radius: 3px; overflow: hidden;">
+            <div style="width: {pct}%; height: 100%; background: {color}; border-radius: 3px;"></div>
+        </div>
+        <span style="color: {color}; font-size: 0.7rem; font-weight: 600; min-width: 24px; text-align: right; font-family: monospace;">{int(score)}</span>
+    </div>
+    '''
+
+
+# ============================================================================
 # FILTER LOGIC
 # ============================================================================
 
@@ -221,24 +789,40 @@ def _apply_filters(
     sector: Optional[str],
     signal_type: Optional[str],
     direction: Optional[str],
-    min_strength: int,
+    min_score: int,  # Composite score (0-100)
     days: int = 2,
-    min_value_bn: float = 0,  # Phase 3: Liquidity filter
-    trend: Optional[str] = None  # Trend filter
+    min_value_bn: float = 0,  # Liquidity filter
+    trend: Optional[str] = None,  # Trend filter
+    vsa_context: Optional[str] = None,  # VSA context filter
+    alignment: Optional[str] = None,  # Trend alignment filter
+    min_rs: int = 0  # RS Rating filter
 ) -> pd.DataFrame:
-    """Apply all filters to signals dataframe."""
+    """
+    Apply all filters to signals dataframe.
+
+    Composite Scoring UI filters:
+    - min_score: Composite score (6 factors) 0-100
+    - vsa_context: Bullish/Bearish/Neutral
+    - alignment: Aligned/Counter (trend alignment)
+    - min_rs: Minimum RS Rating
+    """
 
     filtered = df.copy()
 
-    # Filter by days (recent signals only)
+    # Filter by trading sessions (not calendar days)
     if 'date' in filtered.columns:
         try:
             filtered['date'] = pd.to_datetime(filtered['date'])
-            # Normalize cutoff to start of day for comparison
-            cutoff_date = pd.Timestamp(datetime.now().date()) - pd.Timedelta(days=days)
-            filtered = filtered[filtered['date'] >= cutoff_date]
+            # Get unique trading dates sorted descending
+            unique_dates = filtered['date'].dropna().unique()
+            unique_dates = pd.to_datetime(unique_dates)
+            unique_dates = sorted(unique_dates, reverse=True)
+            # Take top N trading sessions
+            if len(unique_dates) >= days:
+                valid_dates = unique_dates[:days]
+                filtered = filtered[filtered['date'].isin(valid_dates)]
         except Exception:
-            pass  # If date parsing fails, skip date filter
+            pass
 
     # Symbol search
     if symbols_str and symbols_str.strip():
@@ -253,9 +837,16 @@ def _apply_filters(
     if signal_type and 'signal_type' in filtered.columns:
         filtered = filtered[filtered['signal_type'] == signal_type]
 
-    # Direction filter
+    # Direction filter (BUY/SELL includes PULLBACK/BOUNCE if related)
     if direction and 'direction' in filtered.columns:
-        filtered = filtered[filtered['direction'] == direction]
+        if direction == 'BUY':
+            filtered = filtered[filtered['direction'].isin(['BUY', 'PULLBACK'])]
+        elif direction == 'SELL':
+            filtered = filtered[filtered['direction'].isin(['SELL', 'BOUNCE'])]
+        elif direction == 'NEUTRAL':
+            filtered = filtered[filtered['direction'] == 'NEUTRAL']
+        else:
+            filtered = filtered[filtered['direction'] == direction]
 
     # Trend filter (UPTREND includes STRONG_UP, DOWNTREND includes STRONG_DOWN)
     if trend and 'trend' in filtered.columns:
@@ -266,42 +857,87 @@ def _apply_filters(
         elif trend == 'SIDEWAYS':
             filtered = filtered[filtered['trend'] == 'SIDEWAYS']
 
-    # Strength filter
-    if min_strength > 0 and 'strength' in filtered.columns:
-        strength_col = filtered['strength']
-        if strength_col.max() <= 1:
-            strength_col = strength_col * 100
-        filtered = filtered[strength_col >= min_strength]
+    # Composite Score filter (replaces pattern strength)
+    # Uses 'composite_score' column if exists, falls back to 'strength'
+    score_col = 'composite_score' if 'composite_score' in filtered.columns else 'strength'
+    if min_score > 0 and score_col in filtered.columns:
+        score_values = filtered[score_col].copy()
+        if score_values.max() <= 1:  # Normalize if 0-1 scale
+            score_values = score_values * 100
+        filtered = filtered[score_values >= min_score]
 
-    # Phase 3: Liquidity filter (GTGD)
+    # VSA Context filter
+    if vsa_context and 'vsa_context' in filtered.columns:
+        filtered = filtered[filtered['vsa_context'] == vsa_context]
+    elif vsa_context and 'vsa_score' in filtered.columns:
+        # Infer VSA context from score if column not present
+        if vsa_context == 'Bullish':
+            filtered = filtered[filtered['vsa_score'] > 5]
+        elif vsa_context == 'Bearish':
+            filtered = filtered[filtered['vsa_score'] < -5]
+        elif vsa_context == 'Neutral':
+            filtered = filtered[(filtered['vsa_score'] >= -5) & (filtered['vsa_score'] <= 5)]
+
+    # Trend Alignment filter
+    if alignment:
+        # Calculate alignment if not present
+        if 'is_aligned' not in filtered.columns and 'trend' in filtered.columns and 'direction' in filtered.columns:
+            def check_aligned(row):
+                t = row.get('trend', '')
+                d = row.get('direction', '')
+                if t in ['UPTREND', 'STRONG_UP'] and d in ['BUY', 'PULLBACK']:
+                    return True
+                if t in ['DOWNTREND', 'STRONG_DOWN'] and d in ['SELL', 'BOUNCE']:
+                    return True
+                return False
+            filtered['_is_aligned'] = filtered.apply(check_aligned, axis=1)
+            align_col = '_is_aligned'
+        else:
+            align_col = 'is_aligned'
+
+        if align_col in filtered.columns:
+            if alignment == 'Aligned':
+                filtered = filtered[filtered[align_col] == True]
+            elif alignment == 'Counter':
+                filtered = filtered[filtered[align_col] == False]
+
+        # Cleanup temp column
+        if '_is_aligned' in filtered.columns:
+            filtered = filtered.drop(columns=['_is_aligned'], errors='ignore')
+
+    # RS Rating filter
+    if min_rs > 0 and 'rs_rating' in filtered.columns:
+        filtered = filtered[filtered['rs_rating'] >= min_rs]
+
+    # Liquidity filter (GTGD)
     if min_value_bn > 0 and 'trading_value' in filtered.columns:
-        min_value = min_value_bn * 1e9  # Convert billion to actual value
+        min_value = min_value_bn * 1e9
         filtered = filtered[filtered['trading_value'] >= min_value]
 
-    # Filter to only primary signals (show secondary via tooltip)
+    # Filter to only primary signals
     if 'is_primary' in filtered.columns:
         filtered = filtered[filtered['is_primary'] == True]
 
-    # Sort by action priority (BUY first, then SELL, then PULLBACK/BOUNCE)
-    # Then by date (newest) and strength (highest)
+    # Sort by composite score (highest first), then by date
+    sort_col = 'composite_score' if 'composite_score' in filtered.columns else 'strength'
     if 'direction' in filtered.columns:
         priority_map = {'BUY': 1, 'SELL': 2, 'PULLBACK': 3, 'BOUNCE': 4, 'NEUTRAL': 5}
         filtered['_priority'] = filtered['direction'].map(priority_map).fillna(6)
 
         if 'date' in filtered.columns:
             filtered = filtered.sort_values(
-                ['date', '_priority', 'strength'],
+                ['date', '_priority', sort_col],
                 ascending=[False, True, False]
             )
         else:
             filtered = filtered.sort_values(
-                ['_priority', 'strength'],
+                ['_priority', sort_col],
                 ascending=[True, False]
             )
 
         filtered = filtered.drop(columns=['_priority'], errors='ignore')
     elif 'date' in filtered.columns:
-        filtered = filtered.sort_values(['date', 'strength'], ascending=[False, False])
+        filtered = filtered.sort_values(['date', sort_col], ascending=[False, False])
 
     return filtered
 
@@ -518,13 +1154,13 @@ def _render_signal_table_compact(
     count = len(df)
     rgb = _hex_to_rgb(accent_color)
 
-    # Trend badge mapping
+    # Trend badge mapping - use text symbols instead of emoji
     trend_badges = {
-        'STRONG_UP': ('⬆⬆', '#10B981'),
-        'UPTREND': ('⬆', '#22C55E'),
-        'SIDEWAYS': ('↔', '#64748B'),
-        'DOWNTREND': ('⬇', '#F59E0B'),
-        'STRONG_DOWN': ('⬇⬇', '#EF4444'),
+        'STRONG_UP': ('++', '#10B981'),
+        'UPTREND': ('+', '#22C55E'),
+        'SIDEWAYS': ('=', '#64748B'),
+        'DOWNTREND': ('-', '#F59E0B'),
+        'STRONG_DOWN': ('--', '#EF4444'),
     }
 
     # Header
@@ -630,22 +1266,54 @@ def _render_signal_table_compact(
 
 
 def _render_split_tables(signals: pd.DataFrame) -> None:
-    """Render signal tables: MUA | BÁN | PULLBACK/BOUNCE."""
+    """Render signal tables with click-to-expand accordion and score breakdown."""
     if signals.empty:
         st.info("Không có tín hiệu phù hợp với bộ lọc")
         return
+
+    # Initialize session state for selected signals (accordion)
+    if 'scanner_selected_tickers' not in st.session_state:
+        st.session_state.scanner_selected_tickers = []
 
     # Split by direction
     buy_signals = signals[signals['direction'] == 'BUY'].copy()
     sell_signals = signals[signals['direction'] == 'SELL'].copy()
     pullback_signals = signals[signals['direction'].isin(['PULLBACK', 'BOUNCE'])].copy()
 
-    # Sort by strength descending
-    buy_signals = buy_signals.sort_values('strength', ascending=False).head(30)
-    sell_signals = sell_signals.sort_values('strength', ascending=False).head(30)
-    pullback_signals = pullback_signals.sort_values('strength', ascending=False).head(30)
+    # Sort by composite score (or strength) descending
+    score_col = 'composite_score' if 'composite_score' in signals.columns else 'strength'
+    buy_signals = buy_signals.sort_values(score_col, ascending=False).head(30)
+    sell_signals = sell_signals.sort_values(score_col, ascending=False).head(30)
+    pullback_signals = pullback_signals.sort_values(score_col, ascending=False).head(30)
 
-    # Three columns layout
+    # Get all available tickers for selection
+    all_tickers = signals['symbol'].unique().tolist()
+
+    # Ticker selection for accordion expansion
+    st.markdown("##### Chọn mã để xem chi tiết điểm")
+    selected_tickers = st.multiselect(
+        "Chọn mã cổ phiếu",
+        options=all_tickers,
+        default=st.session_state.scanner_selected_tickers[:5],  # Max 5 for performance
+        max_selections=5,
+        key="scanner_ticker_select",
+        label_visibility="collapsed",
+        help="Chọn tối đa 5 mã để xem breakdown điểm composite (6 yếu tố)"
+    )
+
+    # Update session state
+    st.session_state.scanner_selected_tickers = selected_tickers
+
+    # Auto-sync with Single Stock Analysis (wire click)
+    # Note: Cannot directly set single_stock_input after widget instantiated
+    # Use a flag to trigger sync on next rerun
+    if selected_tickers and len(selected_tickers) == 1:
+        new_ticker = selected_tickers[0]
+        if st.session_state.get('_pending_sync_ticker') != new_ticker:
+            st.session_state._pending_sync_ticker = new_ticker
+            st.rerun()  # Trigger rerun to apply sync
+
+    # Three columns layout for tables
     col1, col2, col3 = st.columns(3)
 
     with col1:
@@ -668,9 +1336,152 @@ def _render_split_tables(signals: pd.DataFrame) -> None:
         _render_signal_table_compact(
             pullback_signals,
             title="PULLBACK/BOUNCE",
-            accent_color="#F59E0B",  # Orange for counter-trend
-            is_buy=True  # Use warm colors
+            accent_color="#F59E0B",
+            is_buy=True
         )
+
+    # Render detail panels for selected tickers (accordion expansion)
+    if selected_tickers:
+        st.markdown("---")
+        st.markdown("##### Chi tiết điểm Composite")
+        _render_score_breakdown_panels(signals, selected_tickers)
+
+
+def _render_score_breakdown_panels(signals: pd.DataFrame, selected_tickers: list) -> None:
+    """
+    Render score breakdown panels for selected tickers (accordion expansion).
+
+    Shows 6-factor composite score breakdown:
+    1. Candlestick Pattern (15 pts max)
+    2. VSA Context (25 pts max)
+    3. Trend Alignment (20 pts max)
+    4. S/R Proximity (15 pts max)
+    5. RS Rating (15 pts max)
+    6. Liquidity (10 pts max)
+
+    Plus S/R levels and R:R ratio.
+    """
+    if not selected_tickers:
+        return
+
+    # Filter signals for selected tickers
+    selected_signals = signals[signals['symbol'].isin(selected_tickers)]
+
+    if selected_signals.empty:
+        return
+
+    # Render each ticker in columns (max 3 per row)
+    ticker_chunks = [selected_tickers[i:i+3] for i in range(0, len(selected_tickers), 3)]
+
+    for chunk in ticker_chunks:
+        cols = st.columns(len(chunk))
+
+        for idx, ticker in enumerate(chunk):
+            with cols[idx]:
+                ticker_data = selected_signals[selected_signals['symbol'] == ticker].iloc[0] if len(selected_signals[selected_signals['symbol'] == ticker]) > 0 else None
+
+                if ticker_data is None:
+                    continue
+
+                # Get score components (use defaults if columns don't exist)
+                total_score = ticker_data.get('composite_score', ticker_data.get('strength', 0) * 100)
+                if total_score <= 1:
+                    total_score = total_score * 100
+
+                pattern_score = ticker_data.get('pattern_score', 10)
+                vsa_score = ticker_data.get('vsa_score', 15)
+                trend_score = ticker_data.get('trend_score', 15)
+                sr_score = ticker_data.get('sr_score', 10)
+                rs_score = ticker_data.get('rs_score', 10)
+                liquidity_score = ticker_data.get('liquidity_score', 8)
+
+                # Normalize scores if needed
+                pattern_score = min(15, max(0, pattern_score if not pd.isna(pattern_score) else 10))
+                vsa_score = min(25, max(-25, vsa_score if not pd.isna(vsa_score) else 15))
+                trend_score = min(20, max(-10, trend_score if not pd.isna(trend_score) else 15))
+                sr_score = min(15, max(0, sr_score if not pd.isna(sr_score) else 10))
+                rs_score = min(15, max(0, rs_score if not pd.isna(rs_score) else 10))
+                liquidity_score = min(10, max(0, liquidity_score if not pd.isna(liquidity_score) else 8))
+
+                # Get pattern and direction
+                pattern = ticker_data.get('type_label', ticker_data.get('pattern_name', '-'))
+                direction = ticker_data.get('direction', 'NEUTRAL')
+                trend = ticker_data.get('trend', 'SIDEWAYS')
+
+                # Direction color
+                dir_color = {
+                    'BUY': '#10B981', 'SELL': '#EF4444',
+                    'PULLBACK': '#F59E0B', 'BOUNCE': '#F59E0B',
+                    'NEUTRAL': '#64748B'
+                }.get(direction, '#64748B')
+
+                # Build score breakdown HTML
+                breakdown_html = f'''
+                <div style="
+                    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(26, 22, 37, 0.95) 100%);
+                    border: 1px solid rgba(139, 92, 246, 0.3);
+                    border-radius: 12px;
+                    padding: 16px;
+                    margin-bottom: 12px;
+                ">
+                    <!-- Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #FFFFFF; font-weight: 700; font-family: monospace; font-size: 1.1rem;">{ticker}</span>
+                            <span style="color: {dir_color}; font-size: 0.8rem; font-weight: 600;">{direction}</span>
+                        </div>
+                        <div style="
+                            background: rgba(139, 92, 246, 0.2);
+                            color: #A78BFA;
+                            padding: 4px 12px;
+                            border-radius: 20px;
+                            font-size: 0.85rem;
+                            font-weight: 700;
+                            font-family: monospace;
+                        ">{int(total_score)} pts</div>
+                    </div>
+
+                    <!-- Pattern -->
+                    <div style="color: #C4B5FD; font-size: 0.8rem; margin-bottom: 12px;">
+                        {pattern} | Trend: {trend}
+                    </div>
+
+                    <!-- 6 Factor Bars -->
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        {_render_score_bar("Pattern", pattern_score, 15, "#8B5CF6")}
+                        {_render_score_bar("VSA", vsa_score, 25, "#06B6D4" if vsa_score > 0 else "#EF4444")}
+                        {_render_score_bar("Trend", trend_score, 20, "#10B981" if trend_score > 0 else "#F59E0B")}
+                        {_render_score_bar("S/R", sr_score, 15, "#22D3EE")}
+                        {_render_score_bar("RS", rs_score, 15, "#A78BFA")}
+                        {_render_score_bar("Liquidity", liquidity_score, 10, "#64748B")}
+                    </div>
+                </div>
+                '''
+
+                st.html(breakdown_html)
+
+
+def _render_score_bar(label: str, score: float, max_score: float, color: str) -> str:
+    """Render a single score bar for the breakdown panel."""
+    # Handle negative scores (VSA, Trend can be negative)
+    if score < 0:
+        pct = 0
+        display_score = f"{int(score)}"
+        bar_bg = "rgba(239, 68, 68, 0.3)"
+    else:
+        pct = min(100, (score / max_score) * 100)
+        display_score = f"+{int(score)}" if score > 0 else "0"
+        bar_bg = color
+
+    return f'''
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="color: #94A3B8; font-size: 0.7rem; min-width: 55px; text-transform: uppercase;">{label}</span>
+        <div style="flex: 1; height: 6px; background: rgba(100,116,139,0.2); border-radius: 3px; overflow: hidden;">
+            <div style="width: {pct}%; height: 100%; background: {bar_bg}; border-radius: 3px;"></div>
+        </div>
+        <span style="color: {color}; font-size: 0.75rem; font-weight: 600; min-width: 28px; text-align: right; font-family: monospace;">{display_score}</span>
+    </div>
+    '''
 
 
 def _render_signal_table_enhanced(signals: pd.DataFrame) -> None:
@@ -944,7 +1755,11 @@ def _calculate_fib_sr_levels(ticker: str) -> dict:
         'resistances': []
     }
 
-    basic_path = Path("DATA/processed/technical/basic_data.parquet")
+    # Use 30d file (2.2MB) instead of full file (20MB) for S/R calculation
+    basic_path = Path("DATA/processed/technical/basic_data_30d.parquet")
+    if not basic_path.exists():
+        # Fallback to full file
+        basic_path = Path("DATA/processed/technical/basic_data.parquet")
     if not basic_path.exists():
         return result
 
@@ -988,12 +1803,22 @@ def _calculate_fib_sr_levels(ticker: str) -> dict:
     supports = []
     resistances = []
 
+    # Round swing levels for comparison
+    swing_low_rounded = round(swing_low_10d, -2)
+    swing_high_rounded = round(swing_high_10d, -2)
+
     for level, label in fib_levels:
         fib_price = fib_low + (price_range * level)
-        fib_price = round(fib_price, -2)  # Round to nearest 100 (e.g., 16793 → 16800)
+        fib_price = round(fib_price, -2)  # Round to nearest 100
         pct = ((fib_price / current_price) - 1) * 100
 
         info = {'price': fib_price, 'label': label, 'pct': pct}
+
+        # Skip if too close to Swing levels (within 1%)
+        if swing_low_rounded > 0 and abs(fib_price - swing_low_rounded) / swing_low_rounded < 0.01:
+            continue
+        if swing_high_rounded > 0 and abs(fib_price - swing_high_rounded) / swing_high_rounded < 0.01:
+            continue
 
         if fib_price < current_price * 0.995:  # Below price (0.5% buffer)
             supports.append(info)
@@ -1004,32 +1829,18 @@ def _calculate_fib_sr_levels(ticker: str) -> dict:
     supports.sort(key=lambda x: x['price'], reverse=True)
     resistances.sort(key=lambda x: x['price'])
 
-    # Add Swing Low 10d as additional support if not already in list
-    swing_low_10d = round(swing_low_10d, -2)  # Round to nearest 100
-    swing_low_pct = ((swing_low_10d / current_price) - 1) * 100
-    swing_low_info = {'price': swing_low_10d, 'label': 'Swing Low 10d', 'pct': swing_low_pct}
-
-    # Check if swing_low_10d is not too close to existing supports
-    existing_prices = [s['price'] for s in supports]
-    if not any(abs(swing_low_10d - p) / p < 0.01 for p in existing_prices):  # >1% difference
-        supports.append(swing_low_info)
-        supports.sort(key=lambda x: x['price'], reverse=True)
-
-    result['supports'] = supports[:3]  # Top 3 supports (including Swing Low 10d)
-
-    # Round swing_high_10d for resistance fallback
-    swing_high_10d = round(swing_high_10d, -2)
-    result['resistances'] = resistances[:1] if resistances else [{'price': swing_high_10d, 'label': 'Swing High 10d', 'pct': ((swing_high_10d / current_price) - 1) * 100}]
+    result['supports'] = supports[:3]  # Top 3 Fib supports (excl. duplicates with Swing)
+    result['resistances'] = resistances[:2]  # Top 2 Fib resistances (excl. duplicates)
 
     return result
 
 
 TREND_ICONS = {
-    'STRONG_UP': '⬆⬆',
-    'UPTREND': '⬆',
-    'SIDEWAYS': '↔',
-    'DOWNTREND': '⬇',
-    'STRONG_DOWN': '⬇⬇',
+    'STRONG_UP': '++',
+    'UPTREND': '+',
+    'SIDEWAYS': '=',
+    'DOWNTREND': '-',
+    'STRONG_DOWN': '--',
 }
 
 TREND_COLORS = {
@@ -1062,10 +1873,15 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
     """
     st.markdown("### Phân tích cổ phiếu")
 
-    # Check for synced ticker from Fundamental pages
+    # Check for synced ticker from Fundamental pages or Scanner selection
     default_ticker = ""
     synced_info = ""
-    if has_synced_ticker():
+
+    # Priority: 1) Scanner selection, 2) Fundamental sync
+    if st.session_state.get('_pending_sync_ticker'):
+        default_ticker = st.session_state._pending_sync_ticker
+        synced_info = " (từ Scanner)"
+    elif has_synced_ticker():
         default_ticker = get_synced_ticker()
         synced_info = " (từ trang Fundamental)"
 
@@ -1075,7 +1891,7 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
     with input_col:
         ticker_input = st.text_input(
             "Mã cổ phiếu",
-            value=default_ticker if default_ticker and not st.session_state.get('single_stock_input') else None,
+            value=default_ticker if default_ticker else None,
             placeholder="VD: VCB, ACB, FPT",
             key="single_stock_input",
             label_visibility="collapsed",
@@ -1103,9 +1919,11 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
             st.warning(f"Không có tín hiệu cho {ticker}")
             return
 
-        # Load fresh data directly from basic_data (more reliable than JOIN)
+        # Load fresh data directly from basic_data_30d (2.2MB vs 20MB)
         from pathlib import Path
-        basic_path = Path("DATA/processed/technical/basic_data.parquet")
+        basic_path = Path("DATA/processed/technical/basic_data_30d.parquet")
+        if not basic_path.exists():
+            basic_path = Path("DATA/processed/technical/basic_data.parquet")
 
         sma20, sma50, price, trading_value, expected_value = 0, 0, 0, 0, 0
         trend = 'SIDEWAYS'
@@ -1256,7 +2074,7 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
                 </div>
             </div>
 
-            <!-- Support/Resistance (Fib 30d) -->
+            <!-- Support/Resistance (Swing + Fib) -->
             <div style="
                 display: flex;
                 gap: 16px;
@@ -1269,14 +2087,22 @@ def _render_single_stock_analysis(signals: pd.DataFrame) -> None:
                     <span style="color: #10B981; font-size: 0.7rem; text-transform: uppercase; display: block; margin-bottom: 6px;">
                         Hỗ trợ
                     </span>
-                    {''.join([f'<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span style="color: #94A3B8; font-size: 0.8rem;">{s["price"]:,.0f} ({s["label"]})</span><span style="color: #10B981; font-size: 0.8rem; font-family: monospace;">{s["pct"]:+.1f}%</span></div>' for s in supports]) if supports else '<span style="color: #64748B; font-size: 0.8rem;">N/A</span>'}
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px; padding: 2px 0; border-bottom: 1px solid rgba(6, 182, 212, 0.2);">
+                        <span style="color: #06B6D4; font-size: 0.8rem; font-weight: 500;">{sr_levels.get('swing_low', 0):,.0f} (Swing Low 10d)</span>
+                        <span style="color: #10B981; font-size: 0.8rem; font-family: monospace;">{((sr_levels.get('swing_low', 0) / price - 1) * 100 if price > 0 else 0):+.1f}%</span>
+                    </div>
+                    {''.join([f'<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span style="color: #94A3B8; font-size: 0.8rem;">{s["price"]:,.0f} ({s["label"]})</span><span style="color: #10B981; font-size: 0.8rem; font-family: monospace;">{s["pct"]:+.1f}%</span></div>' for s in supports]) if supports else ''}
                 </div>
                 <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
                 <div style="flex: 1;">
                     <span style="color: #EF4444; font-size: 0.7rem; text-transform: uppercase; display: block; margin-bottom: 6px;">
                         Kháng cự
                     </span>
-                    {''.join([f'<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span style="color: #94A3B8; font-size: 0.8rem;">{r["price"]:,.0f} ({r["label"]})</span><span style="color: #EF4444; font-size: 0.8rem; font-family: monospace;">{r["pct"]:+.1f}%</span></div>' for r in resistances]) if resistances else '<span style="color: #64748B; font-size: 0.8rem;">N/A</span>'}
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px; padding: 2px 0; border-bottom: 1px solid rgba(6, 182, 212, 0.2);">
+                        <span style="color: #06B6D4; font-size: 0.8rem; font-weight: 500;">{sr_levels.get('swing_high', 0):,.0f} (Swing High 10d)</span>
+                        <span style="color: #EF4444; font-size: 0.8rem; font-family: monospace;">{((sr_levels.get('swing_high', 0) / price - 1) * 100 if price > 0 else 0):+.1f}%</span>
+                    </div>
+                    {''.join([f'<div style="display: flex; justify-content: space-between; margin-bottom: 4px;"><span style="color: #94A3B8; font-size: 0.8rem;">{r["price"]:,.0f} ({r["label"]})</span><span style="color: #EF4444; font-size: 0.8rem; font-family: monospace;">{r["pct"]:+.1f}%</span></div>' for r in resistances]) if resistances else ''}
                 </div>
             </div>
 
@@ -1435,6 +2261,161 @@ def _render_download_button(signals: pd.DataFrame) -> None:
             mime="text/csv",
             key="download_signals_csv"
         )
+
+
+# ============================================================================
+# MOMENTUM TAB (Buy List from RS Strategy)
+# ============================================================================
+
+def _render_momentum_tab(service: 'TADashboardService') -> None:
+    """
+    Render Momentum tab showing Buy List stocks.
+
+    Buy List = RS Momentum strategy stocks with:
+    - High RS Rating (relative strength)
+    - Breakout/MA crossover signals
+    - Good liquidity
+    """
+    from pathlib import Path
+
+    # Load buy list
+    buy_list_path = Path("DATA/processed/technical/lists/buy_list_latest.parquet")
+
+    if not buy_list_path.exists():
+        st.info("Chưa có Buy List. Chạy pipeline hàng ngày để tạo.")
+        return
+
+    buy_list = pd.read_parquet(buy_list_path)
+
+    if buy_list.empty:
+        st.info("Không có cổ phiếu trong Buy List hôm nay.")
+        return
+
+    # ============ SUMMARY METRICS ============
+    st.markdown("### 🚀 Momentum - RS Strategy")
+    st.caption("Cổ phiếu momentum mạnh dựa trên RS Rating và tín hiệu kỹ thuật")
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Tổng mã", len(buy_list))
+    with col2:
+        avg_rs = buy_list['rs_rating'].mean()
+        st.metric("RS TB", f"{avg_rs:.0f}")
+    with col3:
+        avg_score = buy_list['score'].mean()
+        st.metric("Điểm TB", f"{avg_score:.1f}")
+    with col4:
+        top_sector = buy_list['sector_code'].mode().iloc[0] if not buy_list.empty else "N/A"
+        st.metric("Ngành mạnh", top_sector)
+
+    st.markdown("---")
+
+    # ============ BUY LIST TABLE ============
+    st.markdown("### Danh sách mua khuyến nghị")
+
+    # Sort by score descending
+    buy_list = buy_list.sort_values('score', ascending=False)
+
+    # Build HTML table
+    table_html = '''
+    <div style="
+        background: linear-gradient(135deg, rgba(26, 22, 37, 0.95) 0%, rgba(16, 12, 26, 0.98) 100%);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        border-radius: 12px;
+        overflow: hidden;
+    ">
+    <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr style="background: rgba(16, 185, 129, 0.15);">
+            <th style="padding: 12px; text-align: left; color: #10B981; font-size: 0.75rem; font-weight: 600;">MÃ</th>
+            <th style="padding: 12px; text-align: center; color: #10B981; font-size: 0.75rem; font-weight: 600;">NGÀNH</th>
+            <th style="padding: 12px; text-align: center; color: #10B981; font-size: 0.75rem; font-weight: 600;">RS</th>
+            <th style="padding: 12px; text-align: right; color: #10B981; font-size: 0.75rem; font-weight: 600;">ĐIỂM</th>
+            <th style="padding: 12px; text-align: right; color: #10B981; font-size: 0.75rem; font-weight: 600;">GIÁ VÀO</th>
+            <th style="padding: 12px; text-align: right; color: #10B981; font-size: 0.75rem; font-weight: 600;">CẮT LỖ</th>
+            <th style="padding: 12px; text-align: right; color: #10B981; font-size: 0.75rem; font-weight: 600;">MỤC TIÊU</th>
+        </tr>
+    </thead>
+    <tbody>
+    '''
+
+    for _, row in buy_list.iterrows():
+        symbol = row.get('symbol', '-')
+        sector = row.get('sector_code', '-')
+        rs = row.get('rs_rating', 0)
+        score = row.get('score', 0)
+        entry = row.get('entry_price', 0)
+        stop_loss = row.get('stop_loss', 0)
+        target = row.get('target_1', 0)
+
+        # RS color
+        if rs >= 90:
+            rs_color = '#10B981'  # Green
+        elif rs >= 80:
+            rs_color = '#34D399'
+        elif rs >= 70:
+            rs_color = '#FCD34D'  # Yellow
+        else:
+            rs_color = '#94A3B8'
+
+        # Score bar
+        score_pct = min(100, score)
+
+        row_html = f'''
+        <tr style="background: rgba(26, 22, 37, 0.6); border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 10px 12px; color: #FFFFFF; font-weight: 700; font-family: monospace; font-size: 0.9rem;">
+                {symbol}
+            </td>
+            <td style="padding: 10px 12px; text-align: center;">
+                <span style="background: rgba(139, 92, 246, 0.2); color: #C4B5FD; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem;">
+                    {sector}
+                </span>
+            </td>
+            <td style="padding: 10px 12px; text-align: center;">
+                <span style="color: {rs_color}; font-weight: 700; font-size: 0.9rem;">{rs:.0f}</span>
+            </td>
+            <td style="padding: 10px 12px;">
+                <div style="display: flex; align-items: center; gap: 8px; justify-content: flex-end;">
+                    <div style="flex: 1; max-width: 60px; height: 6px; background: rgba(100,116,139,0.2); border-radius: 3px; overflow: hidden;">
+                        <div style="width: {score_pct}%; height: 100%; background: linear-gradient(90deg, #10B981, #34D399); border-radius: 3px;"></div>
+                    </div>
+                    <span style="color: #10B981; font-weight: 700; font-size: 0.85rem; font-family: monospace;">
+                        {score:.1f}
+                    </span>
+                </div>
+            </td>
+            <td style="padding: 10px 12px; text-align: right; color: #E2E8F0; font-family: monospace; font-size: 0.85rem;">
+                {entry:,.0f}
+            </td>
+            <td style="padding: 10px 12px; text-align: right; color: #EF4444; font-family: monospace; font-size: 0.85rem;">
+                {stop_loss:,.0f}
+            </td>
+            <td style="padding: 10px 12px; text-align: right; color: #10B981; font-family: monospace; font-size: 0.85rem;">
+                {target:,.0f}
+            </td>
+        </tr>
+        '''
+        table_html += row_html
+
+    table_html += '</tbody></table></div>'
+    st.html(table_html)
+
+    # ============ LEGEND ============
+    with st.expander("📖 Giải thích", expanded=False):
+        st.markdown("""
+        **RS Rating (Relative Strength):**
+        - 90+ : Momentum cực mạnh, dẫn đầu thị trường
+        - 80-89: Momentum mạnh
+        - 70-79: Momentum khá
+
+        **Điểm (Score):**
+        - Tổng hợp RS Rating + Breakout + MA Crossover + Volume
+
+        **Giá vào / Cắt lỗ / Mục tiêu:**
+        - Entry: Giá hiện tại
+        - Stop Loss: -7% (quản trị rủi ro)
+        - Target 1: +10% (chốt lời đầu)
+        """)
 
 
 # ============================================================================

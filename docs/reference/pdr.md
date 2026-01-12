@@ -70,8 +70,8 @@ Vietnamese stock market financial data dashboard providing comprehensive analysi
 | Entity Types | 4 (COMPANY, BANK, INSURANCE, SECURITY) |
 | Financial Metrics | 2,099 mapped (Vietnamese to English) |
 | Calculated Formulas | 40+ (roe, gross_margin, yoy_growth, etc.) |
-| Python Files | 223 (110 PROCESSORS + 113 WEBAPP) |
-| Data Storage | ~500 MB (Parquet files) |
+| Python Files | 270 (137 PROCESSORS + 133 WEBAPP) |
+| Data Storage | ~590 MB (Parquet files) |
 | MCP Tools | 30 (ticker, fundamental, technical, valuation, forecast, macro) |
 | Daily Pipeline Steps | 6 (OHLCV, TA, Alerts, Valuation, Sector, Regime) |
 
@@ -115,10 +115,10 @@ Vietnamese stock market financial data dashboard providing comprehensive analysi
 ### Fundamental Data
 | Entity | Tickers | Records | Key Metrics |
 |--------|---------|---------|-------------|
-| Company | 1,633 | 37,145 | ROE, ROA, EPS, margins, growth |
-| Bank | 46 | 1,033 | NIM, CIR, NPL, LDR, CAR, CASA |
-| Insurance | 18 | 418 | Combined ratio, claims ratio |
-| Security | 146 | 2,811 | Brokerage revenue, commission |
+| Company | ~400 | 37,145 | ROE, ROA, EPS, margins, growth |
+| Bank | ~35 | 1,033 | NIM, CIR, NPL, LDR, CAR, CASA |
+| Insurance | ~10 | 418 | Combined ratio, claims ratio |
+| Security | ~60 | 2,811 | Brokerage revenue, commission |
 
 ### Valuation Data
 | Metric | Records | Formula |

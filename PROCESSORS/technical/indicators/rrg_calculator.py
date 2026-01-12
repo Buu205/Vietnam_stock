@@ -171,7 +171,8 @@ class RRGCalculator:
             if 'market_cap' in sector_df.columns:
                 daily = sector_df.groupby('date').apply(
                     lambda x: np.average(x['close'], weights=x['market_cap'])
-                    if x['market_cap'].sum() > 0 else x['close'].mean()
+                    if x['market_cap'].sum() > 0 else x['close'].mean(),
+                    include_groups=False
                 )
             else:
                 daily = sector_df.groupby('date')['close'].mean()
@@ -203,7 +204,7 @@ class RRGCalculator:
         rs_ratio_normalized = (rs_ratio / rs_ratio.rolling(self.RS_PERIOD).mean()) * 100
 
         # Calculate RS-Momentum (rate of change of RS-Ratio)
-        rs_momentum = rs_ratio_normalized.pct_change(self.MOM_PERIOD) * 100 + 100
+        rs_momentum = rs_ratio_normalized.pct_change(self.MOM_PERIOD, fill_method=None) * 100 + 100
 
         # Get latest values
         if target_date in rs_ratio_normalized.index and target_date in rs_momentum.index:

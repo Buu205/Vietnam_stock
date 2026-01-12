@@ -228,7 +228,8 @@ class SectorRankingCalculator:
         # Calculate 20-day return by symbol
         symbol_returns = df.groupby('symbol').apply(
             lambda x: x.sort_values('date')['close'].iloc[-1] / x.sort_values('date')['close'].iloc[0] - 1
-            if len(x) > 1 else 0
+            if len(x) > 1 else 0,
+            include_groups=False
         )
 
         # Map symbols to sectors

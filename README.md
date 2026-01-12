@@ -15,7 +15,7 @@ Multi-layered platform: 4 entity types, 457 tickers, 19 sectors, 6-stage daily p
 | Feature | Coverage | Details |
 |---------|----------|---------|
 | **Fundamental** | 4 types | Company, Bank, Insurance, Security metrics |
-| **Technical** | 457 tickers | OHLCV, 10+ indicators, alerts, breadth |
+| **Technical** | 457 tickers | OHLCV, 20+ indicators, alerts, breadth |
 | **Valuation** | PE/PB/PS/EV | TTM + Forward, 7+ years history |
 | **Sector** | 19 sectors | FA+TA scoring with aggregation |
 | **BSC Forecast** | 93 stocks | Target prices, ratings, EPS forecasts |
@@ -34,7 +34,7 @@ pip install -r WEBAPP/requirements.txt
 streamlit run WEBAPP/main_app.py
 # Opens at http://localhost:8501
 
-# Daily data update (~45 minutes)
+# Daily data update (~80 seconds)
 python3 PROCESSORS/pipelines/run_all_daily_updates.py
 ```
 
@@ -42,13 +42,14 @@ python3 PROCESSORS/pipelines/run_all_daily_updates.py
 
 ## 🏗️ Architecture Overview
 
-### Frontend (WEBAPP/ - 113 files, 15K+ LOC)
-- **8 Dashboards:** Company, Bank, Security, Sector, Valuation, Technical, Forecast, FX/Commodities
+### Frontend (WEBAPP/ - 133 files, 15K+ LOC)
+- **7 Dashboards:** Company, Bank, Security, Sector, Technical, Forecast, FX/Commodities
+- **Cross-page ticker sync:** Fundamental → Forecast/Technical
 - **MVC Pattern:** Pages (view) → Services (data) → Components (UI) → Core (config)
 - **Design:** Glassmorphism crypto terminal (purple/cyan/amber palette)
 - **Session State:** Persistent widget state, TTL-based caching (3600s)
 
-### Backend (PROCESSORS/ - 86+ files, 32K+ LOC)
+### Backend (PROCESSORS/ - 137 files, 32K+ LOC)
 - **6-Stage Daily Pipeline:**
   1. OHLCV Update (vnstock API)
   2. Technical Indicators (MA, RSI, MACD, Bollinger, Stochastic)
@@ -68,9 +69,9 @@ python3 PROCESSORS/pipelines/run_all_daily_updates.py
   - API: Data source integrations
   - Decision: Trading signal generation
 
-### Data (DATA/ - 470 MB)
-- **Raw Layer:** 175 MB CSV fundamentals, 56 MB OHLCV, metadata
-- **Processed Layer:** 229 MB parquet (snappy compressed)
+### Data (DATA/ - 590 MB)
+- **Raw Layer:** 184 MB CSV fundamentals, 54 MB OHLCV, 64 MB forecasts, metadata
+- **Processed Layer:** 295 MB parquet (snappy compressed)
 - **Coverage:** 19.9M+ fundamental records, 792K+ valuation records, 7+ years history
 - **Format:** v4.0.0 canonical paths (`DATA/raw/`, `DATA/processed/`)
 
@@ -79,18 +80,22 @@ python3 PROCESSORS/pipelines/run_all_daily_updates.py
 - **SectorRegistry:** 457 tickers × 19 sectors × 4 entity types
 - **SchemaRegistry:** Formatting rules, color schemes, type validation
 
+### MCP Server (MCP_SERVER/ - 18 files, 30 tools)
+- **FastMCP integration:** Model Context Protocol for AI/LLM apps
+- **Tool categories:** Ticker (5), Fundamental (5), Technical (8), Valuation (6), Forecast (4), Macro (2)
+- **Data access:** Read-only access to DATA/processed/ parquet files
+
 ---
 
-## 📋 Dashboard Pages (8 Total)
+## 📋 Dashboard Pages (7 Total)
 
 | Page | Focus | Key Metrics |
 |------|-------|-------------|
-| **Company** | Companies | Revenue, ROE, margins, growth |
-| **Bank** | Banks (57) | NIM, CAR, NPL, CASA, LDR |
-| **Security** | Brokerages (146) | Commission, AUM, ROE, leverage |
+| **Company** | Companies (~400) | Revenue, ROE, margins, growth |
+| **Bank** | Banks (~35) | NIM, CAR, NPL, CASA, LDR |
+| **Security** | Brokerages (~60) | Commission, AUM, ROE, leverage |
 | **Sector** | 19 sectors | PE, PB, PS, EV/EBITDA valuation |
-| **Valuation** | 457 stocks | PE/PB percentile, z-score bands |
-| **Technical** | Price action | Breadth, regime, patterns, scanner |
+| **Technical** | Price action | 20+ indicators, breadth, regime, patterns |
 | **Forecast** | 93 stocks | BSC targets, EPS, ratings |
 | **FX & Commodities** | Macro | USD/VND, rates, oil, gold |
 

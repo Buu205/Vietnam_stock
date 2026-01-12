@@ -2,7 +2,7 @@
   "version": "1.0",
   "last_updated": "2026-01-05T13:41:03.000930",
   "metadata": {
-    "total_tickers": 457,
+    "total_tickers": 460,
     "total_sectors": 19,
     "total_entity_types": 4
   },
@@ -18,7 +18,7 @@
     },
     "SECURITY": {
       "description": "Công ty chứng khoán",
-      "count": 37,
+      "count": 40,
       "metric_registry_key": "SECURITY",
       "calculator_class": "SecurityFinancialCalculator",
       "sectors": [
@@ -107,7 +107,7 @@
     },
     "Dịch vụ tài chính": {
       "entity_type": "SECURITY",
-      "count": 37,
+      "count": 40,
       "description": "Ngành Dịch vụ tài chính",
       "tickers": [
         "AAS",
@@ -136,15 +136,18 @@
         "SHS",
         "SSI",
         "TCI",
+        "TCX",
         "TVB",
         "TVC",
         "TVS",
         "VCI",
+        "VCK",
         "VDS",
         "VFS",
         "VIG",
         "VIX",
         "VND",
+        "VPX",
         "VUA",
         "WSS"
       ],
@@ -4568,6 +4571,30 @@
       "entity_type": "SECURITY",
       "sector": "Dịch vụ tài chính",
       "name": "",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY",
+      "sector_en": "Financial Services"
+    },
+    "VPX": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "Công ty Cổ phần Chứng khoán VPBank",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY",
+      "sector_en": "Financial Services"
+    },
+    "VCK": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "Công ty Cổ phần Chứng khoán VPS",
+      "exchange": "HOSE",
+      "industry_code": "SECURITY",
+      "sector_en": "Financial Services"
+    },
+    "TCX": {
+      "entity_type": "SECURITY",
+      "sector": "Dịch vụ tài chính",
+      "name": "Công ty Cổ phần Chứng khoán Techcom",
       "exchange": "HOSE",
       "industry_code": "SECURITY",
       "sector_en": "Financial Services"

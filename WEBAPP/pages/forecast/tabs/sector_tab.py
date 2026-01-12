@@ -105,47 +105,8 @@ def render_valuation_matrix(
     bsc_2026_vals = [bsc_forward_2026.get(s) for s in symbols]
     vci_2026_vals = [vci_forward_2026.get(s) if vci_forward_2026 else None for s in symbols]
 
-    # Overlap detection: if values are within 5% of TTM, apply X offset to separate
-    OVERLAP_THRESHOLD_PCT = 0.05  # 5%
-    X_OFFSET = 0.15  # Offset when overlapping
-
-    def calc_x_offsets(i: int, ttm: float, bsc: float, vci: float) -> tuple:
-        """
-        Calculate X offsets based on value proximity.
-        - If difference < 5%: offset markers horizontally to separate
-        - If difference >= 5% or no data: all markers on same X (no offset)
-        """
-        # No TTM data: all on same line
-        if ttm is None or ttm <= 0:
-            return i, i, i
-
-        threshold = ttm * OVERLAP_THRESHOLD_PCT
-        distances = []
-        if bsc and bsc > 0:
-            distances.append(abs(ttm - bsc))
-        if vci and vci > 0:
-            distances.append(abs(ttm - vci))
-        if bsc and vci and bsc > 0 and vci > 0:
-            distances.append(abs(bsc - vci))
-
-        # No comparison data: all on same line
-        if not distances:
-            return i, i, i
-
-        # Check if any pair is closer than 5%
-        min_dist = min(distances)
-        if min_dist < threshold:
-            # Overlap detected: apply offset to separate
-            return i, i - X_OFFSET, i + X_OFFSET
-        else:
-            # No overlap: all on same X line
-            return i, i, i
-
-    # Pre-calculate X positions for all stocks
-    x_positions = [
-        calc_x_offsets(i, current_vals[i], bsc_2026_vals[i], vci_2026_vals[i])
-        for i in range(len(symbols))
-    ]
+    # X positions: always center markers on bars (no offset for cleaner alignment)
+    x_indices = list(range(len(symbols)))
 
     # Status colors
     status_colors = {
@@ -158,8 +119,7 @@ def render_valuation_matrix(
 
     fig = go.Figure()
 
-    # Use numeric x-axis for precise positioning
-    x_indices = list(range(len(symbols)))
+    # Use x_indices defined above for all traces
 
     # Whiskers (P5-P95)
     fig.add_trace(go.Scatter(
@@ -209,12 +169,11 @@ def render_valuation_matrix(
         customdata=symbols
     ))
 
-    # BSC 2026F markers - diamond, dynamic offset left
+    # BSC 2026F markers - diamond, centered on bars
     bsc_x, bsc_y, bsc_hover = [], [], []
     for i, (sym, fwd) in enumerate(zip(symbols, bsc_2026_vals)):
         if fwd is not None and fwd > 0:
-            _, bsc_offset_x, _ = x_positions[i]  # Use pre-calculated offset
-            bsc_x.append(bsc_offset_x)
+            bsc_x.append(i)  # Center on bar
             bsc_y.append(fwd)
             trailing = current_vals[i]
             change = ((fwd - trailing) / trailing * 100) if trailing > 0 else 0
@@ -236,12 +195,11 @@ def render_valuation_matrix(
             customdata=bsc_hover
         ))
 
-    # VCI 2026F markers - triangle, dynamic offset right
+    # VCI 2026F markers - triangle, centered on bars
     vci_x, vci_y, vci_hover = [], [], []
     for i, (sym, fwd) in enumerate(zip(symbols, vci_2026_vals)):
         if fwd is not None and fwd > 0:
-            _, _, vci_offset_x = x_positions[i]  # Use pre-calculated offset
-            vci_x.append(vci_offset_x)
+            vci_x.append(i)  # Center on bar
             vci_y.append(fwd)
             trailing = current_vals[i]
             change = ((fwd - trailing) / trailing * 100) if trailing > 0 else 0

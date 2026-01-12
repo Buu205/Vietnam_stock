@@ -25,6 +25,7 @@ from WEBAPP.core.trading_constants import (
     SWING_LOW_MIN_DEPTH_PCT,
     SWING_LOW_LOOKBACK_WINDOW,
 )
+from WEBAPP.pages.technical.services.composite_scoring import calculate_composite_scores
 
 
 # ==================== SINGLETON PATTERN ====================
@@ -474,12 +475,26 @@ class TADashboardService:
         all_signals = []
 
         # ======================================================================
-        # 1. CANDLESTICK PATTERNS
+        # 1. CANDLESTICK PATTERNS (try pre-scored first for instant loading)
         # ======================================================================
+        prescored_path = Path("DATA/processed/technical/alerts/signals_with_scores.parquet")
         patterns_path = history_dir / "patterns_history.parquet"
         if not patterns_path.exists():
             patterns_path = daily_dir / "patterns_latest.parquet"
-        if patterns_path.exists():
+
+        # Option B: Try pre-scored data first (instant loading)
+        use_prescored = prescored_path.exists()
+        if use_prescored:
+            df = pd.read_parquet(prescored_path)
+            df['signal_type'] = 'patterns'
+            df['type_label'] = df['pattern_name'].fillna('Pattern')
+            # Pre-scored data already has: composite_score, trend, direction, etc.
+            # Add priority_group
+            df['priority_group'] = df['pattern_name'].map(
+                TADashboardService.PATTERN_PRIORITY
+            ).fillna(4).astype(int)
+            all_signals.append(df)
+        elif patterns_path.exists():
             df = pd.read_parquet(patterns_path)
 
             # Remove exact duplicates (data pipeline bug)
@@ -488,8 +503,10 @@ class TADashboardService:
             df['signal_type'] = 'patterns'
             df['type_label'] = df['pattern_name'].fillna('Pattern')
 
-            # JOIN trend data
-            basic_path = Path("DATA/processed/technical/basic_data.parquet")
+            # JOIN trend data - use 30d file (2.2MB vs 20MB)
+            basic_path = Path("DATA/processed/technical/basic_data_30d.parquet")
+            if not basic_path.exists():
+                basic_path = Path("DATA/processed/technical/basic_data.parquet")
             if basic_path.exists():
                 basic_df = pd.read_parquet(basic_path, columns=[
                     'symbol', 'date', 'price_vs_sma20', 'price_vs_sma50',
@@ -690,6 +707,11 @@ class TADashboardService:
         combined['secondary_signals'] = combined['secondary_signals'].apply(
             lambda x: x if isinstance(x, list) else []
         )
+
+        # Calculate composite scores (6-factor system v2.1)
+        # Skip if pre-scored data already has composite_score (Option B optimization)
+        if 'composite_score' not in combined.columns:
+            combined = calculate_composite_scores(combined)
 
         return combined
 

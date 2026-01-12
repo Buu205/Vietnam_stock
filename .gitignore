@@ -87,19 +87,21 @@ DATA/processed/**/*.csv
 !DATA/processed/fundamental/bank/bank_financial_metrics.parquet
 !DATA/processed/fundamental/security/security_financial_metrics.parquet
 
-# Technical - Basic (1 file)
-!DATA/processed/technical/basic_data.parquet
+# Technical - Basic (optimized files instead of 20MB basic_data.parquet)
+!DATA/processed/technical/basic_data_latest.parquet
+!DATA/processed/technical/basic_data_30d.parquet
 
 # Technical - Market/Sector Breadth (3 files)
 !DATA/processed/technical/market_breadth/market_breadth_daily.parquet
 !DATA/processed/technical/sector_breadth/sector_breadth_daily.parquet
 !DATA/processed/technical/vnindex/vnindex_indicators.parquet
 
-# Technical - Alerts/Signals Daily (4 files)
+# Technical - Alerts/Signals Daily (5 files)
 !DATA/processed/technical/alerts/daily/patterns_latest.parquet
 !DATA/processed/technical/alerts/daily/ma_crossover_latest.parquet
 !DATA/processed/technical/alerts/daily/volume_spike_latest.parquet
 !DATA/processed/technical/alerts/daily/breakout_latest.parquet
+!DATA/processed/technical/alerts/signals_with_scores.parquet
 
 # Technical - Alerts/Signals Historical (4 files) - for stock scanner multi-day view
 !DATA/processed/technical/alerts/historical/patterns_history.parquet

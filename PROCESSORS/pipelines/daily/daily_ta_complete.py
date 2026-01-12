@@ -184,6 +184,227 @@ class CompleteTAUpdatePipeline:
                 else:
                     alert_df.to_parquet(hist_path, index=False)
 
+    def generate_optimized_basic_data(self, tech_df: pd.DataFrame):
+        """Generate optimized basic_data files for Streamlit (Option B).
+
+        Creates:
+        - basic_data_latest.parquet (146KB) - latest row per symbol for lookups
+        - basic_data_30d.parquet (2.2MB) - last 30 days for S/R calculations
+        """
+        output_dir = Path("DATA/processed/technical")
+
+        # Ensure date is datetime
+        tech_df['date'] = pd.to_datetime(tech_df['date'])
+
+        # 1. basic_data_latest.parquet (458 rows, 146KB)
+        latest = tech_df.sort_values('date', ascending=False).groupby('symbol', as_index=False).first()
+        latest_path = output_dir / "basic_data_latest.parquet"
+        latest.to_parquet(latest_path, index=False)
+        logger.info(f"  ✅ basic_data_latest.parquet: {len(latest)} rows")
+
+        # 2. basic_data_30d.parquet (~10K rows, 2.2MB)
+        latest_date = tech_df['date'].max()
+        cutoff = latest_date - pd.Timedelta(days=30)
+        recent = tech_df[tech_df['date'] >= cutoff].copy()
+        recent_path = output_dir / "basic_data_30d.parquet"
+        recent.to_parquet(recent_path, index=False)
+        logger.info(f"  ✅ basic_data_30d.parquet: {len(recent)} rows")
+
+    def precalculate_composite_scores(self) -> pd.DataFrame:
+        """Pre-calculate FULL 100-point composite scores for all signals.
+
+        Uses full VSA spec with vol_ratio, spread_ratio, close_position.
+        Saves to signals_with_scores.parquet for instant Streamlit loading.
+        """
+        try:
+            # Import full spec scoring service
+            sys.path.insert(0, str(Path(__file__).parents[3]))
+            from WEBAPP.pages.technical.services.full_spec_scoring_service import (
+                calculate_candlestick_score,
+                calculate_vsa_score,
+                calculate_trend_score,
+                calculate_sr_score,
+                calculate_rs_score,
+                calculate_liquidity_score,
+                classify_trend,
+                BULLISH_REVERSAL_PATTERNS,
+                BEARISH_REVERSAL_PATTERNS,
+            )
+
+            # Load pattern signals
+            patterns_path = Path("DATA/processed/technical/alerts/daily/patterns_latest.parquet")
+            if not patterns_path.exists():
+                logger.warning("  ⚠️ No patterns_latest.parquet found")
+                return None
+
+            signals_df = pd.read_parquet(patterns_path)
+            if signals_df.empty:
+                logger.warning("  ⚠️ No pattern signals to score")
+                return None
+
+            # Drop existing score columns to avoid duplicates
+            cols_to_drop = [c for c in ['composite_score', 'context_score', 'direction', 'trend', 'trading_value',
+                                        'pattern_score', 'vsa_score', 'trend_score', 'sr_score', 'rs_score',
+                                        'liquidity_score', 'vol_ratio', 'vsa_signal', 'vsa_bias', 'price', 'is_aligned', 'rs_rating'] if c in signals_df.columns]
+            if cols_to_drop:
+                signals_df = signals_df.drop(columns=cols_to_drop)
+
+            # Load supporting data
+            basic_latest_path = Path("DATA/processed/technical/basic_data_latest.parquet")
+            basic_30d_path = Path("DATA/processed/technical/basic_data_30d.parquet")
+            rs_path = Path("DATA/processed/technical/rs_rating/stock_rs_rating_daily.parquet")
+
+            # Build basic lookup (latest OHLCV + indicators)
+            basic_lookup = {}
+            if basic_latest_path.exists():
+                basic_df = pd.read_parquet(basic_latest_path)
+                for _, row in basic_df.iterrows():
+                    basic_lookup[row['symbol']] = row.to_dict()
+
+            # Build volume average lookup from 30d data
+            vol_avg_lookup = {}
+            if basic_30d_path.exists():
+                basic_30d = pd.read_parquet(basic_30d_path, columns=['symbol', 'date', 'volume'])
+                basic_30d = basic_30d.sort_values('date', ascending=False)
+                for symbol in basic_30d['symbol'].unique():
+                    sym_data = basic_30d[basic_30d['symbol'] == symbol].head(20)
+                    if len(sym_data) >= 5:
+                        vol_avg_lookup[symbol] = sym_data['volume'].mean()
+
+            # Build RS lookup with momentum
+            rs_lookup = {}
+            if rs_path.exists():
+                rs_df = pd.read_parquet(rs_path)
+                rs_df = rs_df.sort_values('date', ascending=False)
+                for symbol in rs_df['symbol'].unique():
+                    sym_data = rs_df[rs_df['symbol'] == symbol]
+                    if len(sym_data) >= 1:
+                        rs_rating = sym_data.iloc[0].get('rs_rating', 0) or 0
+                        rs_momentum = 0
+                        if len(sym_data) >= 5:
+                            rs_5d_ago = sym_data.iloc[4].get('rs_rating', rs_rating) or rs_rating
+                            rs_momentum = rs_rating - rs_5d_ago
+                        rs_lookup[symbol] = {'rs_rating': rs_rating, 'rs_momentum': rs_momentum}
+
+            # Calculate FULL spec scores
+            scores = []
+            for _, row in signals_df.iterrows():
+                symbol = row.get('symbol', '')
+                pattern = row.get('pattern_name', '')
+                signal_type = row.get('signal', 'BULLISH')
+
+                # Get basic data
+                basic_data = basic_lookup.get(symbol, {})
+                if not basic_data:
+                    continue
+
+                # Extract values
+                price = basic_data.get('close', 0) or 0
+                high = basic_data.get('high', price) or price
+                low = basic_data.get('low', price) or price
+                volume = basic_data.get('volume', 0) or 0
+                trading_value = basic_data.get('trading_value', 0) or 0
+                atr_14 = basic_data.get('atr_14', 1) or 1
+                price_vs_sma20 = basic_data.get('price_vs_sma20', 0) or 0
+                price_vs_sma50 = basic_data.get('price_vs_sma50', 0) or 0
+
+                # Calculate VSA metrics (FULL SPEC)
+                vol_avg_20d = vol_avg_lookup.get(symbol, volume) or volume
+                vol_ratio = volume / vol_avg_20d if vol_avg_20d > 0 else 1.0
+                spread = high - low
+                spread_ratio = spread / atr_14 if atr_14 > 0 else 1.0
+                close_position = (price - low) / spread if spread > 0 else 0.5
+
+                # Classify trend
+                trend = classify_trend(price_vs_sma20, price_vs_sma50)
+
+                # Derive direction from signal type
+                pattern_lower = pattern.lower().replace(' ', '_') if pattern else ''
+                if signal_type == 'BULLISH' or pattern_lower in BULLISH_REVERSAL_PATTERNS:
+                    direction = 'BUY'
+                elif signal_type == 'BEARISH' or pattern_lower in BEARISH_REVERSAL_PATTERNS:
+                    direction = 'SELL'
+                else:
+                    direction = 'NEUTRAL'
+
+                # === CALCULATE ALL 6 FACTORS (FULL SPEC) ===
+
+                # 1. Candlestick Score (15 pts)
+                candlestick_score = calculate_candlestick_score(pattern, trend)
+
+                # 2. VSA Score (25 pts) - FULL SPEC with vol_ratio, spread_ratio, close_position
+                vsa_result = calculate_vsa_score(vol_ratio, spread_ratio, close_position, direction, trend)
+                vsa_score = vsa_result['vsa_score']
+                vsa_signal = vsa_result.get('vsa_signal', '')
+                vsa_bias = vsa_result.get('vsa_bias', '')
+
+                # 3. Trend Score (20 pts)
+                trend_score = calculate_trend_score(direction, trend, pattern)
+
+                # 4. S/R Score (15 pts)
+                sr_result = calculate_sr_score(price, low, high, direction)
+                sr_score = sr_result['sr_score']
+
+                # 5. RS Score (15 pts)
+                rs_data = rs_lookup.get(symbol, {'rs_rating': 50, 'rs_momentum': 0})
+                rs_rating = rs_data.get('rs_rating', 50)
+                rs_momentum = rs_data.get('rs_momentum', 0)
+                rs_result = calculate_rs_score(rs_rating, rs_momentum, direction)
+                rs_score = rs_result['rs_score']
+
+                # 6. Liquidity Score (10 pts)
+                liq_result = calculate_liquidity_score(trading_value, vol_ratio)
+                liquidity_score = liq_result['liquidity_score']
+
+                # TOTAL (max 100)
+                total_score = candlestick_score + vsa_score + trend_score + sr_score + rs_score + liquidity_score
+                total_score = max(0, min(100, total_score))
+
+                # Alignment check
+                is_aligned = (
+                    (trend in ['STRONG_UP', 'UPTREND'] and direction in ['BUY', 'PULLBACK']) or
+                    (trend in ['STRONG_DOWN', 'DOWNTREND'] and direction in ['SELL', 'BOUNCE'])
+                )
+
+                scores.append({
+                    'composite_score': round(total_score, 1),
+                    'pattern_score': round(candlestick_score, 1),
+                    'vsa_score': round(vsa_score, 1),
+                    'trend_score': round(trend_score, 1),
+                    'sr_score': round(sr_score, 1),
+                    'rs_score': round(rs_score, 1),
+                    'liquidity_score': round(liquidity_score, 1),
+                    'is_aligned': is_aligned,
+                    'rs_rating': rs_rating,
+                    'direction': direction,
+                    'trend': trend,
+                    'trading_value': trading_value,
+                    'vol_ratio': round(vol_ratio, 2),
+                    'vsa_signal': vsa_signal or '',
+                    'vsa_bias': vsa_bias or '',
+                    'price': price,
+                })
+
+            # Merge scores with signals
+            scores_df = pd.DataFrame(scores)
+            result = pd.concat([signals_df.reset_index(drop=True), scores_df], axis=1)
+
+            # Remove duplicate columns (keep last occurrence which is from scores_df)
+            result = result.loc[:, ~result.columns.duplicated(keep='last')]
+
+            # Save
+            output_path = Path("DATA/processed/technical/alerts/signals_with_scores.parquet")
+            result.to_parquet(output_path, index=False)
+
+            logger.info(f"  ✅ signals_with_scores.parquet: {len(result)} signals with FULL 100-pt scores")
+            return result
+
+        except Exception as e:
+            logger.error(f"  ❌ Failed to pre-calculate scores: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
     def save_market_breadth(self, breadth: dict):
         """Save market breadth."""
         output_path = Path("DATA/processed/technical/market_breadth/market_breadth_daily.parquet")
@@ -233,6 +454,10 @@ class CompleteTAUpdatePipeline:
                 tech_df['date'] = pd.to_datetime(tech_df['date']).dt.date
             else:
                 tech_df['date'] = pd.to_datetime(tech_df['date']).dt.date
+
+            # Generate optimized basic_data files (Option B - fast Streamlit loading)
+            logger.info("  Generating optimized basic_data files...")
+            self.generate_optimized_basic_data(tech_df.copy())
 
             # Set target date
             if date is None:
@@ -321,10 +546,16 @@ class CompleteTAUpdatePipeline:
                 logger.info(f"  ✅ LEADING sectors: {', '.join(leading[:3]) if leading else 'None'}")
 
             # Step 14: Trading Lists (Buy/Sell)
-            logger.info("\n[14/14] Generating trading lists...")
+            logger.info("\n[14/15] Generating trading lists...")
             buy_list, sell_list = self.trading_list_gen.run(date=str(date) if date else None)
             logger.info(f"  ✅ Buy list: {len(buy_list)} candidates")
             logger.info(f"  ✅ Sell list: {len(sell_list)} signals")
+
+            # Step 15: Pre-calculate Composite Scores (Option B optimization)
+            logger.info("\n[15/15] Pre-calculating composite scores...")
+            scored_signals = self.precalculate_composite_scores()
+            if scored_signals is not None:
+                logger.info(f"  ✅ Saved {len(scored_signals)} signals with scores")
 
             # Summary
             elapsed = (datetime.now() - start_time).total_seconds()

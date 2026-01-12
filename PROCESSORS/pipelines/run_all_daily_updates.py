@@ -33,9 +33,12 @@ import subprocess
 from pathlib import Path
 import argparse
 import logging
-from datetime import datetime
-from typing import Dict, Tuple, Optional
+from datetime import datetime, date
+from typing import Dict, Tuple, Optional, List
 import pandas as pd
+
+# Add project root to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 PIPELINES_DIR = Path(__file__).parent
 DAILY_DIR = PIPELINES_DIR / "daily"  # Daily scripts subfolder
@@ -442,6 +445,89 @@ def run_script(
         return False, duration, None
 
 
+def check_gdkhq_triggers(target_date: Optional[str] = None) -> List[str]:
+    """
+    Check for tickers with GDKHQ (ex-dividend date) today.
+    These need full OHLCV history refresh.
+
+    Args:
+        target_date: Optional date string (YYYY-MM-DD)
+
+    Returns:
+        List of ticker symbols needing full refresh
+    """
+    try:
+        from PROCESSORS.pipelines.utils.event_trigger_check import get_tickers_needing_refresh
+
+        if target_date:
+            check_date = datetime.strptime(target_date, '%Y-%m-%d').date()
+        else:
+            check_date = date.today()
+
+        return get_tickers_needing_refresh(check_date)
+
+    except ImportError:
+        logger.warning("Event trigger check module not found - skipping GDKHQ check")
+        return []
+    except Exception as e:
+        logger.warning(f"GDKHQ check failed: {e} - continuing without refresh")
+        return []
+
+
+def run_full_ohlcv_refresh(tickers: List[str]) -> bool:
+    """
+    Run full OHLCV history refresh for specific tickers using OHLCVAdjustmentDetector.
+
+    Args:
+        tickers: List of ticker symbols to refresh
+
+    Returns:
+        True if successful
+    """
+    if not tickers:
+        return True
+
+    logger.info("\n" + "=" * 80)
+    logger.info("🔄 GDKHQ FULL REFRESH - Corporate Event Detected")
+    logger.info("=" * 80)
+    logger.info(f"   Tickers: {tickers}")
+    logger.info("   Action: Full historical OHLCV refresh + selective TA cascade")
+
+    try:
+        from PROCESSORS.technical.ohlcv.ohlcv_adjustment_detector import OHLCVAdjustmentDetector
+
+        start_time = datetime.now()
+
+        # Use detector's refresh_symbols which handles:
+        # 1. Backup parquet
+        # 2. Fetch full history per ticker
+        # 3. Calculate derived metrics
+        # 4. Save updated parquet
+        detector = OHLCVAdjustmentDetector()
+        results = detector.refresh_symbols(tickers, dry_run=False)
+
+        # Run selective cascade for refreshed tickers
+        if results['success'] > 0:
+            logger.info("\n   🔄 Running selective TA cascade...")
+            detector._cascade_refresh_selective(results['symbols_refreshed'])
+
+        duration = (datetime.now() - start_time).total_seconds()
+        logger.info(f"\n   ⏱️  Full refresh completed in {format_duration(duration)}")
+        logger.info(f"   ✅ Success: {results['success']}, ❌ Failed: {results['failed']}")
+        logger.info("=" * 80)
+
+        return results['failed'] == 0
+
+    except ImportError as e:
+        logger.error(f"Could not import OHLCVAdjustmentDetector: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"Full refresh failed: {e}")
+        import traceback
+        logger.debug(traceback.format_exc())
+        return False
+
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
@@ -521,6 +607,31 @@ Examples:
 
     logger.info(f"\n📋 Pipeline: {total_steps} steps to run")
     logger.info("")
+
+    # ========== PRE-PIPELINE: GDKHQ EVENT CHECK ==========
+    # Check for corporate events (dividend, split) that require full OHLCV refresh
+    if not args.skip_ohlcv and (not args.only or args.only == 'ohlcv'):
+        logger.info("\n" + "=" * 80)
+        logger.info("📅 PRE-CHECK: GDKHQ Event Trigger")
+        logger.info("=" * 80)
+
+        gdkhq_tickers = check_gdkhq_triggers(args.date)
+
+        # Auto-fetch if cache stale/missing (returns None)
+        if gdkhq_tickers is None:
+            logger.info("   📥 Events cache stale - auto-fetching from Vietstock...")
+            fetcher_script = PIPELINES_DIR / "utils" / "vietstock_event_fetcher.py"
+            subprocess.run([sys.executable, str(fetcher_script)], check=False)
+            gdkhq_tickers = check_gdkhq_triggers(args.date) or []
+
+        if gdkhq_tickers:
+            logger.info(f"   ⚠️  Found {len(gdkhq_tickers)} ticker(s) with GDKHQ today: {gdkhq_tickers}")
+            logger.info("   → Running full OHLCV refresh before daily update...")
+            run_full_ohlcv_refresh(gdkhq_tickers)
+        else:
+            logger.info("   ✅ No GDKHQ events detected - proceeding with normal update")
+
+        logger.info("=" * 80)
 
     # Run pipeline
     for step_num, (script, description, key) in enumerate(active_pipeline, start=1):

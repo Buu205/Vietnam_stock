@@ -1830,5 +1830,13 @@
   "TCX": {
     "entity": "COMPANY",
     "sector": "Dịch vụ tài chính"
+  },
+  "VCK": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
+  },
+  "VPX": {
+    "entity": "SECURITY",
+    "sector": "Dịch vụ tài chính"
   }
 }

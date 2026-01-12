@@ -1,8 +1,8 @@
 # Codebase Summary
 
 **Project:** Vietnam Stock Dashboard
-**Total Python Files:** 223 (110 PROCESSORS + 113 WEBAPP)
-**Last Updated:** 2025-12-28
+**Total Python Files:** 270 (137 PROCESSORS + 133 WEBAPP)
+**Last Updated:** 2026-01-11
 
 ---
 
@@ -10,14 +10,14 @@
 
 ```
 Vietnam_dashboard/
-├── WEBAPP/              # Streamlit frontend (113 files)
-├── PROCESSORS/          # Data processing (110 files)
-├── DATA/                # Data storage (~500 MB)
+├── WEBAPP/              # Streamlit frontend (133 files)
+├── PROCESSORS/          # Data processing (137 files)
+├── DATA/                # Data storage (~590 MB)
 ├── config/              # Configuration (2.2 MB, 41 files)
 ├── MCP_SERVER/          # MCP API Server (30 tools)
 ├── scripts/             # Utility scripts
 ├── tests/               # Test files
-├── docs/                # Documentation (5 files)
+├── docs/                # Documentation (15+ files)
 └── plans/reports/       # Scout reports & audit findings
 ```
 
@@ -26,46 +26,30 @@ Vietnam_dashboard/
 ## 2. WEBAPP Module (Streamlit Frontend)
 
 **Location:** `/WEBAPP`
-**Files:** 113 Python files
-**Entry Point:** `main_app.py`
-**Theme:** Crypto Terminal Glassmorphism (dark mode, OLED-optimized)
+**Files:** 133 Python files
+**Entry Point:** `main_app.py` with `st.navigation()` for 7 dashboards
+**Theme:** Crypto Terminal Glassmorphism (Electric Purple #8B5CF6 + Cyan #06B6D4)
+**Features:**
+- Cross-page ticker sync (Fundamental → Forecast/Technical)
+- Master symbols filter (315 liquid tickers)
+- Outlier filtering (PE<100, PB<10)
+- Lazy loading & caching (TTL 3600s)
+- DuckDB for fast parquet reads
 
 ### Structure
 
 ```
 WEBAPP/
-├── main_app.py              # Entry point (st.navigation, 8 pages)
-├── pages/                   # Dashboard pages (8 modules)
-│   ├── company/             # Company analysis
-│   │   ├── company_dashboard.py
-│   │   ├── components/
-│   │   └── services/
-│   ├── bank/                # Bank analysis
-│   │   ├── bank_dashboard.py
-│   │   ├── components/
-│   │   └── services/
-│   ├── security/            # Security analysis
-│   │   ├── security_dashboard.py
-│   │   └── services/
-│   ├── sector/              # Sector overview
-│   │   ├── sector_dashboard.py
-│   │   └── services/
-│   ├── valuation/           # Valuation metrics
-│   │   ├── valuation_dashboard.py
-│   │   └── services/
-│   ├── technical/           # Technical analysis (3 tabs)
-│   │   ├── technical_dashboard.py
-│   │   ├── components/      # market_overview, sector_rotation, stock_scanner
-│   │   ├── services/        # ta_dashboard_service.py
-│   │   └── README.md        # Technical module documentation (658 lines)
-│   ├── fx_commodities/      # FX & Commodities
-│   │   ├── fx_dashboard.py
-│   │   └── services/
-│   └── forecast/            # BSC Forecast
-│       ├── forecast_dashboard.py
-│       └── services/
-│
-├── services/                # Data loading services (8 modules)
+├── main_app.py              # Entry point (st.navigation, 7 pages)
+├── pages/                   # Dashboard pages (7 modules)
+│   ├── company.py           # Company analysis
+│   ├── bank.py              # Bank analysis (18 metrics)
+│   ├── security.py          # Security analysis
+│   ├── sector.py            # Sector overview
+│   ├── technical.py         # Technical analysis (20+ indicators)
+│   ├── forecast.py          # BSC forecasts
+│   └── fx_commodities.py    # FX & Commodities
+├── services/                # Data loading services (15 modules)
 │   ├── company_service.py
 │   ├── bank_service.py
 │   ├── security_service.py
@@ -74,26 +58,40 @@ WEBAPP/
 │   ├── technical_service.py
 │   ├── forecast_service.py
 │   └── fx_service.py
-│
 ├── core/                    # Core utilities (17 files)
 │   ├── models/              # Pydantic models
-│   │   ├── data_models.py   # OHLCVBase, FundamentalBase, BankMetrics, etc.
-│   │   └── market_state.py  # MarketState model
-│   ├── session_state.py     # CRITICAL: init_page_state() for all pages
-│   ├── theme.py             # Crypto Terminal Glassmorphism theme
-│   ├── styles.py            # CSS styles (glassmorphism, animations)
-│   ├── config.py            # App configuration
-│   ├── constants.py         # Constants (entity types, sectors)
-│   ├── display_config.py    # Display settings
-│   ├── formatters.py        # Data formatters
-│   ├── data_loading.py      # Data loading utilities
-│   ├── data_paths.py        # Data path management
-│   ├── chart_config.py      # Chart configuration
-│   ├── chart_schema.py      # Chart schema definitions
-│   ├── display_settings.py  # Display settings
-│   ├── valuation_config.py  # Valuation configuration
-│   ├── symbol_loader.py     # Symbol loading
-│   └── utils.py             # Utilities
+│   ├── session_state.py     # CRITICAL: init_page_state()
+│   ├── theme.py             # Crypto Terminal theme
+│   ├── styles.py            # CSS styles
+│   └── config.py            # App configuration
+├── components/              # Reusable UI components
+│   ├── charts/              # Plotly builders
+│   ├── tables/              # Data tables
+│   └── metric_cards/        # Metric cards
+├── domains/                 # Domain-specific loaders
+├── features/                # Business logic
+├── ai/                      # LLM integration
+└── layout/                  # Layout components
+```
+
+---
+
+## 3. PROCESSORS Module (Data Processing)
+
+**Location:** `/PROCESSORS`
+**Files:** 137 Python modules
+**Master Orchestrator:** `pipelines/run_all_daily_updates.py` (631 lines)
+**Pipeline Execution:** ~80 seconds for 6 stages
+
+### Pipeline Order (6 stages)
+1. `daily_ohlcv_update.py` (~10s) - Fetch OHLCV from vnstock
+2. `daily_ta_complete.py` (~30s) - Full TA pipeline (14 steps)
+3. `daily_macro_commodity.py` (~15s) - Macro & commodity data
+4. `daily_valuation.py` (~8s) - Stock PE/PB/EV-EBITDA
+5. `daily_sector_analysis.py` (~16s) - Sector metrics & scoring
+6. `daily_bsc_forecast.py` (~5s) - BSC forecast update
+
+### Structure
 │
 └── components/              # Reusable UI components
     ├── charts/              # Plotly chart builders
