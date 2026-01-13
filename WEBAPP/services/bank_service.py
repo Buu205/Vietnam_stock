@@ -78,20 +78,22 @@ class BankService(BaseService):
         Returns:
             DataFrame with financial metrics sorted by date
         """
-        # Use base class load_data() - gets path from registry
-        df = self.load_data(validate_schema=False)
+        # Load from different files based on period
+        if period == "Yearly":
+            yearly_path = self.data_root / "processed" / "fundamental" / "bank" / "bank_financial_metrics_yearly.parquet"
+            if yearly_path.exists():
+                df = pd.read_parquet(yearly_path)
+            else:
+                return pd.DataFrame()
+        else:
+            # Use base class load_data() - gets path from registry
+            df = self.load_data(validate_schema=False)
 
         # Filter by ticker
         df = df[df['symbol'] == ticker].copy()
 
         if df.empty:
             return pd.DataFrame()
-
-        # Filter by period
-        if period == "Quarterly":
-            df = df[df['freq_code'] == 'Q']
-        elif period == "Yearly":
-            df = df[df['freq_code'] == 'Y']
 
         df = df.sort_values('report_date')
 

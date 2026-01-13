@@ -185,3 +185,302 @@ class BankFormulas:
     # safe_divide is imported from utils and used directly in calculations where needed,
     # or provided by the base calculator if using object methods.
     # But since these are static methods, we rely on the import.
+
+
+# ============================================================================
+# Bank Group Metrics Calculator
+# ============================================================================
+
+# Metrics to aggregate by weighted average (by total_assets)
+WEIGHTED_AVG_METRICS = [
+    'nim_q', 'cir', 'npl_ratio', 'debt_group2_ratio', 'llcr', 'casa_ratio',
+    'ldr_pure', 'ldr_regulated', 'roea_ttm', 'roaa_ttm', 'asset_yield_q',
+    'funding_cost_q', 'loan_yield_q', 'provision_to_loan', 'credit_cost',
+    'nii_toi', 'noii_toi',
+    # Growth rates also weighted
+    'nii_growth_yoy', 'toi_growth_yoy', 'ppop_growth_yoy', 'pbt_growth_yoy',
+    'npatmi_growth_yoy', 'credit_growth_ytd', 'customer_deposit_growth_ytd',
+]
+
+# Metrics to aggregate by sum
+SUM_METRICS = [
+    'nii', 'noii', 'toi', 'opex', 'ppop', 'pbt', 'npatmi', 'npatmi_ttm',
+    'total_assets', 'total_credit', 'total_customer_deposit', 'total_liabilities',
+    'total_equity', 'npl_amount', 'debt_group2', 'loan_provision_balance',
+    'interest_income', 'interest_expense', 'iea', 'ibl',
+]
+
+
+def calculate_bank_group_metrics(
+    input_path: str = "DATA/processed/fundamental/bank/bank_financial_metrics.parquet",
+    output_path: str = "DATA/processed/fundamental/bank/bank_group_metrics.parquet",
+) -> pd.DataFrame:
+    """
+    Calculate aggregated bank metrics by tier group (SOCB, Tier-1, Tier-2, Tier-3).
+
+    - Ratio metrics: Weighted average by total_assets
+    - Absolute metrics: Sum
+
+    Args:
+        input_path: Path to individual bank metrics parquet
+        output_path: Path to save group metrics parquet
+
+    Returns:
+        DataFrame with aggregated metrics per tier per period
+    """
+    from pathlib import Path
+    from config.sector_analysis.bank_config import BANK_CLASSIFICATION, get_bank_tier
+
+    # Load individual bank data
+    df = pd.read_parquet(input_path)
+
+    # Add tier column
+    df['tier'] = df['symbol'].apply(get_bank_tier)
+
+    # Filter only known tiers (exclude 'Unknown')
+    df = df[df['tier'] != 'Unknown'].copy()
+
+    # Group by tier and period
+    group_cols = ['tier', 'year', 'quarter']
+
+    results = []
+
+    for (tier, year, quarter), group in df.groupby(group_cols):
+        row = {
+            'tier': tier,
+            'year': year,
+            'quarter': quarter,
+            'period': f"{int(quarter)}Q{str(int(year))[-2:]}",
+            'bank_count': len(group),
+        }
+
+        # Get total assets for weighting
+        total_assets_sum = group['total_assets'].sum()
+
+        # Calculate weighted averages for ratio metrics
+        for col in WEIGHTED_AVG_METRICS:
+            if col in group.columns:
+                # Filter valid values
+                valid = group[[col, 'total_assets']].dropna()
+                if len(valid) > 0 and total_assets_sum > 0:
+                    weighted_sum = (valid[col] * valid['total_assets']).sum()
+                    row[f'{col}_wavg'] = round(weighted_sum / valid['total_assets'].sum(), 4)
+                else:
+                    row[f'{col}_wavg'] = None
+
+        # Calculate sums for absolute metrics
+        for col in SUM_METRICS:
+            if col in group.columns:
+                row[f'{col}_sum'] = group[col].sum()
+
+        results.append(row)
+
+    # Create result DataFrame
+    result_df = pd.DataFrame(results)
+
+    # Sort by tier order and period
+    tier_order = {'SOCB': 0, 'Tier-1': 1, 'Tier-2': 2, 'Tier-3': 3}
+    result_df['tier_order'] = result_df['tier'].map(tier_order)
+    result_df = result_df.sort_values(['year', 'quarter', 'tier_order'])
+    result_df = result_df.drop(columns=['tier_order'])
+
+    # Save to parquet
+    output_file = Path(output_path)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    result_df.to_parquet(output_file, index=False)
+
+    print(f"✅ Bank group metrics saved: {output_path}")
+    print(f"   Shape: {result_df.shape}")
+    print(f"   Tiers: {result_df['tier'].unique().tolist()}")
+    print(f"   Periods: {result_df['period'].nunique()}")
+
+    return result_df
+
+
+# ============================================================================
+# Quarterly to Yearly Aggregation
+# ============================================================================
+
+# Flow metrics: Sum of 4 quarters
+FLOW_METRICS = [
+    'nii', 'noii', 'toi', 'opex', 'ppop', 'provision_expense', 'pbt', 'npatmi',
+    'interest_income', 'interest_expense',
+]
+
+# Stock metrics: Use Q4 value (end of year) or latest available
+STOCK_METRICS = [
+    'total_assets', 'total_credit', 'total_customer_deposit', 'total_liabilities',
+    'total_equity', 'charter_capital', 'npl_amount', 'debt_group2',
+    'loan_provision_balance', 'iea', 'ibl', 'equity_avg_2q', 'assets_avg_2q',
+    'casa_ratio', 'ldr_pure', 'ldr_regulated',
+]
+
+# TTM metrics: Already annualized, use Q4 value
+TTM_METRICS = [
+    'roea_ttm', 'roaa_ttm', 'eps_ttm', 'bvps', 'npatmi_ttm',
+]
+
+
+def calculate_yearly_metrics(
+    input_path: str = "DATA/processed/fundamental/bank/bank_financial_metrics.parquet",
+    output_path: str = "DATA/processed/fundamental/bank/bank_financial_metrics_yearly.parquet",
+) -> pd.DataFrame:
+    """
+    Calculate yearly bank metrics from quarterly data.
+
+    Aggregation logic:
+    - Flow metrics (P&L): Sum of 4 quarters
+    - Stock metrics (BS): Q4 value (or latest quarter for current year)
+    - TTM metrics: Q4 value (already annualized)
+    - Ratios: Recalculate from yearly aggregates
+
+    For current year (incomplete), uses trailing sum/latest available.
+
+    Args:
+        input_path: Path to quarterly bank metrics parquet
+        output_path: Path to save yearly metrics parquet
+
+    Returns:
+        DataFrame with yearly metrics per bank
+    """
+    from pathlib import Path
+
+    # Load quarterly data
+    df = pd.read_parquet(input_path)
+
+    results = []
+
+    for symbol in df['symbol'].unique():
+        bank_df = df[df['symbol'] == symbol].copy()
+
+        for year in bank_df['year'].unique():
+            year_df = bank_df[bank_df['year'] == year].sort_values('quarter')
+            quarters_available = year_df['quarter'].tolist()
+            num_quarters = len(quarters_available)
+
+            # Skip if no data
+            if num_quarters == 0:
+                continue
+
+            row = {
+                'symbol': symbol,
+                'year': int(year),
+                'quarter': 0,  # 0 indicates yearly
+                'freq_code': 'Y',
+                'quarters_aggregated': num_quarters,
+                'report_date': year_df['report_date'].max(),
+            }
+
+            # Flow metrics: Sum of available quarters
+            for col in FLOW_METRICS:
+                if col in year_df.columns:
+                    row[col] = year_df[col].sum()
+
+            # Stock metrics: Use latest quarter value
+            latest_q = year_df.iloc[-1]
+            for col in STOCK_METRICS:
+                if col in year_df.columns:
+                    row[col] = latest_q[col]
+
+            # TTM metrics: Use latest quarter value
+            for col in TTM_METRICS:
+                if col in year_df.columns:
+                    row[col] = latest_q[col]
+
+            # Recalculate ratios from yearly data
+            # NIM = (interest_income - interest_expense) / avg(iea) * 100
+            if row.get('interest_income') and row.get('interest_expense') and row.get('iea'):
+                net_interest = row['interest_income'] - row['interest_expense']
+                iea_avg = year_df['iea'].mean()
+                if iea_avg > 0:
+                    row['nim_q'] = round((net_interest / iea_avg) * 100 / num_quarters, 2)
+
+            # CIR = abs(opex) / toi * 100 (opex is stored as negative)
+            if row.get('toi') and row['toi'] > 0:
+                row['cir'] = round((abs(row.get('opex', 0)) / row['toi']) * 100, 2)
+
+            # NII/TOI ratio
+            if row.get('toi') and row['toi'] > 0:
+                row['nii_toi'] = round((row.get('nii', 0) / row['toi']) * 100, 2)
+                row['noii_toi'] = round((row.get('noii', 0) / row['toi']) * 100, 2)
+
+            # NPL ratio = npl_amount / total_credit * 100
+            if row.get('total_credit') and row['total_credit'] > 0:
+                row['npl_ratio'] = round((row.get('npl_amount', 0) / row['total_credit']) * 100, 2)
+                row['debt_group2_ratio'] = round((row.get('debt_group2', 0) / row['total_credit']) * 100, 2)
+
+            # LLCR = loan_provision_balance / npl_amount * 100
+            if row.get('npl_amount') and row['npl_amount'] > 0:
+                row['llcr'] = round((row.get('loan_provision_balance', 0) / row['npl_amount']) * 100, 2)
+
+            # Provision to loan = loan_provision_balance / total_credit * 100
+            if row.get('total_credit') and row['total_credit'] > 0:
+                row['provision_to_loan'] = round((row.get('loan_provision_balance', 0) / row['total_credit']) * 100, 2)
+
+            # Credit cost = provision_expense / total_credit * 100
+            if row.get('total_credit') and row['total_credit'] > 0:
+                row['credit_cost'] = round((row.get('provision_expense', 0) / row['total_credit']) * 100, 2)
+
+            # Asset yield = interest_income / iea * 100
+            if row.get('iea') and row['iea'] > 0:
+                iea_avg = year_df['iea'].mean()
+                row['asset_yield_q'] = round((row.get('interest_income', 0) / iea_avg) * 100 / num_quarters, 2)
+
+            # Funding cost = interest_expense / ibl * 100
+            if row.get('ibl') and row['ibl'] > 0:
+                ibl_avg = year_df['ibl'].mean()
+                row['funding_cost_q'] = round((row.get('interest_expense', 0) / ibl_avg) * 100 / num_quarters, 2)
+
+            results.append(row)
+
+    # Create result DataFrame
+    result_df = pd.DataFrame(results)
+
+    # Sort
+    result_df = result_df.sort_values(['symbol', 'year']).reset_index(drop=True)
+
+    # Calculate YoY growth metrics
+    growth_metrics = {
+        'nii': 'nii_growth_yoy',
+        'toi': 'toi_growth_yoy',
+        'ppop': 'ppop_growth_yoy',
+        'pbt': 'pbt_growth_yoy',
+        'npatmi': 'npatmi_growth_yoy',
+        'total_credit': 'credit_growth_yoy',
+        'total_customer_deposit': 'deposit_growth_yoy',
+    }
+
+    for base_col, growth_col in growth_metrics.items():
+        if base_col in result_df.columns:
+            result_df[growth_col] = result_df.groupby('symbol')[base_col].pct_change(fill_method=None) * 100
+            result_df[growth_col] = result_df[growth_col].round(2)
+
+    # Add aliases for dashboard compatibility (expects _ytd columns)
+    result_df['credit_growth_ytd'] = result_df['credit_growth_yoy']
+    result_df['customer_deposit_growth_ytd'] = result_df['deposit_growth_yoy']
+
+    # Save to parquet
+    output_file = Path(output_path)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    result_df.to_parquet(output_file, index=False)
+
+    print(f"✅ Bank yearly metrics saved: {output_path}")
+    print(f"   Shape: {result_df.shape}")
+    print(f"   Symbols: {result_df['symbol'].nunique()}")
+    print(f"   Years: {sorted(result_df['year'].unique())}")
+
+    return result_df
+
+
+# Main execution for standalone run
+if __name__ == "__main__":
+    print("Calculating bank group metrics...")
+    df = calculate_bank_group_metrics()
+    print("\nSample output:")
+    print(df[['tier', 'period', 'bank_count', 'nim_q_wavg', 'npl_ratio_wavg', 'toi_sum']].tail(8))
+
+    print("\n" + "="*60)
+    print("Calculating bank yearly metrics...")
+    df_yearly = calculate_yearly_metrics()
+    print("\nSample yearly output:")
+    print(df_yearly[['symbol', 'year', 'quarters_aggregated', 'toi', 'npatmi', 'nim_q', 'npl_ratio']].tail(10))

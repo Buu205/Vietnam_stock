@@ -739,12 +739,45 @@ class BankCalculator(EntityCalculator):
             if col in df.columns:
                 df[f'{col}_growth_yoy'] = df.groupby('SECURITY_CODE')[col].pct_change(periods=4) * 100
 
+        # Add total_loan as alias for total_credit (for growth calculation)
+        # Note: total_loan column doesn't exist in raw data, use total_credit as proxy
+        if 'total_loan' not in df.columns and 'total_credit' in df.columns:
+            df['total_loan'] = df['total_credit']
+
         # YTD growth for balance sheet items (vs Q4 of previous year)
+        # Formula: (Current Q value - Q4 of prev year) / Q4 of prev year * 100
         bs_cols = ['total_credit', 'total_loan', 'total_assets', 'total_customer_deposit']
+        df = df.sort_values(['SECURITY_CODE', 'YEAR', 'QUARTER'])
+
         for col in bs_cols:
-            if col in df.columns:
-                col_name = col.replace('total_', '')
-                df[f'{col_name}_growth_ytd'] = df.groupby('SECURITY_CODE')[col].pct_change(periods=1) * 100
+            if col not in df.columns:
+                continue
+            col_name = col.replace('total_', '')
+            growth_col = f'{col_name}_growth_ytd'
+
+            # Get Q4 values for each ticker/year as reference
+            q4_values = df[df['QUARTER'] == 4].set_index(['SECURITY_CODE', 'YEAR'])[col].to_dict()
+
+            # Use vectorized approach to avoid closure issues
+            def calc_ytd_for_col(df_in, col_in, q4_vals):
+                """Calculate YTD growth vs Q4 of previous year."""
+                results = []
+                for _, row in df_in.iterrows():
+                    ticker = row['SECURITY_CODE']
+                    year = row['YEAR']
+                    prev_year = year - 1
+                    current_val = row[col_in]
+
+                    # Get Q4 value of previous year
+                    q4_val = q4_vals.get((ticker, prev_year))
+
+                    if q4_val and q4_val > 0 and pd.notna(current_val):
+                        results.append((current_val - q4_val) / q4_val * 100)
+                    else:
+                        results.append(np.nan)
+                return results
+
+            df[growth_col] = calc_ytd_for_col(df, col, q4_values)
 
         return df
 

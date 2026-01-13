@@ -37,6 +37,7 @@ from WEBAPP.pages.forecast.tabs.bsc_universal_tab import render_bsc_universal_ta
 from WEBAPP.pages.forecast.tabs.sector_tab import render_sector_tab
 from WEBAPP.pages.forecast.tabs.achievement_tab import render_achievement_tab
 from WEBAPP.pages.forecast.tabs.bsc_vs_consensus_tab import render_bsc_vs_consensus_tab
+from WEBAPP.pages.forecast.tabs.assumptions_tab import render_assumptions_tab
 
 # Inject premium styles
 st.markdown(get_page_style(), unsafe_allow_html=True)
@@ -185,9 +186,9 @@ if has_synced_ticker():
 
 st.markdown("---")
 
-# Tabs (Session State Persisted) - 4 tabs per refactor plan
+# Tabs (Session State Persisted) - 5 tabs
 active_tab = render_persistent_tabs(
-    ["BSC Universal", "Sector", "Achievement", "Consensus"],
+    ["BSC Universal", "Sector", "Achievement", "Consensus", "Assumptions"],
     "forecast_active_tab"
 )
 
@@ -302,6 +303,13 @@ elif active_tab == 2:
 # ============================================================================
 elif active_tab == 3:
     render_bsc_vs_consensus_tab()
+
+
+# ============================================================================
+# TAB 4: SECTOR ASSUMPTIONS (BSC Masterfiles)
+# ============================================================================
+elif active_tab == 4:
+    render_assumptions_tab()
 
 
 # Footer

@@ -324,8 +324,8 @@ def render_sector_tab(sector_df: pd.DataFrame, individual_df: pd.DataFrame, serv
             fig = render_valuation_matrix(stats_data, bsc_fwd_2026, selected_sector, metric, vci_fwd_2026)
             st.plotly_chart(fig, width='stretch')
 
-            # Compact legend
-            st.caption(f"━ {metric} TTM | ◆ BSC 26F (trái) | △ VCI 26F (phải) | Box: P25-P75")
+            # Compact legend (BSC only - no VCI data available)
+            st.caption(f"━ {metric} TTM | ◆ BSC {metric} 26F | Box: P25-P75")
         else:
             st.info(f"No historical {metric} data for {selected_sector}.")
 

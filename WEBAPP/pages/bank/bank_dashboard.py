@@ -32,6 +32,7 @@ from WEBAPP.core.styles import (
 )
 from WEBAPP.core.session_state import init_page_state, render_persistent_tabs
 from WEBAPP.components.filters.fundamental_filter_bar import render_fundamental_filters
+from config.sector_analysis.bank_config import BANK_CLASSIFICATION, TIER_COLORS, TIER_NAMES_VI, get_bank_tier
 
 # ============================================================================
 # PAGE CONFIG & STYLES
@@ -96,49 +97,323 @@ except FileNotFoundError as e:
     st.info("Run: `python3 PROCESSORS/fundamental/calculators/run_bank_calculator.py`")
     st.stop()
 
-# Header filter bar (replaces sidebar filters)
-filters = render_fundamental_filters(
-    service=service,
-    entity_type='bank',
-    mode='basic'
-)
-ticker = filters['ticker']
-period = filters['period']
-limit = filters['num_periods']
-
-st.markdown("---")
-
 # ============================================================================
-# LOAD DATA
+# CACHED DATA LOADERS (must be defined before use)
 # ============================================================================
+@st.cache_data(ttl=3600)
+def load_bank_group_data():
+    """Load aggregated bank group metrics."""
+    path = Path("DATA/processed/fundamental/bank/bank_group_metrics.parquet")
+    if not path.exists():
+        return pd.DataFrame()
+    return pd.read_parquet(path)
+
+
 @st.cache_data(ttl=3600)
 def load_bank_data_full(ticker: str, period: str):
     """Load FULL bank financial data for MA4 calculation (from 2018+)."""
     service = BankService()
-    df = service.get_financial_data(ticker, period, limit=100)  # Get all available
+    df = service.get_financial_data(ticker, period, limit=100)
     if not df.empty and 'report_date' in df.columns:
         df['report_date'] = pd.to_datetime(df['report_date'])
     return df
 
-df_full = load_bank_data_full(ticker, period)
 
-if df_full.empty:
-    st.warning(f"No data available for {ticker}")
-    st.stop()
-
-# Filter to display only requested periods, but keep df_full for MA4
-df_full = df_full.sort_values('report_date', ascending=True)
-df = df_full.tail(limit).copy() if len(df_full) > limit else df_full.copy()
-
-# Prepare period labels (short format for better chart display)
-df['period_label'] = df.apply(
-    lambda r: f"{int(r['quarter'])}Q{str(int(r['year']))[-2:]}" if period == 'Quarterly' else str(int(r['year'])),
-    axis=1
+# ============================================================================
+# VIEW MODE SELECTOR
+# ============================================================================
+view_mode = st.radio(
+    "View Mode",
+    options=["Individual Bank", "By Tier Group"],
+    horizontal=True,
+    help="Individual: Single bank analysis | Tier Group: SOCB vs Tier-1/2/3 comparison"
 )
-df_full['period_label'] = df_full.apply(
-    lambda r: f"{int(r['quarter'])}Q{str(int(r['year']))[-2:]}" if period == 'Quarterly' else str(int(r['year'])),
-    axis=1
-)
+
+# Conditional filters based on view mode
+if view_mode == "Individual Bank":
+    # Header filter bar (replaces sidebar filters)
+    filters = render_fundamental_filters(
+        service=service,
+        entity_type='bank',
+        mode='basic'
+    )
+    ticker = filters['ticker']
+    period = filters['period']
+    limit = filters['num_periods']
+else:
+    # Tier selection for group view
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        selected_tiers = st.multiselect(
+            "Select Tiers",
+            options=list(BANK_CLASSIFICATION.keys()),
+            default=["SOCB", "Tier-1", "Tier-2"],
+            help="Compare performance across bank tiers"
+        )
+    with col2:
+        limit = st.slider("Periods", 4, 20, 8)
+    period = "Quarterly"  # Fixed for tier view
+    ticker = None  # Not used in tier view
+
+    st.markdown("---")
+
+    # =========================================================================
+    # TIER GROUP VIEW - Load and render
+    # =========================================================================
+    df_group = load_bank_group_data()
+
+    if df_group.empty:
+        st.error("Bank group data not found. Run: `python3 -c \"import sys; sys.path.insert(0,'.'); from PROCESSORS.fundamental.formulas.bank_formulas import calculate_bank_group_metrics; calculate_bank_group_metrics()\"`")
+        st.stop()
+
+    # Filter by selected tiers and limit periods
+    df_group = df_group[df_group['tier'].isin(selected_tiers)].copy()
+    df_group = df_group.sort_values(['year', 'quarter'])
+
+    # Get latest N periods
+    unique_periods = df_group[['year', 'quarter']].drop_duplicates().tail(limit)
+    df_group = df_group.merge(unique_periods, on=['year', 'quarter'])
+
+    if df_group.empty:
+        st.warning("No data for selected tiers")
+        st.stop()
+
+    # -------------------------------------------------------------------------
+    # METRIC CARDS - Latest Period Summary
+    # -------------------------------------------------------------------------
+    st.subheader("Tier Group Summary (Latest Period)")
+
+    latest_period = df_group.groupby('tier').last().reset_index()
+
+    cols = st.columns(len(selected_tiers))
+    for i, tier in enumerate(selected_tiers):
+        tier_data = latest_period[latest_period['tier'] == tier]
+        if tier_data.empty:
+            continue
+        row = tier_data.iloc[0]
+        with cols[i]:
+            st.markdown(f"**{tier}** ({int(row.get('bank_count', 0))} banks)")
+            c1, c2 = st.columns(2)
+            with c1:
+                nim = row.get('nim_q_wavg')
+                st.metric("NIM", f"{nim:.2f}%" if pd.notna(nim) else "-")
+                roe = row.get('roea_ttm_wavg')
+                st.metric("ROE", f"{roe:.2f}%" if pd.notna(roe) else "-")
+            with c2:
+                npl = row.get('npl_ratio_wavg')
+                st.metric("NPL", f"{npl:.2f}%" if pd.notna(npl) else "-")
+                cir = row.get('cir_wavg')
+                st.metric("CIR", f"{cir:.2f}%" if pd.notna(cir) else "-")
+
+    # -------------------------------------------------------------------------
+    # TOP CONTRIBUTORS ANALYSIS - Which banks drive tier improvement?
+    # -------------------------------------------------------------------------
+    st.markdown("---")
+    st.subheader("Top Contributors per Tier")
+
+    # Metrics available for contributor analysis
+    CONTRIBUTOR_METRICS = {
+        "NIM": {"col": "nim_q", "higher_better": True, "unit": "%"},
+        "ROE": {"col": "roea_ttm", "higher_better": True, "unit": "%"},
+        "NPL": {"col": "npl_ratio", "higher_better": False, "unit": "%"},
+        "CIR": {"col": "cir", "higher_better": False, "unit": "%"},
+        "CASA": {"col": "casa_ratio", "higher_better": True, "unit": "%"},
+        "Credit Cost": {"col": "credit_cost", "higher_better": False, "unit": "%"},
+    }
+
+    selected_contributor_metric = st.selectbox(
+        "Select metric to analyze",
+        options=list(CONTRIBUTOR_METRICS.keys()),
+        index=0,
+        key="contributor_metric"
+    )
+
+    metric_info = CONTRIBUTOR_METRICS[selected_contributor_metric]
+    metric_col = metric_info["col"]
+    higher_better = metric_info["higher_better"]
+
+    # Load individual bank data to identify contributors
+    try:
+        bank_df = pd.read_parquet(Path("DATA/processed/fundamental/bank/bank_financial_metrics.parquet"))
+
+        # Get tier classification
+        bank_df['tier'] = bank_df['symbol'].apply(get_bank_tier)
+        bank_df = bank_df[bank_df['tier'].isin(selected_tiers)]
+
+        # Get last 2 periods to calculate change
+        periods = bank_df[['year', 'quarter']].drop_duplicates().sort_values(['year', 'quarter']).tail(2)
+        if len(periods) >= 2:
+            prev_period = periods.iloc[0]
+            curr_period = periods.iloc[1]
+
+            prev_df = bank_df[(bank_df['year'] == prev_period['year']) & (bank_df['quarter'] == prev_period['quarter'])]
+            curr_df = bank_df[(bank_df['year'] == curr_period['year']) & (bank_df['quarter'] == curr_period['quarter'])]
+
+            # Merge to calculate change
+            cols_to_merge = ['symbol', 'tier', metric_col, 'total_assets']
+            cols_to_merge = [c for c in cols_to_merge if c in curr_df.columns]
+
+            if metric_col in curr_df.columns and metric_col in prev_df.columns:
+                merged = curr_df[cols_to_merge].merge(
+                    prev_df[['symbol', metric_col]],
+                    on='symbol',
+                    suffixes=('_curr', '_prev')
+                )
+                merged['change'] = merged[f'{metric_col}_curr'] - merged[f'{metric_col}_prev']
+
+                # Sort: higher_better=True means improvement is positive change
+                sort_ascending = not higher_better
+                merged = merged.sort_values('change', ascending=sort_ascending)
+
+                # Build consolidated table per tier
+                tier_cols = st.columns(len(selected_tiers))
+                for i, tier in enumerate(selected_tiers):
+                    tier_banks = merged[merged['tier'] == tier].copy()
+                    if tier_banks.empty:
+                        continue
+
+                    # Re-sort within tier
+                    tier_banks = tier_banks.sort_values('change', ascending=not higher_better)
+
+                    with tier_cols[i]:
+                        st.markdown(f"**{tier}** ({len(tier_banks)} banks)")
+
+                        # Prepare display dataframe
+                        display_df = tier_banks[['symbol', f'{metric_col}_curr', 'change']].copy()
+                        display_df.columns = ['Bank', selected_contributor_metric, 'Δ (pp)']
+                        display_df[selected_contributor_metric] = display_df[selected_contributor_metric].apply(lambda x: f"{x:.2f}")
+                        display_df['Δ (pp)'] = display_df['Δ (pp)'].apply(lambda x: f"{x:+.2f}")
+
+                        # Use centralized styled table function
+                        html_table = render_styled_table(display_df, highlight_first_col=True)
+                        st.markdown(html_table, unsafe_allow_html=True)
+
+                period_label = f"Q{int(curr_period['quarter'])}/{int(curr_period['year'])} vs Q{int(prev_period['quarter'])}/{int(prev_period['year'])}"
+                st.caption(f"{selected_contributor_metric} change: {period_label}")
+            else:
+                st.info(f"Metric '{metric_col}' not available in data")
+    except Exception as e:
+        st.warning(f"Could not load contributor analysis: {e}")
+
+    st.markdown("---")
+
+    # -------------------------------------------------------------------------
+    # TIME SERIES COMPARISON CHARTS
+    # -------------------------------------------------------------------------
+    st.subheader("Tier Comparison Over Time")
+
+    TIER_METRICS = {
+        "NIM (%)": "nim_q_wavg",
+        "ROE (%)": "roea_ttm_wavg",
+        "NPL (%)": "npl_ratio_wavg",
+        "CIR (%)": "cir_wavg",
+        "CASA (%)": "casa_ratio_wavg",
+        "Credit Growth (%)": "credit_growth_ytd_wavg",
+        "TOI (B VND)": "toi_sum",
+        "NPATMI (B VND)": "npatmi_sum",
+    }
+
+    selected_tier_metrics = st.multiselect(
+        "Select metrics to compare",
+        options=list(TIER_METRICS.keys()),
+        default=["NIM (%)", "ROE (%)", "NPL (%)", "CIR (%)"],
+        label_visibility="collapsed"
+    )
+
+    # Generate charts - 2 per row
+    chart_idx = 0
+    while chart_idx < len(selected_tier_metrics):
+        cols = st.columns(2)
+        for col_idx in range(2):
+            if chart_idx >= len(selected_tier_metrics):
+                break
+
+            metric_name = selected_tier_metrics[chart_idx]
+            col_name = TIER_METRICS[metric_name]
+
+            with cols[col_idx]:
+                fig = go.Figure()
+
+                for tier in selected_tiers:
+                    tier_df = df_group[df_group['tier'] == tier].sort_values(['year', 'quarter'])
+
+                    if col_name not in tier_df.columns:
+                        continue
+
+                    y_vals = tier_df[col_name]
+                    if '_sum' in col_name:
+                        y_vals = y_vals / 1e9
+
+                    fig.add_trace(go.Scatter(
+                        x=tier_df['period'],
+                        y=y_vals,
+                        name=tier,
+                        mode='lines+markers',
+                        line=dict(color=TIER_COLORS.get(tier, '#888'), width=2),
+                        marker=dict(size=6),
+                        hovertemplate=f"<b>{tier}</b><br>{metric_name}: %{{y:.2f}}<extra></extra>"
+                    ))
+
+                # Get base layout and customize legend
+                base_layout = get_chart_layout(metric_name, height=350)
+                base_layout['legend'] = dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(color='#FFFFFF'))
+                fig.update_layout(
+                    **base_layout,
+                    showlegend=True,
+                    hovermode='x unified'
+                )
+                fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(128,128,128,0.2)')
+
+                st.plotly_chart(fig, use_container_width=True)
+
+            chart_idx += 1
+
+    # -------------------------------------------------------------------------
+    # DATA TABLE
+    # -------------------------------------------------------------------------
+    st.markdown("---")
+    with st.expander("View Raw Group Data", expanded=False):
+        display_cols = ['tier', 'period', 'bank_count'] + [TIER_METRICS[m] for m in selected_tier_metrics if TIER_METRICS[m] in df_group.columns]
+        st.dataframe(df_group[display_cols], use_container_width=True, hide_index=True)
+
+        st.download_button(
+            "Download Group Data (CSV)",
+            df_group.to_csv(index=False).encode('utf-8'),
+            "bank_tier_comparison.csv",
+            "text/csv",
+            use_container_width=True
+        )
+
+    # Footer for tier view
+    st.markdown("---")
+    st.caption(f"Data: Bank Tier Metrics | Tiers: {', '.join(selected_tiers)} | Periods: {limit}")
+    st.stop()  # End execution - don't run individual bank code
+
+st.markdown("---")
+
+# ============================================================================
+# INDIVIDUAL BANK VIEW - Load Data
+# ============================================================================
+if view_mode == "Individual Bank":
+    df_full = load_bank_data_full(ticker, period)
+
+    if df_full.empty:
+        st.warning(f"No data available for {ticker}")
+        st.stop()
+
+    # Filter to display only requested periods, but keep df_full for MA4
+    df_full = df_full.sort_values('report_date', ascending=True)
+    df = df_full.tail(limit).copy() if len(df_full) > limit else df_full.copy()
+
+    # Prepare period labels (short format for better chart display)
+    df['period_label'] = df.apply(
+        lambda r: f"{int(r['quarter'])}Q{str(int(r['year']))[-2:]}" if period == 'Quarterly' else str(int(r['year'])),
+        axis=1
+    )
+    df_full['period_label'] = df_full.apply(
+        lambda r: f"{int(r['quarter'])}Q{str(int(r['year']))[-2:]}" if period == 'Quarterly' else str(int(r['year'])),
+        axis=1
+    )
 
 # ============================================================================
 # HELPER FUNCTIONS

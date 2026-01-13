@@ -378,6 +378,56 @@ logger.error(f"Failed to calculate metric: {e}", exc_info=True)
 
 ---
 
+## Pattern 8: Streamlit Dark Mode Tables (CRITICAL)
+
+**NEVER use these approaches for tables in Streamlit dark mode:**
+
+### ❌ WRONG: st.dataframe with Styler.set_properties()
+
+```python
+# ❌ BROKEN: Custom CSS conflicts with Streamlit's internal styling
+styled_df = df.style.format({...}).set_properties(**{
+    'color': 'white',
+    'background-color': '#1E1E1E'
+})
+st.dataframe(styled_df)  # Text invisible (dark-on-dark)
+```
+
+### ❌ WRONG: Raw HTML with inline styles
+
+```python
+# ❌ UNRELIABLE: May render as raw text instead of HTML
+html = f"<table style='color:white;...'>{rows}</table>"
+st.markdown(html, unsafe_allow_html=True)  # Sometimes shows raw HTML
+```
+
+### ✅ CORRECT: Use centralized render_styled_table()
+
+```python
+from WEBAPP.core.styles import render_styled_table, get_table_style
+
+# Ensure CSS is injected at page top (usually in page header)
+st.markdown(get_table_style(), unsafe_allow_html=True)
+
+# Use the centralized function
+html_table = render_styled_table(df, highlight_first_col=True)
+st.markdown(html_table, unsafe_allow_html=True)
+```
+
+### ✅ ALTERNATIVE: Plain st.dataframe (no styling)
+
+```python
+# ✅ SIMPLE: Let Streamlit handle dark mode automatically
+st.dataframe(df, hide_index=True, use_container_width=True)
+```
+
+**Why this matters:**
+- Streamlit's `st.dataframe()` has internal dark mode handling
+- Custom CSS via `.set_properties()` conflicts with Streamlit's styles
+- `render_styled_table()` uses CSS classes (not inline styles) that work with the theme
+
+---
+
 ## Summary: Key Patterns
 
 | Pattern | When to Use | Example |
@@ -389,5 +439,6 @@ logger.error(f"Failed to calculate metric: {e}", exc_info=True)
 | **Validation** | Input checking | `validate_ticker("ACB")` |
 | **Caching** | Performance optimization | `@st.cache_data(ttl=3600)` |
 | **Logging** | Debugging & monitoring | `logger.info("Processing...")` |
+| **Dark Mode Tables** | Displaying tables in UI | `render_styled_table(df)` |
 
 **Follow these patterns for consistency and maintainability.**
