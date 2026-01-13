@@ -1,0 +1,76 @@
+{
+  "version": "1.0",
+  "description": "Essential parquet files required for WEBAPP/Streamlit dashboard. Only these files need to be committed and pushed to GitHub.",
+  "last_updated": "2026-01-13",
+  "usage": {
+    "commit_essential": "cat config/essential_parquets.json | jq -r '.files[]' | xargs git add",
+    "check_missing": "cat config/essential_parquets.json | jq -r '.files[]' | while read f; do [ -f \"$f\" ] || echo \"MISSING: $f\"; done",
+    "check_size": "cat config/essential_parquets.json | jq -r '.files[]' | xargs du -sh 2>/dev/null | sort -h"
+  },
+  "files": [
+    "DATA/processed/forecast/unified.parquet",
+    "DATA/processed/fundamental/bank/bank_financial_metrics.parquet",
+    "DATA/processed/fundamental/bank/bank_group_metrics.parquet",
+    "DATA/processed/fundamental/company/company_financial_metrics.parquet",
+    "DATA/processed/fundamental/macro/deposit_interest_rates.parquet",
+    "DATA/processed/macro_commodity/macro_commodity_unified.parquet",
+    "DATA/processed/technical/alerts/signals_with_scores.parquet",
+    "DATA/processed/technical/basic_data.parquet",
+    "DATA/processed/technical/basic_data_30d.parquet",
+    "DATA/processed/technical/basic_data_latest.parquet",
+    "DATA/processed/technical/lists/buy_list_latest.parquet",
+    "DATA/processed/technical/market_breadth/market_breadth_daily.parquet",
+    "DATA/processed/technical/money_flow/individual_money_flow.parquet",
+    "DATA/processed/technical/rs_rating/stock_rs_rating_daily.parquet",
+    "DATA/processed/technical/sector_breadth/sector_breadth_daily.parquet",
+    "DATA/processed/technical/vnindex/vnindex_indicators.parquet",
+    "DATA/processed/valuation/pb/historical/historical_pb.parquet",
+    "DATA/processed/valuation/pe/historical/historical_pe.parquet",
+    "DATA/raw/ohlcv/OHLCV_mktcap.parquet"
+  ],
+  "categories": {
+    "fundamental": [
+      "DATA/processed/fundamental/bank/bank_financial_metrics.parquet",
+      "DATA/processed/fundamental/bank/bank_group_metrics.parquet",
+      "DATA/processed/fundamental/company/company_financial_metrics.parquet",
+      "DATA/processed/fundamental/macro/deposit_interest_rates.parquet"
+    ],
+    "technical": [
+      "DATA/processed/technical/basic_data.parquet",
+      "DATA/processed/technical/basic_data_30d.parquet",
+      "DATA/processed/technical/basic_data_latest.parquet",
+      "DATA/processed/technical/alerts/signals_with_scores.parquet",
+      "DATA/processed/technical/lists/buy_list_latest.parquet",
+      "DATA/processed/technical/market_breadth/market_breadth_daily.parquet",
+      "DATA/processed/technical/money_flow/individual_money_flow.parquet",
+      "DATA/processed/technical/rs_rating/stock_rs_rating_daily.parquet",
+      "DATA/processed/technical/sector_breadth/sector_breadth_daily.parquet",
+      "DATA/processed/technical/vnindex/vnindex_indicators.parquet"
+    ],
+    "valuation": [
+      "DATA/processed/valuation/pb/historical/historical_pb.parquet",
+      "DATA/processed/valuation/pe/historical/historical_pe.parquet"
+    ],
+    "macro": [
+      "DATA/processed/macro_commodity/macro_commodity_unified.parquet"
+    ],
+    "forecast": [
+      "DATA/processed/forecast/unified.parquet"
+    ],
+    "raw": [
+      "DATA/raw/ohlcv/OHLCV_mktcap.parquet"
+    ]
+  },
+  "warnings": {
+    "large_files": {
+      "DATA/processed/technical/rs_rating/stock_rs_rating_daily.parquet": "52MB - exceeds GitHub 50MB limit, consider Git LFS"
+    }
+  },
+  "skip_patterns": [
+    "DATA/processed/technical/alerts/daily/*.parquet",
+    "DATA/processed/technical/alerts/historical/*.parquet", 
+    "DATA/processed/technical/money_flow/sector_money_flow_*.parquet",
+    "DATA/processed/sector/*.parquet",
+    "DATA/.DS_Store"
+  ]
+}
