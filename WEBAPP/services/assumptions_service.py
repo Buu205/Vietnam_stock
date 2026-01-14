@@ -37,17 +37,25 @@ class AssumptionsService:
     TIER3_PCBS = BANK_CLASSIFICATION['Tier-3']
 
     # Column index mapping for Banking Masterfile (0-indexed)
+    # NOTE: Historical data (2023A, 2024A) comes from parquet, NOT Excel
+    # Only FORECAST columns (25F, 26F) are loaded from Excel
     BANKING_COLS = {
         # Stock info
         'ticker': 1, 'rating': 2, 'target_price': 3,
         'closing_price': 4, 'upside': 5, 'prev_price': 6, 'ytd': 7,
-        # Income metrics (25F, 26F, %YoY 25F, %YoY 26F)
-        'nii_25f': 12, 'nii_26f': 13, 'nii_yoy_25f': 16, 'nii_yoy_26f': 17,
-        'noii_25f': 22, 'noii_26f': 23, 'noii_yoy_25f': 26, 'noii_yoy_26f': 27,
-        'toi_25f': 32, 'toi_26f': 33, 'toi_yoy_25f': 36, 'toi_yoy_26f': 37,
-        'provision_25f': 42, 'provision_26f': 43, 'provision_yoy_25f': 46, 'provision_yoy_26f': 47,
-        'pbt_25f': 52, 'pbt_26f': 53, 'pbt_yoy_25f': 56, 'pbt_yoy_26f': 57,
-        'npatmi_25f': 62, 'npatmi_26f': 63, 'npatmi_yoy_25f': 66, 'npatmi_yoy_26f': 67,
+        # Income metrics - FORECAST ONLY (25F, 26F) + %YoY from Excel
+        'nii_25f': 12, 'nii_26f': 13,
+        'nii_yoy_25f': 16, 'nii_yoy_26f': 17,
+        'noii_25f': 22, 'noii_26f': 23,
+        'noii_yoy_25f': 26, 'noii_yoy_26f': 27,
+        'toi_25f': 32, 'toi_26f': 33,
+        'toi_yoy_25f': 36, 'toi_yoy_26f': 37,
+        'provision_25f': 42, 'provision_26f': 43,
+        'provision_yoy_25f': 46, 'provision_yoy_26f': 47,
+        'pbt_25f': 52, 'pbt_26f': 53,
+        'pbt_yoy_25f': 56, 'pbt_yoy_26f': 57,
+        'npatmi_25f': 62, 'npatmi_26f': 63,
+        'npatmi_yoy_25f': 66, 'npatmi_yoy_26f': 67,
         # Quality metrics
         'credit_growth_25f': 72, 'credit_growth_26f': 73,
         'npl_25f': 78, 'npl_26f': 79,
@@ -68,6 +76,11 @@ class AssumptionsService:
         'equity_25f': 142, 'equity_26f': 143,
     }
 
+    # Historical parquet path for bank metrics
+    BANK_PARQUET_PATH = Path("DATA/processed/fundamental/bank/bank_financial_metrics.parquet")
+    # OHLCV path for latest prices
+    OHLCV_PATH = Path("DATA/raw/ohlcv/OHLCV_mktcap.parquet")
+
     def __init__(self, masterfile_root: Optional[Path] = None):
         """
         Initialize AssumptionsService.
@@ -78,8 +91,123 @@ class AssumptionsService:
         self.masterfile_root = masterfile_root or Path("BSC_masterfile")
 
     # =========================================================================
+    # Price Data Helper
+    # =========================================================================
+
+    def _load_latest_prices(self, tickers: list) -> pd.DataFrame:
+        """
+        Load latest closing prices from OHLCV parquet.
+
+        Args:
+            tickers: List of ticker symbols
+
+        Returns:
+            DataFrame with columns: ticker, latest_price, price_date
+        """
+        if not self.OHLCV_PATH.exists():
+            return pd.DataFrame()
+
+        try:
+            df = pd.read_parquet(self.OHLCV_PATH)
+            # OHLCV uses 'symbol' column, not 'ticker'
+            df = df[df['symbol'].isin(tickers)].copy()
+
+            if df.empty:
+                return pd.DataFrame()
+
+            # Get latest date for each ticker
+            latest_idx = df.groupby('symbol')['date'].idxmax()
+            latest_df = df.loc[latest_idx, ['symbol', 'date', 'close']].copy()
+            latest_df.columns = ['ticker', 'price_date', 'latest_price']
+
+            return latest_df.reset_index(drop=True)
+
+        except Exception as e:
+            print(f"Error loading latest prices: {e}")
+            return pd.DataFrame()
+
+    # =========================================================================
     # Banking Sector
     # =========================================================================
+
+    def _load_bank_historical(self) -> pd.DataFrame:
+        """
+        Load historical bank metrics (2023A, 2024A) from parquet.
+
+        Returns:
+            DataFrame with columns: ticker, npatmi_23a, npatmi_24a, nii_23a, nii_24a, etc.
+            - Income metrics: Sum of 4 quarters, in billion VND (tỉ VND)
+            - Ratio metrics: Q4 value as proxy for full year
+        """
+        if not self.BANK_PARQUET_PATH.exists():
+            return pd.DataFrame()
+
+        try:
+            df = pd.read_parquet(self.BANK_PARQUET_PATH)
+
+            # Filter for 2023 and 2024 full year data
+            df_2023 = df[df['year'] == 2023].copy()
+            df_2024 = df[df['year'] == 2024].copy()
+
+            # Income metrics: Sum of 4 quarters
+            income_cols = ['npatmi', 'nii', 'noii', 'toi', 'provision_expense', 'pbt']
+            # Ratio metrics: Use Q4 as proxy for full year
+            ratio_cols = ['nim_q', 'cir', 'npl_ratio', 'roea_ttm', 'roaa_ttm']
+
+            def agg_year(year_df: pd.DataFrame) -> pd.DataFrame:
+                """Aggregate annual data from quarterly."""
+                agg_dict = {}
+                # Sum for income metrics
+                for col in income_cols:
+                    if col in year_df.columns:
+                        agg_dict[col] = 'sum'
+                result = year_df.groupby('symbol').agg(agg_dict).reset_index()
+                # Convert from VND to billion VND (tỉ VND) to match Excel format
+                for col in income_cols:
+                    if col in result.columns:
+                        result[col] = result[col] / 1e9
+
+                # Get Q4 data for ratio metrics
+                q4_df = year_df[year_df['quarter'] == 4].copy()
+                if not q4_df.empty:
+                    q4_ratios = q4_df[['symbol'] + [c for c in ratio_cols if c in q4_df.columns]]
+                    result = result.merge(q4_ratios, on='symbol', how='left')
+
+                return result
+
+            hist_2023 = agg_year(df_2023)
+            hist_2024 = agg_year(df_2024)
+
+            # Rename columns with year suffix
+            hist_2023.columns = ['ticker'] + [f'{c}_23a' for c in hist_2023.columns[1:]]
+            hist_2024.columns = ['ticker'] + [f'{c}_24a' for c in hist_2024.columns[1:]]
+
+            # Rename provision_expense to provision, nim_q to nim, etc.
+            rename_map_23 = {
+                'provision_expense_23a': 'provision_23a',
+                'nim_q_23a': 'nim_23a',
+                'npl_ratio_23a': 'npl_23a',
+                'roea_ttm_23a': 'roe_23a',
+                'roaa_ttm_23a': 'roa_23a',
+            }
+            rename_map_24 = {
+                'provision_expense_24a': 'provision_24a',
+                'nim_q_24a': 'nim_24a',
+                'npl_ratio_24a': 'npl_24a',
+                'roea_ttm_24a': 'roe_24a',
+                'roaa_ttm_24a': 'roa_24a',
+            }
+            hist_2023.rename(columns=rename_map_23, inplace=True)
+            hist_2024.rename(columns=rename_map_24, inplace=True)
+
+            # Merge 2023 and 2024
+            historical = hist_2023.merge(hist_2024, on='ticker', how='outer')
+
+            return historical
+
+        except Exception as e:
+            print(f"Error loading bank historical: {e}")
+            return pd.DataFrame()
 
     @st.cache_data(ttl=3600, show_spinner=False)
     def load_banking_assumptions(_self) -> Dict[str, Any]:
@@ -120,6 +248,25 @@ class AssumptionsService:
             clean_df['ticker'] = clean_df['ticker'].astype(str).str.strip()
             clean_df['rating'] = clean_df['rating'].fillna('N/A')
 
+            # Merge historical data from parquet (2023A, 2024A)
+            historical_df = _self._load_bank_historical()
+            if not historical_df.empty:
+                clean_df = clean_df.merge(historical_df, on='ticker', how='left')
+
+            # Update prices from OHLCV and recalculate upside
+            tickers = clean_df['ticker'].tolist()
+            latest_prices = _self._load_latest_prices(tickers)
+            if not latest_prices.empty:
+                # Merge latest prices
+                clean_df = clean_df.merge(latest_prices, on='ticker', how='left')
+                # Update closing_price with latest_price where available
+                mask = clean_df['latest_price'].notna()
+                clean_df.loc[mask, 'closing_price'] = clean_df.loc[mask, 'latest_price']
+                # Recalculate upside = (target - current) / current
+                clean_df['upside'] = (clean_df['target_price'] - clean_df['closing_price']) / clean_df['closing_price']
+                # Drop helper columns
+                clean_df.drop(columns=['latest_price', 'price_date'], inplace=True, errors='ignore')
+
             # Add bank classification (SOCB, Tier-1, Tier-2, Tier-3)
             def classify_bank(ticker):
                 if ticker in _self.SOCBS:
@@ -139,10 +286,17 @@ class AssumptionsService:
             def calc_summary_row(subset_df: pd.DataFrame, label: str) -> dict:
                 """Calculate aggregated row for a subset of banks."""
                 row = {'ticker': label, 'rating': '', 'bank_type': 'summary'}
-                # Sum for income metrics
-                sum_cols = ['nii_25f', 'nii_26f', 'noii_25f', 'noii_26f', 'toi_25f', 'toi_26f',
-                           'provision_25f', 'provision_26f', 'pbt_25f', 'pbt_26f',
-                           'npatmi_25f', 'npatmi_26f', 'total_assets_25f', 'equity_25f']
+                # Sum for income metrics (historical + forecast)
+                sum_cols = [
+                    # Historical from parquet
+                    'nii_23a', 'nii_24a', 'noii_23a', 'noii_24a', 'toi_23a', 'toi_24a',
+                    'provision_23a', 'provision_24a', 'pbt_23a', 'pbt_24a',
+                    'npatmi_23a', 'npatmi_24a',
+                    # Forecast from Excel
+                    'nii_25f', 'nii_26f', 'noii_25f', 'noii_26f', 'toi_25f', 'toi_26f',
+                    'provision_25f', 'provision_26f', 'pbt_25f', 'pbt_26f',
+                    'npatmi_25f', 'npatmi_26f', 'total_assets_25f', 'equity_25f'
+                ]
                 for col in sum_cols:
                     if col in subset_df.columns:
                         row[col] = subset_df[col].sum()

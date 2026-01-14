@@ -40,12 +40,17 @@ def format_number(val, decimals: int = 1, suffix: str = '') -> str:
 
 
 def format_billions(val) -> str:
-    """Format value in billions VND."""
+    """Format value in trillion VND (nghìn tỷ) - no unit suffix."""
     if pd.isna(val) or val is None or val == 0:
         return '-'
-    if val >= 1000:
-        return f"{val/1000:,.1f}T"
-    return f"{val:,.0f}B"
+    # Convert billion to trillion (nghìn tỷ)
+    val_t = abs(val) / 1000
+    if val_t >= 10:
+        return f"{val_t:,.1f}"  # 55.4 for 55,400B
+    elif val_t >= 1:
+        return f"{val_t:,.2f}"  # 3.32 for 3,315B
+    else:
+        return f"{val_t:,.2f}"  # 0.50 for 500B
 
 
 def format_price(val) -> str:
@@ -291,78 +296,77 @@ def render_banking_wide_table(df: pd.DataFrame, summary_rows: pd.DataFrame):
     display_df['Upside'] = df['upside'].apply(format_upside)
 
     if view_mode == "Quick View":
-        # Core metrics only
-        if 'ytd' in df.columns:
-            display_df['YTD'] = df['ytd'].apply(format_yoy)
+        # Simplified: NPATMI (24A baseline, 25F, 26F) + YoY + Quality 26F
+        if 'npatmi_24a' in df.columns:
+            display_df['24A'] = df['npatmi_24a'].apply(format_billions)
         if 'npatmi_25f' in df.columns:
-            display_df['NPATMI'] = df['npatmi_25f'].apply(format_billions)
+            display_df['25F'] = df['npatmi_25f'].apply(format_billions)
+        if 'npatmi_26f' in df.columns:
+            display_df['26F'] = df['npatmi_26f'].apply(format_billions)
         if 'npatmi_yoy_25f' in df.columns:
-            display_df['%YoY'] = df['npatmi_yoy_25f'].apply(format_yoy)
-        if 'roae_25f' in df.columns:
+            display_df['%25'] = df['npatmi_yoy_25f'].apply(format_yoy)
+        if 'npatmi_yoy_26f' in df.columns:
+            display_df['%26'] = df['npatmi_yoy_26f'].apply(format_yoy)
+        if 'roae_26f' in df.columns:
+            display_df['ROE'] = df['roae_26f'].apply(format_percent)
+        elif 'roae_25f' in df.columns:
             display_df['ROE'] = df['roae_25f'].apply(format_percent)
-        if 'nim_25f' in df.columns:
+        if 'nim_26f' in df.columns:
+            display_df['NIM'] = df['nim_26f'].apply(format_percent)
+        elif 'nim_25f' in df.columns:
             display_df['NIM'] = df['nim_25f'].apply(format_percent)
-        if 'npl_25f' in df.columns:
+        if 'npl_26f' in df.columns:
+            display_df['NPL'] = df['npl_26f'].apply(format_percent)
+        elif 'npl_25f' in df.columns:
             display_df['NPL'] = df['npl_25f'].apply(format_percent)
 
     elif view_mode == "Income":
-        # NII columns
+        # Income: NII, TOI, Provision, NPAT (25F, 26F) - unit: nghìn tỷ đồng
+        # NII: 25F, 26F
         if 'nii_25f' in df.columns:
-            display_df['NII 25F'] = df['nii_25f'].apply(format_billions)
+            display_df['NII 25'] = df['nii_25f'].apply(format_billions)
         if 'nii_26f' in df.columns:
-            display_df['NII 26F'] = df['nii_26f'].apply(format_billions)
-        if 'nii_yoy_25f' in df.columns:
-            display_df['NII %'] = df['nii_yoy_25f'].apply(format_yoy)
-        # NoII columns
-        if 'noii_25f' in df.columns:
-            display_df['NoII 25F'] = df['noii_25f'].apply(format_billions)
-        if 'noii_26f' in df.columns:
-            display_df['NoII 26F'] = df['noii_26f'].apply(format_billions)
-        if 'noii_yoy_25f' in df.columns:
-            display_df['NoII %'] = df['noii_yoy_25f'].apply(format_yoy)
-        # TOI columns
+            display_df['NII 26'] = df['nii_26f'].apply(format_billions)
+        # TOI: 25F, 26F
         if 'toi_25f' in df.columns:
-            display_df['TOI 25F'] = df['toi_25f'].apply(format_billions)
+            display_df['TOI 25'] = df['toi_25f'].apply(format_billions)
         if 'toi_26f' in df.columns:
-            display_df['TOI 26F'] = df['toi_26f'].apply(format_billions)
-        if 'toi_yoy_25f' in df.columns:
-            display_df['TOI %'] = df['toi_yoy_25f'].apply(format_yoy)
-        # Provision
+            display_df['TOI 26'] = df['toi_26f'].apply(format_billions)
+        # Provision: 25F, 26F (use format_billions - converts to trillion)
         if 'provision_25f' in df.columns:
-            display_df['Prov 25F'] = df['provision_25f'].apply(format_billions)
+            display_df['Prov 25'] = df['provision_25f'].apply(format_billions)
         if 'provision_26f' in df.columns:
-            display_df['Prov 26F'] = df['provision_26f'].apply(format_billions)
-        # NPATMI
+            display_df['Prov 26'] = df['provision_26f'].apply(format_billions)
+        # NPATMI: 25F, 26F with YoY
         if 'npatmi_25f' in df.columns:
-            display_df['NPAT 25F'] = df['npatmi_25f'].apply(format_billions)
+            display_df['NPAT 25'] = df['npatmi_25f'].apply(format_billions)
         if 'npatmi_26f' in df.columns:
-            display_df['NPAT 26F'] = df['npatmi_26f'].apply(format_billions)
-        if 'npatmi_yoy_25f' in df.columns:
-            display_df['NPAT %'] = df['npatmi_yoy_25f'].apply(format_yoy)
+            display_df['NPAT 26'] = df['npatmi_26f'].apply(format_billions)
+        if 'npatmi_yoy_26f' in df.columns:
+            display_df['%26'] = df['npatmi_yoy_26f'].apply(format_yoy)
 
     elif view_mode == "Quality":
-        # Efficiency
+        # Simplified: Focus on 25F vs 26F only
+        # NIM: 25F, 26F
         if 'nim_25f' in df.columns:
-            display_df['NIM 25F'] = df['nim_25f'].apply(format_percent)
+            display_df['NIM 25'] = df['nim_25f'].apply(format_percent)
         if 'nim_26f' in df.columns:
-            display_df['NIM 26F'] = df['nim_26f'].apply(format_percent)
-        if 'cir_25f' in df.columns:
-            display_df['CIR 25F'] = df['cir_25f'].apply(format_percent)
-        if 'cir_26f' in df.columns:
-            display_df['CIR 26F'] = df['cir_26f'].apply(format_percent)
+            display_df['NIM 26'] = df['nim_26f'].apply(format_percent)
+        # ROE: 25F, 26F
         if 'roae_25f' in df.columns:
-            display_df['ROE 25F'] = df['roae_25f'].apply(format_percent)
+            display_df['ROE 25'] = df['roae_25f'].apply(format_percent)
         if 'roae_26f' in df.columns:
-            display_df['ROE 26F'] = df['roae_26f'].apply(format_percent)
-        # Asset quality
-        if 'credit_growth_25f' in df.columns:
-            display_df['Cr.Gr 25F'] = df['credit_growth_25f'].apply(format_percent)
+            display_df['ROE 26'] = df['roae_26f'].apply(format_percent)
+        # NPL: 25F, 26F
         if 'npl_25f' in df.columns:
-            display_df['NPL 25F'] = df['npl_25f'].apply(format_percent)
+            display_df['NPL 25'] = df['npl_25f'].apply(format_percent)
         if 'npl_26f' in df.columns:
-            display_df['NPL 26F'] = df['npl_26f'].apply(format_percent)
-        if 'credit_cost_25f' in df.columns:
-            display_df['Cr.Cost 25F'] = df['credit_cost_25f'].apply(format_percent)
+            display_df['NPL 26'] = df['npl_26f'].apply(format_percent)
+        # CIR: 25F, 26F
+        if 'cir_25f' in df.columns:
+            display_df['CIR 25'] = df['cir_25f'].apply(format_percent)
+        if 'cir_26f' in df.columns:
+            display_df['CIR 26'] = df['cir_26f'].apply(format_percent)
 
     elif view_mode == "Valuation":
         if 'eps_25f' in df.columns:
@@ -391,42 +395,83 @@ def render_banking_wide_table(df: pd.DataFrame, summary_rows: pd.DataFrame):
         summary_display['Upside'] = ''
 
         if view_mode == "Quick View":
-            summary_display['YTD'] = ''
+            # Match columns with detail table: 24A, 25F, 26F, %25, %26, ROE, NIM, NPL
+            if 'npatmi_24a' in summary_rows.columns:
+                summary_display['24A'] = summary_rows['npatmi_24a'].apply(format_billions)
             if 'npatmi_25f' in summary_rows.columns:
-                summary_display['NPATMI'] = summary_rows['npatmi_25f'].apply(format_billions)
-            summary_display['%YoY'] = ''
-            if 'roae_25f' in summary_rows.columns:
+                summary_display['25F'] = summary_rows['npatmi_25f'].apply(format_billions)
+            if 'npatmi_26f' in summary_rows.columns:
+                summary_display['26F'] = summary_rows['npatmi_26f'].apply(format_billions)
+            summary_display['%25'] = ''
+            summary_display['%26'] = ''
+            if 'roae_26f' in summary_rows.columns:
+                summary_display['ROE'] = summary_rows['roae_26f'].apply(format_percent)
+            elif 'roae_25f' in summary_rows.columns:
                 summary_display['ROE'] = summary_rows['roae_25f'].apply(format_percent)
-            if 'nim_25f' in summary_rows.columns:
+            if 'nim_26f' in summary_rows.columns:
+                summary_display['NIM'] = summary_rows['nim_26f'].apply(format_percent)
+            elif 'nim_25f' in summary_rows.columns:
                 summary_display['NIM'] = summary_rows['nim_25f'].apply(format_percent)
-            if 'npl_25f' in summary_rows.columns:
+            if 'npl_26f' in summary_rows.columns:
+                summary_display['NPL'] = summary_rows['npl_26f'].apply(format_percent)
+            elif 'npl_25f' in summary_rows.columns:
                 summary_display['NPL'] = summary_rows['npl_25f'].apply(format_percent)
 
         elif view_mode == "Income":
+            # Match columns: NII, TOI, Prov, NPAT (25F, 26F) + %26
             if 'nii_25f' in summary_rows.columns:
-                summary_display['NII 25F'] = summary_rows['nii_25f'].apply(format_billions)
+                summary_display['NII 25'] = summary_rows['nii_25f'].apply(format_billions)
             if 'nii_26f' in summary_rows.columns:
-                summary_display['NII 26F'] = summary_rows['nii_26f'].apply(format_billions)
-            summary_display['NII %'] = ''
-            if 'noii_25f' in summary_rows.columns:
-                summary_display['NoII 25F'] = summary_rows['noii_25f'].apply(format_billions)
-            if 'noii_26f' in summary_rows.columns:
-                summary_display['NoII 26F'] = summary_rows['noii_26f'].apply(format_billions)
-            summary_display['NoII %'] = ''
+                summary_display['NII 26'] = summary_rows['nii_26f'].apply(format_billions)
             if 'toi_25f' in summary_rows.columns:
-                summary_display['TOI 25F'] = summary_rows['toi_25f'].apply(format_billions)
+                summary_display['TOI 25'] = summary_rows['toi_25f'].apply(format_billions)
             if 'toi_26f' in summary_rows.columns:
-                summary_display['TOI 26F'] = summary_rows['toi_26f'].apply(format_billions)
-            summary_display['TOI %'] = ''
+                summary_display['TOI 26'] = summary_rows['toi_26f'].apply(format_billions)
             if 'provision_25f' in summary_rows.columns:
-                summary_display['Prov 25F'] = summary_rows['provision_25f'].apply(format_billions)
+                summary_display['Prov 25'] = summary_rows['provision_25f'].apply(format_billions)
             if 'provision_26f' in summary_rows.columns:
-                summary_display['Prov 26F'] = summary_rows['provision_26f'].apply(format_billions)
+                summary_display['Prov 26'] = summary_rows['provision_26f'].apply(format_billions)
             if 'npatmi_25f' in summary_rows.columns:
-                summary_display['NPAT 25F'] = summary_rows['npatmi_25f'].apply(format_billions)
+                summary_display['NPAT 25'] = summary_rows['npatmi_25f'].apply(format_billions)
             if 'npatmi_26f' in summary_rows.columns:
-                summary_display['NPAT 26F'] = summary_rows['npatmi_26f'].apply(format_billions)
-            summary_display['NPAT %'] = ''
+                summary_display['NPAT 26'] = summary_rows['npatmi_26f'].apply(format_billions)
+            summary_display['%26'] = ''
+
+        elif view_mode == "Quality":
+            # Match columns: NIM, ROE, NPL, CIR (25F, 26F)
+            if 'nim_25f' in summary_rows.columns:
+                summary_display['NIM 25'] = summary_rows['nim_25f'].apply(format_percent)
+            if 'nim_26f' in summary_rows.columns:
+                summary_display['NIM 26'] = summary_rows['nim_26f'].apply(format_percent)
+            if 'roae_25f' in summary_rows.columns:
+                summary_display['ROE 25'] = summary_rows['roae_25f'].apply(format_percent)
+            if 'roae_26f' in summary_rows.columns:
+                summary_display['ROE 26'] = summary_rows['roae_26f'].apply(format_percent)
+            if 'npl_25f' in summary_rows.columns:
+                summary_display['NPL 25'] = summary_rows['npl_25f'].apply(format_percent)
+            if 'npl_26f' in summary_rows.columns:
+                summary_display['NPL 26'] = summary_rows['npl_26f'].apply(format_percent)
+            if 'cir_25f' in summary_rows.columns:
+                summary_display['CIR 25'] = summary_rows['cir_25f'].apply(format_percent)
+            if 'cir_26f' in summary_rows.columns:
+                summary_display['CIR 26'] = summary_rows['cir_26f'].apply(format_percent)
+
+        elif view_mode == "Valuation":
+            # Match columns: EPS, PE, BVPS, PB (25F, 26F)
+            if 'eps_25f' in summary_rows.columns:
+                summary_display['EPS 25F'] = summary_rows['eps_25f'].apply(lambda x: format_number(x, 0) if pd.notna(x) else '-')
+            if 'eps_26f' in summary_rows.columns:
+                summary_display['EPS 26F'] = summary_rows['eps_26f'].apply(lambda x: format_number(x, 0) if pd.notna(x) else '-')
+            if 'pe_25f' in summary_rows.columns:
+                summary_display['P/E 25F'] = summary_rows['pe_25f'].apply(lambda x: format_number(x, 1, 'x') if pd.notna(x) else '-')
+            if 'pe_26f' in summary_rows.columns:
+                summary_display['P/E 26F'] = summary_rows['pe_26f'].apply(lambda x: format_number(x, 1, 'x') if pd.notna(x) else '-')
+            if 'bvps_25f' in summary_rows.columns:
+                summary_display['BVPS 25F'] = summary_rows['bvps_25f'].apply(lambda x: format_number(x, 0) if pd.notna(x) else '-')
+            if 'pb_25f' in summary_rows.columns:
+                summary_display['P/B 25F'] = summary_rows['pb_25f'].apply(lambda x: format_number(x, 2, 'x') if pd.notna(x) else '-')
+            if 'pb_26f' in summary_rows.columns:
+                summary_display['P/B 26F'] = summary_rows['pb_26f'].apply(lambda x: format_number(x, 2, 'x') if pd.notna(x) else '-')
 
         # Combine data and summary
         combined_df = pd.concat([display_df, summary_display], ignore_index=True)
@@ -434,7 +479,8 @@ def render_banking_wide_table(df: pd.DataFrame, summary_rows: pd.DataFrame):
         combined_df = display_df
 
     # Render wide table with custom CSS
-    st.markdown(f"**{len(df)} banks** | View: {view_mode}")
+    unit_note = " | *Đơn vị: nghìn tỷ đồng*" if view_mode == "Income" else ""
+    st.markdown(f"**{len(df)} banks** | View: {view_mode}{unit_note}")
     st.markdown(render_wide_table_html(combined_df, len(df)), unsafe_allow_html=True)
 
 
