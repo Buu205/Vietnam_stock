@@ -704,7 +704,7 @@ data_sources:
   # ==========================================================================
 
   stock_rs_rating:
-    path: "processed/technical/rs_rating/stock_rs_rating_daily.parquet"
+    path: "processed/technical/rs_rating/stock_rs_rating_1y.parquet"
     schema_columns:
       - symbol
       - date

@@ -529,7 +529,7 @@ def load_scoring_data() -> Tuple[dict, dict, dict, pd.DataFrame]:
     # 3. RS RATING - Load and create lookup with momentum
     # =========================================================================
     rs_lookup = {}
-    rs_path = Path("DATA/processed/technical/rs_rating/stock_rs_rating_daily.parquet")
+    rs_path = Path("DATA/processed/technical/rs_rating/stock_rs_rating_1y.parquet")
     if rs_path.exists():
         rs_df = pd.read_parquet(rs_path)
         if not rs_df.empty:

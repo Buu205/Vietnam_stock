@@ -266,7 +266,7 @@ class TADashboardService:
         """
         try:
             # Load RS rating data
-            path = self.DATA_ROOT / "rs_rating/stock_rs_rating_daily.parquet"
+            path = self.DATA_ROOT / "rs_rating/stock_rs_rating_1y.parquet"
             if not path.exists():
                 return None
 
@@ -346,7 +346,7 @@ class TADashboardService:
     def get_tickers_by_sector(self, sector: str) -> List[str]:
         """Get list of stock tickers in a sector."""
         try:
-            path = self.DATA_ROOT / "rs_rating/stock_rs_rating_daily.parquet"
+            path = self.DATA_ROOT / "rs_rating/stock_rs_rating_1y.parquet"
             if not path.exists():
                 return []
 
@@ -376,7 +376,7 @@ class TADashboardService:
     def get_stock_rs_rating_history(self, days: int = 30) -> Optional[pd.DataFrame]:
         """Get RS Rating history for heatmap"""
         try:
-            path = self.DATA_ROOT / "rs_rating/stock_rs_rating_daily.parquet"
+            path = self.DATA_ROOT / "rs_rating/stock_rs_rating_1y.parquet"
             if not path.exists():
                 return None
 

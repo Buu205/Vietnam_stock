@@ -114,8 +114,8 @@ DATA/processed/**/*.csv
 !DATA/processed/technical/money_flow/sector_money_flow_1w.parquet
 !DATA/processed/technical/money_flow/sector_money_flow_1m.parquet
 
-# Technical - RS Rating (1 file)
-!DATA/processed/technical/rs_rating/stock_rs_rating_daily.parquet
+# Technical - RS Rating (1 file - split from 52MB to 6MB)
+!DATA/processed/technical/rs_rating/stock_rs_rating_1y.parquet
 
 # Valuation (5 files)
 !DATA/processed/valuation/pe/historical/historical_pe.parquet

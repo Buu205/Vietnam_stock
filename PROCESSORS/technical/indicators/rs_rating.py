@@ -212,11 +212,23 @@ def get_sector_mapping() -> dict:
 
 
 def save_rs_rating(df: pd.DataFrame, filename: str = "stock_rs_rating_daily.parquet"):
-    """Save RS Rating to parquet file."""
+    """Save RS Rating to parquet file and create 1Y split for GitHub."""
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Save full data
     output_path = OUTPUT_DIR / filename
     df.to_parquet(output_path, index=False)
     logger.info(f"  Saved RS Rating to {output_path}")
+
+    # Create 1Y split (for GitHub - smaller file)
+    df['date'] = pd.to_datetime(df['date'])
+    cutoff = df['date'].max() - pd.Timedelta(days=365)
+    recent_df = df[df['date'] >= cutoff]
+
+    split_path = OUTPUT_DIR / "stock_rs_rating_1y.parquet"
+    recent_df.to_parquet(split_path, index=False)
+    logger.info(f"  Saved RS Rating 1Y split to {split_path} ({len(recent_df):,} rows)")
+
     return output_path
 
 

@@ -21,7 +21,7 @@
     "DATA/processed/technical/lists/buy_list_latest.parquet",
     "DATA/processed/technical/market_breadth/market_breadth_daily.parquet",
     "DATA/processed/technical/money_flow/individual_money_flow.parquet",
-    "DATA/processed/technical/rs_rating/stock_rs_rating_daily.parquet",
+    "DATA/processed/technical/rs_rating/stock_rs_rating_1y.parquet",
     "DATA/processed/technical/sector_breadth/sector_breadth_daily.parquet",
     "DATA/processed/technical/vnindex/vnindex_indicators.parquet",
     "DATA/processed/valuation/pb/historical/historical_pb.parquet",
@@ -43,7 +43,7 @@
       "DATA/processed/technical/lists/buy_list_latest.parquet",
       "DATA/processed/technical/market_breadth/market_breadth_daily.parquet",
       "DATA/processed/technical/money_flow/individual_money_flow.parquet",
-      "DATA/processed/technical/rs_rating/stock_rs_rating_daily.parquet",
+      "DATA/processed/technical/rs_rating/stock_rs_rating_1y.parquet",
       "DATA/processed/technical/sector_breadth/sector_breadth_daily.parquet",
       "DATA/processed/technical/vnindex/vnindex_indicators.parquet"
     ],
@@ -61,9 +61,10 @@
       "DATA/raw/ohlcv/OHLCV_mktcap.parquet"
     ]
   },
-  "warnings": {
-    "large_files": {
-      "DATA/processed/technical/rs_rating/stock_rs_rating_daily.parquet": "52MB - exceeds GitHub 50MB limit, consider Git LFS"
+  "notes": {
+    "split_files": {
+      "stock_rs_rating_1y.parquet": "Recent 1 year data (~6MB) - for dashboard",
+      "stock_rs_rating_archive.parquet": "Historical data (~47MB) - local only, not pushed to GitHub"
     }
   },
   "skip_patterns": [

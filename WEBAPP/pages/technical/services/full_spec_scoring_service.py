@@ -115,7 +115,7 @@ def load_full_scoring_data() -> Tuple[Dict, Dict, Dict]:
     # 3. RS RATING with momentum
     # =========================================================================
     rs_lookup = {}
-    rs_path = Path("DATA/processed/technical/rs_rating/stock_rs_rating_daily.parquet")
+    rs_path = Path("DATA/processed/technical/rs_rating/stock_rs_rating_1y.parquet")
     if rs_path.exists():
         rs_df = pd.read_parquet(rs_path)
         rs_df = rs_df.sort_values('date', ascending=False)
