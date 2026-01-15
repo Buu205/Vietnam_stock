@@ -140,3 +140,83 @@ def validate_ticker(ticker: str, all_tickers: List[str]) -> str:
     # Try to find suggestions
     suggestions = find_similar_tickers(normalized, all_tickers)
     raise TickerNotFoundError(normalized, suggestions)
+
+
+def validate_date_format(date_str: Optional[str], param_name: str = "date") -> Optional[str]:
+    """
+    Validate date string format (YYYY-MM-DD).
+
+    Args:
+        date_str: Date string to validate (or None)
+        param_name: Parameter name for error message
+
+    Returns:
+        Validated date string, or None if input was None
+
+    Raises:
+        InvalidParameterError: If date format is invalid
+    """
+    if date_str is None:
+        return None
+
+    from datetime import datetime
+
+    try:
+        datetime.strptime(date_str, "%Y-%m-%d")
+        return date_str
+    except ValueError:
+        raise InvalidParameterError(
+            param_name,
+            date_str,
+            ["YYYY-MM-DD format (e.g., 2024-12-31)"]
+        )
+
+
+def validate_limit(limit: int, min_val: int = 1, max_val: int = 1000) -> int:
+    """
+    Validate limit parameter is within bounds.
+
+    Args:
+        limit: Limit value to validate
+        min_val: Minimum allowed value
+        max_val: Maximum allowed value
+
+    Returns:
+        Validated limit value
+
+    Raises:
+        InvalidParameterError: If limit is out of bounds
+    """
+    if limit < min_val or limit > max_val:
+        raise InvalidParameterError(
+            "limit",
+            str(limit),
+            [f"Integer between {min_val} and {max_val}"]
+        )
+    return limit
+
+
+def validate_dataframe_schema(
+    df,
+    expected_columns: List[str],
+    source_name: str = "data"
+) -> None:
+    """
+    Validate DataFrame has expected columns.
+
+    Args:
+        df: DataFrame to validate
+        expected_columns: List of required column names
+        source_name: Name of data source for error message
+
+    Raises:
+        DataNotFoundError: If required columns are missing
+    """
+    if df is None or df.empty:
+        return
+
+    missing = set(expected_columns) - set(df.columns)
+    if missing:
+        logger.warning(
+            f"Schema validation: {source_name} missing columns: {missing}"
+        )

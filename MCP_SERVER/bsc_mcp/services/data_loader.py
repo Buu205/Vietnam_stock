@@ -92,6 +92,10 @@ class DataLoader:
 
         df = pd.read_parquet(full_path)
 
+        # Validate empty DataFrame
+        if df.empty:
+            logger.warning(f"Loaded empty DataFrame for {cache_key} from {full_path}")
+
         elapsed = time.time() - start_time
         logger.info(f"Loaded {cache_key}: {len(df)} rows in {elapsed:.2f}s")
 

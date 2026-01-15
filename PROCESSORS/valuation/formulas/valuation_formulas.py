@@ -207,6 +207,10 @@ def calculate_enterprise_value(
     if market_cap is None:
         return None
 
+    # Validate market cap is non-negative (negative market cap is invalid data)
+    if market_cap < 0:
+        return None
+
     ev = market_cap
     ev += (total_debt or 0)
     ev -= (cash or 0)

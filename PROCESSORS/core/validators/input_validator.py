@@ -217,8 +217,8 @@ class InputValidator:
         if 'year' in df.columns:
             try:
                 pd.to_numeric(df['year'], errors='raise')
-            except:
-                errors.append("Column 'year' contains non-numeric values")
+            except (ValueError, TypeError) as e:
+                errors.append(f"Column 'year' contains non-numeric values: {e}")
 
         # Quarter should be 1, 2, 3, or 4
         if 'quarter' in df.columns:
@@ -230,8 +230,8 @@ class InputValidator:
                         f"Column 'quarter' has {invalid.sum()} invalid values "
                         "(must be 1, 2, 3, or 4)"
                     )
-            except:
-                errors.append("Column 'quarter' contains non-numeric values")
+            except (ValueError, TypeError) as e:
+                errors.append(f"Column 'quarter' contains non-numeric values: {e}")
 
         # Ticker should be string
         if 'ticker' in df.columns:

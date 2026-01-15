@@ -168,6 +168,12 @@ class BaseService(ABC):
         # Load data
         df = pd.read_parquet(path, columns=columns)
 
+        # Validate empty DataFrame
+        if df.empty:
+            logger.warning(
+                f"{self.__class__.__name__}: Loaded empty DataFrame from {path}"
+            )
+
         # Validate schema
         if validate_schema:
             self._validate_schema(df)

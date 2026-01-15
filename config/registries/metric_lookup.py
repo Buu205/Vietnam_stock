@@ -127,10 +127,16 @@ class MetricRegistry:
             >>> print(metric['name_vi'])
             'Lợi nhuận sau thuế công ty mẹ'
         """
+        # Validate code parameter
+        if code is None:
+            logger.warning("get_metric called with None code")
+            return None
+
         if entity_type:
             # Search in specific entity type
             entity_data = self.registry["entity_types"].get(entity_type)
             if not entity_data:
+                logger.warning(f"Unknown entity_type: {entity_type}")
                 return None
 
             for category_name, metrics in entity_data.items():

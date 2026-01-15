@@ -46,6 +46,13 @@ class RetryConfig:
         default_factory=lambda: [408, 429, 500, 502, 503, 504]
     )
 
+    def __post_init__(self):
+        """Validate configuration after initialization."""
+        if not self.retryable_exceptions:
+            logger.warning(
+                "retryable_exceptions is empty - no exceptions will be retried"
+            )
+
 
 class RetryHandler:
     """
@@ -73,7 +80,8 @@ class RetryHandler:
             Delay in seconds
         """
         if retry_after:
-            return min(retry_after, self.config.max_delay)
+            # Ensure retry_after is non-negative to prevent undefined behavior
+            return min(max(retry_after, 0), self.config.max_delay)
 
         delay = self.config.base_delay * (self.config.exponential_base**attempt)
 
