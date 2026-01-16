@@ -13,6 +13,10 @@
 - [Phase 3: Frontend Core](./phase-03-frontend-core.md)
 - [Current Streamlit Pages](../../../WEBAPP/pages/)
 
+**AI Skills for UI Development:**
+- `/ui-ux-pro-max` - Design system, layouts, animations, dark mode polish
+- `/frontend-development` - React patterns, component architecture
+
 ---
 
 ## Overview

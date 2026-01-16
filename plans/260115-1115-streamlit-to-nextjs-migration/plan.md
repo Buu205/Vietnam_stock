@@ -33,6 +33,19 @@ created: 2026-01-15
 
 **Timeline:** 20 weeks (realistic for beginner)
 
+**AI Skills for Development:**
+- `/ui-ux-pro-max` - Frontend UI/UX design (50 styles, 21 palettes, responsive layouts)
+- `/ui-styling` - shadcn/ui components + Tailwind CSS
+- `/frontend-development` - React/TypeScript patterns, component architecture
+- `/backend-development` - FastAPI, APIs, authentication, database
+- `/databases` - PostgreSQL setup, queries, optimization
+- `/better-auth` - JWT authentication framework
+- `/devops` - Docker, deployment, CI/CD
+- `/debugging` - Systematic debugging, test failures
+- `/code-review` - Code quality assessment before merge
+- `/docs-seeker` - Search Next.js/FastAPI documentation
+- `/planning` - Technical planning for each phase
+
 ---
 
 ## Current State Summary

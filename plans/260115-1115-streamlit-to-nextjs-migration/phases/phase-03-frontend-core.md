@@ -14,6 +14,10 @@
 - [Next.js + FastAPI Architecture](../research/researcher-nextjs-fastapi-architecture.md)
 - [Current Streamlit UI](../../../WEBAPP/pages/)
 
+**AI Skills for UI Development:**
+- `/ui-ux-pro-max` - Design system, color palettes, responsive layouts, animations
+- `/frontend-development` - React patterns, TypeScript, component architecture
+
 ---
 
 ## Overview
